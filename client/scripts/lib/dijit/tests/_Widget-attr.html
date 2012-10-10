@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+		"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>Widget.get()/set() unit test</title>
+	<style type="text/css">
+		@import "../themes/claro/document.css";
+		@import "css/dijitTests.css";
+	</style>
+	<script type="text/javascript" src="../../dojo/dojo.js"
+		djConfig="isDebug: true"></script>
+	<script type="text/javascript" src="_testCommon.js"></script>
+
+	<script type="text/javascript">
+		dojo.require("doh.runner");
+		dojo.require("dojo.parser");
+		dojo.require("dijit.dijit");
+
+		dojo.addOnLoad(function(){
+			dojo.declare("Baz",
+				[ dijit._Widget, dijit._Templated ],
+				{
+					templateString: "<div><div dojoAttachPoint='nameNode'></div><span>${attr1}</span></div>",
+	
+					attributeMap: {
+						name: {node: "nameNode", type: "innerHTML" }
+					},
+	
+					name: "howdy!",
+	
+					attr1: 0,
+					_setAttr1Attr: function(value){
+						this.domNode.lastChild.innerHTML = value;
+						this.attr1 = value;
+					},
+	
+					attr2: 0,
+					_getAttr2Attr: function(){
+					}
+				}
+			);
+			dojo.declare("Textbox",
+				[ dijit._Widget, dijit._Templated ],
+				{
+					attributeMap: {id:"", dir:"", lang:"", "class":"", style:"", title:"", disabled: "", readonly: ""},
+					templateString: "<input>"
+				}
+			);
+	
+			dojo.declare("Thud", Baz, {
+				get: function(name){
+					// default getter
+				},
+				set: function(name, value){
+					// default setter
+				}
+			});
+	
+			dojo.declare("AttrMap", [dijit._Widget, dijit._Templated], {
+				attributeMap: {foo: "", bar: "buttonNode", plainText: {node: "plainTextNode", type: "innerText"}},
+				templateString: "<div class='class1' style='border: 1px solid red; width: 456px'>" +
+									"<button dojoAttachPoint='buttonNode,focusNode'>hi</button>" +
+									'<span><input dojoAttachPoint="inputNode" value="input"></span>' +
+									"<span dojoAttachPoint='containerNode'></span>" +
+									"<span dojoAttachPoint='plainTextNode'>original plain text</span>" +
+								"</div>"
+			});
+
+			doh.register("parse", function(){
+				dojo.parser.parse();
+			});
+
+			doh.register("_Widget.attr",
+				[
+					function attr(){
+						var b = new Baz();
+
+						// widget attribute mapped to DOM node innerHTML
+						dojo.body().appendChild(b.domNode);
+						doh.is("howdy!", b.attr("name"));
+						doh.is("howdy!", b.nameNode.innerHTML);
+						b.attr("name", "thinger");
+						doh.is(b.attr("name"), "thinger");
+						doh.is(b.nameNode.innerHTML, "thinger");
+
+						// hash setting
+						b.attr({
+							name: "bang",
+							foo: "zap"
+						});
+						doh.is("bang", b.attr("name"));
+						doh.is("zap", b.attr("foo"));
+					},
+					function setGet(){
+						var b = new Baz();
+
+						// widget attribute mapped to DOM node innerHTML
+						dojo.body().appendChild(b.domNode);
+						doh.is("howdy!", b.get("name"));
+						doh.is("howdy!", b.nameNode.innerHTML);
+						b.set("name", "thinger");
+						doh.is(b.get("name"), "thinger");
+						doh.is(b.nameNode.innerHTML, "thinger");
+
+						// hash setting
+						b.set({
+							name: "bang",
+							foo: "zap"
+						});
+						doh.is("bang", b.get("name"));
+						doh.is("zap", b.get("foo"));
+					},
+
+					function domSetGet(){
+						// test setting widget attributes corresponding to DOM node attributes
+						var t = new Textbox();
+						doh.assertFalse(t.get("disabled"));
+						t.set("disabled", true);
+						doh.assertTrue(dojo.attr(t.domNode, "disabled"));
+						doh.assertTrue(t.get("disabled"));
+					},
+
+					function domInnerHTML(){
+						// test initializing widget attributes corresponding to DOM node innerHTML
+						var b2 = new Baz({
+							foo: "blah",
+							name: "whatever"
+						});
+						doh.is("whatever", b2.get("name"));
+						doh.is("whatever", b2.nameNode.innerHTML);
+					},
+					function attributeMap(){
+						var widget = new AttrMap({
+							foo:"value1",
+							bar:"value2",
+							"class":"class2",
+							style:"height: 123px",
+							plainText: "hello world <>&;"
+						});
+						var wrapper = dojo.byId("attributeMapWrapper");
+						wrapper.appendChild(widget.domNode);
+						doh.is("value1", widget.domNode.getAttribute("foo"));
+						doh.is("value2", widget.buttonNode.getAttribute("bar"));
+						doh.assertTrue(dojo.hasClass(widget.domNode, "class1"));
+						doh.assertTrue(dojo.hasClass(widget.domNode, "class2"));
+						doh.is("123px", dojo.style(widget.domNode).height);
+						doh.is("456px", dojo.style(widget.domNode).width);
+						doh.is("hello world &lt;&gt;&amp;;", widget.plainTextNode.innerHTML);
+					}
+				]
+			);
+
+			doh.run();
+		});
+
+	</script>
+</head>
+<body>
+	<h1>Dijit Widget.get()/set() Unit Test</h1>
+	<div id="attributeMapWrapper"></div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Scripted</title>
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+	<script type="text/javascript" data-main="scripts/setup.js" src="scripts/lib/requirejs/require.js"></script>
+</head>
+<body spellcheck="false" class="nihilo">
+	<header class="main_gradient">
+			<div class="right" id="help_open" title="Toggle Help Panel"></div>
+			<div class="right" id="side_toggle" title="Toggle Side Panel"></div>
+	</header>
+
+	<div id="main">
+		<div id="navigator-wrapper">
+			<div id="navigator-container">
+				<div id="explorer-tree">
+				</div>
+			</div>
+		</div>
+
+		<ul id="breadcrumb">
+		</ul>
+
+		<div id="editor_wrapper">
+			<div id="editor" class="scriptededitor"></div>
+			<div id="exec-console"></div>
+		</div>
+		
+		<div id="side_panel">
+		</div>
+		
+		<div id="help_panel">
+			<ul id="command_list">
+			</ul>
+		</div>
+	</div>
+	
+	<footer class="main_gradient">
+		<div id="status"></div>
+	</footer>
+
+	<div id="contentassist" class="contentassist"></div>
+</body>
+</html>

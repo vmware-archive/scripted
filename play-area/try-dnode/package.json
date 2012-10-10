@@ -1,0 +1,14 @@
+{
+  "name": "play-area"
+, "version": "0.0.1"
+, "private": true
+, "dependencies": {
+    "dnode": "1.0.1",
+    "shoe": "0.0.4",
+    "ecstatic": "0.1.6"
+  }
+, "scripts" : {
+	"test": "./all-tests.sh"
+  },
+  "engine": "node ~> 0.6.x"
+}

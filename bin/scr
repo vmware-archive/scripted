@@ -1,0 +1,91 @@
+#!/bin/bash
+# Launch script for Scripted 
+
+# Does the following:
+# 1. locate any existing running node (big assumption that 'node scripted.js' is the node app we want)
+# 2. Kills it
+# 3. Calls 'launchnode' to start a new node
+# 4. Opens a URL that loads the editor - the url encodes the file we want to edit
+
+pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
+# echo "pid = " $pid
+
+DIRNAME=`dirname "$0"`
+
+if [ ! -z "$pid" ]
+then
+#  echo "killing node"
+  kill -9 $pid
+fi
+echo "===" >> $DIRNAME/../scripted.log
+echo "launching node again: `date`" >> $DIRNAME/../scripted.log
+# echo $DIRNAME/launchnode
+
+$DIRNAME/launchnode >> $DIRNAME/../scripted.log 2>&1 &
+
+# DONT DO THIS, IF EDITING A FILE TO CREATE IT, YOU MAY DISAPPEAR INTO A COSTLY SEARCH
+# If the file does not exist, try to find it with a quick search.
+#fileexists=`ls $1 2>/dev/null`
+#if [ -z "$fileexists" ]
+#then
+#candidate=`find . -name "$1" | head -1 | sed 's/^..//'`
+#if [ -z "$candidate" ]
+#then
+#  echo "Cannot find $1"
+#  exit 1
+#else
+#  file=$candidate
+#fi
+#else 
+#file="$1"
+#fi
+file="$1"
+
+dir=`pwd`
+
+# if nothing specified, just exit (server will have restarted)
+if [ -z "$file" ]
+then
+	echo "Not opening an editor, no file specified. Server has been restarted."
+	exit 0
+fi
+
+if [ "$file" == "." ]
+then
+	URL=http://localhost:7261/editor.html?$dir
+else
+  # does it start with a slash or is it relative?
+  if [ `echo "$file " | cut -c1` == '/' ]
+  then
+	URL=http://localhost:7261/editor.html?$file
+  else
+	URL=http://localhost:7261/editor.html?$dir/$file
+  fi
+fi
+
+
+sleep 0.20
+
+# some code to add an extra wait if the server hasn't started yet, work in progress
+#serverUp=`curl http://localhost:7261/helo 2>&1`
+#curlErrored=`echo $serverUp | grep "(7)"`
+#echo "errored: $curlErrored"
+#if [ ! -z "$curlErrored" ]
+#then
+#	sleep 0.20
+#	serverUp=`curl http://localhost:7261/helo 2>&1`
+#	curlErrored=`echo $serverUp | grep "(7)"`
+#	echo "errored2: $curlErrored"
+#fi
+
+
+# echo "opening $dir/$file"
+if which gnome-open > /dev/null; then
+  gnome-open "$URL"
+elif which xdg-open > /dev/null; then
+  xdg-open "$URL"
+elif which open > /dev/null; then
+  open "$URL"
+else
+  echo "Could not detect the web browser to use."
+fi

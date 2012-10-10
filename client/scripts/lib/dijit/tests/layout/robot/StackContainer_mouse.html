@@ -1,0 +1,372 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+		"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>doh.robot StackContainer Test</title>
+
+		<style>
+			@import "../../../../util/doh/robot/robot.css";
+		</style>
+
+		<!-- required: dojo.js -->
+		<script type="text/javascript" src="../../../../dojo/dojo.js"
+			djConfig="isDebug: true"></script>
+
+		<!-- functions to help test -->
+		<script type="text/javascript" src="../../helpers.js"></script>
+
+		<script type="text/javascript">
+			dojo.require("dijit.robotx");
+
+			dojo.addOnLoad(function(){
+				doh.robot.initRobot('../test_StackContainer.html');
+				
+				doh.register("test stackcontainer 1", [
+					{
+						name: "forward",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("next", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1"));
+								isVisible(dojo.byId("page2"));
+								isHidden(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "forward2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("next", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1"));
+								isHidden(dojo.byId("page2"));
+								isVisible(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "forward3",
+						timeout: 4000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("next", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								doh.t(dijit.byId("next").disabled);
+								isHidden(dojo.byId("page1"));
+								isHidden(dojo.byId("page2"));
+								isVisible(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "previous",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("previous", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1"));
+								isVisible(dojo.byId("page2"));
+								isHidden(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "previous2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("previous", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								doh.t(dijit.byId("previous").disabled);
+								isVisible(dojo.byId("page1"));
+								isHidden(dojo.byId("page2"));
+								isHidden(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("dijit_layout_StackController_0_page2", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1"));
+								isVisible(dojo.byId("page2"));
+								isHidden(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page3",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("dijit_layout_StackController_0_page3", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								doh.t(dijit.byId("next").disabled);
+								isHidden(dojo.byId("page1"));
+								isHidden(dojo.byId("page2"));
+								isVisible(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page1",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("dijit_layout_StackController_0_page1", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								doh.t(dijit.byId("previous").disabled);
+								isVisible(dojo.byId("page1"));
+								isHidden(dojo.byId("page2"));
+								isHidden(dojo.byId("page3"));
+							}), 500);
+
+							return d;
+						}
+					}
+				]);
+				
+				doh.register("test stackcontainer 2", [
+					{
+						name: "forward_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("nextPR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1PR"));
+								isVisible(dojo.byId("page2PR"));
+								isVisible(dojo.byId("bc"));
+								isVisible(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "forward2_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("nextPR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isVisible(dojo.byId("page1PR"));
+								isHidden(dojo.byId("page2PR"));
+								isHidden(dojo.byId("bc"));
+								isHidden(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "forward3_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("nextPR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1PR"));
+								isVisible(dojo.byId("page2PR"));
+								isVisible(dojo.byId("bc"));
+								isVisible(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "previous_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("previousPR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isVisible(dojo.byId("page1PR"));
+								isHidden(dojo.byId("page2PR"));
+								isHidden(dojo.byId("bc"));
+								isHidden(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "previous2_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("previousPR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1PR"));
+								isVisible(dojo.byId("page2PR"));
+								isVisible(dojo.byId("bc"));
+								isVisible(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page1_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("dijit_layout_StackController_2_page1PR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isVisible(dojo.byId("page1PR"));
+								isHidden(dojo.byId("page2PR"));
+								isHidden(dojo.byId("bc"));
+								isHidden(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page2_sc2",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("dijit_layout_StackController_2_page2PR", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1PR"));
+								isVisible(dojo.byId("page2PR"));
+								isVisible(dojo.byId("bc"));
+								isVisible(dojo.byId("tc"));
+							}), 500);
+
+							return d;
+						}
+					}
+				]);
+
+				doh.register("test stackcontainer prog", [
+					{
+						name: "page2_sc_prog",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("holder_page1Prog", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1Prog"));
+								isVisible(dojo.byId("page2Prog"));
+								isHidden(dojo.byId("page3Prog"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page3_sc_prog",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("holder_page2Prog", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isHidden(dojo.byId("page1Prog"));
+								isHidden(dojo.byId("page2Prog"));
+								isVisible(dojo.byId("page3Prog"));
+							}), 500);
+
+							return d;
+						}
+					},
+					{
+						name: "page1_sc_prog",
+						timeout: 3000,
+						runTest: function(t){
+							var d = new doh.Deferred();
+
+							doh.robot.mouseMoveAt("holder_page3Prog", 1000);
+							doh.robot.mouseClick({left:true}, 500);
+							
+							doh.robot.sequence(d.getTestCallback(function(){
+								isVisible(dojo.byId("page1Prog"));
+								isHidden(dojo.byId("page2Prog"));
+								isHidden(dojo.byId("page3Prog"));
+							}), 500);
+
+							return d;
+						}
+					}
+				]);
+				
+				doh.run();
+			});
+		</script>
+	</head>
+</html>

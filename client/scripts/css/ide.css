@@ -1,0 +1,950 @@
+html {
+  overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
+  cursor: default;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	font: 9pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+}
+
+.orionPage {
+	background-color: #fdfdfd;
+	width: 100%;
+	height: 100%;
+}
+
+h1 {
+	font-size:1.5em;
+	font-weight: bold;
+	color: #6d6d6d;
+	line-height: 36px;
+	position:absolute;
+	top:0;
+	bottom:0;
+	margin:auto;
+}
+
+h2 {
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #6d6d6d;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+a {
+	cursor: hand;
+	text-decoration: none;
+	color: #024892;
+}
+
+a:visited {
+	color: #024892;
+}
+
+a:active {
+	color: #024892;
+}
+
+a:hover {
+	cursor: hand;
+	text-decoration: underline;
+	color: #024892;
+}
+
+.layoutBlock {
+	clear: both;
+	margin: 0;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 8px;
+	padding-right: 8px;
+	vertical-align: baseline;
+}
+
+.layoutLeft {
+	float: left;
+	margin: 0;
+}
+
+.layoutRight {
+	float: right;
+	margin: 0;
+}
+
+.spacingLeft {
+	margin-left: 5px;
+}
+
+.spacingRight {
+	margin-right: 5px;
+}
+
+.clear {
+	clear: both;
+}
+
+.footerBlock {
+	float: left;
+	margin: 4px;
+}
+
+.footerRightBlock {
+	float: right;
+	margin: 4px;
+}
+
+.navlinkonpage {
+	color: #024892;
+	cursor: hand;
+	text-decoration: none;
+}
+
+.navlinkonpage:visited {
+	color: #024892;
+}
+
+.navlinkonpage:active {
+	color: #024892;
+	cursor: hand;
+	text-decoration: none;
+}
+
+.navlinkonpage:hover {
+	color: #024892;
+	cursor: hand;
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+
+.logo {
+	padding-top: 2px;
+}
+
+.primaryNav {
+	font-size: 8pt;
+	color: #bfbfbf;
+	padding-top: 4px;
+	vertical-align: baseline;
+}
+
+.primaryNav a {
+	font-size: 8pt;
+	color: #bfbfbf;
+	margin-right: 6px;
+	margin-left: 6px;
+	padding-top: 4px;
+	vertical-align: baseline;
+}
+
+.primaryNav a:hover {
+	color: #bfbfbf;
+	cursor: hand;
+	text-decoration: underline;
+}
+
+.pageNav {
+	color: #808080;
+	font-size: 8pt;
+}
+
+.pageActions {
+	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	min-height: 30px;
+	margin-top: 4px;
+}
+
+/* 4px margin used by toolbar, plus 4px of border/padding */
+.status {
+	padding-top: 8px;
+	vertical-align: baseline;
+}
+
+/* marker for finding section and main toolbars */
+.toolComposite {
+}
+
+.sectionActions {
+	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	margin-top: 2px;
+	vertical-align: baseline;
+}
+
+.pageNavigationActions {
+	text-align: right;
+	min-height: 30px;
+}
+
+.parameters {
+	color: #ffffff;
+	vertical-align: middle;
+}
+
+.parametersMenu {
+	cursor: pointer;
+	padding: 1px;
+	font-size: 8pt;
+	margin-left: 8px;
+	vertical-align: middle;
+}
+
+.parametersDismiss {
+	color: #404040;
+	vertical-align: middle;
+}
+
+#pageCommandParameters > input{
+	position:relative;
+	top:1px;
+}
+
+.dismiss {
+	border: 1px solid transparent;
+	cursor: pointer;
+	padding: 1px;
+	font-size: 8pt;
+	margin-left: 8px;
+	vertical-align: middle;
+}
+.dismiss:hover {
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
+    border-radius: 2px;
+}
+
+.parameterInput {
+	margin-left: 4px;
+}
+
+.parameterInputurl {
+	width: 30em;
+}
+/*
+.navTableHeading {
+	color: #404040;
+	border-bottom: 1px solid #404040;
+}
+*/
+
+.navColumn {
+	min-width: 150px;
+	padding-right: 8px;
+}
+
+.actionsColumn {
+	min-width: 300px;
+	text-align: right;
+	padding-left: 16px;
+	vertical-align: middle;
+	height: 24px;  /* breathing room */
+}
+
+/*
+.selectionCheckmarkSprite {
+	display: inline-block; 
+	vertical-align: middle; 
+	background-image: url(../images/core_sprites.png);
+	padding: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 4px;
+}
+*/
+
+.modelDecorationSprite { 
+	display: inline-block; 
+	vertical-align: middle; 
+	background-image: url(../images/core_sprites.png);
+	padding-left: 8px;
+	padding-right: 8px;
+	margin-right: 8px;
+}
+
+/* less hit-area since we aren't worried about touch */
+@media all and (min-device-width: 1025px) {
+	.modelDecorationSprite { 	
+		padding: 0;
+		padding-left: 4px;
+		padding-right: 4px;
+		margin: 0;
+		margin-right: 2px;
+	}
+	
+/*
+	.selectionCheckmarkSprite { 	
+		padding: 0;
+		padding-left: 2px;
+		padding-right: 2px;
+		margin-right: 2px;
+	}
+*/
+	
+/*
+	.checkColumn {
+		width: 22px;
+	}
+*/
+}
+
+.thumbnail {
+	vertical-align: middle; 
+	margin-left: 4px; 
+	margin-right: 4px;
+	max-height: 24px;
+	max-width: 48px;
+}
+
+.pane {
+   	margin: 0;
+    padding: 0;
+    background: #FFFFFF;
+    min-width: 300px;
+}
+
+.paneHeadingToolbar {
+	text-align: right;
+	vertical-align: middle;
+	margin-left: 16px;
+}
+
+.paneHeadingCommands {
+	text-align: right;
+}
+
+.userEditBoxPrompt {
+	background: white;
+	color: black;
+}
+
+.landingHeading {
+	font-size: 2.0em;
+	color: #666666;
+	padding-bottom: 8px;
+}
+
+.landingDescription {
+	font-size: 1.6em;
+	color: #404040;
+}
+
+.landingImage {
+	border: 1px solid #6d6d6d;
+}
+
+.landingLink {
+	font-size: 1.2em;
+	color: #404040;
+	padding-left: 24px;
+	padding-bottom: 8px;
+}
+
+.landingPanelContainer {
+	background: #EDEDED;
+	padding: 0;
+	margin: 0;
+	border-left: 1px solid white;
+	border-right: 2px solid white;
+}
+
+.landingPanel {
+	background: #EDEDED;
+	border-left: 1px solid white;
+	border-right: 1px solid #cccccc;
+	padding: 0;
+	margin: 0;
+}
+
+.auxpane {
+	border: 0;
+	border-top: 1px solid #e4e4e4;
+    background: #f8f8f8;
+    overflow-x: auto;
+    min-width: 200px;
+}
+
+.auxPadding {
+	padding-left: 8px;
+	padding-top: 4px;
+}
+
+.claro .dijitBorderContainer {
+	border: 0;
+	padding: 0;
+}
+
+.claro .dijitContentPane {
+	padding: 0;
+	margin: 0;
+	outline: 0;
+}
+
+.claro .dijitDialogTitleBar {
+    background: white;
+    color: black;
+    font: 8px;
+    outline: 0 none;
+    padding: 5px 6px 3px;
+}
+
+/* splitters */
+
+.claro .dijitSplitterV, .claro .dijitGutterV {
+  background: #e3e3e3;
+  width: 3px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.claro .dijitSplitterVActive {
+  font-size: 1px;
+  background-color: #cccccc;
+}
+
+.claro .dijitSplitterV .dijitSplitterThumb {	
+  background-color: #bbbbbb;
+  height: 16px;
+  left: 0px;
+  width: 3px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.claro .dijitSplitterVHover .dijitSplitterThumb {
+  background: #a0a0a0;
+}
+ 
+/*
+.mainpane {
+	border-top: 1px solid #ebebeb;
+    background: #FFFFFF;
+	overflow: auto;
+}
+*/
+
+/*
+.mainPadding {
+	padding-left: 4px;
+	padding-top: 4px;
+}
+*/
+
+.help {
+	font-weight: bold;
+	font-size: 1.2em;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.progress {
+	text-align: right;
+	margin-right: 8px;
+}
+
+.progressInfo {
+	background-color: #e4f0fb;
+	border: 1px solid #b8cfe6;
+}
+
+.progressWarning {
+	background-color: #fbf3e4;
+	border: 1px solid #e6d7b8;
+}
+
+.progressError {
+	background-color: #fbf4ec;
+	border: 1px solid #e6b8c7;
+}
+
+.progressNormal {
+	background-color: #efefef;
+	border: 1px solid #cfcfcf;
+}
+
+.progressPane {
+	vertical-align: bottom;
+	margin-right: 8px;
+	background-position: 0 0; 
+	text-align: right;
+	border: 0;
+	width: 16px;
+	height: 16px;
+}
+
+.progressPane_operations {
+	margin-top: 4px;
+	background-image: url(../images/core_sprites.png);
+	background-position: -96px -328px; 
+	width: 16px; height: 16px; 
+}
+
+/* we don't sprite an animated gif */
+.progressPane_running {
+	margin-top: 4px;
+	background: url(../images/progress_running.gif) no-repeat center;  
+	width: 16px; height: 16px;
+}
+
+.progressPane_error {
+	margin-top: 4px;
+	background-image: url(../images/core_sprites.png);
+	background-position: 0 -561px; 
+	width: 16px; height: 16px;
+}
+
+.progressPane_warning {
+	margin-top: 4px;
+	background-image: url(../images/core_sprites.png);
+	background-position: -96px -1440px; 
+	width: 16px; height: 16px;
+}
+
+.progressPane_empty {
+	margin-top: 4px;
+	background: inherit;
+}
+
+.toolbar {
+	vertical-align: middle;
+	min-height: 32px;
+	width: 100%;
+	color: #222222;
+}
+
+.auxToolbar {
+    background: #f8f8f8;
+ 	min-height: 32px;
+	width: 100%;
+	color: #222222;
+}
+
+.mainToolbar {
+ 	min-height: 30px;
+ 	background: #ffffff;
+}
+
+#status{
+	height:14px;
+	color:#ffffff;
+	position:absolute;
+	right:20px;
+	bottom:2px;
+	z-index:15;
+}
+
+.pageTitle {
+	font-size: 12pt;
+	vertical-align: top;
+	color: #666666;
+}
+
+.footer {
+	text-align: left;
+	width: 100%;
+	border: 0;
+	padding: 0;
+	font-size: 0.9em;
+	min-height: 2.5em; 
+	border-top: 1px solid #dbdbdb
+}
+
+.toolbarLabel {
+	padding-left: 8px;
+}
+
+.topRowBanner {
+	margin: 0;
+	border: 0;
+	background-color: #2e2e2e;
+	height: 22px;
+}
+
+.titleArea {
+    margin: 0;
+    border: 0;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7'); /* IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f7f7f7));
+    background: -moz-linear-gradient(top,  #ffffff,  #f7f7f7);
+    border-bottom: 1px solid #bfbfbf;
+}
+
+.paneTitle {
+	padding-top: 2px;
+	padding-left: 2px;
+	vertical-align: baseline;
+}
+
+.paneHeading {
+	background-color: #f8f8f8;
+	vertical-align: middle;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	min-height: 26px;
+	width: 100%;
+	font-size: 9pt;
+	font-weight: bold;
+	color: #808080;
+}
+
+.paneHeadingFixed {
+	min-width: 300px;
+}
+
+.auxpaneHeading {
+	background-color: #fafafa;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	vertical-align: middle;
+	min-height: 26px;
+	width: 100%;
+	font-size: 9pt;
+	font-weight: bold;
+	color: #808080;
+}
+.slideContainer {
+	height: auto;
+	/* width: 97%;*/
+	clear: both;
+	float: left;
+	/*
+	border-radius: 2px;
+	margin-left: 4px;
+	margin-right: 4px;
+	margin: 2px;
+	*/
+	display: none;
+}
+
+.slideParameters {
+
+	color:#ffffff;
+	background-color: #323232;
+	/*
+	border-top-width: 1px;
+	border-left-width:0px;
+	border-right-width:0px;
+	border-bottom-width: 1px;
+	border-style: solid;
+	border-top-color: #969497;
+	border-bottom-color: #000000;
+	border: 1px solid #808080;
+	background-color: #404040;
+	position: absolute;
+	left: 200px;
+	top:28px;
+	*/
+	
+	/*
+	background: -webkit-gradient(linear, left top, left bottom, from(#aaaaaa), to(#6c6c6c)); /* webkit */
+	/*
+	background: -moz-linear-gradient(top,  #aaaaaa,  #6c6c6c); /* firefox */	
+}
+
+.slideContainerActive {
+	display: block;
+}
+
+.slide {
+	text-align: left;
+	vertical-align: middle;
+	float: left;
+	opacity: 0;
+	height: 0;
+ 	transition: opacity .5s ease-out;
+	-o-transition: opacity .5s ease-out;
+	-moz-transition: opacity .5s ease-out;
+	-webkit-transition: opacity .5s ease-out;   
+}
+
+.dijitDropDownButton{
+	color:#243C5F;
+}
+
+.activeCommand {
+	background-color: #e3e3e3;
+	border: 1px solid #9a9a9a;
+}
+
+/* marker used by parameter collectors to identify commands */
+.commandMarker {
+}
+
+.slideActive {
+	padding: 5px 3px;
+	opacity: 1;
+	height: auto;
+}
+
+.searchbox {
+	background: transparent;
+	border: 1px solid #a6a6a6;
+	font-size: 8pt;
+	min-width: 15em;
+	margin-top: 2px;
+}
+
+.toolbarButton {
+	border: 0;
+	padding: 0;
+	height: 20px;
+}
+
+.toolbarTest {
+/*	background: #fff url("../images/titleBarTest.png")  repeat-x top left; */
+	border:1px solid #bfbfbf;
+	cursor: default;
+	font-size: 0.9em;
+	font-weight: bold;
+	color: #6d6d6d;
+}
+
+.searchFloat {
+	display: none;
+	background: #ffffe0;
+	position: absolute;
+	left: 20px;
+	top: 10px;
+	min-width: 300px;
+	max-width: 650px;
+	border: 1px solid #bfbfbf;
+	padding: 4px;
+	z-index: 10;
+}
+
+.keyAssistFloat {
+	display: none;
+	background: #404040;
+	color: #FFD900;
+	position: fixed;
+	left: 44px;
+	top: 60px;
+	padding: 4px;
+	float: left;
+	z-index:10;
+}
+
+.keyAssistFloat h2 {
+	color: #FFD900;
+}
+
+#tree {
+	margin-right: 9em;
+	overflow-x: hidden;
+}
+
+#treeButtons br {
+	line-height: 0.5em;
+}
+
+#treeButtons {
+	margin: 0;
+	padding: 0;
+	float: right;
+	width: 9em;
+}
+
+#treeButtons .contentButton {
+	width: 8.5em;
+	margin: 0;
+	margin-bottom: 3px;
+	font-size: 1em;
+}
+
+.checkedRow {
+	background-color: #e3e3e3 !important;
+}
+
+.testResult {
+	background-color: #444444 !important;
+	color: white;
+}
+
+.folderItem {
+	background: url(../images/folder.gif);
+}
+
+.fileItem {
+	background: url(../images/file.gif);
+}
+
+.newItem {
+	background: url(../images/add.gif);
+}
+
+.treetable {
+	border-spacing: 0;
+	/*
+	min-width: 600px;
+	*/
+}
+
+.favoritesTable {
+	border-collapse: separate;
+	border-spacing: 2;
+	overflow-x: hidden; /* because it is placed inside a div with overflow scrollbars */
+}
+
+.secondaryColumn {
+	color: #000000;	
+	padding-right: 8px;
+}
+
+.primaryColumn {
+	color: #024892;
+	text-decoration: none;
+}
+
+.checkColumn {
+	padding: 0;
+}
+/*
+.lightTreeTableRow > td {
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.darkTreeTableRow > td {
+	border-bottom: 1px solid #e6e6e6;
+}
+*/
+
+.testNavTreetable {
+	min-width: 150px;
+}
+
+.testResultTreetable {
+	min-width: 600px;
+}
+
+.contentassist {
+	display: none;
+	background-color: white;
+	position: fixed;
+	top: 100px;
+	left: 100px;
+	border: 2px inset #DDD;
+	z-index:10;
+	cursor: default;
+	overflow: auto;
+	height: 150px;
+	width: 300px;
+	resize: both;
+}
+
+.contentassist:focus {
+	border: 2px solid #666;
+}
+
+.contentassist .selected {
+	background-color: #DDD;
+}
+
+.contentassist>div {
+	padding: 1px 3px 0 3px;
+}
+
+.contentassist>div:hover {
+	background-color: #EAF2FE;
+}
+
+.treeIterationCursor {
+	background-color: #EAF2FE !important;
+}
+
+.searchCmdGroupMargin {
+	margin:0 4px 0 14px;
+}
+
+.LoginWindowLeft {
+	padding-left: 0.5em;
+}
+
+.LoginWindowRight {
+	padding-right: 0.5em;
+}
+
+.LoginWindowComment {
+	font-size: 0.9em;
+	padding-left: 15px;
+}
+
+#outline #switchOutlineMenu {
+	float: right;
+}
+
+#outline #switchOutlineMenu .commandImage {
+	display: none;
+}
+
+#outline>ul {
+	padding-left: 0 !important;
+	clear: both;
+	margin: 4px 0 0 8px;
+}
+
+#outline ul {
+	padding-left: 14px;
+}
+
+#outline li {
+	list-style-type: none;
+	white-space: nowrap; /*wrapping makes indented list hard to read*/
+}
+
+.test-passed {
+	background-color: #11FF11;
+}
+
+.test-failed {
+	background-color: #FF1111;
+}
+
+#test-overview {
+	margin: 8px;
+}
+
+#test-tree {
+	margin: 8px;
+}
+
+.uploadContainer{
+	padding:20px;
+	font-weight:bold;
+}
+
+.dottedOutline{
+	border: #DDD 4px dashed;
+	border-radius: 2px;
+	padding:50px;
+	height:300px;
+	width: 300px;
+}
+
+.floatingSection{
+	color: #DDD;
+}
+
+.uploadInstruction{
+	font-size: 18pt;
+	color: #CCC;
+	padding: 0 0 100px;
+	text-align:center;
+}
+
+.tipInstruction{
+	font-size: 12pt;
+	color: #CCC;
+	padding: 0 0 100px;
+	text-align:center;
+}
+
+.uploadBrowser{
+	left:50px;
+}
+
+
+.targetSelector{
+
+}

@@ -1,0 +1,19 @@
+<div class="dijitTabListContainer-${tabPosition}" style="visibility:hidden">
+	<div dojoType="dijit.layout._ScrollingTabControllerMenuButton"
+			class="tabStripButton-${tabPosition}"
+			id="${id}_menuBtn" containerId="${containerId}" iconClass="dijitTabStripMenuIcon"
+			dropDownPosition="below-alt, above-alt"
+			dojoAttachPoint="_menuBtn" showLabel="false">&#9660;</div>
+	<div dojoType="dijit.layout._ScrollingTabControllerButton"
+			class="tabStripButton-${tabPosition}"
+			id="${id}_leftBtn" iconClass="dijitTabStripSlideLeftIcon"
+			dojoAttachPoint="_leftBtn" dojoAttachEvent="onClick: doSlideLeft" showLabel="false">&#9664;</div>
+	<div dojoType="dijit.layout._ScrollingTabControllerButton"
+			class="tabStripButton-${tabPosition}"
+			id="${id}_rightBtn" iconClass="dijitTabStripSlideRightIcon"
+			dojoAttachPoint="_rightBtn" dojoAttachEvent="onClick: doSlideRight" showLabel="false">&#9654;</div>
+	<div class='dijitTabListWrapper' dojoAttachPoint='tablistWrapper'>
+		<div role='tablist' dojoAttachEvent='onkeypress:onkeypress'
+				dojoAttachPoint='containerNode' class='nowrapTabStrip'></div>
+	</div>
+</div>

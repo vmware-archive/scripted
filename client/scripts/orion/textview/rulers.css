@@ -1,0 +1,27 @@
+/* Styles for rulers */
+.ruler {
+	background-color: white;
+}
+.ruler.annotations {
+	border-right: 1px solid lightgray;
+	width: 16px;
+}
+.ruler.folding {
+	border-right: 1px solid lightgray;
+	width: 14px;
+}
+.ruler.lines {
+	border-right: 1px solid lightgray;
+	text-align: right;
+}
+.ruler.overview {
+	border-left: 1px solid lightgray;
+	width: 14px;
+}
+
+/* Styles for the line number ruler */
+.rulerLines {
+}
+.rulerLines.even
+.rulerLines.odd {
+}

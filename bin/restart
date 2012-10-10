@@ -1,0 +1,8 @@
+#!/bin/bash
+killserver
+
+DIRNAME=`dirname "$0"`
+echo "===" >> $DIRNAME/../scripted.log
+echo "launching node again: `date`" >> $DIRNAME/../scripted.log
+$DIRNAME/launchnode >> $DIRNAME/../scripted.log 2>&1 &
+exit 0

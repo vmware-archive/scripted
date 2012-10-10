@@ -1,0 +1,249 @@
+.commandSprite {
+   background: url(../images/core_sprites.png) no-repeat top left;
+   vertical-align: middle;
+   display: inline-block;
+}
+
+/* spacing for commands in a list */
+.commandList {
+	padding: 0;
+	margin-left: 0;
+	margin-right: 0;
+	list-style-type: none;
+	vertical-align: baseline;
+}
+
+.commandList li {
+	float: left;
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+/* for commands not in a list we add margins for backward compatibility */
+.commandMargins {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+.commandImage {
+	border: 1px solid transparent;
+	background-color: transparent;
+	vertical-align: baseline;
+	cursor: pointer;
+	display: inline-block;
+	padding: 1px;
+}
+
+.commandImageOver {
+	background-color: #666;
+	border: 1px solid #808080;
+    border-radius: 2px;
+}
+
+/* should be used in conjunction with .commandButton when a tool has no icon. */
+.commandMissingImageButton {
+	font-weight:bold;
+}
+
+.commandButton {
+	color: #ffffff;
+	border: 1px solid transparent;
+	background-color: transparent;
+	text-align: center;
+	vertical-align: baseline;
+    cursor: pointer;
+    display: inline-block;
+    padding: 1px;
+}
+
+.commandButtonOver {
+	background-color: #666;
+	border: 1px solid #808080;
+    border-radius: 2px;
+}
+
+.commandMenu {
+	display: inline-block;
+	vertical-align: baseline;
+	margin: 0;
+}
+
+.commandMenuItem {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.commandLink {
+	display: inline-block;
+	vertical-align: baseline;
+	padding: 2px;  /* other commands have 1px plus a border, so we need 2 */
+}
+
+.commandSeparator {
+	padding: 2px;
+}
+
+.commandActive {
+	background-color: #e6e6e6 !important;
+	border: 1px solid #808080 !important;
+    border-radius: 2px !important;
+}
+
+
+/* placeholders for possible hover states on command items */
+.commandActiveItem {
+}
+
+.commandInactiveItem {
+}
+
+/* Images */
+
+/* these really belong in ide.css but simply moving them there upsets the order of things.  Do later.  */
+
+.imageSprite {
+   background-image: url(../images/core_sprites.png);
+   display: inline-block;
+   margin: 1px;
+   vertical-align: middle;
+}
+
+.core-sprite-add{ background-position: 0 0; width: 16px; height: 16px; } 
+.core-sprite-check{ background-position: 0 -66px; width: 16px; height: 16px; } 
+.core-sprite-check_on{ background-position: 0 -132px; width: 16px; height: 16px; } 
+.core-sprite-close{ margin:2px 0 0 0; background-position: 1px -197px; width: 16px; height: 16px; cursor: pointer;} 
+.core-sprite-collapseAll{ background-position: 0 -264px; width: 16px; height: 16px; } 
+.core-sprite-delete{ background-position: 0 -330px; width: 14px; height: 13px; } 
+.core-sprite-diff-border-sel{ background-position: 0 -393px; width: 46px; height: 1px; } 
+.core-sprite-diff-border{ background-position: 0 -444px; width: 46px; height: 1px; } 
+.core-sprite-edit{ background-position: 0 -495px; width: 16px; height: 16px; } 
+.core-sprite-error{ background-position: 0 -561px; width: 16px; height: 16px; } 
+.core-sprite-expandAll{ background-position: 0 -627px; width: 16px; height: 16px; } 
+.core-sprite-exportzip{ background-position: 0 -693px; width: 16px; height: 16px; } 
+.core-sprite-favorite_sml{ background-position: 0 -759px; width: 16px; height: 16px; } 
+.core-sprite-file{ background-position: 0 -825px; width: 16px; height: 16px; } 
+.core-sprite-file_model{ background-position: 0 -891px; width: 16px; height: 16px; } 
+.core-sprite-folder{ background-position: 0 -957px; width: 16px; height: 16px; } 
+.core-sprite-gear{ background-position: 0 -1023px; width: 16px; height: 16px; } 
+.core-sprite-help{ background-position: 0 -1089px; width: 16px; height: 16px; } 
+.core-sprite-help_banner{ background-position: 0 -1155px; width: 16px; height: 16px; } 
+.core-sprite-importzip{ background-position: 0 -1221px; width: 16px; height: 16px; } 
+.core-sprite-info{ background-position: 0 -1287px; width: 16px; height: 16px; } 
+.core-sprite-leftarrow{ background-position: 0 -1353px; width: 16px; height: 16px; } 
+.core-sprite-link{ background-position: 0 -1419px; width: 16px; height: 16px; } 
+.core-sprite-makeFavorite{ background-position: 0 -1485px; width: 16px; height: 16px; } 
+.core-sprite-menu{ background-position: 0 -1551px; width: 16px; height: 16px; } 
+.core-sprite-menu_twistie{ background-position: 0 -1617px; width: 5px; height: 3px; } 
+.core-sprite-more{ background-position: 0 -1670px; width: 16px; height: 16px; } 
+.core-sprite-move_down{ 
+	background-image: url(../images/down_arrow.png);
+	height:16px;
+	width:16px;
+} 
+.core-sprite-move_up{ 
+	background-image: url(../images/up_arrow.png);
+	height:16px;
+	width:16px;
+} 
+.core-sprite-new_file{ background-position: 0 -1868px; width: 16px; height: 16px; } 
+.core-sprite-new_folder{ background-position: 0 -1934px; width: 16px; height: 16px; } 
+.core-sprite-none{ background-position: -96px 0; width: 16px; height: 16px; } 
+.core-sprite-ok{ background-position: -96px -66px; width: 16px; height: 16px; } 
+.core-sprite-orion-small-lightondark{ background-position: -96px -132px; width: 43px; height: 14px; } 
+.core-sprite-problem{ background-position: -96px -196px; width: 16px; height: 16px; } 
+.core-sprite-progress{ background-position: -96px -262px; width: 16px; height: 16px; } 
+.core-sprite-progress_none{ background-position: -96px -328px; width: 16px; height: 16px; } 
+.core-sprite-progress_running{ background-position: -96px -394px; width: 16px; height: 16px; } 
+.core-sprite-refresh{ background-position: -96px -460px; width: 16px; height: 16px; } 
+.core-sprite-rename{ background-position: -96px -526px; width: 16px; height: 16px; } 
+.core-sprite-replace{ background-position: -96px -592px; width: 16px; height: 16px; } 
+.core-sprite-replaceAll{ background-position: -96px -658px; width: 16px; height: 16px; } 
+.core-sprite-rightarrow{ background-position: -96px -724px; width: 16px; height: 16px; } 
+.core-sprite-sep{ background-position: -96px -790px; width: 1px; height: 16px; } 
+.core-sprite-splitterleft{ background-position: -96px -856px; width: 6px; height: 11px; } 
+.core-sprite-splitterright{ background-position: -96px -917px; width: 6px; height: 11px; } 
+.core-sprite-start{ background-position: -96px -978px; width: 16px; height: 16px; } 
+.core-sprite-stop{ background-position: -96px -1044px; width: 16px; height: 16px; } 
+.core-sprite-transferin{ background-position: -96px -1110px; width: 16px; height: 16px; } 
+.core-sprite-transferout{ background-position: -96px -1176px; width: 16px; height: 16px; } 
+.core-sprite-twistie_closed{ background-position: -96px -1242px; width: 16px; height: 16px; } 
+.core-sprite-twistie_open{ background-position: -96px -1308px; width: 16px; height: 16px; } 
+.core-sprite-twistie_partOpen{ background-position: -96px -1374px; width: 16px; height: 16px; } 
+.core-sprite-warning{ background-position: -96px -1440px; width: 16px; height: 16px; } 
+
+/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
+/* buttons */
+.claro .dijitButton .dijitButtonNode,
+.claro .dijitDropDownButton .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNode,
+.claro .dijitToggleButton .dijitButtonNode {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 1px;
+  color: #808080;
+  margin: 0;
+}
+
+/* button hover */
+.claro .dijitButtonHover .dijitButtonNode,
+.claro .dijitDropDownButtonHover .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNodeHover,
+.claro .dijitComboButton .dijitDownArrowButtonHover,
+.claro .dijitToggleButtonHover .dijitButtonNode {
+    background-color: #e3e3e3;
+    color: black;
+	border: 1px solid #808080;
+ }
+
+/* arrow buttons*/
+.claro .dijitArrowButtonInner {
+	background-position: 0 -1617px; 
+	width: 5px; height: 3px;
+	background-image: url(../images/core_sprites.png); 
+	display: inline-block; 
+	margin: 1px;
+	vertical-align: middle; 
+}
+
+.claro .textless .dijitArrowButtonInner {
+	background-position: 0 -1551px;	
+	width: 16px; height: 16px; 
+	background-image: url(../images/core_sprites.png);
+	display: inline-block; 
+	vertical-align: middle; 
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+/* menus and menu items */
+
+.claro .dijitMenu {
+   background-color: #FFFFFF;
+   border: 1px solid #9a9a9a;
+}
+
+.claro .dijitMenuItem {
+   outline: none;
+}
+
+.claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
+   background-color: #e3e3e3;
+   color: black;
+   background-image: none;
+}
+
+/* tooltips */
+.claro .dijitTooltip {
+	max-width: 300px;
+	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+}
+
+.claro .dijitTooltipContainer {
+  /* the part with the text */
+  background-color: #ffffff;
+  background-image: none;
+ }

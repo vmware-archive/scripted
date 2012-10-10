@@ -1,0 +1,77 @@
+@import "../../lib/dojo/resources/dojo.css";
+@import "../../lib/dijit/themes/nihilo/nihilo.css";
+@import "../../lib/dijit/themes/nihilo/layout/BorderContainer.css";
+@import "../../lib/dijit/themes/nihilo/form/Common.css";
+@import "../../lib/dijit/themes/nihilo/form/Button.css";
+@import "../../orion/textview/textview.css";
+@import "../../orion/textview/rulers.css";
+@import "../../orion/textview/annotations.css";
+@import "../../orion/textview/tooltip.css";
+@import "../../examples/textview/textstyler.css";
+@import "../../examples/editor/htmlStyles.css";
+@import "../../css/default-theme.css";
+@import "../../css/ide.css";
+@import "../../css/commands.css";
+
+.treetable {
+overflow: auto;
+font-family: sans-serif;
+font-size: 12px;
+/*
+	border-spacing: 0;
+	min-width: 600px;
+width:100%;
+*/
+}
+
+.favoritesTable {
+	border-collapse: separate;
+//	border-spacing: 2;
+	overflow-x: hidden; /* because it is placed inside a div with overflow scrollbars */
+}
+
+.secondaryColumn {
+	color: #ffffff;	
+	//padding-right: 8px;
+}
+
+.primaryColumn {
+	color: #024892;
+	text-decoration: none;
+}
+
+.checkColumn {
+	padding: 0;
+}
+
+/*
+.mainpane {
+	border-top: 1px solid #ebebeb;
+    background: #FFFFFF;
+	overflow: auto;
+}
+*/
+
+.mainPadding {
+//	padding-left: 4px;
+//	padding-top: 4px;
+}
+
+/*
+tr.treeTableRow td:first-child {
+	padding-left: 16px !important;
+}
+
+.treetable th {
+	font-weight: bold;
+}
+
+.treetable td {
+	padding: 16px 0 16px 16px;
+}
+
+.treetable th {
+	padding: 16px 0 0 16px;
+}
+*/
+

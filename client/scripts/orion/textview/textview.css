@@ -1,0 +1,16 @@
+.textview {
+	background-color: white;
+	padding: 1px 2px;
+}
+
+.textviewContainer {
+	background-color: #eeeeee;
+	font-family: "Monaco","Ubuntu Mono","monospace";
+	font-size: 9pt;
+}
+::-webkit-scrollbar-corner {
+	background-color: #eeeeee;
+}
+
+.textviewContent {
+}

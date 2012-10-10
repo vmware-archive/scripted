@@ -1,0 +1,51 @@
+.token_singleline_comment {
+	color: green;
+}
+
+.token_multiline_comment {
+	color: green;
+}
+
+.token_doc_comment {
+	color: #00008F;
+}
+
+.token_doc_html_markup {
+	color: #7F7F9F;
+}
+
+.token_doc_tag {
+	color: #7F9FBF;
+}
+
+.token_task_tag {
+	color: #7F9FBF;
+}
+
+.token_string {
+	color: blue;
+}
+
+.token_keyword {
+	color: darkred;
+	font-weight: bold;
+}
+
+.token_space {
+	/* images/white_space.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAIAAABv85FHAAAABnRSTlMA/wAAAACkwsAdAAAAIUlEQVR4nGP4z8CAC+GUIEXuABhgkTuABEiRw2cmae4EAH05X7xDolNRAAAAAElFTkSuQmCC");
+	background-repeat: no-repeat;
+ 	background-position: center center;
+}
+
+.token_tab {
+	/* images/white_tab.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAIAAACJ2loDAAAABnRSTlMA/wD/AP83WBt9AAAAMklEQVR4nGP4TwRgoK6i52c3bz5w6zMSA6tJn28d2Lx589nnCAYu63AaSLxJRLoJPwAAeNk0aG4opfMAAAAASUVORK5CYII=");
+	background-repeat: no-repeat;
+ 	background-position: left center;
+}
+
+.line_caret {
+	background-color: #EAF2FE;
+}
+

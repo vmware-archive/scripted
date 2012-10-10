@@ -1,0 +1,39 @@
+<table cellspacing="0" cellpadding="0" class="dijitCalendarContainer" role="grid" dojoAttachEvent="onkeypress: _onKeyPress">
+	<thead>
+		<tr class="dijitReset dijitCalendarMonthContainer" valign="top">
+			<th>			
+			<span class='dijitReset dijitCalendarArrow' dojoAttachPoint="decrementMonth">
+				<img src="${_blankGif}" alt="" class="dijitCalendarIncrementControl dijitCalendarDecrease" role="presentation">
+				<span dojoAttachPoint="decreaseArrowNode" class="dijitA11ySideArrow">-</span>
+			</span>
+			<span dojoAttachEvent="onclick: goToToday" style="cursor: pointer; cursor: hand;">&#2299;</span>
+			<span class='dijitReset dijitCalendarArrow' dojoAttachPoint="incrementMonth">
+				<img src="${_blankGif}" alt="" class="dijitCalendarIncrementControl dijitCalendarIncrease" role="presentation"/>
+				<span dojoAttachPoint="increaseArrowNode" class="dijitA11ySideArrow">+</span>
+			</span></th>
+			<th class='dijitReset' colspan="6">
+				<div data-dojo-type="dijit.form.DropDownButton" data-dojo-attach-point="monthDropDownButton">
+				</div>
+			</th>
+		</tr>
+		<tr>
+			<th class="dijitReset dijitCalendarDayLabelTemplate" role="columnheader"><span class="dijitCalendarDayLabel"></span></th>
+		</tr>
+	</thead>
+	<tbody dojoAttachEvent="onclick: _onDayClick, onmouseover: _onDayMouseOver, onmouseout: _onDayMouseOut, onmousedown: _onDayMouseDown, onmouseup: _onDayMouseUp" class="dijitReset dijitCalendarBodyContainer">
+		<tr class="dijitReset dijitCalendarWeekTemplate" role="row">
+			<td class="dijitReset dijitCalendarDateTemplate" role="gridcell"><span class="dijitCalendarDateLabel"></span><span class="dijitCalendarDateDescription"></span></td>
+		</tr>
+	</tbody>
+	<tfoot class="dijitReset dijitCalendarYearContainer">
+		<tr>
+			<td class='dijitReset' valign="top" colspan="7">
+				<h3 class="dijitCalendarYearLabel">
+					<span dojoAttachPoint="previousYearLabelNode" class="dijitInline dijitCalendarPreviousYear"></span>
+					&#171;<span dojoAttachPoint="currentYearLabelNode" class="dijitInline dijitCalendarSelectedYear"></span>&#187;
+					<span dojoAttachPoint="nextYearLabelNode" class="dijitInline dijitCalendarNextYear"></span>
+				</h3>
+			</td>
+		</tr>
+	</tfoot>
+</table>

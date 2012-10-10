@@ -1,0 +1,235 @@
+<!doctype html>
+<html style="height: 100%;">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010.">
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Minimal Editor</title>
+
+<link rel="stylesheet" type="text/css" href="minimaleditor.css" />
+
+<script src="scripts/orion/editor/esprima.js"></script>
+<script src="scripts/orion/editor/jslintworker.js"></script>
+<script src="scripts/orion/editor/jsbeautify.js"></script>
+<script type="text/javascript">
+
+require = {
+		 baseUrl: 'scripts',
+		  packages: [{ name: 'dojo', location: 'dojo', main:'lib/main-browser', lib:'.'},
+					 { name: 'dijit',location: 'dijit',main:'lib/main',lib: '.'}
+					], 
+		  paths: {
+			  i18n: 'requirejs/i18n',
+			  text: 'requirejs/text',
+			  fileapi: 'orion/editor/fileapi',
+			  /*
+			  tests: '/js-tests',
+			  */
+			  esprimaJsContentAssist: 'orion/editor/esprimaJsContentAssist',
+			  indexerService: 'orion/editor/indexerService',
+			  esprima: 'orion/editor/esprima'
+		  },
+		  ready:function() {
+			  require(["dojo"],function (mDojo) {
+			    if (!mDojo) {
+			    	throw "mdojo not set";
+			    } else {
+			    	console.log("dojo OK");
+			    }
+			  });
+		  }
+};
+</script>
+<script src="scripts/requirejs/require.js"></script>
+<script>
+/*
+			require({
+			  baseUrl: 'scripts',
+			  packages: [{ name: 'dojo', location: 'dojo', main:'lib/main-browser', lib:'.'},
+						 { name: 'dijit',location: 'dijit',main:'lib/main',lib: '.'}
+						], 
+			  paths: {
+				  text: 'requirejs/text',
+				  i18n: 'requirejs/i18n',
+				  tests: '/js-tests',
+				  esprimaJsContentAssist: 'orion/editor/esprimaJsContentAssist',
+				  indexerService: 'orion/editor/indexerService'
+			  },
+			  ready:function() {
+ 				  require(["dojo"],function (mDojo) {
+				    if (!mDojo) {
+				    	throw "mdojo not set";
+				    } else {
+				    	console.log("dojo OK");
+				    }
+				  });
+			  }
+			}); 
+			*/
+			require(["./minimaleditor","orion/editor/jslintdriver","dojo","orion/explorer-table","fileapi"],function(mEditor,mJslintDriver,dojo,mExplorerTable,mFileApi) {
+				if (!dojo) {
+					throw "dojo not defined";
+				}
+				mEditor.editor.setInput("Content",null,'Loading...');
+				console.log("set editor to "+mEditor);
+				console.log("search = "+window.location.search);
+				window.editor = mEditor.editor;
+				
+				// Load editor contents
+				var xhrobj = new XMLHttpRequest();
+				try {
+					var url = 'http://localhost:7261/get?file='+window.location.search.substr(1);
+					console.log("url is "+url);
+					xhrobj.open("GET",url,true);
+					xhrobj.onreadystatechange= function() {
+						// TODO status =200 should proceed otherwise error (xhrObj.status ==200)
+						window.editor.setInput("Content", null, xhrobj.responseText);
+						var problems = mJslintDriver.checkSyntax('',xhrobj.responseText).problems;
+						window.editor.showProblems(problems);
+					};
+					xhrobj.send();
+				} catch (e) {
+					console.log("xhr failed "+e);
+				}
+				
+				var explorer  = new mExplorerTable.FileExplorer({
+					//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
+					//searcher: searcher, fileClient: fileClient, commandService: commandService,
+					//contentTypeService: contentTypeService,
+					parentId: "explorer-tree"
+					//breadcrumbId: "location", toolbarId: "pageActions",
+				    //selectionToolsId: "selectionTools", preferences: preferences
+				}); 
+				require(["orion/explorer-table","dojo"],function(mExplorerTable) {
+				// From orion table.js
+				
+					var filetoedit = window.location.search.substr(1);
+					// need to find the nearest .project file or at most 5 dirs up
+					var found = null;
+					var dir = filetoedit.substr(0,filetoedit.lastIndexOf("/"));
+					var count = 0;
+                try {
+					while (found === null) {
+
+// does it contain a .project or .scripted?
+
+					var xhrobj = new XMLHttpRequest();
+                    url = 'http://localhost:7261/fs_list/'+dir;
+                    console.log("url is "+url);
+                    xhrobj.open("GET",url,false);
+                    xhrobj.send();
+                    var scriptedconfig;
+					var kids = JSON.parse(xhrobj.responseText).children;
+					if (kids) {
+					for (var i=0;i<kids.length;i++) {
+						var n = kids[i].name;
+						if (n === ".scripted" || n === ".project" || n === ".git") {
+							if (n === ".scripted") {
+								scriptedconfig = dir+"/"+n;
+							}
+							found = dir;
+						}
+					}
+					}
+					if (scriptedconfig) {
+						/* Load the configuration file */
+						mFileApi.getContents(scriptedconfig,function(contents) {
+							console.log("Loading scripted configuration: "+scriptedconfig);
+							if (!window.scripted) {
+							  window.scripted = {};
+							}
+							try {
+								if (contents.length!=0) {
+								    var endBlockCommentIndex = contents.indexOf('*/');
+								    if (endBlockCommentIndex!=-1) {
+								    	contents = contents.substr(endBlockCommentIndex+2);
+								    }
+									window.scripted.config = JSON.parse(contents);
+								}
+							} catch (e) {
+							  console.error("Unable to parse JSON config block: "+e);
+							}
+						});
+					}
+
+					if (found===null) {
+						dir = dir.substr(0,dir.lastIndexOf("/"));
+						count++;
+						if (count===5) {
+							found = dir;
+						}
+					}
+                    }
+                } catch (e) {
+                    console.log("xhr failed "+e);
+                }
+                
+					// Set to the root for the explorer
+					window.fsroot=found;
+				
+					explorer.loadResourceList(found/*pageParams.resource*/, false, function() {
+							//	mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
+							// highlight the row we are using
+							explorer.highlight(filetoedit);
+					});
+				});
+				
+            });
+
+//			window.onload = function() {
+//			}
+		</script>
+</head>
+
+<body class="nihilo" style="height: 100%; max-height: 100%;">
+
+	<!-- 
+		This section provides the raw html for hooking in the search pane.  This could certainly be simplified since it
+		also includes html hooks for progress, status, and other things we don't need.
+	-->
+	<div class="toolbar toolComposite" style="left:220px; position: absolute; top: -40px;" id="pageToolbar" splitter="false" region="top">
+		<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>
+		<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>
+		<img class="layoutRight progressPane" src="scripts/images/none.png" id="progressPane" tabindex="0" role="progressbar" aria-label="Operations - Press spacebar to show current operations"/>
+		<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>
+		<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>
+		<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">
+			<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>
+			<div class="layoutRight">
+				<span tabindex="0" role="button" aria-label="Close notification" class="layoutRight core-sprite-close imageSprite" id="closeNotifications"></span>
+			</div>
+		</div>
+		<div id="parameterArea" class="layoutBlock slideParameters slideContainer">
+			<span id="pageParameterArea" class="slide">
+				<span id="pageCommandParameters" class="parameters"></span>
+				<span id="pageCommandDismiss" class="parametersDismiss"></span>
+			</span>
+		</div>
+	</div>
+	<!-- End toolbar -->
+	
+	
+	<div id="logo" style="height: 28px; background: #404040; text-align: left;">
+		<span id="status" style="height: 28px; vertical-align: top; color: #FFFFFF;"></span>
+	</div>
+
+		<div style="border:0px; border-style:solid; border-color: #404040; width:220px;">
+			<div id="filter"></div>
+			<div id="history"></div>
+			<div id="navigator-container" style="width: 200px; height: 95%; border:0px;">
+				<div class="mainpane" tabindex="0" id="explorer-tree" dojoType="dijit.layout.ContentPane" style="width:100%;">
+				</div>
+			</div>
+			<!-- 
+			<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false"></div>
+			-->
+		</div>
+		
+		<div>
+			<div id="editor" style="left:200px; position: absolute; top: 28px; bottom: 0; right: 0;">
+			</div>
+		</div>
+	<div id="contentassist" class="contentassist"></div>
+
+</body>
+</html>

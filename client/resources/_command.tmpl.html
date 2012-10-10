@@ -1,0 +1,37 @@
+{{if name}}
+<li>
+	<span class="shortcut_name">{{toShortcutName:name}}</span>
+	<span class="shortcut_command">
+	{{if keyBinding.mod1 }}
+		{{if ~isMac() }} 
+			CMD
+		{{else }}
+			CTRL
+		{{/if}}
+
+		{{if keyBinding.mod2 || keyBinding.mod3 || keyBinding.mod4}}
+			+
+		{{/if}}
+	{{/if}}
+
+	{{if keyBinding.mod2 }}
+		SHIFT
+		{{if keyBinding.mod3 || keyBinding.mod4}}
+			+
+		{{/if}}
+	{{/if}}
+
+	{{if keyBinding.mod3 }}
+		ALT
+		{{if keyBinding.mod4}}
+			+
+		{{/if}}
+	{{/if}}
+	{{if keyBinding.mod4 && ~isMac }}
+		CTRL
+	{{/if}}
+
+	{{toChar:keyBinding.keyCode}}
+	</span>
+</li>
+{{/if}}

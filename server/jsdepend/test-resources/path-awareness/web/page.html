@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Sample Project</title>
+        <!-- data-main attribute tells require.js to load
+             scripts/main.js after require.js loads. -->
+        <script src="require.js"></script>
+        <script>
+            require.config({
+                paths: {
+                    "sub/submain": "odd-name/submain",
+                    "sub/subdep": "odd-name/subdep"
+                }
+            });
+            require(["main"], function (main) {
+            });
+        </script>
+    </head>
+    <body>
+        <h1>My Sample Project</h1>
+        <p id='target'></p>
+    </body>
+</html>

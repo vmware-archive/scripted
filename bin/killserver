@@ -1,0 +1,10 @@
+pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
+echo $pid
+
+DIRNAME=`dirname "$0"`
+
+if [ ! -z "$pid" ]
+then
+  echo "Killing $pid"
+  kill -9 $pid
+fi

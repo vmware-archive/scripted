@@ -1,0 +1,3 @@
+#!/bin/bash
+node --debug-brk run-dirwatch.js &
+node-inspector --web-port=1234 &

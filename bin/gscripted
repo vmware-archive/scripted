@@ -1,0 +1,43 @@
+#!/bin/bash
+# Launch script for scripted, intended to be uses as an 'Open With' application for gnome.
+# It differs from the regular scripted script in that we assume gnome will always pass
+# an absolute file reference to the file that is to be opened.
+
+# Does the following:
+# 1. locate any existing running node (big assumption that 'node app.js' is the node app we want)
+# 2. Kills it
+# 3. Calls 'launchnode' to start a new node
+# 4. Opens a URL that loads the editor - the url encodes the file we want to edit
+
+pid=`ps axu | grep "node app.js" | grep -v grep | awk '{print $2}'`
+#echo $pid
+
+DIRNAME=`dirname "$0"`
+CHROME=/opt/google/chrome/chrome
+
+if [ ! -z "$pid" ]
+then
+#  echo "killing node"
+  kill -9 $pid
+fi
+echo "===" >> $DIRNAME/../scripted.log
+echo "launching node again: `date`" >> $DIRNAME/../scripted.log
+$DIRNAME/launchnode >> $DIRNAME/../scripted.log 2>&1 &
+
+file="$1"
+URL=http://localhost:7261/editor.html?$file
+
+sleep 0.10
+echo "opening $file"
+if [ -f $CHROME ]; then
+  $CHROME $URL
+elif which gnome-open > /dev/null; then
+  gnome-open $URL
+elif which xdg-open > /dev/null; then
+  xdg-open $URL
+elif which open > /dev/null; then
+  open $URL
+else
+  echo "Could not detect the web browser to use."
+fi
+

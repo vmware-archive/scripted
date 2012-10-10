@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+	<title>New Editor</title>
+	
+	<link rel="stylesheet" type="text/css" href="css/main.css" />
+	<script type="text/javascript" data-main="scripts/setup.js" src="scripts/requirejs/require.js"></script>
+</head>
+<body spellcheck="false" class="nihilo">
+	<header class="main_gradient">
+		<span id="the_button">+</span>
+		<div class="right">
+			<img id="help_open" src="images/help.png" />
+		</div>
+	</header>
+
+	<div id="main">
+		<div id="navigator-wrapper">
+			<div id="navigator-container">
+				<div id="explorer-tree">
+				</div>
+			</div>
+		</div>
+
+		<div class="toolbar toolComposite" id="pageToolbar">
+			<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>
+			<div id="parameterArea" class="slideParameters slideContainer">
+				<span id="pageParameterArea" class="slide">
+					<span id="pageCommandParameters" class="parameters"></span>
+					<span id="pageCommandDismiss" class="parametersDismiss"></span>
+				</span>
+			</div>
+		</div>
+
+		<div id="editor" class="scriptededitor">
+		<!--
+			<h1>loading...</h1>
+			-->
+		</div>
+
+		<div id="help_panel">
+			<ul id="command_list">
+			</ul>
+		</div>
+
+		<div id="hoverbox_panel">
+			<div class="hoverbox" id="the_box" style="display:none;">
+				<span class="hoverbox_toolbar">
+					<span class="hoverbox_name">rectangle.js</span>
+					<span class="hoverbox_close">x</span>
+				</span>
+				<div class="hoverbox_content shadow">var Rectangle = function(){
+					var x = arguments[0] || 5;
+					var y = arguments[1] || 6;
+	
+					getArea = function(){
+						this.wtf = "hi!";
+						return x * y;
+					};
+	
+					getPerimeter = function(){
+						return 2*x + 2*y;
+					};
+	
+					setX = function(val){
+						x = val;
+					};
+	
+					setY = function(val){
+						y = val;
+					};
+	
+					this.getX = function(){
+						return x;
+					}
+				}</div>
+			</div>
+		</div>
+
+	</div>
+
+	<footer class="main_gradient">
+		<div id="status"></div>
+	</footer>
+
+	<div id="contentassist" class="contentassist"></div>
+</body>
+</html>

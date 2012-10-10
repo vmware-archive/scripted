@@ -1,0 +1,24 @@
+.tooltip .textview {
+	color: InfoText !important;
+	background-color: InfoBackground !important;
+	padding: 0px;
+}
+
+/* Styles for the view tooltips */
+.textviewTooltip {
+	font-family: monospace;
+	font-size: 10pt;
+	background-color: InfoBackground;
+	color: InfoText;
+	padding: 2px;
+	border-radius: 4px;
+	border: 1px solid black;
+	z-index: 100;
+	position: fixed;
+	overflow: hidden;
+	white-space: pre;
+}
+.textviewTooltip em {
+	font-style: normal;
+	font-weight: bold;
+}

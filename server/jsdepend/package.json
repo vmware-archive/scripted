@@ -1,0 +1,14 @@
+{
+  "name": "jsdepend"
+, "version": "0.0.1"
+, "main": "api.js"
+, "private": true
+, "dependencies": {
+    "amdefine": "0.0.2"
+  , "htmlparser": "1.7.6"
+  }
+, "scripts" : {
+	"test": "./all-tests.sh"
+  },
+  "engine": "node ~> 0.6.x"
+}

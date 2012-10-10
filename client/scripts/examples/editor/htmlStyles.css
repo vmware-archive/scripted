@@ -1,0 +1,26 @@
+/* Styling for html syntax highlighting */
+.entity-name-tag {
+	color: #3f7f7f;
+}
+
+.entity-other-attribute-name {
+	color: #7f007f;
+}
+
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+
+.comment {
+	color: #3f5fbf
+}
+
+.string-quoted {
+	color: #2a00ff;
+	font-style: italic;
+}
+
+.invalid {
+	color: red;
+	font-weight: bold;
+}

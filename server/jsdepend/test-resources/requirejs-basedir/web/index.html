@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+		<title>Welcome to The Require with BaseDir Sample</title>
+		<!--<link rel="stylesheet" type="text/css" href="index.css" />-->
+		<script src="requirejs/require.js"></script>
+		<script type="text/javascript">
+		/*global require*/
+		require({
+		  someOther: 'confuse',
+		  baseUrl: 'scripts',
+		  moreConfuse: 'hahah'
+		});
+		require(['index.js']);
+		</script>
+</head>
+<body>
+<h1>RequireJS with BaseDir Sample</h1>
+<pre id=message>Message goes here</pre>
+</body>
+</html>

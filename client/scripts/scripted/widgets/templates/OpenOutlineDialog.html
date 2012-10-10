@@ -1,0 +1,28 @@
+<div class="dijitDialog" tabindex="-1" waiRole="dialog" title="${title}" waiState="labelledby-${id}_title">
+	<div dojoAttachPoint="titleBar" class="dijitDialogTitleBar">
+		<span dojoAttachPoint="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
+		<span dojoAttachPoint="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
+			<span dojoAttachPoint="closeText" class="closeText" title="${buttonCancel}">x</span>
+		</span>
+	</div>
+	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
+		<div style="display:table">
+			<div style="display:table-row">
+				<div style="display:table-cell; padding:3px;">
+					<input type="text" dojoType="dijit.form.TextBox" dojoAttachPoint="resourceName" 
+						placeHolder="${searchPlaceHolder}"
+						intermediateChanges="true" style="width:30em;outline:none;">
+				</div>
+			</div>
+			<div style="display:table-row">
+				<div dojoAttachPoint="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>
+			</div>
+			<div style="display:table-row">
+				<div dojoAttachPoint="results" style="max-height:400px; height:auto; overflow-y:auto;"></div>
+			</div>
+			<div style="display:table-row">
+				<div dojoAttachPoint="statusbar" style="display:table-cell;"></div>
+			</div>
+		</div>
+	</div>
+</div>

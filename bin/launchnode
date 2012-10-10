@@ -1,0 +1,4 @@
+# Node launch script
+DIRNAME=`dirname "$0"`
+cd $DIRNAME/../server
+node scripted.js

@@ -1,0 +1,94 @@
+/*
+
+    FORMATTER OPTIONS:
+
+    indent_size (default 4)          ? indentation size,
+    indent_char (default space)      ? character to indent with,
+    preserve_newlines (default true) ? whether existing line breaks should be preserved,
+    preserve_max_newlines (default unlimited) ? maximum number of line breaks to be preserved in one chunk,
+
+    jslint_happy (default false) ? if true, then jslint-stricter mode is enforced.
+
+            jslint_happy   !jslint_happy
+            ---------------------------------
+             function ()      function()
+
+    brace_style (default "collapse") ? "collapse" | "expand" | "end-expand" | "expand-strict"
+            put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or just put end braces on own line.
+
+            expand-strict: put brace on own line even in such cases:
+
+                var a =
+                {
+                    a: 5,
+                    b: 6
+                }
+            This mode may break your scripts - e.g "return { a: 1 }" will be broken into two lines, so beware.
+
+    space_before_conditional (default true) ? should the space before conditional statement be added, "if(true)" vs "if (true)",
+
+    unescape_strings (default false) ? should printable characters in strings encoded in \xNN notation be unescaped, "example" vs "\x65\x78\x61\x6d\x70\x6c\x65"
+
+
+
+    CONFIGURATION OPTION EXAMPLES:
+    
+	"formatter": {
+		"js": {
+			"indent_size": 1,
+			"indent_char": "\t"
+		}
+	},
+    "ui": {
+		"font":"Ubuntu Mono",
+		"font_size":18,
+		"content_assist_font_size":14,
+		"navigator": false
+    }
+    
+    EXEC configuration examples:
+    
+    "exec": {
+        "onKeys" : {
+	        "ctrl+alt+b": {
+				"cmd": "ls -la", 
+				"cwd": "${dir}",
+				"name": "ls current dir"
+	        },
+	        "ctrl+alt+shift+b": "ls -la",
+	        "ctrl+alt+shift+x": "this command is very long and should be too long for a name",
+	        "ctrl+alt+shift+y": "this command is very long and should be too long for a name like this",
+	        "ctrl+alt+shift+c": "javac ${file}"
+	    },
+	    "afterSave" : {
+			"** / *.js": "cat ${file}", //!!!Spaces arround the / should be removed!!!
+			".rigel": "echo Thank you for saving me!",
+			"** / .rigel": "echo ${file}"  //!!!Spaces arround the / should be removed!!!
+	    },
+	    "onLoad" : [
+			"echo Loading ${projectDir}",
+			{	"cmd": "ls -la",
+				"cwd": "${projectDir}/client"
+			}
+	    ]
+     }
+    
+    "exec": {
+        "onKeys" : {
+	        "ctrl+alt+c": "node releng/copycheck.js"
+	    }
+	},
+	"formatter": {
+		"js": {
+			"indent_size": 1,
+			"indent_char": "\t"
+		}
+	}
+{
+    "ui": { 
+		"font": "Monaco"
+	}
+  } 
+*/
+{
+}

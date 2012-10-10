@@ -1,0 +1,8 @@
+{
+  "name": "node-test-sample"
+, "version": "0.0.1"
+, "main": "main.js"
+, "private": true
+, "dependencies": {}
+, "engine": "node ~> 0.6.x"
+}
