@@ -39,7 +39,8 @@ Many of these are covered in this introductory screencast:<br>
 # How do I try it out?
 
 The only pre-req for trying it out is that you have Node.js installed. Grab it from here: [http://nodejs.org/](http://nodejs.org).
-The team has been testing with recent versions from 0.6 to 0.8.
+The team has been testing with a range of versions from 0.6 to 0.8 but haven't tested all of them exhaustively. It is recommended
+that you try to use the latest (0.8.11 at time of writing).
 
 Then you can grab the most recent packaged release from here:
 
