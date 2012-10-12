@@ -33,6 +33,6 @@ set "patharg=!patharg: =%%20!"
 
 echo Starting scripted.js... >> scripted.log
 
-start /MIN cmd /c node %rootdir%\server\scripted.js^>^>scripted.log
+start /MIN cmd /c node %thisdir%..\server\scripted.js^>^>scripted.log
 
 start "" "http://localhost:7261/editor.html?%patharg%"
