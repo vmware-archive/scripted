@@ -1,4 +1,17 @@
-/*global require exports process console*/
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Kris De Volder - initial API and implementation
+ *     Any Clement
+ ******************************************************************************/
+ /*global require exports process console*/
 
 //This servlet is 'special' and doesn't get registered in the same 
 //way/place that other servlets do.
@@ -9,7 +22,7 @@
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
 var sockjs = require('sockjs');
-var conf = require('../jsdepend/configuration').withBaseDir(null);
+var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
 var searchFile = require('../textsearch/searcher').searchFile;

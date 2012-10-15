@@ -18,7 +18,7 @@ var getFileName = require('./utils').getFileName;
 
 function configure(conf) {
 
-	var ignore = conf.ignore || require('./configuration').ignore;
+	var ignore = conf.ignore || require('./filesystem').ignore;
 	var listFiles = conf.listFiles;
 	var isDirectory = conf.isDirectory;
 

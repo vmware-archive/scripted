@@ -20,7 +20,7 @@
 
 var url = require('url');
 var servlets = require('../servlets');
-var configuration = require('../jsdepend/configuration');
+var configuration = require('../jsdepend/filesystem');
 var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 

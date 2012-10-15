@@ -34,11 +34,11 @@ function contains(list, el) {
 	return false;
 }
 
-var defaultIgnore = require('../server/jsdepend/configuration').ignore;
+var defaultIgnore = require('../server/jsdepend/filesystem').ignore;
 var extend = require('../server/jsdepend/utils').extend;
 var path = require('path');
 
-var jsdependConf = extend(require('../server/jsdepend/configuration').withBaseDir(null), {
+var jsdependConf = extend(require('../server/jsdepend/filesystem').withBaseDir(null), {
 	ignore: function ignore(name) {
 		//console.log("calling ignore");
 		return defaultIgnore(name) || contains(IGNORED_NAMES, name);

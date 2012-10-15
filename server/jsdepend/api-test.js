@@ -34,7 +34,7 @@ var nodeNatives = require('./node-natives');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('./configuration').withBaseDir(baseDir);
+	var conf = require('./filesystem').withBaseDir(baseDir);
 	conf.sloppy = false;
 	var api = require("./api").configure(conf);
 	return api;

@@ -14,7 +14,7 @@
 /*global console __dirname exports require*/
 var tm = require('./tree-matcher.js');
 var esprima = require('./parser');
-var configuration = require('./configuration');
+var configuration = require('./filesystem');
 
 var andPat = tm.andPat;
 var arrayElementPat = tm.arrayElementPat;

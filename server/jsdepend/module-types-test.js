@@ -32,7 +32,7 @@
 var toCompareString = require('./utils').toCompareString;
 var getModuleType = require("./module-types").getModuleType;
 var esprima = require('./parser');
-var configuration = require('./configuration');
+var configuration = require('./filesystem');
 
 var walk = require('./tree-walker').walk;
 

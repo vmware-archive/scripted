@@ -20,7 +20,7 @@ var assertContains = require('./test-utils').assertContains;
 
 function makeApi(relativeBaseDir, reducedConfig) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('./configuration').withBaseDir(baseDir);
+	var conf = require('./filesystem').withBaseDir(baseDir);
 	if (reducedConfig) {
 		conf.listFiles = undefined;
 	}

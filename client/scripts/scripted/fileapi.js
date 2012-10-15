@@ -20,7 +20,7 @@
 //  Some operations needed to access files.
 //  These operations are needed by jsdepend to find dependencies of js files.
 //  This modules 'exports' should correspond to what jsdepend expects.
-//  See jsdepend/configuration.js for a sample implementation that uses
+//  See jsdepend/filesystem.js for a sample implementation that uses
 //  node.js fs and path apis to implement the required functions here.
 //
 //  Note: this module can not be used in nodejs only in browser environments that provide

@@ -37,7 +37,7 @@
 var toCompareString = require('./utils').toCompareString;
 var map = require('./utils').map;
 var mapk = require('./utils').mapk;
-var configuration = require('./configuration');
+var configuration = require('./filesystem');
 var nodeNatives = require('./node-natives');
 
 function makeApi(relativeBaseDir, sloppy) {

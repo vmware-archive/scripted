@@ -17,7 +17,7 @@ var utils = require('../../jsdepend/utils.js');
 var mapk = utils.mapk;
 var filter = utils.filter;
 var os = require('os');
-var ignore = require('../configuration').ignore;
+var ignore = require('../filesystem').ignore;
 
 //TODO: optimize tree for better memory usage:
 //   - don't store full path in every tree node

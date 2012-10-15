@@ -32,7 +32,7 @@
 var toCompareString = require('./utils').toCompareString;
 var findReferences = require("./reference-finder").findReferences;
 var esprima = require('./parser');
-var configuration = require('./configuration');
+var configuration = require('./filesystem');
 
 function dumpTree(parseTree) {
 	console.log(JSON.stringify(parseTree, null, "  "));

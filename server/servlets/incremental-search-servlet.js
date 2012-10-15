@@ -22,7 +22,7 @@
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
 var sockjs = require('sockjs');
-var conf = require('../jsdepend/configuration').withBaseDir(null);
+var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var toRegexp = require('../jsdepend/utils').toRegexp;
 var getFileName = require('../jsdepend/utils').getFileName;
