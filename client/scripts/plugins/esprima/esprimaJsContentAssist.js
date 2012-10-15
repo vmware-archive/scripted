@@ -1798,6 +1798,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					}
 				};
 				var targetType = this._allTypes[this.scope(target)];
+				
+				// uncomment this if we want to hide errors where there is an unknown type being placed on the scope stack
+//				if (!targetType) {
+//					targetType = this.globalScope()
+//				}
 				var res = innerLookup(swapper(name), targetType, this._allTypes);
 				return res;
 			},
