@@ -101,8 +101,8 @@ requirejs.config({
 	}
 });
 
-require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/fileLoader", "scripted/exec/exec-on-load"], 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mFileLoader) {
+require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/fileLoader", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mFileLoader, mJsdepend) {
 	
 	/* needs dependency on "sockjs"
 	var sock = new SockJS("http://localhost:7261/echo");
@@ -205,6 +205,10 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 	var filepath = window.location.getPath();
 	findProjectRoot(filepath);
+	
+	mJsdepend.getConf(filepath, function (dotScripted) {
+		console.log(JSON.stringify(dotScripted, null, "  "));
+	});
 
 	// Create new FileExplorer
 	var explorer  = new mExplorerTable.FileExplorer({
