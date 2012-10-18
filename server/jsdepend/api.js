@@ -58,6 +58,7 @@ function configure(config) {
 	var getContents = fromConfig(config, 'getContents', 'function');
 	var resolve = require("./resolver").configure(config).resolve;
 	var getIndexer = require('./file-indexer').configure(config).getIndexer;
+	var getConf = require('./dot-scripted').configure(config).getConfiguration;
 	
 //	console.log('jsdepend/api is using encoding: '+encoding);
 	
@@ -252,21 +253,22 @@ function configure(config) {
 			}
 		);
 	}
-
+	
 	getDGraph.remoteType =  ['JSON', 'callback'];
 	getTransitiveDependencies.remoteType = ['JSON', 'callback'];
 	getDependencies.remoteType = ['JSON', 'callback'];
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	findFileNamesContaining.remoteType =  ['JSON', 'JSON', 'callback', 'errback'];
+	getConf.remoteType = ['JSON', 'callback'];
 
 	//Creates the API object containing all exported operations for this API.
 	return {
-		config: config,
 		getContents: getContents,
 		getDependencies: getDependencies,
 		getTransitiveDependencies: getTransitiveDependencies,
 		getDGraph: getDGraph,
-		findFileNamesContaining: findFileNamesContaining
+		findFileNamesContaining: findFileNamesContaining,
+		getConf: getConf
 	};
 }
 
