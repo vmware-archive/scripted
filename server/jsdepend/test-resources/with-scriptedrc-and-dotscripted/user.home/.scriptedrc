@@ -1,0 +1,9 @@
+/*
+ * I like's me a really huge font :-)
+ */
+{
+    "readScriptedRc" : true,
+    "ui" : {
+        "font_size" : 99
+    }
+}

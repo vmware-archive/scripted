@@ -11,11 +11,7 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
-/*global require define console module*/
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
-define(function(require, exports, module) {
+/*global require exports console module process */
 
 //TODO: a better name for this module. It's really an abstraction of the file system. 
 //      so the name ought to reflect that.
@@ -56,6 +52,19 @@ function withBaseDir(baseDir) {
 	
 	function nativeNodeModuleName(handle) {
 		return handle.substring(nodeNatives.MAGIC_PATH_PREFIX.length);
+	}
+	
+	function getUserHome() {
+		if (baseDir) {
+			//We are testing with a 'mini test file system' can't use the
+			// regular user home dir here. So use a special "HOME" dir under the
+			// baseDir
+			return "user.home";
+		} else {
+			//Note: this code from here 
+			// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
+			return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
+		}
 	}
 	
 	function handle2file(handle) {
@@ -142,6 +151,7 @@ function withBaseDir(baseDir) {
 	}
 	
 	return {
+		getUserHome:  getUserHome,
 		baseDir:      baseDir, 
 		handle2file:  handle2file,
 		file2handle:  file2handle,
@@ -154,6 +164,3 @@ function withBaseDir(baseDir) {
 
 exports.withBaseDir = withBaseDir;
 exports.ignore = ignore;
-
-});
-

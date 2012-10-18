@@ -1,0 +1,13 @@
+/*
+    blah blah blah
+*/
+{
+    "exec": {
+        "onKeys" : {
+	        "ctrl+alt+c": "node releng/copycheck.js"
+	    }
+	},
+    "ui": {
+		"font_size":11
+	}
+}
