@@ -28,10 +28,9 @@ define(function(require, exports, module) {
 		getTransitiveDependencies: ['JSON', 'callback'],
 		getContents: ['JSON', 'callback', 'errback'],
 		findFileNamesContaining: ['JSON', 'JSON', 'callback', 'errback'],
-		getDGraph: ['JSON', 'callback']
+		getDGraph: ['JSON', 'callback'],
+		getConf: ['JSON', 'callback']
 	};
-	
-	var expectedSig = JSON.stringify(['JSON', 'callback', 'errback']);
 	
 	for (var functionName in signatures) {
 		if (signatures.hasOwnProperty(functionName)) {
