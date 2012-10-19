@@ -53,6 +53,9 @@ function configure(conf) {
 		}
 	}
 
+	//TODO: this function, and other functions related to determining the 'root context'
+	// do not belong in here. They should be removed and the remaining code refactored
+	// to use the 'dot-scripted' module to determine the root context.
 	function isRootMarkerFile(name) {
 		if (name==='.scripted' || name==='.project' || name==='.git') {
 			return name;
