@@ -3145,5 +3145,25 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
+	tests["test computed member expressions6"] = function() {
+		var results = computeContentAssist(
+			"var x = 0;\n" +
+			"var foo = [];\n" +
+			"foo[x./**/]");
+		testProposals("", results, [
+			["toExponential(digits)", "toExponential(digits) : Number"],
+			["toFixed(digits)", "toFixed(digits) : Number"],
+			["toPrecision(digits)", "toPrecision(digits) : Number"],
+			["", "---------------------------------"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["toLocaleString()", "toLocaleString() : String"],
+			["toString()", "toString() : String"],
+			["valueOf()", "valueOf() : Object"],
+			["prototype", "prototype : Object"]
+		]);
+	};
+	
 	return tests;
 });

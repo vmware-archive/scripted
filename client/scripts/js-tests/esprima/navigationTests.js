@@ -301,6 +301,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			'hhh', "Number", 'hhh :: Number', 1);
 	};
 	
+	tests.testInsideArrayAccess1 = function() {
+		doSameFileTest("var x = 0;\n" +
+			"var foo = [];\n" +
+			"foo[x]", "x", "Number", "x :: Number", 1);
+	};
+	
 	
 	return tests;
 });
