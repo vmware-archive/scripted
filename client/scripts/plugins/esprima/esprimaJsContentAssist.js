@@ -781,8 +781,6 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			node.extras.inferredType = env.newScope();
 			break;
 		case "Literal":
-			oftype = (typeof node.value);
-			node.extras.inferredType = oftype[0].toUpperCase() + oftype.substring(1, oftype.length);
 			break;
 		case "ArrayExpression":
 			node.extras.inferredType = "Array";
@@ -1005,12 +1003,25 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			break;
 		case "MemberExpression":
 			if (node.property) {
-				// keep track of the target of the property expression
-				// so that its type can be used as the seed for finding properties
-				if (!node.property.extras) {
-					node.property.extras = {};
+				if (!node.computed ||  // like this: foo.at
+					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['at']
+					
+					// keep track of the target of the property expression
+					// so that its type can be used as the seed for finding properties
+					if (!node.property.extras) {
+						node.property.extras = {};
+					}
+					node.property.extras.target = node.object;
+				} else if (node.computed && node.property.type === "Literal" && typeof node.property.value === "number") {  // like this: foo[9]
+					// TODO: handle parameterized array access
+					if (!node.property.extras) {
+						node.property.extras = {};
+					}
+					node.property.extras.target = node.object;
+				
+				} else { // like this: foo[at]
+					// TODO handle parameterized object types
 				}
-				node.property.extras.target = node.object;
 			}
 			break;
 		case "CallExpression":
@@ -1304,6 +1315,30 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "ReturnStatement":
 			if (node.argument) {
 				node.extras.inferredType = node.argument.extras.inferredType;
+			}
+			break;
+			
+		case "Literal":
+			if (node.extras.target && typeof node.value === "string") {
+				// inside of a member expression, like this foo["at"]
+				// this is not exactly right, since the inferred type of the literal is not "string", but the type of the property
+				name = node.value;
+				newTypeName = env.lookupName(name, node.extras.target);
+				node.extras.inferredType = newTypeName;
+			} else if (node.extras.target && typeof node.value === "number") {
+				// TODO handle arrays like this foo[8]
+				// this is not exactly right, since the inferred type of the literal is not "string", but the type of the property
+				node.extras.inferredType = "Object";
+			} else {
+				var oftype = (typeof node.value);
+				node.extras.inferredType = oftype[0].toUpperCase() + oftype.substring(1, oftype.length);
+			}
+			break;
+
+		case "ConditionalExpression":
+			var target = node.consequent ? node.consequent : node.alternate;
+			if (target) {
+				node.extras.inferredType = target.extras.inferredType;
 			}
 			break;
 		}

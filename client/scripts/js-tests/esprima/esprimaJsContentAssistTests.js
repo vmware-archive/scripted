@@ -3095,5 +3095,55 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
+	// computed member expressions
+	tests["test computed member expressions1"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo['at'].b", "b");
+		testProposals("b", results, [
+			["bar", "bar : Number"]
+		]);
+	};
+	
+	tests["test computed member expressions2"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[at].b", "b");
+		testProposals("b", results, [
+		]);
+	};
+	
+	tests["test computed member expressions3"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[9].toF", "toF");
+		testProposals("toF", results, [
+		]);
+	};
+	
+	tests["test computed member expressions4"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo['at'].bar.toF", "toF");
+		testProposals("toF", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	
+	tests["test computed member expressions5"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[at.foo.bar].");
+		testProposals("", results, [
+			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["toLocaleString()", "toLocaleString() : String"],
+			["toString()", "toString() : String"],
+			["valueOf()", "valueOf() : Object"],
+			["prototype", "prototype : Object"]
+		]);
+	};
+	
 	return tests;
 });
