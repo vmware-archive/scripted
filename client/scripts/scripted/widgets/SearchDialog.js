@@ -67,7 +67,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = "Search files";
+		this.options.title = "Look in files";
 		this.inherited(arguments);
 	},
 	

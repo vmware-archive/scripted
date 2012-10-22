@@ -19,7 +19,9 @@ define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "orion/se
 function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
 	mFileSearchClient, mSearchDialog){
 
-	var initializeBreadcrumbs, loadEditor, attachSearchClient, attachOutlineClient, attachDefinitionNavigation, attachEditorSwitch, clickNavigation, backNavigation, mainNavigation, subNavigation, openDeclaration, attachFileSearchClient, close_side, open_side;
+	var initializeBreadcrumbs, loadEditor, attachSearchClient, attachOutlineClient, attachDefinitionNavigation, 
+			attachEditorSwitch, clickNavigation, backNavigation, mainNavigation, subNavigation, openDeclaration, 
+			attachFileSearchClient, close_side, open_side;
 	
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	
@@ -418,8 +420,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			},0);
 		};
 		
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Search files");
-		editor.getTextView().setAction("Search files",function() {
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Look in files");
+		editor.getTextView().setAction("Look in files",function() {
 			openFileSearchDialog(editor);
 		});
 	};
