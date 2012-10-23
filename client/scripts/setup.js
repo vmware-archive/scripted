@@ -101,8 +101,8 @@ requirejs.config({
 	}
 });
 
-require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/fileLoader", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mFileLoader, mJsdepend) {
+require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend) {
 	
 	/* needs dependency on "sockjs"
 	var sock = new SockJS("http://localhost:7261/echo");
@@ -146,12 +146,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		});
 
 		window.explorer = explorer;
-		window.editor = mFileLoader.loadEditor( filepath, ($('#editor')[0]), 'main' );
+		window.editor = mNavHistory.loadEditor( filepath, ($('#editor')[0]), 'main' );
 		if (location.hash.length > 1) {
-			mFileLoader.highlightSelection(window.editor);
+			mNavHistory.highlightSelection(window.editor);
 		}
 		
-		mFileLoader.initializeBreadcrumbs(filepath);
+		mNavHistory.initializeBreadcrumbs(filepath);
 		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {
@@ -314,7 +314,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		
 		/*Side panel open/close*/
 		
-		$('#side_toggle').on('click', mFileLoader.toggleSidePanel);
+		$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
 
 		/*Position elements correctly on page*/
 		var footer_height = $('footer').outerHeight();
@@ -378,7 +378,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			require("scripted/exec/exec-on-load").installOn(window.fsroot);
 			/* setTimeout so popstate doesn't fire on initial page load */
 			window.setTimeout(function() {
-				$(window).bind('popstate', mFileLoader.popstateHandler);
+				$(window).bind('popstate', mNavHistory.popstateHandler);
 			}, 1);
 		});
 		
