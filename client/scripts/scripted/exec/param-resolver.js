@@ -14,7 +14,7 @@
 /*global require define console window */
 /*jslint browser:true devel:true*/
 
-define(['scripted/pathUtils'], function () {
+define(['scripted/utils/pathUtils'], function () {
 
 // This module provides a mechanism to replace 'parameters' of the form ${name}
 // inside of data objects. It walks the data object creating a copy of it, replacing
@@ -59,7 +59,7 @@ function createParamReplacer(paramDefs) {
 	return replaceParams;
 }
 
-var getDirectory = require('scripted/pathUtils').getDirectory;
+var getDirectory = require('scripted/utils/pathUtils').getDirectory;
 
 //Create a param replacer function that 'resolves' parameters relative to
 //a given editor context.

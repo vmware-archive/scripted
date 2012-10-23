@@ -417,7 +417,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 	
 	// Need to load searcher here instead of scriptedEditor.js to avoid circular dependencies
-	// Before : scriptedEditor.js -> searchClient.js -> fileLoader.js -> scriptedEditor.js : BAD
+	// Before : scriptedEditor.js -> searchClient.js -> navHistory.js -> scriptedEditor.js : BAD
 	
 	var attachSearchClient = function(editor) {
 	

@@ -14,7 +14,7 @@
 /*global define window uri scriptedLogger alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "orion/editor/jslintdriver", "jquery", "scripted/utils/fileLoader"
+define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "orion/editor/jslintdriver", "jquery", "scripted/utils/navHistory"
 //,'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number' 
 ], function(require, dojo, mExplorer, mJslintDriver, mJquery, mFileLoader /*,dijit, mUtil, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands*/ ) {
 
