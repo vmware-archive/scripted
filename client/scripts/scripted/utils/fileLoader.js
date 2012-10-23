@@ -700,6 +700,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		clickNavigation: clickNavigation,
 		loadEditor: loadEditor,
 		highlightSelection: highlightSelection,
-		popstate: popstate
+		popstate: popstate,
+		toggleSidePanel: toggleSidePanel
 	};
 });
