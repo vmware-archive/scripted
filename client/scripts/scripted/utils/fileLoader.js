@@ -312,9 +312,11 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 
 	var initializeHistoryMenu = function() {
-		var historyCrumb = $('<li data-id="-1"><span><img src="images/icon.png" /></span></li>');
-		$('#breadcrumb').append(historyCrumb);
-		
+		var historyCrumb = $('#historycrumb');
+		if (!historyCrumb.html()) {
+			historyCrumb = $('<li id="historycrumb" data-id="-1"><span><img src="images/icon.png" /></span></li>');
+			$('#breadcrumb').append(historyCrumb);
+		}		
 		var historyMenu = $('<ul class="breadcrumb_menu" data-id="-1"></ul>');
 		historyMenu.css('left', historyCrumb.position().left);
 		historyMenu.css('top', $('header').height() + $('#breadcrumb').height());
@@ -323,7 +325,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		
 		var history = getHistory();
 		
-		for (var i = 0; i < history.length; i++) {
+		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
 			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
 			$(newHistoryAnchor).click(clickNavigation);
