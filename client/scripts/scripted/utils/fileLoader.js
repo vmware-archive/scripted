@@ -13,34 +13,50 @@
  ******************************************************************************/
 
 /*jslint browser:true */
-/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $*/
+/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage*/
 define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
 "scripted/fileSearchClient", "scripted/widgets/SearchDialog"], 
 function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
-	mFileSearchClient, mSearchDialog){
-
-	var initializeBreadcrumbs, loadEditor, attachSearchClient, attachOutlineClient, attachDefinitionNavigation, 
-			attachEditorSwitch, clickNavigation, backNavigation, mainNavigation, subNavigation, openDeclaration, 
-			attachFileSearchClient, close_side, open_side;
+	mFileSearchClient, mSearchDialog) {
+	
+	var EDITOR_TARGET = {
+		main : "main",
+		sub : "sub",
+		tab : "tab"
+	};
+	var LINE_SCROLL_OFFSET = 5;
+	
+	// define as forward reference
+	var navigate;
 	
 	var isMac = navigator.platform.indexOf("Mac") !== -1;
 	
-	var LINE_SCROLL_OFFSET = 5;
+	var findTarget = function(event) {
+		var target;
+		if ((isMac && event.metaKey) || (!isMac && event.ctrlKey)) {
+			target = EDITOR_TARGET.tab;
+		} else {
+			var subNavigationDisabled = (window.editor.loadResponse === 'error') ? true : false;
+			target = (event.shiftKey || event.makeShift) && !subNavigationDisabled ? EDITOR_TARGET.sub : EDITOR_TARGET.main;
+		}
+		return target;
+	};
+
 	
-	close_side = function(editor){
+	var close_side = function(editor) {
 		$('#side_panel').hide();
 		$('#editor').css('margin-right', '0');
 		editor._textView._updatePage();
 	};
 	
-	open_side = function(editor){
+	var open_side = function(editor) {
 		if ( $('#side_panel').css('display') === 'block') { return false; }
 		$('#side_panel').show();
 		$('#editor').css('margin-right', $('#side_panel').width());
 		editor._textView._updatePage();
 	};
 	
-	var scrollDefinition = function(editor){
+	var scrollDefinition = function(editor) {
 		var tv = editor.getTextView();
 		var model = tv.getModel();
 		var offset = tv.getCaretOffset();
@@ -50,36 +66,127 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 		tv.setTopIndex(line);
 	};
-	
-	var pushHistory = function(editor){
-		var filepath = editor.getFilePath();
-		var history = window.scriptedHistory;
 
-		for (var i = 0; i < history.length; i++){
-			if (history[i].filepath === filepath){
-				var sel = history[i].selection;
-				if(sel !== undefined){
-					editor.setSelection(sel.start, sel.end, true);
-				}
-				if (history[i].position){
-					$(editor._domNode).find('.textview').scrollTop(history[i].position);
-				}
-				history.splice(i,1);
-			}
+	/**
+	 * Retrieves the history from local storage
+	 * @return {Array.<{filename:string,filepath:string,range:Array.<Number>,posiiion,url:string}>}
+	 */
+	var getHistory = function() {
+		var historyJSON = localStorage.getItem("scriptedHistory");
+		if (!historyJSON) {
+			historyJSON = "[]";
 		}
-		
-		var scrollPos = $(editor._domNode).find('.textview').scrollTop();
-
-		history.push({
-			filename: filepath.split('/').pop(),
-			filepath: filepath,
-			selection: editor.getSelection(),
-			position: scrollPos
-		});
-		
+		return JSON.parse(historyJSON);
 	};
 	
-	var switchEditors = function(){
+	var setHistory = function(history) {
+		localStorage.setItem("scriptedHistory", JSON.stringify(history));
+	};
+	
+	
+	/**
+	 * generates an item to be stored in scriptedHistory as well as browser state
+	 */
+	var generateHistoryItem = function(editor) {
+		var filepath = editor.getFilePath();
+		var scrollPos = $(editor._domNode).find('.textview').scrollTop();
+		var selection = editor.getSelection();
+		var url = window.location.pathname + '?' + filepath + "#" + selection.start + "," + selection.end;
+		return {
+			filename: filepath.split('/').pop(),
+			filepath: filepath,
+			range: [selection.start, selection.end],
+			position: scrollPos,
+			url: url
+		};
+	};
+	
+	
+	var storeScriptedHistory = function(histItem) {
+		var scriptedHistory = getHistory();
+		for (var i = 0; i < scriptedHistory.length; i++) {
+			if (scriptedHistory[i].filepath === histItem.filepath) {
+				scriptedHistory.splice(i,1);
+			}
+		}
+		scriptedHistory.push(histItem);
+		
+		// arbitrarily keep track of 8 scriptedHistory items
+		// TODO should we have a .scripted setting to customize this?
+		while (scriptedHistory.length > 8) {
+			scriptedHistory.shift();
+		}
+		
+		setHistory(scriptedHistory);
+	};
+	
+	var storeBrowserState = function(histItem, doReplace) {
+		if (doReplace) {
+			window.history.replaceState(histItem, histItem.filename, histItem.url);
+		} else {
+			window.history.pushState(histItem, histItem.filename, histItem.url);
+		}
+	};
+	
+	
+	var isBinary = function(filepath) {
+		try {
+			var xhrobj = new XMLHttpRequest();
+			var url = 'http://localhost:7261/get?file=' + filepath;
+			xhrobj.open("GET", url, false); // synchronous xhr
+			xhrobj.send();
+			if (xhrobj.readyState === 4) {
+				if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
+					return true;
+				} else {
+					return false;
+				}
+			}
+		} catch (e) {
+			console.log(filepath);
+			console.log(e);
+			return true;
+		}
+		return false;
+	};
+
+
+	/*
+		This handles navigations from
+			-Navigator
+			-Breadcrumb
+			-Open File
+	*/
+	var clickNavigation = function(event) {
+		var filepath = event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href') ;
+		var query_index = filepath.indexOf('?');
+		if (query_index !== -1) {
+			filepath = filepath.substring(query_index+1, filepath.length);
+		}
+		
+		var hashIndex = filepath.indexOf('#');
+		var range;
+		if (hashIndex !== -1) {
+			try {
+				range = JSON.parse("[" + filepath.substring(hashIndex+1) + "]");
+			} catch (e) {
+				console.log("Invalid hash: " + filepath);
+			}
+			filepath = filepath.substring(0, hashIndex);
+		}
+		
+		if (isBinary(filepath)) {
+			alert("Cannot open binary files");
+			return false;
+		}
+		
+		var target = findTarget(event);
+		navigate(filepath, range, target, true);	
+		return false;
+	};
+	
+
+	var switchEditors = function() {
 		if (window.subeditors[0] === undefined) {
 			return false;
 		}
@@ -97,24 +204,21 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		
 		var main_active = (document.activeElement === $(window.editor._domNode).find('.textviewContent')[0]);
 		
-		subNavigation(main_path, null, false);
-		mainNavigation(sub_path, null, false);
-		
-		window.history.pushState(null, null, window.location.pathname + '?' + sub_path);
-		pushHistory(window.editor);
+		navigate(main_path, null, EDITOR_TARGET.sub, true);
+		navigate(sub_path, null, EDITOR_TARGET.main, true);
 		
 		$(window.editor._domNode).find('.textview').scrollTop(sub_scrollpos);
 		$(window.subeditors[0]._domNode).find('.textview').scrollTop(main_scrollpos);
 		
-		if (sub_dirty){
+		if (sub_dirty) {
 			window.editor.setText(sub_text);
 		}
-		if (main_dirty){
+		if (main_dirty) {
 			window.subeditors[0].setText(main_text);
 		}
 		
-		setTimeout(function(){
-			if (main_active){
+		setTimeout(function() {
+			if (main_active) {
 				window.subeditors[0].getTextView().focus();
 				window.subeditors[0].getTextView().setSelection(main_sel.start, main_sel.end, true);
 			} else {
@@ -124,15 +228,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}, 200);
 	};
 	
-	var confirmNavigation = function(editor){
-		if (editor.isDirty()){
+	var confirmNavigation = function(editor) {
+		if (editor && editor.isDirty()) {
 			return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
 		} else {
 			return true;
 		}
 	};
 	
-	var highlightSelection  = function(editor){	
+	var highlightSelection  = function(editor) {	
 		try{
 			var loc = JSON.parse("[" + location.hash.substring(1) + "]");
 			if (loc && loc.constructor === Array && loc.length > 0) {
@@ -141,12 +245,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				editor.getTextView().setSelection(start, end, true);
 				scrollDefinition(editor);
 			}
-		} catch (e){
+		} catch (e) {
 			console.log("Could not navigate to location specified in hash. Hash value: " + location.hash);
 		}
 	};
 	
-	var buildSubeditor = function(filepath){
+	var buildSubeditor = function(filepath) {
 		var filename = filepath.split('/').pop();
 		var subeditor = 
 		$('<div class="subeditor_wrapper">'+
@@ -170,8 +274,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			$('.subeditor_titlebar').height()
 		);
 		
-		$('.subeditor_close').click(function(){
-			if (window.subeditors[0] && confirmNavigation(window.subeditors[0])){
+		$('.subeditor_close').click(function() {
+			if (window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
 				$('.subeditor_wrapper').remove();
 				window.subeditors.pop();
 				close_side(window.editor);
@@ -184,38 +288,17 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		return subeditor;
 	};
 	
-	var toggleSidePanel = function(){
-		if ($('#side_panel').css('display') === 'none'){
+	var toggleSidePanel = function() {
+		if ($('#side_panel').css('display') === 'none') {
 			var sel = window.editor.getSelection();
 			var range = [sel.start, sel.end];
-			subNavigation(window.editor.getFilePath(), range);
+			navigate(window.editor.getFilePath(), range, EDITOR_TARGET.sub);
 			window.subeditors[0].getTextView().focus();
 		} else {
 			$('.subeditor_close').click();
 		}
 	};
 	
-	var isBinary = function(filepath){
-		try {
-			var xhrobj = new XMLHttpRequest();
-			var url = 'http://localhost:7261/get?file=' + filepath;
-			xhrobj.open("GET", url, false); // synchronous xhr
-			xhrobj.send();
-			if (xhrobj.readyState === 4) {
-				if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
-					return true;
-				} else {
-					return false;
-				}
-			}
-		} catch (e) {
-			console.log(filepath);
-			console.log(e);
-			return true;
-		}
-		return false;
-	};
-
 	var fileEntryCompare = function(a, b) {
 		a = a.name.toLowerCase();
 		b = b.name.toLowerCase();
@@ -227,15 +310,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			return 0;
 		}
 	};
-	
-	initializeBreadcrumbs = function(path){
-		var root = window.fsroot;
-		var basepath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
-	
-//		$('#breadcrumb li:not(:first)').remove();
-		$('#breadcrumb li').remove();
-		$('.breadcrumb_menu').remove();
-		
+
+	var initializeHistoryMenu = function() {
 		var historyCrumb = $('<li data-id="-1"><span><img src="images/icon.png" /></span></li>');
 		$('#breadcrumb').append(historyCrumb);
 		
@@ -244,16 +320,28 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		historyMenu.css('top', $('header').height() + $('#breadcrumb').height());
 		$('#main').append(historyMenu);
 		
-		var history = window.scriptedHistory;
 		
-		for (var i = 0; i < history.length; i++){
+		var history = getHistory();
+		
+		for (var i = 0; i < history.length; i++) {
 			var newHistoryElem = $('<li></li>');
-			var newHistoryAnchor = $('<a href="' + basepath + history[i].filepath + '">'+history[i].filename+'</a>');
+			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
 			$(newHistoryAnchor).click(clickNavigation);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
 		}
+	};
+	
+	var initializeBreadcrumbs = function(path) {
+		var root = window.fsroot;
+		var basepath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
+	
+//		$('#breadcrumb li:not(:first)').remove();
+		$('.breadcrumb_menu').remove();
+		$('#breadcrumb li').remove();
 
+		initializeHistoryMenu();
+		
 		var crumbs = path.substring(1 + root.length, path.length).split('/'); // the first position is moved up by 1 for the trailing '/'
 		crumbs.splice(0, 0, root);
 		var constructedPath = "", newCrumbElem, xhrobj, url;
@@ -262,7 +350,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			newCrumbElem = $('<li class="light_gradient" data-id="'+i+'"><span>' + crumbs[i] + '</span></li>');
 			$('#breadcrumb').append(newCrumbElem);	
 
-			if (i + 1 === len){ 
+			if (i + 1 === len) { 
 				constructedPath += crumbs[i];
 			}
 			else {
@@ -277,8 +365,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					kids.sort(fileEntryCompare);
 
 					var newMenu = $('<ul class="breadcrumb_menu" data-id="'+i+'"></ul>');
-					for(var j = 0; j < kids.length; j++){
-						if (kids[j].directory === false){
+					for(var j = 0; j < kids.length; j++) {
+						if (kids[j].directory === false) {
 							if (kids[j].name.lastIndexOf('.',0)!==0) {
 								var href = basepath + kids[j].Location;
 								var newMenuItem = $('<li></li>');
@@ -317,10 +405,10 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			$(this).hide();
 		});
 
-		$('.breadcrumb_menu > li').hover(function(){
+		$('.breadcrumb_menu > li').hover(function() {
 			$(this).addClass('light_gradient_active');
 			$(this).removeClass('light_gradient');
-		}, function(){
+		}, function() {
 			$(this).addClass('light_gradient');
 			$(this).removeClass('light_gradient_active');
 		});
@@ -329,7 +417,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	// Need to load searcher here instead of scriptedEditor.js to avoid circular dependencies
 	// Before : scriptedEditor.js -> searchClient.js -> fileLoader.js -> scriptedEditor.js : BAD
 	
-	attachSearchClient = function(editor){
+	var attachSearchClient = function(editor) {
 	
 		var searcher = new mSearchClient.Searcher({
 			serviceRegistry: null,
@@ -348,7 +436,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
-					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
+//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
 				});
 			}
 			window.setTimeout(function() {
@@ -356,15 +444,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}, 0);
 		};
 		
-		if (editor){
+		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
 				openResourceDialog(searcher, null, editor);
 				return true;
 			});		
 		} else {
-			$('body').on('keydown', function(evt){
-				if (evt.shiftKey && evt.ctrlKey && evt.which === 70 /*F*/){
+			$('body').on('keydown', function(evt) {
+				if (evt.shiftKey && evt.ctrlKey && evt.which === 70 /*F*/) {
 					openResourceDialog(searcher, null, null);
 					return true;
 				}
@@ -372,7 +460,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 	};
 	
-	attachOutlineClient = function(editor){
+	var attachOutlineClient = function(editor) {
 
 		// from globalCommands.js
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
@@ -382,7 +470,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			});
 			if (editor) {
 				dojo.connect(dialog, "onHide", function() {
-					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
+//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
 				});
 			}
 			window.setTimeout(function() {
@@ -397,7 +485,32 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});		
 	};
 	
-	attachFileSearchClient = function(editor) {
+	/**
+	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
+	 * @param {{range:List.<Number>,path:String}} definition
+	 * @param {{Editor}} editor
+	 */
+	var openDeclaration = function(modifier, definition, editor) {
+		if (!definition.range && !definition.path) {
+			return;
+		}
+		var defnrange = definition.range ? definition.range : editor.getSelection();
+		var filepath = definition.path ? definition.path : editor.getFilePath();
+		
+		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
+		
+		var target;
+		if (typeof modifier === "object") {
+			target = findTarget(modifier);
+		} else if (typeof modifier === "string") {
+			target = modifier;
+		}
+		if (target) {
+			navigate(filepath, defnrange, target, true);
+		}
+	};
+
+	var attachFileSearchClient = function(editor) {
 	
 		var fileSearcher = new mFileSearchClient.FileSearcher({
 		});
@@ -410,11 +523,13 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				style:"width:800px",
 				openDeclaration: openDeclaration
 			});
-			if (editor) {
-				dojo.connect(dialog,"onHide", function() {
-					editor.getTextView().focus(); // focus editor after dialog closed
-				});
-			}
+			
+			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
+//			if (editor) {
+//				dojo.connect(dialog,"onHide", function() {
+//					editor.getTextView().focus(); // focus editor after dialog closed
+//				});
+//			}
 			window.setTimeout(function() {
 				dialog.show();
 			},0);
@@ -426,68 +541,31 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});
 	};
 	
-	/**
-	 * @param String modifier
-	 * @param {{range:List.<Number>,path:String}} definition
-	 * @param {{Editor}} editor
-	 */
-	openDeclaration = function(modifier, definition, editor) {
-		if (!definition.range && !definition.path) {
-			return;
-		}
-		var defnrange = definition.range ? definition.range : editor.getSelection();
-		var filepath = definition.path ? definition.path : editor.getFilePath();
-		
-		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
-		
-		if (modifier === "shift"){
-			subNavigation(filepath, defnrange);
-			scrollDefinition(window.subeditors[0]);
-		} else if (modifier === "ctrl"){
-			filepath = filepath + "#" + defnrange;
-			var rootpath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
-			window.open(rootpath + filepath);
-		} else if (modifier === "none"){
-			if (definition.path){
-				if (editor.type === 'main'){
-					window.history.pushState(null, null, window.location.pathname + '?' + filepath);
-					mainNavigation(filepath, defnrange, true);
-					scrollDefinition(window.editor);
-				} else if (editor.type === 'sub'){
-					subNavigation(filepath, defnrange, true);
-					scrollDefinition(window.subeditors[0]);
-				} 
-			} else {
-				editor.getTextView().setSelection(defnrange[0], defnrange[1], true);
-			}
-		}
-	};
-
-	attachDefinitionNavigation = function(editor){
+	var attachDefinitionNavigation = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ false, /*alt*/ false), "Open declaration");
 		editor.getTextView().setAction("Open declaration", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration("none", definition, editor);
+				openDeclaration(EDITOR_TARGET.main, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Open declaration in new tab");
 		editor.getTextView().setAction("Open declaration in new tab", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration("ctrl", definition, editor);
+				openDeclaration(EDITOR_TARGET.tab, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
 		editor.getTextView().setAction("Open declaration in subeditor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration("shift", definition, editor);
+				openDeclaration(EDITOR_TARGET.sub, definition, editor);
 			}
 		});
 	};
 	
-	attachEditorSwitch = function(editor){
+	var attachEditorSwitch = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Switch Subeditor and Main Editor");
 		editor.getTextView().setAction("Switch Subeditor and Main Editor", switchEditors);
 		
@@ -495,103 +573,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		editor.getTextView().setAction("Toggle Subeditor", toggleSidePanel);		
 	};
 	
-	/*
-		This handles navigations from
-			-Navigator
-			-Breadcrumb
-			-Open File
-	*/
-	clickNavigation = function(event){
-		var filepath = event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href') ;
-		var query_index = filepath.indexOf('?');
-		if (query_index !== -1){
-			filepath = filepath.substring(query_index+1, filepath.length);
-		}
-		
-		if (isBinary(filepath)){
-			alert("Cannot open binary files");
-			return false;
-		}
-		
-		if ((isMac && event.metaKey) || (!isMac && event.ctrlKey)) {
-			return true; // if ctrl key is pressed, open in new tab
-		}
-		var subNavigationDisabled = (window.editor.loadResponse === 'error') ? true : false;
-		if ((event.shiftKey || event.makeShift) && !subNavigationDisabled){ // if shift key is pressed, open in subeditor
-			subNavigation(filepath, null, true);
-			return false;
-		} else {
-			mainNavigation(filepath, null, true);
-			window.history.pushState(null, null, window.location.pathname + '?' + filepath);
-			return false;
-		}
-	};
-	
-	/*
-		This handles forward/back button navigation
-		TODO:  Handle dirty changes
-	*/
-	backNavigation = function(){
-		var filepath = window.location.getPath();
-		window.editor = loadEditor(filepath, $('#editor')[0], 'main');
-		explorer.highlight(filepath);
-		
-/*		var historyEntry = window.scriptedHistory[window.scriptedHistory.length - 1];
-		historyEntry.selection = window.editor.getSelection();
-		historyEntry.position = $(window.editor._domNode).find('.textview').scrollTop();*/
-		
-		pushHistory(window.editor);
-		initializeBreadcrumbs(filepath);
-	};
-	
-	mainNavigation = function(filepath, range, confirm){
-		if (!confirm || confirmNavigation(window.editor)){
-			$('#editor').css('display','block');
-			if (window.scripted.navigator !== false){
-				explorer.highlight(filepath);
-			}
-			
-			var historyEntry = window.scriptedHistory[window.scriptedHistory.length - 1];
-			historyEntry.selection = window.editor.getSelection();
-			historyEntry.position = $(window.editor._domNode).find('.textview').scrollTop();
-			
-			window.editor = loadEditor(filepath, $('#editor')[0], 'main');
-			if (range) {
-				window.editor.getTextView().setSelection(range[0], range[1], true);
-			}
-			//pushHistory(window.editor); //TODO: not sure what this should be doing.... but what it seems to be doing, is moving the selection in unpredictable patterns.
-			initializeBreadcrumbs(filepath);
-			window.editor.getTextView().focus();
-			return true;
-		} else {
-			return false;
-		}
-	};
-	
-	subNavigation = function(filepath, range, confirm){
-		if (window.subeditors[0] !== undefined && confirm){
-			if (!confirmNavigation(window.subeditors[0])){
-				return false;
-			}
-		}
-		open_side(window.editor);
-		$('.subeditor_wrapper').remove();
-		buildSubeditor(filepath);
-		window.subeditors[0] = loadEditor(filepath, $('.subeditor')[0], 'sub');
-
-		if (range) {
-			window.subeditors[0].getTextView().setSelection(range[0], range[1], true);
-		}
-	};
-	
-	/*
-		This handles initial page load
-	*/
-	loadEditor = function(filepath, domNode, type){
+	/**
+	 * This handles initial page load
+	 */
+	var loadEditor = function(filepath, domNode, type) {
 		$(domNode).show();
 		$('body').off('keydown');
 		var editor = mEditor.makeEditor(domNode, filepath, type);
-		if (editor.loadResponse === 'error'){
+		if (editor.loadResponse === 'error') {
 			$(domNode).hide();
 			attachSearchClient(null);
 			$('.subeditor_close').click();
@@ -603,20 +592,114 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		attachFileSearchClient(editor);
 		attachEditorSwitch(editor);
 		editor.cursorFix();
-		if (type === 'main'){
-			setTimeout(function(){
+		if (type === 'main') {
+			setTimeout(function() {
 				editor.getTextView().focus();
 			}, 5);
 		}
 		return editor;
 	};
+
+	/**
+	 * handles the onpopstate event
+	 */
+	var popstate = function(event) {
+		var cont = true;
+		if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
+			cont = confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+		}
+		if (cont) {
+			var target = findTarget(event);
+			var state = event.originalEvent.state;
+			if (state && state.filepath) {
+				navigate(state.filepath, state.range, target);
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}				
+	};
+	
+
+	
+
+	/**
+	 * Navigates to a new editor
+	 * @param {String} filepath the path to the target file
+	 * @param {Array.<Number>} range 2 element array specifying offset and length of target selection
+	 * @param {String} target the target of the navigation, either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab for 
+	 * displaying in the main editor, the sub-editor or a new tab.  If a null or invalid value is passed
+	 * there will be an attempt to guess the target
+	 *
+	 * @return {boolean} true if navigation occurred successfully and false otherwise.
+	 */
+	navigate = function(filepath, range, target, doSaveState) {
+		var histItem = generateHistoryItem(window.editor);
+		storeScriptedHistory(histItem);
+		if (doSaveState) {
+			storeBrowserState(histItem, true);
+		}
+		if (window.subeditors[0]) {
+			var subHistItem = generateHistoryItem(window.subeditors[0]);
+			storeScriptedHistory(subHistItem);
+		}
+		
+		if (target === EDITOR_TARGET.sub) {
+			if (!confirmNavigation(window.subeditors[0])) {
+				return false;
+			}
+			open_side(window.editor);
+			$('.subeditor_wrapper').remove();
+			buildSubeditor(filepath);
+			window.subeditors[0] = loadEditor(filepath, $('.subeditor')[0], 'sub');
+			if (range) {
+				if (isNaN(range[0]) || isNaN(range[1])) {
+					console.log("invalid range");
+					console.log(range);
+				}
+				window.subeditors[0].getTextView().setSelection(range[0], range[1], true);
+				scrollDefinition(window.subeditors[0]);
+			}
+			initializeHistoryMenu();
+			window.subeditors[0].getTextView().focus();
+		} else if (target === "main") {
+			if (!confirmNavigation(window.editor)) {
+				return false;
+			}
+			$('#editor').css('display','block');
+			window.editor = loadEditor(filepath, $('#editor')[0], 'main');
+			if (range) {
+				window.editor.getTextView().setSelection(range[0], range[1], false);
+				scrollDefinition(window.editor);
+			}
+
+			// explicit check for false since navigator might be 'undefined' at this point
+			if (window.scripted.navigator !== false) {
+				explorer.highlight(filepath);
+			}
+			initializeBreadcrumbs(filepath);
+			window.editor.getTextView().focus();
+			if (doSaveState) {
+				histItem = generateHistoryItem(window.editor);
+				storeBrowserState(histItem);
+			}
+			
+		} else if (target === EDITOR_TARGET.tab) {
+			var targetPath = range ? filepath + "#" + range : filepath;
+			var rootpath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
+			window.open(rootpath + targetPath);
+		}
+
+		return false;
+	};
 	
 	return {
 		initializeBreadcrumbs: initializeBreadcrumbs,
 		clickNavigation: clickNavigation,
-		backNavigation: backNavigation,
 		loadEditor: loadEditor,
-		toggleSidePanel: toggleSidePanel,
-		highlightSelection: highlightSelection
+		highlightSelection: highlightSelection,
+		popstate: popstate
 	};
 });

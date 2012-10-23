@@ -151,14 +151,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			mFileLoader.highlightSelection(window.editor);
 		}
 		
-		if (!window.scriptedHistory) {
-			window.scriptedHistory = [{
-				filename: filepath.split('/').pop(),
-				filepath: filepath,
-				selection: ""
-			}];
-		}
-
 		mFileLoader.initializeBreadcrumbs(filepath);
 		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
@@ -381,23 +373,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			}
 		};
 		
-		$(window).load(function(){
+//		$(window).load(function(){
+		$(document).ready(function(){
 			require("scripted/exec/exec-on-load").installOn(window.fsroot);
 			/* setTimeout so popstate doesn't fire on initial page load */
-			window.setTimeout(function(){
-				$(window).on('popstate', function(event){
-	//				window.history.forward();
-					var cont = true;
-					if (window.editor.isDirty()){
-						cont = confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
-					}
-					if (cont){
-						return mFileLoader.backNavigation();
-					} else {
-						window.history.pushState(null, null,  window.location.pathname + '?' + window.editor.getFilePath());
-						return false;
-					}				
-				});
+			window.setTimeout(function() {
+				$(window).bind('popstate', mFileLoader.popstate);
 			}, 1);
 		});
 		

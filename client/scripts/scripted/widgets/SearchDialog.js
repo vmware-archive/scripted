@@ -45,7 +45,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 	navigateToResult: function (evt, result) {
 		//TODO: modifier key awareness
 		this.hide();
-		this.openDeclaration("none", {
+		this.openDeclaration(evt, {
 			path: result.path,
 			range: [result.offset, result.offset+result.text.length]
 		}, this.editor);
