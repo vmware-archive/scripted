@@ -302,7 +302,7 @@ if (mExtensionCommands) {
 			dojo.place(textnode, span2, "last");
 
 			if (!item.directory) {
-				$(span2).click(mFileLoader.clickNavigation);
+				$(span2).click(mFileLoader.navigationEventHandler);
 			}
 
 			return col;

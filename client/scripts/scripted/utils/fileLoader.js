@@ -157,7 +157,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			-Breadcrumb
 			-Open File
 	*/
-	var clickNavigation = function(event) {
+	var navigationEventHandler = function(event) {
 		var filepath = event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href') ;
 		var query_index = filepath.indexOf('?');
 		if (query_index !== -1) {
@@ -328,7 +328,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
 			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
-			$(newHistoryAnchor).click(clickNavigation);
+			$(newHistoryAnchor).click(navigationEventHandler);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
 		}
@@ -376,7 +376,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 								newMenuItem.append(newMenuAnchor);
 								newMenu.prepend(newMenuItem);
 
-								$(newMenuAnchor).click(clickNavigation);
+								$(newMenuAnchor).click(navigationEventHandler);
 							}
 						}
 					}
@@ -433,7 +433,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				searcher: searcher,
 				searchRenderer: searcher.defaultRenderer,
 				favoriteService: null,
-				changeFile: clickNavigation,
+				changeFile: navigationEventHandler,
 				editor: editor
 			});
 			if (editor) {
@@ -467,7 +467,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		// from globalCommands.js
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenOutlineDialog({
-				changeFile: clickNavigation,
+				changeFile: navigationEventHandler,
 				editor: editor
 			});
 			if (editor) {
@@ -605,7 +605,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	/**
 	 * handles the onpopstate event
 	 */
-	var popstate = function(event) {
+	var popstateHandler = function(event) {
 		var cont = true;
 		if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
 			cont = confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
@@ -699,10 +699,10 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	return {
 		initializeBreadcrumbs: initializeBreadcrumbs,
-		clickNavigation: clickNavigation,
+		navigationEventHandler: navigationEventHandler,
 		loadEditor: loadEditor,
 		highlightSelection: highlightSelection,
-		popstate: popstate,
+		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel
 	};
 });

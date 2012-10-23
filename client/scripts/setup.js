@@ -378,7 +378,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			require("scripted/exec/exec-on-load").installOn(window.fsroot);
 			/* setTimeout so popstate doesn't fire on initial page load */
 			window.setTimeout(function() {
-				$(window).bind('popstate', mFileLoader.popstate);
+				$(window).bind('popstate', mFileLoader.popstateHandler);
 			}, 1);
 		});
 		
