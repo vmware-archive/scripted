@@ -68,7 +68,7 @@ define(['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searc
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
 		search: function(query, excludeFile, renderer) {
-			console.log("fileSearchClient.search(): incoming query is "+query);
+			//console.log("fileSearchClient.search(): incoming query is "+query);
 
 			var searchRoot = window.fsroot;
 

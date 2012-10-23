@@ -19,6 +19,35 @@ define(['require', 'dojo', 'dijit',
 		function(require, dojo, dijit, mFileLoader) {
 
 /**
+ * Quick and dirty search history. It is not persisted and only retains a single search result.
+ */
+var searchHistory = (function () {
+
+	var lastSearch = null;
+	
+	return {
+		get: function () {
+			return lastSearch;
+		},
+		put: function (search) {
+			if (typeof(search)==='string' && search.length>2) { 
+				//Ignore trivial or empty searches. Probably more useful to keep the
+				//previous search instead.
+				lastSearch = search;
+			}
+		}
+	};
+
+}());
+
+function getSelectedText(editor) {
+	var range = editor && editor.getSelection();
+	if (range && range.start && range.end && range.end > range.start) {
+		return editor.getText(range.start, range.end);		
+	}
+}
+
+/**
  * Usage: <code>new widgets.SearchDialog(options).show();</code>
  * 
  * @name orion.widgets.SearchDialog
@@ -43,7 +72,6 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 
 	/** @private */
 	navigateToResult: function (evt, result) {
-		//TODO: modifier key awareness
 		this.hide();
 		this.openDeclaration(evt, {
 			path: result.path,
@@ -74,6 +102,14 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 	/** @private */
 	postCreate: function() {
 		this.inherited(arguments);
+		
+		dojo.connect(this, "onShow", this, function (evt) {	
+			var lastSearch = getSelectedText(this.editor) || searchHistory.get();
+			if (lastSearch) {
+				this.resourceName.set("value", lastSearch);
+				this.resourceName.textbox.select();
+			}
+		});
 		
 		/* When the text box changes we want to update the results list */
 		dojo.connect(this.resourceName, "onChange", this, function(evt) {
@@ -268,6 +304,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 	
 	/** @private */
 	onHide: function() {
+		searchHistory.put(this.resourceName.get("value"));
 		if (this.activeFileSearch) {
 			this.activeFileSearch.close();
 			delete this.activeFileSearch;
