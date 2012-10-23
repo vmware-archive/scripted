@@ -126,8 +126,8 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	var filepath = window.location.getPath();
 	
 	mJsdepend.getConf(filepath, function (dotScripted) {
-		console.log("fetched dot-scripted conf from server");
-		console.log(JSON.stringify(dotScripted, null, "  "));
+		//console.log("fetched dot-scripted conf from server");
+		//console.log(JSON.stringify(dotScripted, null, "  "));
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
 		if (window.scripted.config && window.scripted.config.ui && window.scripted.config.ui.navigator===false) {
