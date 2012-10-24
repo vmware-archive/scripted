@@ -10,6 +10,7 @@
  * Contributors:
  *     Chris Johnson - initial implementation
  *      Andy Clement
+ *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
  ******************************************************************************/
 
 /*jslint browser:true */
@@ -127,8 +128,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			window.history.pushState(histItem, histItem.filename, histItem.url);
 		}
 	};
-	
-	
+		
 	var isBinary = function(filepath) {
 		try {
 			var xhrobj = new XMLHttpRequest();
@@ -202,10 +202,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		var sub_text = window.subeditors[0].getText();
 		var sub_dirty = window.subeditors[0].isDirty();
 		
-		var main_active = (document.activeElement === $(window.editor._domNode).find('.textviewContent')[0]);
+		// TODO This is not working when using the button to switch since 
+		// clicking on the button will call a blur() on the active editor
+		var main_active = window.editor.getTextView().hasFocus();
 		
-		navigate(main_path, null, EDITOR_TARGET.sub, true);
-		navigate(sub_path, null, EDITOR_TARGET.main, true);
+		navigate(main_path, [main_sel.start, main_sel.end], EDITOR_TARGET.sub, true);
+		navigate(sub_path, [sub_sel.start, sub_sel.end], EDITOR_TARGET.main, true);
 		
 		$(window.editor._domNode).find('.textview').scrollTop(sub_scrollpos);
 		$(window.subeditors[0]._domNode).find('.textview').scrollTop(main_scrollpos);
@@ -220,9 +222,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		setTimeout(function() {
 			if (main_active) {
 				window.subeditors[0].getTextView().focus();
-				window.subeditors[0].getTextView().setSelection(main_sel.start, main_sel.end, true);
 			} else {
-				window.editor.getTextView().setSelection(sub_sel.start, sub_sel.end, true);
 				window.editor.getTextView().focus();
 			}
 		}, 200);
@@ -252,6 +252,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	var buildSubeditor = function(filepath) {
 		var filename = filepath.split('/').pop();
+		
+		// TODO move this html snippet to separate file
 		var subeditor = 
 		$('<div class="subeditor_wrapper">'+
 			'<div class="subeditor_titlebar">'+
