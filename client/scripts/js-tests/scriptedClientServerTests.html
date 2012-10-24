@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- these tests do not require a server to run -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Inferencing tests</title>
+  <link rel="stylesheet" href="../lib/qunit/qunit-1.10.0.css" />
+  <script src="../lib/qunit/qunit-1.10.0.js"></script>
+  <script src="../lib/requirejs/require.js"></script>
+  <script type="text/javascript">
+	/*global window require test module asyncTest console */
+	require({
+		baseUrl: '..',
+		packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
+					{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}], 
+		paths: {
+			'orion/assert' : 'js-tests/assert',
+			'esprima/esprima' : 'lib/esprima/esprima',
+			'doctrine/doctrine' : 'lib/doctrine/doctrine',
+			i18n: 'lib/requirejs/i18n',
+			text: 'lib/requirejs/text',
+			jquery_ui: 'lib/jquery-ui-custom',
+			jsbeautify: 'lib/beautify',
+			jsrender: 'lib/jsrender',
+			jquery: 'lib/jquery-1.7.2.min',
+			sockjs:'lib/sockjs-592774a-0.3.1.min',
+			fileapi: 'scripted/fileapi'
+		}
+	});
+	
+	window.onload = function() {
+		// TODO move this to a test-utils class
+		var xhrobj = new XMLHttpRequest();
+		xhrobj.open("GET", '/test-api/server-root', false);
+		xhrobj.send();  // synchronous xhr request
+		console.log("Found: " + xhrobj.responseText);
+		var initialFile = "?" + xhrobj.responseText + "/foo.js";
+		if (location.search !== initialFile) {
+			location.search = initialFile;
+		}
+	
+		require(["js-tests/navHistory/navHistoryTests"], 
+			function(navHistoryTests) {
+				function testShim(tests) {
+					for (var t in tests) {
+						if (tests.hasOwnProperty(t)) {
+							if (t.indexOf('test') === 0) {
+								test(t, tests[t]);
+							} else if (t.indexOf('asyncTest') === 0) {
+								asyncTest(t, tests[t]);
+							}
+						}
+					}
+				}
+				testShim(navHistoryTests);
+		});
+	};
+  </script>
+</head>
+<body>
+	<div id="qunit"></div>
+	<!-- the following markup is used to create the test page.  This markup should be similar to what is in editor.html -->
+	<div id="main">
+		<div id="navigator-wrapper">
+			<div id="navigator-container">
+				<div id="explorer-tree">
+				</div>
+			</div>
+		</div>
+
+		<ul id="breadcrumb">
+		</ul>
+
+		<div id="editor_wrapper">
+			<div id="editor" class="scriptededitor"></div>
+			<div id="exec-console"></div>
+		</div>
+		
+		<div id="side_panel">
+		</div>
+		
+		<div id="help_panel">
+			<ul id="command_list">
+			</ul>
+		</div>
+	</div>
+	
+	<footer class="main_gradient">
+		<div id="status"></div>
+	</footer>
+
+	<div id="contentassist" class="contentassist"></div>
+</body>
+</html>

@@ -206,7 +206,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				});
 				
 				var xhrobj = new XMLHttpRequest();
-				var url = 'resources/shortcut.json';
+				var url = '/resources/shortcut.json';
 				xhrobj.open("GET", url, false); // TODO naughty? synchronous xhr
 				xhrobj.send();
 				var names = JSON.parse(xhrobj.responseText).names;

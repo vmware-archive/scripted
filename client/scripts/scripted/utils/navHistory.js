@@ -122,10 +122,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 	
 	var storeBrowserState = function(histItem, doReplace) {
-		if (doReplace) {
-			window.history.replaceState(histItem, histItem.filename, histItem.url);
-		} else {
-			window.history.pushState(histItem, histItem.filename, histItem.url);
+		try {
+			if (doReplace) {
+				window.history.replaceState(histItem, histItem.filename, histItem.url);
+			} else {
+				window.history.pushState(histItem, histItem.filename, histItem.url);
+			}
+		} catch (e) {
+			console.log(e);
 		}
 	};
 		
@@ -158,7 +162,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			-Open File
 	*/
 	var navigationEventHandler = function(event) {
-		var filepath = event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href') ;
+		var filepath = event.testTarget ? event.testTarget : (
+			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
 		var query_index = filepath.indexOf('?');
 		if (query_index !== -1) {
 			filepath = filepath.substring(query_index+1, filepath.length);
@@ -316,10 +321,10 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	var initializeHistoryMenu = function() {
 		var historyCrumb = $('#historycrumb');
 		if (!historyCrumb.html()) {
-			historyCrumb = $('<li id="historycrumb" data-id="-1"><span><img src="images/icon.png" /></span></li>');
+			historyCrumb = $('<li id="historycrumb" data-id="-1"><span><img src="/images/icon.png" /></span></li>');
 			$('#breadcrumb').append(historyCrumb);
 		}		
-		var historyMenu = $('<ul class="breadcrumb_menu" data-id="-1"></ul>');
+		var historyMenu = $('<ul id="history_menu" class="breadcrumb_menu" data-id="-1"></ul>');
 		historyMenu.css('left', historyCrumb.position().left);
 		historyMenu.css('top', $('header').height() + $('#breadcrumb').height());
 		$('#main').append(historyMenu);
@@ -581,6 +586,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * This handles initial page load
 	 */
 	var loadEditor = function(filepath, domNode, type) {
+		if (!type) {
+			type = "main";
+		}
+		if (!domNode) {
+			domNode = $('#editor')[0];
+		}
 		$(domNode).show();
 		$('body').off('keydown');
 		var editor = mEditor.makeEditor(domNode, filepath, type);

@@ -1,22 +1,32 @@
 <!DOCTYPE html>
+<!-- these tests do not require a server to run -->
 <html>
 <head>
   <meta charset="utf-8">
   <title>Inferencing tests</title>
   <link rel="stylesheet" href="../lib/qunit/qunit-1.10.0.css" />
-</head>
-<body>
-  <div id="qunit"></div>
   <script src="../lib/qunit/qunit-1.10.0.js"></script>
   <script src="../lib/requirejs/require.js"></script>
   <script type="text/javascript">
 	/*global window require test module asyncTest */
 	require({
 		baseUrl: '..',
+		packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
+					{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}], 
 		paths: {
 			'orion/assert' : 'js-tests/assert',
 			'esprima/esprima' : 'lib/esprima/esprima',
 			'doctrine/doctrine' : 'lib/doctrine/doctrine',
+			i18n: 'lib/requirejs/i18n',
+			text: 'lib/requirejs/text',
+			jquery_ui: 'lib/jquery-ui-custom',
+			jsbeautify: 'lib/beautify',
+			jsrender: 'lib/jsrender',
+			jquery: 'lib/jquery-1.7.2.min',
+			sockjs:'lib/sockjs-592774a-0.3.1.min',
+			fileapi: 'scripted/fileapi',
+			
+			// stub out the jsdepend server calls
 			'servlets/jsdepend-client' : 'js-tests/indexer/stub-jsdepend'
 		}
 	});
@@ -27,7 +37,7 @@
 				 "js-tests/esprima/summaryBuildingTests", 
 				 "js-tests/esprima/contentAssistDependencyTests",
 				 "js-tests/indexer/indexerTests"], 
-			function(jsTests, navTests, summaryTests, dependencyTests, indexerTests) {
+			function(jsTests, navTests, summaryTests, dependencyTests, indexerTests, navHistoryTests) {
 				function testShim(tests) {
 					for (var t in tests) {
 						if (tests.hasOwnProperty(t)) {
@@ -52,5 +62,8 @@
 		});
 	};
   </script>
+</head>
+<body>
+	<div id="qunit"></div>
 </body>
 </html>
