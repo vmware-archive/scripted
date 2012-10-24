@@ -1,4 +1,4 @@
 # Node launch script
-DIRNAME=`dirname "$0"`
+DIRNAME=`dirname $(readlink -f "$0")`
 cd $DIRNAME/../server
 node scripted.js
