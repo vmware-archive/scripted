@@ -16,6 +16,10 @@ var esprima = require("../../client/scripts/lib/esprima/esprima");
 
 function emptyParseTree() { return {}; } 
 
+var esprimaOptions = {
+	tolerant: true
+};
+
 //call esprima parser. If it throws an exception ignore it and return an empty parse tree.
 function parse(text, errback) {
 	if (typeof(errback)!=='function') {
@@ -26,7 +30,7 @@ function parse(text, errback) {
 		};
 	}
 	try {
-		return esprima.parse(text);
+		return esprima.parse(text, esprimaOptions);
 	} catch (error) {
 		return errback(error);
 	}

@@ -299,3 +299,26 @@ exports.getDGraphWithCycleTest2 = function(test) {
 		test.done();
 	});
 };
+
+exports.withParseErrors = function(test) {
+    var api = makeApi('simple-web-with-errors');
+    api.getDGraph('bork.js', function(deps) {
+        test.equals(toCompareString(deps), toCompareString({
+            "foo.js": {
+                "kind": "AMD",
+                "refs": {}
+            },
+            "bork.js": {
+                "kind": "AMD",
+                "refs": {
+                    "foo": {
+                        "kind": "AMD",
+                        "name": "foo",
+                        "path": "foo.js"
+                    }
+                }
+            }
+        }));
+        test.done();
+    });
+};

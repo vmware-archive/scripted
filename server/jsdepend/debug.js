@@ -18,7 +18,7 @@
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
 //var testCase = require('./module-types-test.js').bigFile;
-var testCase = require('./dot-scripted-test.js').combineScriptedRcAndDotScripted;
+var testCase = require('./api-test.js').withParseErrors;
 
 testCase({
 	equals: function (a, b) {
