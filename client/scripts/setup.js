@@ -133,12 +133,20 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		});
 
 		window.explorer = explorer;
-		window.editor = mNavHistory.loadEditor( filepath, ($('#editor')[0]), 'main' );
-		if (location.hash.length > 1) {
-			mNavHistory.highlightSelection(window.editor);
+//		window.editor = mNavHistory.loadEditor( filepath, ($('#editor')[0]), 'main' );
+//		if (location.hash.length > 1) {
+//			mNavHistory.highlightSelection(window.editor);
+//		}
+//		
+//		mNavHistory.initializeBreadcrumbs(filepath);
+		var range;
+		try {
+			range = JSON.parse('[' + location.hash.substring(1) +']');
+			if (!range.length || range.length < 2) {
+				range = null;
+			}
+		} catch (e) {
 		}
-		
-		mNavHistory.initializeBreadcrumbs(filepath);
 		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {
@@ -151,6 +159,8 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			$('#editor').css("left","0px");
 			$('#explorer-tree').remove();
 		}
+		window.subeditors = [];
+		mNavHistory.navigate(filepath, range, "main", false);
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
@@ -180,7 +190,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				$('#side_panel').css('width', side_percent + "%");		
 				
 				window.editor._textView._updatePage();
-				for (var i in window.subeditors){
+				for (var i = 0; i < window.subeditors.length; i++){
 					window.subeditors[i].getTextView().update();
 				}
 			});
@@ -369,8 +379,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			}, 1);
 		});
 		
-		window.subeditors = [];
-
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// HACK sections
 		// Here we do a few things that are not pretty, but is the only way to get things working in all the browsers
