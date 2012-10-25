@@ -17,7 +17,8 @@
 /*jslint browser:true devel:true*/
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",  
-"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", "plugins/esprima/indexerService", "orion/editor/jslintdriver", 
+"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", 
+"plugins/esprima/indexerService", "orion/editor/jslintdriver", 
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar", 
 "plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify","orion/textview/textModel","orion/textview/projectionTextModel",
 "orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save"],
@@ -112,7 +113,7 @@ mHtmlContentAssist, mCssContentAssist) {
 		}
 		
 		var indexer = new mIndexerService.Indexer();
-		indexer.jslingConfig = window.scripted && window.scripted.config && window.scripted.config.jslint;
+		indexer.jslintConfig = window.scripted && window.scripted.config && window.scripted.config.jslint;
 		
 		var selection = new mSelection.Selection();
 		var commandService = new mCommands.CommandService({
@@ -149,12 +150,13 @@ mHtmlContentAssist, mCssContentAssist) {
 		/**
 		 * This function is called after successful save.
 		 */
-		function afterSaveSuccess(filePath) {
+		function afterSaveSuccess(filePath) { 
 			editor.dispatchEvent({type: "afterSave", file: filePath});
 		}
 		
 		var textViewFactory = function() {
-			return new mTextView.TextView({
+		
+			var options = {
 				parent: domNode,
 				// without this, the listeners aren't registered in quite the right order, meaning that the
 				// one that shuffles annotations along when text is entered (annotations.js _onChanged)
@@ -166,7 +168,14 @@ mHtmlContentAssist, mCssContentAssist) {
 				// the style that indicates the 'current line'.1112412344443444
 				model: new mProjectionModel.ProjectionTextModel(new mTextModel.TextModel()),
 				tabSize: 4
-			});
+			};
+			if (window.scripted.config.editor && window.scripted.config.editor.expandtab) {
+			  options.expandTab = window.scripted.config.editor.expandtab;
+			}
+			if (window.scripted.config.editor && window.scripted.config.editor.tabsize) {
+			  options.tabSize = window.scripted.config.editor.tabsize;
+			}
+			return new mTextView.TextView(options);
 		};
 
 		var contentAssistFactory = function(editor) {
@@ -469,7 +478,7 @@ mHtmlContentAssist, mCssContentAssist) {
 		
 		var xhrobj = new XMLHttpRequest();
 		try {
-			var url = 'http://localhost:7261/get?file=' + filePath;
+			var url = 'http://localhost:7261/get2?file=' + filePath;
 			//console.log("Getting contents for " + url);
 			xhrobj.open("GET", url, false); // synchronous xhr
 			

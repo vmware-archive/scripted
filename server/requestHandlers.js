@@ -86,6 +86,77 @@ function get(response, request) {
   });
 }
 
+/**
+ * Similar to get() but for files that do not exist this will attempt to create any
+ * missing directories on the path to the file. Let's see how it goes using this.
+ * TODO use flags on the get() to indicate we want to 'build the missing dirs' then remove this dup
+ */
+function get2(response, request) {
+  var file = url.parse(request.url,true).query.file;
+  //console.log("Processing get request for "+file);
+  fs.readFile(file, function(err,data){
+    if(err) {
+		if (err.errno === 28 /*EISDIR*/) {
+			// is a directory
+			response.writeHead(500, { "Content-Type": "text/plain"});
+			response.write("File is a directory");
+			response.end();
+        } else if (err.errno === 34 /*ENOENT*/) {
+			// File not found
+			// Let's create the folders leading to it - the file itself will
+			// be created when the user saves.
+			var toBuild = [];
+			var lastSlash = file.lastIndexOf('/');
+			while (lastSlash!==-1) {
+			  var aDirectory = file.substring(0,lastSlash);
+			  var directoryExists = fs.existsSync(aDirectory);
+			  if (!directoryExists) {
+				toBuild.unshift(aDirectory);
+				lastSlash = aDirectory.lastIndexOf('/');
+			  } else {
+				lastSlash=-1;
+			  }
+			}
+			if (toBuild.length!==0) {
+				for (var i=0;i<toBuild.length;i++) {
+					console.log("Creating directory "+toBuild[i]);
+					var exc = fs.mkdirSync(toBuild[i]);
+					console.log("exc="+exc+" is null?"+(exc===null));
+				}
+			}
+			
+			response.writeHead(500, { "Content-Type": "text/plain"});
+			response.write("File not found");
+			response.end();
+		} else {
+			response.writeHead(500, {"Content-Type": "text/plain"});
+			response.write("Error: "+err);
+			response.end();
+		}
+    } else {
+
+	  var binary = isBinary(data);
+
+	  if(binary){
+		  console.log('cannot open binary file');
+		  response.writeHead(204, {"Content-Type": "text/plain"});
+		  response.write("cannot open binary file");
+		  response.end();
+	  } else {
+		  response.writeHead(200, {
+			"Content-Type": "text/plain",
+			"Cache-Control": "no-store"
+		});
+		  response.write(data);
+		  response.end();
+	  }
+
+
+    }
+  });
+}
+
+
 
 /*
  * Filesystem list operations, returns dojo.data.Item objects (as JSON).
@@ -241,6 +312,7 @@ function put(response, request) {
 }
 
 exports.get = get;
+exports.get2 = get2;
 exports.put = put;
 exports.fs_list = fs_list;
 
