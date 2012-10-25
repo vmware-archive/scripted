@@ -18,6 +18,12 @@
 define(["jquery", "jquery_ui"], function () {
 
 	/**
+	 * Maximum number of log entries in the console. If more entries are
+	 * added then the oldest entries are automatically deleted.
+	 */
+	var MAX_ENTRIES = 10; 
+
+	/**
 	 * The id of the dom element to which we append console output.
 	 */
 	var CONSOLE_DISPLAY = "#console_display"; 
@@ -28,7 +34,7 @@ define(["jquery", "jquery_ui"], function () {
 	var CONSOLE_WRAPPER = "#console_wrapper";
 
 	var initialized = false;
-
+	
 	/**
 	 * A helper method that creates a dom element to display a given msg.
 	 * For now all we know how to render is plain text messages.
@@ -39,6 +45,20 @@ define(["jquery", "jquery_ui"], function () {
 			elem.addClass(cssClass);
 		}
 		return elem;
+	}
+	
+	///// Managing the entries in the log (so we can limiy their number) //////////////
+	
+	var entries = []; //Array with at most MAX_ENTRIES entries.
+	var newEntryPos = 0; // next place to put an element, cycles around if running past the end.
+	
+	function addEntry(e) {
+		var oldest = entries[newEntryPos];
+		if (oldest) {
+			oldest.remove();
+		}
+		entries[newEntryPos] = e;
+		newEntryPos = (newEntryPos+1) % MAX_ENTRIES;
 	}
 
 	//////////////////// Public API ///////////////////////////////////////////////////
@@ -84,11 +104,16 @@ define(["jquery", "jquery_ui"], function () {
 		}
 	}
 	
+	function isVisible() {
+		return $(CONSOLE_WRAPPER).css('display')!=='none';
+	}	
+	
 	function show() {
 		initialize();
 		var c = $(CONSOLE_WRAPPER);
 		var e = $("#editor");
-		if (c.css('display')==='none') { 
+		if (!isVisible()) { 
+			//TODO: should remember previous size not reset to 1/3 of the screen.
 			//If the console is presently hidden...
 			var editor_height = e.height();
 			var console_height = editor_height / 3;
@@ -99,8 +124,34 @@ define(["jquery", "jquery_ui"], function () {
 			c.css('display', 'block');
 			c.height(console_height-overhead);
 			e.height(editor_height);
+			c.resizable({
+				disabled: false
+			});
+
 			window.editor._textView._updatePage();
 			updateWidth();			
+		}
+	}
+	
+	function hide() {
+		if (isVisible()) {
+			var c = $(CONSOLE_WRAPPER);
+			var e = $("#editor");
+			var console_height = c.outerHeight();
+			c.css('display', 'none');
+			c.resizable({
+				disabled: true
+			});
+			e.height(e.height()+console_height);		
+			window.editor._textView._updatePage();
+		}
+	}
+	
+	function toggle() {
+		if (isVisible()) {
+			hide();
+		} else {
+			show();
 		}
 	}
 	
@@ -127,26 +178,15 @@ define(["jquery", "jquery_ui"], function () {
 		show();
 		var e = render(msg, cssClass);
 		$(CONSOLE_DISPLAY).append(e); 
+		addEntry(e);
 		scrollToBottom();
 	}
-
-	function hide() {
-	//TODO: this code is not really correct.
-//		var c = $(CONSOLE_DISPLAY);
-//		var e = $("#editor");
-//		if (c.css('display')==='block') { 
-//			//If the console is presently shown...
-//			var editor_height = e.height();
-//			var console_height = c.outerHeight();
-//			var padding = consoleHeig
-//			editor_height = editor_height - console_height;
-//			
-//			c.css('display', 'block');
-//			c.height(console_height);
-//			e.height(editor_height);
-//			window.editor._textView._updatePage();
-//		}
-	}
+	
+	$(document).ready(function () {
+		$('#console_toggle').on('click', toggle);
+		$('#side_panel').bind('open', updateWidth);
+		$('#side_panel').bind('close', updateWidth);
+	});
 
 	return {
 		log: log,

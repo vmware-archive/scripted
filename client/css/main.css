@@ -191,6 +191,14 @@ footer{
 	height:16px;
 }
 
+#console_toggle {
+	margin: 4px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/gnome-terminal_16.png);
+	width:16px;
+	height:16px;
+}
+
 #help_panel{
 	position:absolute;
 	bottom:18px;

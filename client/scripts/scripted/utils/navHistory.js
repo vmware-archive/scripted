@@ -48,6 +48,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#side_panel').hide();
 		$('#editor').css('margin-right', '0');
 		editor._textView._updatePage();
+		$('#side_panel').trigger('close');
 	};
 	
 	var open_side = function(editor) {
@@ -55,6 +56,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#side_panel').show();
 		$('#editor').css('margin-right', $('#side_panel').width());
 		editor._textView._updatePage();
+		$('#side_panel').trigger('open');
 	};
 	
 	var scrollDefinition = function(editor) {
