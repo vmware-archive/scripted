@@ -357,43 +357,40 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			
 		for (var i = 0, len = crumbs.length; i < len; i++) {
 			newCrumbElem = $('<li class="light_gradient" data-id="'+i+'"><span>' + crumbs[i] + '</span></li>');
+			$('#breadcrumb').append(newCrumbElem);	
 
 			if (i + 1 === len) { 
 				constructedPath += crumbs[i];
-			} else {
+			}
+			else {
 				constructedPath += crumbs[i] + '/';
 				url = 'http://localhost:7261/fs_list/'+constructedPath.substring(0, constructedPath.length-1);
 				xhrobj = new XMLHttpRequest();
 				xhrobj.open("GET",url,false); // TODO naughty? synchronous xhr
 				xhrobj.send();
-				if (xhrobj.status !== 200) {
-					i=len; // terminate early - the rest of the directory structure looks like it does not exist
-				} else {
-					$('#breadcrumb').append(newCrumbElem);	
-					var kids = JSON.parse(xhrobj.responseText).children;
-					if (kids) {
+				var kids = JSON.parse(xhrobj.responseText).children;
+				if (kids) {
 
-						kids.sort(fileEntryCompare);
+					kids.sort(fileEntryCompare);
 
-						var newMenu = $('<ul class="breadcrumb_menu" data-id="'+i+'"></ul>');
-						for(var j = 0; j < kids.length; j++) {
-							if (kids[j].directory === false) {
-								if (kids[j].name.lastIndexOf('.',0)!==0) {
-									var href = basepath + kids[j].Location;
-									var newMenuItem = $('<li></li>');
-									var newMenuAnchor = $('<a href="'+href+'">'+kids[j].name+'</a>');
-									newMenuItem.append(newMenuAnchor);
-									newMenu.prepend(newMenuItem);
+					var newMenu = $('<ul class="breadcrumb_menu" data-id="'+i+'"></ul>');
+					for(var j = 0; j < kids.length; j++) {
+						if (kids[j].directory === false) {
+							if (kids[j].name.lastIndexOf('.',0)!==0) {
+								var href = basepath + kids[j].Location;
+								var newMenuItem = $('<li></li>');
+								var newMenuAnchor = $('<a href="'+href+'">'+kids[j].name+'</a>');
+								newMenuItem.append(newMenuAnchor);
+								newMenu.prepend(newMenuItem);
 
-									$(newMenuAnchor).click(navigationEventHandler);
-								}
+								$(newMenuAnchor).click(navigationEventHandler);
 							}
 						}
-						newMenu.css('left', newCrumbElem.position().left);
-						newMenu.css('min-width', newCrumbElem.outerWidth());
-						newMenu.css('top', $('header').height() + $('#breadcrumb').height());
-						$('#main').append(newMenu);
 					}
+					newMenu.css('left', newCrumbElem.position().left);
+					newMenu.css('min-width', newCrumbElem.outerWidth());
+					newMenu.css('top', $('header').height() + $('#breadcrumb').height());
+					$('#main').append(newMenu);
 				}
 			}
 		}
@@ -657,7 +654,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		// check if the editor has been created yet, or if
 		// window.editor is a dom node
 		var histItem;
-		var hasEditor = window.editor.getText;
+		var hasEditor = window.editor && window.editor.getText;
 		if (hasEditor) {
 			histItem = generateHistoryItem(window.editor);
 			storeScriptedHistory(histItem);
