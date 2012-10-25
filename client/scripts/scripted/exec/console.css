@@ -1,0 +1,33 @@
+#console_wrapper {
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	display: none;
+	padding:6px;
+	border: 1px solid grey;
+}
+
+#console_wrapper > div {
+	background-color: background-color:rgba(0,0,0,0);
+	white-space: pre;
+  	font-family: monospace;
+  	font-size: 11px;
+ 	display: block;
+}
+
+.command:before {
+	content: "> "
+}
+
+#console_wrapper > .command {
+	font-weight:bold;
+	padding: 3px;
+	border: 1px solid grey;
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+#console_wrapper > .error {
+	font-weight:bold;
+	color:red;
+}

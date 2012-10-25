@@ -21,9 +21,10 @@
 //   TODO: actually, exec-keys isn't using this yet. The code was merely copied
 //     from it.
 /////////////////////////////
-define(['require', 'servlets/exec-client'], function (require) {
+define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'], function (require) {
 
 	var exec = require('servlets/exec-client').exec;
+	var execConsole = require('scripted/exec/exec-console');
 
 	/** 
 	 * Follow a 'trail' of properties starting at given object. 
@@ -57,14 +58,14 @@ define(['require', 'servlets/exec-client'], function (require) {
 		}
 	}
 	
-	var execConsole = {
-		log : function (msg) {
-			console.log(render(msg));
-		},
-		error: function (msg) {
-			console.error(render(msg));
-		}
-	};
+//	var execConsole = {
+//		log : function (msg) {
+//			console.log(render(msg));
+//		},
+//		error: function (msg) {
+//			console.error(render(msg));
+//		}
+//	};
 	
 	function makeExecFunction(cmdSpec) {
 		//Start by normalizing the cmdSpec so it always has 'object form' and provides
@@ -79,7 +80,7 @@ define(['require', 'servlets/exec-client'], function (require) {
 		
 		return function(replaceParams) {
 			var cmd = replaceParams(cmdSpec);
-			execConsole.log("exec: " + cmd.cmd);
+			execConsole.log(cmd.cmd, "command");
 			exec(cmd,
 				function(error, stdout, stderr) {
 					if (stdout) {

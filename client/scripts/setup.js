@@ -126,8 +126,8 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	var filepath = window.location.getPath();
 	
 	mJsdepend.getConf(filepath, function (dotScripted) {
-		//console.log("fetched dot-scripted conf from server");
-		//console.log(JSON.stringify(dotScripted, null, "  "));
+		console.log("fetched dot-scripted conf from server");
+		console.log(JSON.stringify(dotScripted, null, "  "));
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
 		if (window.scripted.config && window.scripted.config.ui && window.scripted.config.ui.navigator===false) {
@@ -333,6 +333,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 		$(window).resize(function(e){
 			var main_height = $(window).height() - footer_height - header_height;
+			var console_height;
+			if ($('#console_wrapper').css('display')==='none') {
+				console_height = 0;
+			} else {
+				console_height = $('#console_wrapper').outerHeight() || 0;
+			}
 			
 			$('#main').height(main_height);
 			$('#side_panel').height(main_height);
@@ -346,7 +352,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				$('.subeditor_titlebar').height()
 			);
 				
-			$('#editor').height($('#main').height() - breadcrumb_height);
+			$('#editor').height($('#main').height() - breadcrumb_height - console_height);
 			var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 			$('#editor').css('margin-right', side_width);
 

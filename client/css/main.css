@@ -1,4 +1,5 @@
 @import "../scripts/orion/editor/editor.css";
+@import "../scripts/scripted/exec/console.css";
 
 ul{
 	display: block;
