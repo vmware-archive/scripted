@@ -150,12 +150,13 @@ mHtmlContentAssist, mCssContentAssist) {
 		/**
 		 * This function is called after successful save.
 		 */
-		function afterSaveSuccess(filePath) {
+		function afterSaveSuccess(filePath) { 
 			editor.dispatchEvent({type: "afterSave", file: filePath});
 		}
 		
 		var textViewFactory = function() {
-			return new mTextView.TextView({
+		
+			var options = {
 				parent: domNode,
 				// without this, the listeners aren't registered in quite the right order, meaning that the
 				// one that shuffles annotations along when text is entered (annotations.js _onChanged)
@@ -167,7 +168,14 @@ mHtmlContentAssist, mCssContentAssist) {
 				// the style that indicates the 'current line'.1112412344443444
 				model: new mProjectionModel.ProjectionTextModel(new mTextModel.TextModel()),
 				tabSize: 4
-			});
+			};
+			if (window.scripted.config.editor && window.scripted.config.editor.expandtab) {
+			  options.expandTab = window.scripted.config.editor.expandtab;
+			}
+			if (window.scripted.config.editor && window.scripted.config.editor.tabsize) {
+			  options.tabSize = window.scripted.config.editor.tabsize;
+			}
+			return new mTextView.TextView(options);
 		};
 
 		var contentAssistFactory = function(editor) {
