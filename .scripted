@@ -87,8 +87,13 @@
 {
     "ui": { 
 		"font": "Monaco"
+	},
+	"editor": {
+		"expandtab": true,
+		"tabsize": 4
 	}
   } 
 */
 {
+	
 }
