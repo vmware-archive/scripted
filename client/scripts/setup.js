@@ -101,23 +101,9 @@ requirejs.config({
 	}
 });
 
-require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
+require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
+		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend) {
-	
-	/* needs dependency on "sockjs"
-	var sock = new SockJS("http://localhost:7261/echo");
-	   sock.onopen = function() {
-	       scriptedLogger.info('open', "SETUP");
-			sock.send("helo");
-	   };
-	   sock.onmessage = function(e) {
-	       scriptedLogger.info('message', "SETUP");
-	       scriptedLogger.info(e.data, "SETUP");
-	   };
-	   sock.onclose = function() {
-	       scriptedLogger.info('close', "SETUP");
-	   };
-	 */
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -125,6 +111,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 	var filepath = window.location.getPath();
 	
+	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(filepath, function (dotScripted) {
 		//console.log("fetched dot-scripted conf from server");
 		//console.log(JSON.stringify(dotScripted, null, "  "));

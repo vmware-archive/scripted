@@ -17,7 +17,8 @@
 /*jslint browser:true devel:true*/
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",  
-"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", "plugins/esprima/indexerService", "orion/editor/jslintdriver", 
+"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", 
+"plugins/esprima/indexerService", "orion/editor/jslintdriver", 
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar", 
 "plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify","orion/textview/textModel","orion/textview/projectionTextModel",
 "orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save"],
@@ -112,7 +113,7 @@ mHtmlContentAssist, mCssContentAssist) {
 		}
 		
 		var indexer = new mIndexerService.Indexer();
-		indexer.jslingConfig = window.scripted && window.scripted.config && window.scripted.config.jslint;
+		indexer.jslintConfig = window.scripted && window.scripted.config && window.scripted.config.jslint;
 		
 		var selection = new mSelection.Selection();
 		var commandService = new mCommands.CommandService({
@@ -469,7 +470,7 @@ mHtmlContentAssist, mCssContentAssist) {
 		
 		var xhrobj = new XMLHttpRequest();
 		try {
-			var url = 'http://localhost:7261/get?file=' + filePath;
+			var url = 'http://localhost:7261/get2?file=' + filePath;
 			//console.log("Getting contents for " + url);
 			xhrobj.open("GET", url, false); // synchronous xhr
 			
