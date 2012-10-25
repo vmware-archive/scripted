@@ -1,33 +1,40 @@
 #console_wrapper {
 	background-color: #FFFFFF;
+	overflow: hide;
+	display: none;
+}
+
+#console_display {
 	overflow-x: auto;
 	overflow-y: scroll;
-	display: none;
-	padding:6px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+	width: 100%;
 	border: 1px solid grey;
 }
 
-#console_wrapper > div {
+#console_display > div {
 	background-color: background-color:rgba(0,0,0,0);
 	white-space: pre;
   	font-family: monospace;
   	font-size: 11px;
  	display: block;
+ 	margin: 5px;
 }
 
 .command:before {
 	content: "> "
 }
 
-#console_wrapper > .command {
+#console_display > .command {
 	font-weight:bold;
-	padding: 3px;
 	border: 1px solid grey;
-	margin-top: 3px;
-	margin-bottom: 3px;
+	padding: 3px;
 }
 
-#console_wrapper > .error {
+#console_display > .error {
 	font-weight:bold;
 	color:red;
 }

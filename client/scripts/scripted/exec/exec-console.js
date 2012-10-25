@@ -20,7 +20,12 @@ define(["jquery", "jquery_ui"], function () {
 	/**
 	 * The id of the dom element to which we append console output.
 	 */
-	var CONSOLE_DISPLAY = "#console_wrapper"; 
+	var CONSOLE_DISPLAY = "#console_display"; 
+	
+	/**
+	 * The id of the dom element that represents the entire console UI.
+	 */
+	var CONSOLE_WRAPPER = "#console_wrapper";
 
 	var initialized = false;
 
@@ -39,30 +44,49 @@ define(["jquery", "jquery_ui"], function () {
 	//////////////////// Public API ///////////////////////////////////////////////////
 
 	/**
+	 * Change the width and vertical position of the console UI to line up properly with 
+	 * the editor. 
+	 */
+	function updateWidth() {
+		var c = $(CONSOLE_WRAPPER);
+		var e = $("#editor");
+		function copyCss() {
+			for (var i = 0; i < arguments.length; i++) {
+				var name = arguments[i];
+				c.css(name, e.css(name));
+			}
+		}
+		copyCss('margin-left', 'margin-right', 'width');
+	}
+
+	/**
 	 * This method should be called by the editor setup at a good time (i.e. when editor has
 	 * mostly been setup.
 	 */
 	function initialize() {
 		if (!initialized) {
 			initialized = true; 
-			$(CONSOLE_DISPLAY).resizable({
+			$(CONSOLE_WRAPPER).resizable({
 				handles: "n"
 			});
-			$(CONSOLE_DISPLAY).resize(function (event, ui) {
+			$(CONSOLE_WRAPPER).resize(function (event, ui) {
 				var console_height = ui.size.height;
 				var breadcrumb_height = $('#breadcrumb').outerHeight();
 				var editor_height = $('#main').height() - breadcrumb_height - console_height;
-				$(CONSOLE_DISPLAY).css('top', '0px'); //I think JQuery resizable is changing this from 0 but it messes things up.
-				$(CONSOLE_DISPLAY).height(console_height);
+				$(CONSOLE_WRAPPER).css('top', '0px'); //I think JQuery resizable is changing this from 0 but it messes things up.
+				$(CONSOLE_WRAPPER).height(console_height);
 				$("#editor").height(editor_height);
 				window.editor._textView._updatePage();
+				updateWidth();
 			});
+			$("#navigator-wrapper").resize(updateWidth);
+			$("#side_panel").resize(updateWidth);
 		}
 	}
 	
 	function show() {
 		initialize();
-		var c = $(CONSOLE_DISPLAY);
+		var c = $(CONSOLE_WRAPPER);
 		var e = $("#editor");
 		if (c.css('display')==='none') { 
 			//If the console is presently hidden...
@@ -76,6 +100,7 @@ define(["jquery", "jquery_ui"], function () {
 			c.height(console_height-overhead);
 			e.height(editor_height);
 			window.editor._textView._updatePage();
+			updateWidth();			
 		}
 	}
 	

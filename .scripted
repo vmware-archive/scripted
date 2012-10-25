@@ -96,6 +96,6 @@
 */
 {
 	"jslint" : {
-		"global" : ["define", "require", "$"]
+		"global" : ["define", "require", "$", "window"]
 	}
 }
