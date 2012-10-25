@@ -103,6 +103,7 @@ requirejs.config({
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
+		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend) {
 			
 	if (!window.scripted) {
@@ -110,6 +111,78 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	}
 
 	var filepath = window.location.getPath();
+	
+	/**
+	 * This function will perform checks on the configuration and where appropriate ensure options are consistent.
+	 * Currently, it:
+	 * 1) ensures if formatter indentation is configured, it sets editor indentation options, and vice versa
+	 */
+	var processConfiguration = function() {
+	
+		// 1. Ensuring consistency of options across formatter and editor configuration
+		// formatter configuration options:
+		//  formatter.js.indent_size (number)
+		//  formatter.js.indent_char (string)
+		// editor configuration options:
+		//  editor.expandtab (boolean)
+		//  editor.tabsize (number)
+		// rule: if possible (compatible), copy one config to the other
+		var editor_expandtab_set = window.scripted.config.editor && window.scripted.config.editor.expandtab!==null;
+		var editor_tabsize_set = window.scripted.config.editor && window.scripted.config.editor.tabsize!==null;
+		var formatter_js_indent_size_set = window.scripted.config.formatter && window.scripted.config.formatter.js &&
+											window.scripted.config.formatter.js.indent_size!==null;
+		var formatter_js_indent_char_set = window.scripted.config.formatter && window.scripted.config.formatter.js &&
+											window.scripted.config.formatter.js.indent_char!==null;
+											
+		// Just do the common cases for now:
+		if (editor_expandtab_set || editor_tabsize_set) {
+			if (!(formatter_js_indent_size_set || formatter_js_indent_char_set)) {
+				if (editor_expandtab_set && window.scripted.config.editor.expandtab && !formatter_js_indent_char_set) {
+					// Set the indent char to space
+					if (!window.scripted.config.formatter) {
+						window.scripted.config.formatter = { "js": { "indent_char": " " }};
+					} else if (!window.scripted.config.formatter.js) {
+						window.scripted.config.formatter.js = { "indent_char": " "};
+					} else {
+						window.scripted.config.formatter.js.indent_char = " ";
+					}
+				}
+				if (editor_tabsize_set && !formatter_js_indent_size_set) {
+					// Set the indent size to match the tabsize
+					var tabsize = window.scripted.config.editor.tabsize;
+					if (!window.scripted.config.formatter) {
+						window.scripted.config.formatter = { "js": { "indent_size": tabsize }};
+					} else if (!window.scripted.config.formatter.js) {
+						window.scripted.config.formatter.js = { "indent_size": tabsize};
+					} else {
+						window.scripted.config.formatter.js.indent_size = tabsize;
+					}
+				}
+			}
+		} else {
+			if (formatter_js_indent_size_set || formatter_js_indent_char_set) {
+				var indent_char_isspace = formatter_js_indent_char_set && window.scripted.config.formatter.js.indent_char===" ";
+				if (indent_char_isspace) {
+					// Set the expandtab if we can
+					if (!window.scripted.config.editor) {
+						window.scripted.config.editor = { "expandtab": true };
+					} else {
+						window.scripted.config.editor.expandtab = true;
+					}
+					if (formatter_js_indent_size_set) {
+						// Set the tabsize to match the indent size
+						var indentsize = window.scripted.config.formatter.js.indent_size;
+						if (!window.scripted.config.editor) {
+							window.scripted.config.editor = { "tabsize": indentsize };
+						} else {
+							window.scripted.config.editor.tabsize = indentsize;
+						}
+					}
+				}
+			}
+		}
+	};
+	
 	
 	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(filepath, function (dotScripted) {
@@ -121,7 +194,9 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			window.scripted.navigator=false; // default is true
 			$('#navigator-wrapper').hide();
 		}
-
+		
+		processConfiguration();
+		
 		// Create new FileExplorer
 		var explorer  = new mExplorerTable.FileExplorer({
 			//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,

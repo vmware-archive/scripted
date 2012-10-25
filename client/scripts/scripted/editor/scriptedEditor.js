@@ -238,6 +238,11 @@ mHtmlContentAssist, mCssContentAssist) {
 				var end = selection.end;
 				var selectionEmpty = start === end;
 				var options = window.scripted.config && window.scripted.config.formatter && window.scripted.config.formatter.js ? window.scripted.config.formatter.js : {};
+				// If nothing specified let's at least make the options match the editor defaults
+				if (!options.indent_size && !options.indent_char) {
+					options.indent_size = 1;
+					options.indent_char = "\t";
+				} 
 				var toFormat, formatted;
 				if (!selectionEmpty) {
 					var checkedFormatSelection = checkFormatSelection(editor, start, end);
