@@ -44,7 +44,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	function setup() {
 		window.fsroot = testResourcesRootNoSlash;
 		localStorage.removeItem("scriptedHistory");
-		window.editor = mNavHistory.loadEditor(testResourcesRoot + "foo.js");
+		window.editor = mNavHistory._loadEditor(testResourcesRoot + "foo.js");
 		mNavHistory.initializeBreadcrumbs(testResourcesRoot + "foo.js");
 	}
 
@@ -61,7 +61,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 					assert.equal(window.editor.getText(), contents);
 					
 					getFileContents("bar.js", function(contents) {
-						window.editor = mNavHistory.loadEditor(testResourcesRoot + "bar.js");
+						window.editor = mNavHistory._loadEditor(testResourcesRoot + "bar.js");
 						assert.equal(window.editor.getText(), contents);
 						assert.start();
 					});
@@ -196,6 +196,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
 		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 	};
+	
+	// still to test
+	
+	// raw history object
+	// subeditor and state
 	
 	return tests;
 });

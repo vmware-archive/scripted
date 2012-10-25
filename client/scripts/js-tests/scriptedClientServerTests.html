@@ -29,16 +29,6 @@
 	});
 	
 	window.onload = function() {
-		// TODO move this to a test-utils class
-		var xhrobj = new XMLHttpRequest();
-		xhrobj.open("GET", '/test-api/server-root', false);
-		xhrobj.send();  // synchronous xhr request
-		console.log("Found: " + xhrobj.responseText);
-		var initialFile = "?" + xhrobj.responseText + "/foo.js";
-		if (location.search !== initialFile) {
-			location.search = initialFile;
-		}
-	
 		require(["js-tests/navHistory/navHistoryTests"], 
 			function(navHistoryTests) {
 				function testShim(tests) {

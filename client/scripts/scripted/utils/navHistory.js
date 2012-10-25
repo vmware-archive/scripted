@@ -654,18 +654,23 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * @return {boolean} true if navigation occurred successfully and false otherwise.
 	 */
 	navigate = function(filepath, range, target, doSaveState) {
-		var histItem = generateHistoryItem(window.editor);
-		storeScriptedHistory(histItem);
-		if (doSaveState) {
-			storeBrowserState(histItem, true);
+		// check if the editor has been created yet, or if
+		// window.editor is a dom node
+		var histItem;
+		var hasEditor = window.editor.getText;
+		if (hasEditor) {
+			histItem = generateHistoryItem(window.editor);
+			storeScriptedHistory(histItem);
+			if (doSaveState) {
+				storeBrowserState(histItem, true);
+			}
+			if (window.subeditors[0]) {
+				var subHistItem = generateHistoryItem(window.subeditors[0]);
+				storeScriptedHistory(subHistItem);
+			}
 		}
-		if (window.subeditors[0]) {
-			var subHistItem = generateHistoryItem(window.subeditors[0]);
-			storeScriptedHistory(subHistItem);
-		}
-		
 		if (target === EDITOR_TARGET.sub) {
-			if (!confirmNavigation(window.subeditors[0])) {
+			if (hasEditor && !confirmNavigation(window.subeditors[0])) {
 				return false;
 			}
 			open_side(window.editor);
@@ -682,12 +687,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}
 			initializeHistoryMenu();
 			window.subeditors[0].getTextView().focus();
-		} else if (target === "main") {
-			if (!confirmNavigation(window.editor)) {
+		} else if (target === EDITOR_TARGET.main) {
+			if (hasEditor && !confirmNavigation(window.editor)) {
 				return false;
 			}
 			$('#editor').css('display','block');
-			window.editor = loadEditor(filepath, $('#editor')[0], 'main');
+			window.editor = loadEditor(filepath, $('#editor')[0], EDITOR_TARGET.main);
 			if (range) {
 				window.editor.getTextView().setSelection(range[0], range[1], false);
 				scrollDefinition(window.editor);
@@ -695,7 +700,10 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 
 			// explicit check for false since navigator might be 'undefined' at this point
 			if (window.scripted.navigator !== false) {
-				explorer.highlight(filepath);
+				// if model not yet available, highlighting is handled elsewhere.
+				if (explorer.model) {
+					explorer.highlight(filepath);
+				}
 			}
 			initializeBreadcrumbs(filepath);
 			window.editor.getTextView().focus();
@@ -714,11 +722,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 	
 	return {
+		// loadEditor is a private function and only exposed for testing purposes
+		_loadEditor: loadEditor,
+		
 		initializeBreadcrumbs: initializeBreadcrumbs,
 		navigationEventHandler: navigationEventHandler,
-		loadEditor: loadEditor,
 		highlightSelection: highlightSelection,
 		popstateHandler: popstateHandler,
-		toggleSidePanel: toggleSidePanel
+		toggleSidePanel: toggleSidePanel,
+		navigate: navigate
 	};
 });
