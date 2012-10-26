@@ -27,6 +27,8 @@ define(function(require, exports, module) {
 function configure(conf) {
 
 	var sloppy = conf.sloppy;
+	var useOldResolver = conf.useOldResolver;
+	
 	if (typeof(sloppy)==='undefined') {
 		console.trace('WARNING: sloppy mode is undefined. Assuming it will be disabled');
 	}
@@ -188,10 +190,14 @@ function configure(conf) {
 		}
 	}
 	
+	var mCommonJsResolverNew = require('./commonjs-resolver');
+	var mCommonJsResolverOld = require('./commonjs-resolver-OLD');
+	var mCommonJsResolver = useOldResolver ? mCommonJsResolverOld : mCommonJsResolverNew; 
+	
 	var resolvers = {
 		'list': listResolver,
 		'AMD': require('./amd-resolver').configure(conf).resolver,
-		'commonjs': require('./commonjs-resolver').configure(conf).resolver
+		'commonjs': mCommonjsResolver.configure(conf).resolver
 	};
 	if (sloppy) {
 		resolvers.AMD = compose(resolvers.AMD, searchByNameResolver);

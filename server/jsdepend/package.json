@@ -1,14 +1,15 @@
 {
   "name": "jsdepend"
-, "version": "0.0.1"
+, "version": "0.0.3"
 , "main": "api.js"
 , "private": true
 , "dependencies": {
     "amdefine": "0.0.2"
   , "htmlparser": "1.7.6"
+  , "enhanced-resolve": "0.2.9"
   }
 , "scripts" : {
 	"test": "./all-tests.sh"
   },
-  "engine": "node ~> 0.6.x"
+  "engine": "node ~> 0.8.11"
 }

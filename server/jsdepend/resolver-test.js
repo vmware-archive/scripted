@@ -400,6 +400,33 @@ exports.resolveNodeModulesInParentDir = function(test) {
 	);
 };
 
+exports.resolveNodeModulesWithProblem3 = function(test) {
+	var api = makeApi('node-with-bad-data');
+	var depNames = ['foo3'];
+	var expectedPaths = [
+		undefined //won't be found because json is unparsable
+	];
+	
+	var deps = map(depNames, function (name) {
+		return {
+			name: name,
+			kind: 'commonjs'
+		};
+	});
+	mapk(deps, function (dep, k) {
+			api.resolve('subfolder/main.js', dep, k);
+		},
+		function (resolveds) {
+			test.equals(resolveds.length, expectedPaths.length);
+			for (var i = 0; i < expectedPaths.length; i++) {
+				test.equals(expectedPaths[i], resolveds[i].path); 
+			}
+			//console.log(resolveds);
+			test.done();
+		}
+	);
+};
+
 exports.resolveNodeModulesWithProblems = function(test) {
 	var api = makeApi('node-with-bad-data');
 	var depNames = ['foo', 'foo2', 'foo3', 'foo4', 'bar', 'zor', 'booger'];
