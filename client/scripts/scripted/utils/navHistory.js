@@ -241,26 +241,28 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 	};
 	
-	var highlightSelection  = function(editor) {	
-		try{
-			var loc = JSON.parse("[" + location.hash.substring(1) + "]");
-			if (loc && loc.constructor === Array && loc.length > 0) {
-				var start = loc[0];
-				var end = loc.length > 1 ? loc[1] : start;
-				editor.getTextView().setSelection(start, end, true);
-				scrollDefinition(editor);
-			}
-		} catch (e) {
-			console.log("Could not navigate to location specified in hash. Hash value: " + location.hash);
-		}
-	};
+	
+	// don't think we need this any more
+//	var highlightSelection  = function(editor) {	
+//		try{
+//			var loc = JSON.parse("[" + location.hash.substring(1) + "]");
+//			if (loc && loc.constructor === Array && loc.length > 0) {
+//				var start = loc[0];
+//				var end = loc.length > 1 ? loc[1] : start;
+//				editor.getTextView().setSelection(start, end, true);
+//				scrollDefinition(editor);
+//			}
+//		} catch (e) {
+//			console.log("Could not navigate to location specified in hash. Hash value: " + location.hash);
+//		}
+//	};
 	
 	/**
 	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
 	 * @param {{range:List.<Number>,path:String}} definition
 	 * @param {{Editor}} editor
 	 */
-	var openOnRange = function(modifier, definition, editor) {
+	var _openOnRange = function(modifier, definition, editor) {
 		if (!definition.range && !definition.path) {
 			return;
 		}
@@ -286,7 +288,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
 			var definition = editor.findDefinition(offset);
 			if (definition) {
-				openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
+				_openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
 			}
 		}
 	}
@@ -407,8 +409,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 
 			if (i + 1 === len) { 
 				constructedPath += crumbs[i];
-			}
-			else {
+			} else {
 				constructedPath += crumbs[i] + '/';
 				url = 'http://localhost:7261/fs_list/'+constructedPath.substring(0, constructedPath.length-1);
 				xhrobj = new XMLHttpRequest();
@@ -553,7 +554,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				fileSearcher: fileSearcher,
 				fileSearchRenderer: fileSearcher.defaultRenderer,
 				style:"width:800px",
-				openOnRange: openOnRange
+				_openOnRange: _openOnRange
 			});
 			
 			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
@@ -580,21 +581,21 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		editor.getTextView().setAction("Open declaration", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.main, definition, editor);
+				_openOnRange(EDITOR_TARGET.main, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Open declaration in new tab");
 		editor.getTextView().setAction("Open declaration in new tab", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.tab, definition, editor);
+				_openOnRange(EDITOR_TARGET.tab, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
 		editor.getTextView().setAction("Open declaration in subeditor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.sub, definition, editor);
+				_openOnRange(EDITOR_TARGET.sub, definition, editor);
 			}
 		});
 	};
@@ -741,15 +742,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					}
 				}
 				initializeBreadcrumbs(filepath);
+				window.editor = targetEditor;
 				if (doSaveState) {
 					histItem = generateHistoryItem(targetEditor);
 					storeBrowserState(histItem);
 				}
-				window.editor = targetEditor;
 			} else {
 				window.subeditors[0] = targetEditor;
+				initializeHistoryMenu();
 			}
-			initializeHistoryMenu();
 			targetEditor.getTextView().focus();
 
 		} else if (target === EDITOR_TARGET.tab) {
@@ -762,13 +763,13 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 		
 	return {
-		// loadEditor is a private function and only exposed for testing purposes
+		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
+		_openOnRange: _openOnRange,
 		
-		openOnRange: openOnRange,
 		initializeBreadcrumbs: initializeBreadcrumbs,
 		navigationEventHandler: navigationEventHandler,
-		highlightSelection: highlightSelection,
+//		highlightSelection: highlightSelection,  don't think we need this
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
 		navigate: navigate

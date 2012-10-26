@@ -307,7 +307,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 //					}
 //				});
 
-				var command_file = "../resources/_command.tmpl.html";
+				var command_file = "resources/_command.tmpl.html";
 				// use a copy so we can sort
 				var keyBindings = window.editor.getTextView()._keyBindings.slice(0); 
 				
