@@ -169,11 +169,13 @@ mHtmlContentAssist, mCssContentAssist) {
 				model: new mProjectionModel.ProjectionTextModel(new mTextModel.TextModel()),
 				tabSize: 4
 			};
-			if (window.scripted.config.editor && window.scripted.config.editor.expandtab) {
-			  options.expandTab = window.scripted.config.editor.expandtab;
-			}
-			if (window.scripted.config.editor && window.scripted.config.editor.tabsize) {
-			  options.tabSize = window.scripted.config.editor.tabsize;
+			if (window.scripted.config) {
+				if (window.scripted.config.editor && window.scripted.config.editor.expandtab) {
+				  options.expandTab = window.scripted.config.editor.expandtab;
+				}
+				if (window.scripted.config.editor && window.scripted.config.editor.tabsize) {
+				  options.tabSize = window.scripted.config.editor.tabsize;
+				}
 			}
 			return new mTextView.TextView(options);
 		};

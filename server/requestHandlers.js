@@ -94,6 +94,16 @@ function get(response, request) {
 function get2(response, request) {
   var file = url.parse(request.url,true).query.file;
   //console.log("Processing get request for "+file);
+  if (!file) {
+    // no file passed in
+    response.writeHead(500, {
+        "Content-Type": "text/plain"
+    });
+    response.write("No file name passed in");
+    response.end();
+    return;
+  }
+  
   fs.readFile(file, function(err,data){
     if(err) {
 		if (err.errno === 28 /*EISDIR*/) {
@@ -185,10 +195,18 @@ function fs_list(response, request, path) {
 	if (path) {
 		pathToUse = path;
 	} else {
-		var obj2 = url.parse(request.url,true).query;
-		//console.log("fsq: request url query is "+url.parse(request.url,true).query);
-		var data = JSON.parse(obj2.query);
-		pathToUse = data.name;
+		var obj2;
+		try {
+			obj2 = url.parse(request.url,true).query;
+			//console.log("fsq: request url query is "+url.parse(request.url,true).query);
+			var data = JSON.parse(obj2.query);
+			pathToUse = data.name;
+		} catch (e) {
+          response.writeHead(500, {'content-type': 'text/plain'});
+          response.write('Invalid path request '+obj2);
+          response.end();
+		  return;
+		}
 	}
 	//console.log("fs_list request for: "+pathToUse);
 	

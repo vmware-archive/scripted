@@ -44,6 +44,8 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	function setup() {
 		window.fsroot = testResourcesRootNoSlash;
 		localStorage.removeItem("scriptedHistory");
+		$('.subeditor_wrapper').remove();
+		window.subeditors = [];
 		window.editor = mNavHistory._loadEditor(testResourcesRoot + "foo.js");
 		mNavHistory.initializeBreadcrumbs(testResourcesRoot + "foo.js");
 	}
@@ -70,13 +72,13 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	};
 	tests.asyncTestToggleSidePanel = function() {
 		setup();
-		assert.ok(!window.subeditors[0]);
+		assert.ok(!window.subeditors[0], window.subeditors[0]);
 		$('#side_panel').css('display', 'none');
 		mNavHistory.toggleSidePanel();
 		
 		setTimeout(function() {
 			assert.ok(window.subeditors[0]);
-			assert.ok(window.editor.getText(), window.subeditors[0].getText());
+			assert.equal(window.editor.getText(), window.subeditors[0].getText());
 			mNavHistory.toggleSidePanel();
 			setTimeout(function() {
 				assert.ok(!window.subeditors[0]);
@@ -197,10 +199,34 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 	};
 	
+	tests.asyncTestGetContentsSubEditor = function() {
+		setup();
+		setTimeout(function() {
+			assert.ok(window.editor);
+			assert.ok(!window.subeditors[0]);
+			$('#side_panel').css('display', 'none');
+			mNavHistory.toggleSidePanel();
+			assert.ok(window.subeditors[0]);
+			
+			getFileContents("foo.js",
+				function(contents) {
+					window.subeditors[0] = mNavHistory._loadEditor(testResourcesRoot + "foo.js",  $('.subeditor')[0], "sub");
+					assert.equal(window.subeditors[0].getText(), contents);
+					
+					getFileContents("bar.js", function(contents) {
+						window.subeditors[0] = mNavHistory._loadEditor(testResourcesRoot + "bar.js",  $('.subeditor')[0], "sub");
+						assert.equal(window.subeditors[0].getText(), contents);
+						assert.start();
+					});
+				});
+		}, 500);
+	};
+	
 	// still to test
 	
 	// raw history object
 	// subeditor and state
+	// open on range
 	
 	return tests;
 });
