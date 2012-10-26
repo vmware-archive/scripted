@@ -196,19 +196,19 @@ mHtmlContentAssist, mCssContentAssist) {
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		
 		/* for some reason, jsbeautify likes to strip the first line of its indent.  let's fix that */
-		var fixFirstLineFormatting = function(toFormat, formatted) {
-			var fix_format = "";
-			var i = 0;
-			var char = toFormat.charAt(i);
-			var format_char = formatted.charAt(0);
-			while (char !== format_char) {
-				fix_format = char + fix_format;
-				i++;
-				char = toFormat.charAt(i);
-			}
-			formatted = fix_format + formatted;
-			return formatted;
-		};
+//		var fixFirstLineFormatting = function(toFormat, formatted) {
+//			var fix_format = "";
+//			var i = 0;
+//			var char = toFormat.charAt(i);
+//			var format_char = formatted.charAt(0);
+//			while (char !== format_char) {
+//				fix_format = char + fix_format;
+//				i++;
+//				char = toFormat.charAt(i);
+//			}
+//			formatted = fix_format + formatted;
+//			return formatted;
+//		};
 
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 

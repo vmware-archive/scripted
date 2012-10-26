@@ -16,9 +16,9 @@
 /*jslint browser:true */
 /*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage*/
 define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog"], 
+"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os"], 
 function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
-	mFileSearchClient, mSearchDialog) {
+	mFileSearchClient, mSearchDialog, mOsUtils) {
 	
 	var EDITOR_TARGET = {
 		main : "main",
@@ -30,11 +30,9 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	// define as forward reference
 	var navigate;
 	
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
-	
 	var findTarget = function(event) {
 		var target;
-		if ((isMac && event.metaKey) || (!isMac && event.ctrlKey)) {
+		if (mOsUtils.isCtrlOrMeta(event)) {
 			target = EDITOR_TARGET.tab;
 		} else {
 			var subNavigationDisabled = (window.editor.loadResponse === 'error') ? true : false;
@@ -257,6 +255,48 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 	};
 	
+	/**
+	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
+	 * @param {{range:List.<Number>,path:String}} definition
+	 * @param {{Editor}} editor
+	 */
+	var openOnRange = function(modifier, definition, editor) {
+		if (!definition.range && !definition.path) {
+			return;
+		}
+		var defnrange = definition.range ? definition.range : editor.getSelection();
+		var filepath = definition.path ? definition.path : editor.getFilePath();
+		
+		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
+		
+		var target;
+		if (typeof modifier === "object") {
+			target = findTarget(modifier);
+		} else if (typeof modifier === "string") {
+			target = modifier;
+		}
+		if (target) {
+			navigate(filepath, defnrange, target, true);
+		}
+	};
+
+	function openOnClick(event, editor) {
+		if (mOsUtils.isCtrlOrMeta(event)) {
+			var rect = editor.getTextView().convert({x:event.pageX, y:event.pageY}, "page", "document");
+			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
+			var definition = editor.findDefinition(offset);
+			if (definition) {
+				openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
+			}
+		}
+	}
+	
+	var buildMaineditor = function() {
+		$('#editor').click(function(event) {
+			openOnClick(event, window.editor);
+		});
+	};
+	
 	var buildSubeditor = function(filepath) {
 		var filename = filepath.split('/').pop();
 		
@@ -283,6 +323,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			$('.subeditor_titlebar').height()
 		);
 		
+		// must reattach these handlers on every new subeditor open since we always delete the old editor
 		$('.subeditor_close').click(function() {
 			if (window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
 				$('.subeditor_wrapper').remove();
@@ -293,7 +334,10 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});
 		
 		$('.subeditor_switch').click(switchEditors);
-							
+		
+		$('.subeditor').click(function(event) {
+			openOnClick(event, window.subeditors[0]);
+		});
 		return subeditor;
 	};
 	
@@ -496,31 +540,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});		
 	};
 	
-	/**
-	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
-	 * @param {{range:List.<Number>,path:String}} definition
-	 * @param {{Editor}} editor
-	 */
-	var openDeclaration = function(modifier, definition, editor) {
-		if (!definition.range && !definition.path) {
-			return;
-		}
-		var defnrange = definition.range ? definition.range : editor.getSelection();
-		var filepath = definition.path ? definition.path : editor.getFilePath();
-		
-		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
-		
-		var target;
-		if (typeof modifier === "object") {
-			target = findTarget(modifier);
-		} else if (typeof modifier === "string") {
-			target = modifier;
-		}
-		if (target) {
-			navigate(filepath, defnrange, target, true);
-		}
-	};
 
+	// TODO move to scriptedEditor.js
 	var attachFileSearchClient = function(editor) {
 	
 		var fileSearcher = new mFileSearchClient.FileSearcher({
@@ -532,7 +553,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				fileSearcher: fileSearcher,
 				fileSearchRenderer: fileSearcher.defaultRenderer,
 				style:"width:800px",
-				openDeclaration: openDeclaration
+				openOnRange: openOnRange
 			});
 			
 			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
@@ -552,30 +573,33 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});
 	};
 	
+	
+	// TODO move to scriptedEditor.js
 	var attachDefinitionNavigation = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ false, /*alt*/ false), "Open declaration");
 		editor.getTextView().setAction("Open declaration", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration(EDITOR_TARGET.main, definition, editor);
+				openOnRange(EDITOR_TARGET.main, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Open declaration in new tab");
 		editor.getTextView().setAction("Open declaration in new tab", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration(EDITOR_TARGET.tab, definition, editor);
+				openOnRange(EDITOR_TARGET.tab, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
 		editor.getTextView().setAction("Open declaration in subeditor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openDeclaration(EDITOR_TARGET.sub, definition, editor);
+				openOnRange(EDITOR_TARGET.sub, definition, editor);
 			}
 		});
 	};
 	
+	// TODO move to scriptedEditor.js
 	var attachEditorSwitch = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Switch Subeditor and Main Editor");
 		editor.getTextView().setAction("Switch Subeditor and Main Editor", switchEditors);
@@ -603,12 +627,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			$('.subeditor_close').click();
 			return editor;
 		}
+		
+		// TODO move to scriptedEditor.js
 		attachSearchClient(editor);
 		attachOutlineClient(editor);
 		attachDefinitionNavigation(editor);
 		attachFileSearchClient(editor);
 		attachEditorSwitch(editor);
 		editor.cursorFix();
+		
 		if (type === 'main') {
 			setTimeout(function() {
 				editor.getTextView().focus();
@@ -653,64 +680,78 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * @return {boolean} true if navigation occurred successfully and false otherwise.
 	 */
 	navigate = function(filepath, range, target, doSaveState) {
+		var histItem;
 		// check if the editor has been created yet, or if
 		// window.editor is a dom node
-		var histItem;
-		var hasEditor = window.editor && window.editor.getText;
-		if (hasEditor) {
+		var hasMainEditor = window.editor && window.editor.getText;
+		var hasSubEditpr = hasMainEditor && window.subeditors.length > 0;
+		if (hasMainEditor) {
 			histItem = generateHistoryItem(window.editor);
 			storeScriptedHistory(histItem);
 			if (doSaveState) {
 				storeBrowserState(histItem, true);
 			}
-			if (window.subeditors[0]) {
-				var subHistItem = generateHistoryItem(window.subeditors[0]);
-				storeScriptedHistory(subHistItem);
+			if (hasSubEditpr) {
+				histItem = generateHistoryItem(window.subeditors[0]);
+				storeScriptedHistory(histItem);
 			}
 		}
-		if (target === EDITOR_TARGET.sub) {
-			if (hasEditor && !confirmNavigation(window.subeditors[0])) {
+
+		if (target === EDITOR_TARGET.sub || target === EDITOR_TARGET.main) {
+			var targetEditor = target === EDITOR_TARGET.main ? window.editor : window.subeditors[0];
+			var hasEditor = targetEditor && targetEditor.getText;
+			var isSame = hasEditor && targetEditor.getFilePath() === filepath;
+			if (!isSame && hasEditor && !confirmNavigation(window.editor)) {
 				return false;
 			}
-			open_side(window.editor);
-			$('.subeditor_wrapper').remove();
-			buildSubeditor(filepath);
-			window.subeditors[0] = loadEditor(filepath, $('.subeditor')[0], 'sub');
+			
+			// this is annoying...the targetEditor is destroyed and recreated here so can't get the dom node undil after this if statement
+			if (target === EDITOR_TARGET.sub && !isSame) {
+				open_side(window.editor);
+				$('.subeditor_wrapper').remove();
+				buildSubeditor(filepath);
+			}
+			var domNode = target === EDITOR_TARGET.main ? $('#editor') : $('.subeditor');
+			if (target === EDITOR_TARGET.main) {
+				if (!hasEditor) {
+					buildMaineditor(filepath);
+				}
+				domNode.css('display','block');
+			}
+
+			if (!hasEditor || !isSame) {
+				targetEditor = loadEditor(filepath,  domNode[0], target);
+			}
+
 			if (range) {
 				if (isNaN(range[0]) || isNaN(range[1])) {
 					console.log("invalid range");
 					console.log(range);
 				}
-				window.subeditors[0].getTextView().setSelection(range[0], range[1], true);
-				scrollDefinition(window.subeditors[0]);
-			}
-			initializeHistoryMenu();
-			window.subeditors[0].getTextView().focus();
-		} else if (target === EDITOR_TARGET.main) {
-			if (hasEditor && !confirmNavigation(window.editor)) {
-				return false;
-			}
-			$('#editor').css('display','block');
-			window.editor = loadEditor(filepath, $('#editor')[0], EDITOR_TARGET.main);
-			if (range) {
-				window.editor.getTextView().setSelection(range[0], range[1], false);
-				scrollDefinition(window.editor);
+				targetEditor.getTextView().setSelection(range[0], range[1], true);
+				scrollDefinition(targetEditor);
 			}
 
-			// explicit check for false since navigator might be 'undefined' at this point
-			if (window.scripted.navigator !== false) {
-				// if model not yet available, highlighting is handled elsewhere.
-				if (explorer.model) {
-					explorer.highlight(filepath);
+			if (target === EDITOR_TARGET.main) {
+				// explicit check for false since navigator might be 'undefined' at this point
+				if (window.scripted.navigator !== false) {
+					// if model not yet available, highlighting is handled elsewhere.
+					if (explorer.model) {
+						explorer.highlight(filepath);
+					}
 				}
+				initializeBreadcrumbs(filepath);
+				if (doSaveState) {
+					histItem = generateHistoryItem(targetEditor);
+					storeBrowserState(histItem);
+				}
+				window.editor = targetEditor;
+			} else {
+				window.subeditors[0] = targetEditor;
 			}
-			initializeBreadcrumbs(filepath);
-			window.editor.getTextView().focus();
-			if (doSaveState) {
-				histItem = generateHistoryItem(window.editor);
-				storeBrowserState(histItem);
-			}
-			
+			initializeHistoryMenu();
+			targetEditor.getTextView().focus();
+
 		} else if (target === EDITOR_TARGET.tab) {
 			var targetPath = range ? filepath + "#" + range : filepath;
 			var rootpath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
@@ -719,11 +760,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 
 		return false;
 	};
-	
+		
 	return {
 		// loadEditor is a private function and only exposed for testing purposes
 		_loadEditor: loadEditor,
 		
+		openOnRange: openOnRange,
 		initializeBreadcrumbs: initializeBreadcrumbs,
 		navigationEventHandler: navigationEventHandler,
 		highlightSelection: highlightSelection,

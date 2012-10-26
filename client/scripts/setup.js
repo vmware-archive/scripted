@@ -102,9 +102,10 @@ requirejs.config({
 });
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
-		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/exec/exec-on-load"], 
+		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/utils/os", 
+		 "scripted/exec/exec-on-load"], 
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend) {
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend, mOsUtils) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -208,12 +209,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		});
 
 		window.explorer = explorer;
-//		window.editor = mNavHistory.loadEditor( filepath, ($('#editor')[0]), 'main' );
-//		if (location.hash.length > 1) {
-//			mNavHistory.highlightSelection(window.editor);
-//		}
-//		
-//		mNavHistory.initializeBreadcrumbs(filepath);
 		var range;
 		try {
 			range = JSON.parse('[' + location.hash.substring(1) +']');
@@ -239,7 +234,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
-			var navigator_width = $('#navigator-container').width();
 			$('#navigator-wrapper').resizable({
 				handles: "e"
 			});
@@ -306,11 +300,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				});
 
-				$.views.helpers({
-					isMac: function(){
-						return (window.navigator.platform.indexOf("Mac") !== -1);
-					}
-				});
+				// TODO FIXADE I think we can delete
+//				$.views.helpers({
+//					isMac: function(){
+//						return (window.navigator.platform.indexOf("Mac") !== -1);
+//					}
+//				});
 
 				var command_file = "../resources/_command.tmpl.html";
 				// use a copy so we can sort
@@ -447,7 +442,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			}
 		};
 		
-//		$(window).load(function(){
 		$(document).ready(function(){
 			require("scripted/exec/exec-on-load").installOn(window.fsroot);
 			/* setTimeout so popstate doesn't fire on initial page load */
