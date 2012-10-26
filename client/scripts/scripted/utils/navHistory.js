@@ -249,13 +249,29 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}, 200);
 	};
 	
+	var confirmer;
+	var _setNavigationConfirmer = function(callback) {
+		confirmer = callback;
+	};
+
 	var confirmNavigation = function(editor) {
+	
 		if (editor && editor.isDirty()) {
-			return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+			if (confirmer) {
+				// non-blocking mode for tests
+				confirmer(true);
+				return true;
+			} else {
+				return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+			}
 		} else {
+			if (confirmer) {
+				confirmer(false);
+			}
 			return true;
 		}
 	};
+	
 	
 	/**
 	 * Opens the given editor on the given definition
@@ -706,7 +722,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var targetEditor = target === EDITOR_TARGET.main ? window.editor : window.subeditors[0];
 			var hasEditor = targetEditor && targetEditor.getText;
 			var isSame = hasEditor && targetEditor.getFilePath() === filepath;
-			if (!isSame && hasEditor && !confirmNavigation(window.editor)) {
+			if (!isSame && hasEditor && !confirmNavigation(targetEditor)) {
 				return false;
 			}
 			
@@ -769,6 +785,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
+		_setNavigationConfirmer : _setNavigationConfirmer,
 		
 //		highlightSelection: highlightSelection,  don't think we need this
 		openOnRange: openOnRange,

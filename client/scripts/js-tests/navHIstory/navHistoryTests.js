@@ -329,7 +329,131 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		// back to original file and ensure selection is grabbed from history
 		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });		
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
-	}
+	};
+	
+	// confirmation after editing
+	// no edit main --- no confirm
+	tests.testConfirmNoEditMain = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+		}
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
+		
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
+	};
+	// no edit sub --- no confirm
+	tests.testConfirmNoEditSub = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
+	};
+	// edit sub, navigate in main --- no confirm
+	tests.testConfirmEditSubNavMain = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		window.subeditors[0].setText('foo', 0,0);
+		
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
+	};
+	// edit main navigate in sub  --- no confirm
+	tests.testConfirmEditMainNavSub = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		window.editor.setText('foo', 0,0);
+		
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
+	};
+	
+	// edit main navigate in main to same file --- no confirm
+	tests.testConfirmEditMainNavMainSameFile = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		window.editor.setText('foo', 0,0);
+		
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		// should be false and not "no" since the confirmation never occurs if in same file
+		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
+	};
+	// edit sub navigate in sub to same file --- no confirm
+	tests.testConfirmEditMainNavMainSameFile = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		window.subeditors[0].setText('foo', 0,0);
+		
+		mNavHistory._setNavigationConfirmer(confirmer);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		// should be false and not "no" since the confirmation never occurs if in same file
+		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
+	};
+
+	
+	// edit main navigate in main --- confirm
+	tests.testConfirmEditMainNavMain = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		mNavHistory._setNavigationConfirmer(confirmer);
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		window.editor.setText('foo', 0,0);
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
+		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
+	};
+	// edit sub navigate in sub  --- confirm
+	tests.testConfirmEditSubNavSub = function() {
+		var confirmed = false;
+		function confirmer(done) {
+			confirmed = done ? "yes" : "no";
+			return true;
+		}
+		mNavHistory._setNavigationConfirmer(confirmer);
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		window.subeditors[0].setText('foo', 0,0);
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
+		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
+	};
 	
 	// still to test
 	
