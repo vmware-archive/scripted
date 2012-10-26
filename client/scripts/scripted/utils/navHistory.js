@@ -57,7 +57,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#side_panel').trigger('open');
 	};
 	
-	var scrollDefinition = function(editor) {
+	var scrollToSelection = function(editor) {
 		var tv = editor.getTextView();
 		var model = tv.getModel();
 		var offset = tv.getCaretOffset();
@@ -78,6 +78,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			historyJSON = "[]";
 		}
 		return JSON.parse(historyJSON);
+	};
+	
+	var getHistoryAsObject = function() {
+		var histArr = getHistory();
+		var histObj = {};
+		for (var i = 0; i < histArr.length; i++) {
+			histObj[histArr[i].filepath] = histArr[i];
+		}
+		return histObj;
 	};
 	
 	var setHistory = function(history) {
@@ -179,6 +188,13 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}
 			filepath = filepath.substring(0, hashIndex);
 		}
+		if (!range) {
+			// try to get range from history
+			var histItem = getHistoryAsObject()[filepath];
+			if (histItem) {
+				range = histItem.range;
+			}
+		}
 		
 		if (isBinary(filepath)) {
 			alert("Cannot open binary files");
@@ -241,23 +257,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 	};
 	
-	
-	// don't think we need this any more
-//	var highlightSelection  = function(editor) {	
-//		try{
-//			var loc = JSON.parse("[" + location.hash.substring(1) + "]");
-//			if (loc && loc.constructor === Array && loc.length > 0) {
-//				var start = loc[0];
-//				var end = loc.length > 1 ? loc[1] : start;
-//				editor.getTextView().setSelection(start, end, true);
-//				scrollDefinition(editor);
-//			}
-//		} catch (e) {
-//			console.log("Could not navigate to location specified in hash. Hash value: " + location.hash);
-//		}
-//	};
-	
 	/**
+	 * Opens the given editor on the given definition
 	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
 	 * @param {{range:List.<Number>,path:String}} definition
 	 * @param {{Editor}} editor
@@ -293,6 +294,9 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 	}
 	
+	/**
+	 * Adds one-time configuration to the main editor
+	 */
 	var buildMaineditor = function() {
 		$('#editor').click(function(event) {
 			openOnClick(event, window.editor);
@@ -730,7 +734,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					console.log(range);
 				}
 				targetEditor.getTextView().setSelection(range[0], range[1], true);
-				scrollDefinition(targetEditor);
+				scrollToSelection(targetEditor);
 			}
 
 			if (target === EDITOR_TARGET.main) {

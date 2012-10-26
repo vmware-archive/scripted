@@ -311,6 +311,26 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
+	tests.testNavigateUsingImplicitHistory = function() {
+		setup();
+		
+		// initial selection should be 0
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });		
+		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
+		
+		// explicit set of selection through url
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50" });		
+		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
+		
+		// go to a new file 
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });		
+		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
+		
+		// back to original file and ensure selection is grabbed from history
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });		
+		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
+	}
+	
 	// still to test
 	
 	// raw history object
