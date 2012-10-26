@@ -186,6 +186,7 @@ define(["jquery", "jquery_ui"], function () {
 		$('#console_toggle').on('click', toggle);
 		$('#side_panel').bind('open', updateWidth);
 		$('#side_panel').bind('close', updateWidth);
+		$(window).resize(updateWidth);
 	});
 
 	return {
