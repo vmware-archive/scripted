@@ -13,7 +13,7 @@
  *        Andy Clement - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true*/
-/*global define orion window dojo dijit*/
+/*global define orion window dojo dijit scripted*/
 
 define(['require', 'dojo', 'dijit', 'plugins/outline/esprimaOutlinerPlugin','dijit/Dialog', 'dijit/form/TextBox', 
 		'scripted/widgets/_OrionDialogMixin', 'text!scripted/widgets/templates/OpenOutlineDialog.html'], 

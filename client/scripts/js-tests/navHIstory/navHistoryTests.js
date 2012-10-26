@@ -199,6 +199,35 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 	};
 	
+	// test subeditor navigation applies to history
+	tests.testHistorycrumb5 = function() {
+		setup();
+		var historyMenu = $("#history_menu");
+		// history should be empty because no navigation happened
+		assert.equal(historyMenu.children().length, 0);
+		window.editor.setSelection(10, 20);
+		
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		window.subeditors[0].setSelection(15, 25);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "baz.js", shiftKey:true });
+		window.subeditors[0].setSelection(5, 10);
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js", shiftKey:true });
+		window.subeditors[0].setSelection(6, 7);
+		
+		// this one is not stored in history yet
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });
+		window.subeditors[0].setSelection(6, 8);
+		historyMenu = $("#history_menu");
+		
+		assert.equal(historyMenu.children().length, 3);
+		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
+		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+	};
+	
 	tests.asyncTestGetContentsSubEditor = function() {
 		setup();
 		setTimeout(function() {
@@ -222,11 +251,71 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		}, 500);
 	};
 	
+	tests.testEditorNavigation1 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
+	};
+	
+	tests.testEditorNavigation2 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50" });
+		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
+	};
+	
+	tests.testEditorNavigation3 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
+		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
+	};
+	
+	tests.testEditorNavigation4 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
+		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
+	};
+	
+	tests.testSubeditorNavigation1 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
+	};
+	
+	tests.testSubeditorNavigation2 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:40,end:50});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
+	};
+	
+	tests.testSubeditorNavigation3 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
+	};
+	
+	tests.testSubeditorNavigation4 = function() {
+		setup();
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
+		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
+	};
+	
 	// still to test
 	
 	// raw history object
-	// subeditor and state
-	// open on range
+	// click navigate
+	
 	
 	return tests;
 });

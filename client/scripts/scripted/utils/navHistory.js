@@ -262,7 +262,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * @param {{range:List.<Number>,path:String}} definition
 	 * @param {{Editor}} editor
 	 */
-	var _openOnRange = function(modifier, definition, editor) {
+	var openOnRange = function(modifier, definition, editor) {
 		if (!definition.range && !definition.path) {
 			return;
 		}
@@ -288,7 +288,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
 			var definition = editor.findDefinition(offset);
 			if (definition) {
-				_openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
+				openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
 			}
 		}
 	}
@@ -554,7 +554,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				fileSearcher: fileSearcher,
 				fileSearchRenderer: fileSearcher.defaultRenderer,
 				style:"width:800px",
-				_openOnRange: _openOnRange
+				openOnRange: openOnRange
 			});
 			
 			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
@@ -581,21 +581,21 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		editor.getTextView().setAction("Open declaration", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				_openOnRange(EDITOR_TARGET.main, definition, editor);
+				openOnRange(EDITOR_TARGET.main, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Open declaration in new tab");
 		editor.getTextView().setAction("Open declaration in new tab", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				_openOnRange(EDITOR_TARGET.tab, definition, editor);
+				openOnRange(EDITOR_TARGET.tab, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
 		editor.getTextView().setAction("Open declaration in subeditor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				_openOnRange(EDITOR_TARGET.sub, definition, editor);
+				openOnRange(EDITOR_TARGET.sub, definition, editor);
 			}
 		});
 	};
@@ -765,11 +765,11 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
-		_openOnRange: _openOnRange,
 		
+//		highlightSelection: highlightSelection,  don't think we need this
+		openOnRange: openOnRange,
 		initializeBreadcrumbs: initializeBreadcrumbs,
 		navigationEventHandler: navigationEventHandler,
-//		highlightSelection: highlightSelection,  don't think we need this
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
 		navigate: navigate

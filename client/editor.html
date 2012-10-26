@@ -45,5 +45,18 @@
 	</footer>
 
 	<div id="contentassist" class="contentassist"></div>
+	
+	<div id="dialogs">
+		<!-- used to 'black out' the background when a modal dialog is opened -->
+		<div id="dialog_mask"></div>
+	
+		<div id="dialog_goto_line" class="dialog_popup">
+			<div id="dialog_message" class="dialog_content">
+			<p>Enter destination line:</p>
+			<input id="goto_line_number" type="text">
+			</div>
+			<a href="#" id="dialog_goto_line_button" class="dialog_button">OK</a>
+		</div>
+    </div>
 </body>
 </html>
