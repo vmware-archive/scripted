@@ -531,3 +531,91 @@ footer{
 .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}
 .ui-icon-gripsmall-diagonal-se { background-position: -64px -224px; }
 
+#dialog_mask {
+  width:100%;
+  height:100%;
+  filter:alpha(opacity=50%)
+  -moz-opacity:0.5;
+  -khtml-opacity:0.5;
+  opacity:0.5;
+  background:#000;
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:3000;
+  display:none;
+}
+
+#dialog_goto_line {
+    -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+     
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+     
+    background:#eee;
+    // currently a fixed width:
+    width:320px; 
+     
+    /* high z index means on top*/
+    position:absolute; 
+    z-index:5000; 
+ 
+ 	/* hidden by default */
+    display:none;
+}
+
+a.dialog_button {
+    margin:10px auto 5px auto;
+    text-align:center;
+    display: block;
+    width:50px;
+    padding: 5px 10px 6px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    line-height: 1;
+     
+    /* button color */
+    background-color: #323232;
+     
+    /* rounded corner */
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+     
+    -moz-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+     
+    /* text shadow */
+    text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    position: relative;
+    cursor: pointer;
+     
+}
+
+a.dialog_button:hover {
+	background-color: #4f4f4f;
+}
+
+#dialog_goto_line .dialog_content {
+    font-family:arial;
+    font-size:13px; 
+    text-align:left; 
+    margin:13px;
+    padding:10px; 
+    color:#666; 
+}
+
+#dialog_goto_line .dialog_content p {
+    font-weight:600; 
+    margin:0;
+}
+ 
+#dialog_goto_line .dialog_content ul {
+    margin:10px 0 10px 20px; 
+    padding:0; 
+    height:50px;
+}
