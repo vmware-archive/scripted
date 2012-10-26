@@ -97,7 +97,8 @@ requirejs.config({
 		sockjs:'lib/sockjs-592774a-0.3.1.min',
 		fileapi: 'scripted/fileapi',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine'
+		'doctrine/doctrine' : 'lib/doctrine/doctrine',
+		jshint: 'lib/jshint-r12-80277ef'
 	}
 });
 
@@ -300,12 +301,11 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				});
 
-				// TODO FIXADE I think we can delete
-//				$.views.helpers({
-//					isMac: function(){
-//						return (window.navigator.platform.indexOf("Mac") !== -1);
-//					}
-//				});
+				$.views.helpers({
+					isMac: function(){
+						return (window.navigator.platform.indexOf("Mac") !== -1);
+					}
+				});
 
 				var command_file = "resources/_command.tmpl.html";
 				// use a copy so we can sort
