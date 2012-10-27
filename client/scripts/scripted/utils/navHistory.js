@@ -170,7 +170,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			-Breadcrumb
 			-Open File
 	*/
-	var navigationEventHandler = function(event) {
+	var navigationEventHandler = function(event, editor) {
 		var filepath = event.testTarget ? event.testTarget : (
 			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
 		var query_index = filepath.indexOf('?');
@@ -201,7 +201,19 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			return false;
 		}
 		
+
+		
 		var target = findTarget(event);
+		if (editor) {
+			// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+			if (editor.type === EDITOR_TARGET.sub) {
+				if (target === EDITOR_TARGET.sub) {
+					target = EDITOR_TARGET.main;
+				} else if (target === EDITOR_TARGET.main) {
+					target = EDITOR_TARGET.sub;
+				}
+			}
+		}
 		navigate(filepath, range, target, true);	
 		return false;
 	};
@@ -295,6 +307,16 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			target = modifier;
 		}
 		if (target) {
+			if (editor) {
+				// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+				if (editor.type === EDITOR_TARGET.sub) {
+					if (target === EDITOR_TARGET.sub) {
+						target = EDITOR_TARGET.main;
+					} else if (target === EDITOR_TARGET.main) {
+						target = EDITOR_TARGET.sub;
+					}
+				}
+			}
 			navigate(filepath, defnrange, target, true);
 		}
 	};
@@ -305,7 +327,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
 			var definition = editor.findDefinition(offset);
 			if (definition) {
-				openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
+				openOnRange(event.shiftKey ? EDITOR_TARGET.sub : EDITOR_TARGET.main, definition, editor);
 			}
 		}
 	}
@@ -541,7 +563,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		// from globalCommands.js
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenOutlineDialog({
-				changeFile: navigationEventHandler,
+				// TODO FIXADE Do we need this?
+//				changeFile: navigationEventHandler,
 				editor: editor
 			});
 			if (editor) {
@@ -598,7 +621,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	// TODO move to scriptedEditor.js
 	var attachDefinitionNavigation = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ false, /*alt*/ false), "Open declaration");
-		editor.getTextView().setAction("Open declaration", function() { 
+		editor.getTextView().setAction("Open declaration in same editor", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
 				openOnRange(EDITOR_TARGET.main, definition, editor);
@@ -612,7 +635,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
-		editor.getTextView().setAction("Open declaration in subeditor", function() {
+		editor.getTextView().setAction("Open declaration in other editor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
 				openOnRange(EDITOR_TARGET.sub, definition, editor);
@@ -669,22 +692,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * handles the onpopstate event
 	 */
 	var popstateHandler = function(event) {
-		var cont = true;
-		if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
-			cont = confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
-		}
-		if (cont) {
-			var target = findTarget(event);
-			var state = event.originalEvent.state;
-			if (state && state.filepath) {
-				navigate(state.filepath, state.range, target);
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		var target = findTarget(event);
+		var state = event.originalEvent.state;
+		if (state && state.filepath) {
+			navigate(state.filepath, state.range, target);
 			return false;
-		}				
+		} else {
+			return true;
+		}
 	};
 	
 

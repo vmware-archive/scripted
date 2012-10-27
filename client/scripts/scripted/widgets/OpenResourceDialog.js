@@ -11,7 +11,7 @@
  *        Andy Clement - tailored for use in scripted
  *******************************************************************************/
 /*jslint browser:true*/
-/*global define orion window dojo dijit*/
+/*global define orion window dojo dijit scripted*/
 
 define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'scripted/widgets/_OrionDialogMixin', 'text!scripted/widgets/templates/OpenResourceDialog.html'], 
@@ -239,10 +239,7 @@ var OpenResourceDialog = dojo.declare("scripted.widgets.OpenResourceDialog", [di
 		dojo.query("a", resultsDiv).forEach(function(resourceLink) {
 			dojo.connect(resourceLink, 'onclick', function(evt){
 				widget.hide();
-				if (editor && editor.type === 'sub'){
-					evt.makeShift = true;
-				}
-				var ret = changeFile(evt);
+				var ret = changeFile(evt, editor);
 				if (!ret) { dojo.stopEvent(evt); }
 			});
 		});
