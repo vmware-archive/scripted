@@ -194,7 +194,7 @@ footer{
 #console_toggle {
 	margin: 4px 5px 0 0;
 	cursor:pointer;
-	background-image: url(../images/gnome-terminal_16.png);
+	background-image: url(../images/console.png);
 	width:16px;
 	height:16px;
 }
