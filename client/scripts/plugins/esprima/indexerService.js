@@ -58,7 +58,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 			}
 		}
 	} else {
-		if (this.comsole) {
+		if (this.console) {
 			this.console.warn("Web worker not available for background indexing.  Falling back to in-browser indexing.");
 		}
 	}
