@@ -78,21 +78,104 @@ function configure(conf) {
 	// with an or.
 	// A 'computation' is a function that accepts just one parameter which is a callback and it passes
 	// a value to that callback.
-	function ork(comp1, comp2) { 
-		//isCovered();
-		return function(k) {
-			comp1(function (v1) {
-				if (v1){ 
-					//isCovered();
-					k(v1);
-				} else {
-					//isCovered();
-					comp2(k);
-				}
-			});
-		};
-	}
+//	function ork(comp1, comp2) { 
+//		//isCovered();
+//		return function(k) {
+//			comp1(function (v1) {
+//				if (v1){ 
+//					//isCovered();
+//					k(v1);
+//				} else {
+//					//isCovered();
+//					comp2(k);
+//				}
+//			});
+//		};
+//	}
 
+	var ork = require('./utils').ork;
+	
+	function maybeAddJs(str) {
+		if (endsWith(str, '.js')) {
+			//isCovered();
+			return str;
+		} else {
+			//isCovered();
+			return str + '.js';
+		}
+	}		
+
+	function getPathFromJsonFile(jsonFile, k) {
+		getContents(jsonFile, 
+			function (text) {
+				//isCovered();
+				try {
+					var json = JSON.parse(text);
+					var path = json && json.main;
+					if (typeof(path)==='string') {
+						//isCovered();
+						path = maybeAddJs(pathResolve(getDirectory(jsonFile), path));
+						return k(path);
+					} else {
+						//isCovered(); by putting '"main" : 88 in package.json
+						return k();
+					}
+				} catch (e) {
+					//isCovered(); by unparseable package.json
+					//Assume its not proper JSON data: ignore and continue
+				}
+				k();
+			},
+			function (err) {
+				//isCovered(); // by module dir that has neither index.js nor package.json
+				//console.log(err);
+				k();
+			}
+		);
+	}
+	
+	function absoluteDirResolve(path, dep, k) {
+		ork(
+			//Try .js extension
+			function (k) {
+				var file = path+".js";
+				isFile(file, function (is) { 
+					k(is && file); 
+				});
+			},
+			//Try index.js
+			function (k) {
+				var indexjs = pathResolve(path, 'index.js');
+				isFile(indexjs, function (is) {
+					//isCovered();
+					k(is && indexjs);
+				});
+			},
+			//Try package.json
+			function(k) {
+				//isCovered();
+				var jsonFile = pathResolve(path, 'package.json');
+				getPathFromJsonFile(jsonFile, function(path) {
+					isFile(path, function(is) {
+						//isCovered();
+						if (is) {
+							//isCovered();
+							k(path);
+						} else {
+							//isCovered(); by mispelled file name in package.json
+							k(false);
+						}
+					});
+				});
+			}
+		)(function (resolvedPath) {
+			if (resolvedPath) {
+				dep.path = resolvedPath;
+			}
+			k(dep);
+		});
+	}
+	
 	function createResolver(dir) {
 	
 		var modulesMap = {};
@@ -117,45 +200,6 @@ function configure(conf) {
 		var ready = new Ready(); //Becomes 'true' upon completion of building the table.
 		var dirty = true; // Becomes true when file system changes invalidate the contents of the table.
 						  // meaning: the map needs a (re)build to be initiated.
-		
-		function maybeAddJs(str) {
-			if (endsWith(str, '.js')) {
-				//isCovered();
-				return str;
-			} else {
-				//isCovered();
-				return str + '.js';
-			}
-		}		
-		
-		function getPathFromJsonFile(jsonFile, k) {
-			getContents(jsonFile, 
-				function (text) {
-					//isCovered();
-					try {
-						var json = JSON.parse(text);
-						var path = json && json.main;
-						if (typeof(path)==='string') {
-							//isCovered();
-							path = maybeAddJs(pathResolve(getDirectory(jsonFile), path));
-							return k(path);
-						} else {
-							//isCovered(); by putting '"main" : 88 in package.json
-							return k();
-						}
-					} catch (e) {
-						//isCovered(); by unparseable package.json
-						//Assume its not proper JSON data: ignore and continue
-					}
-					k();
-				},
-				function (err) {
-					//isCovered(); // by module dir that has neither index.js nor package.json
-					//console.log(err);
-					k();
-				}
-			);
-		}
 
 		function addModule(name, path) {
 			if (!modulesMap.hasOwnProperty(name)) {

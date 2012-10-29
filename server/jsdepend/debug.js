@@ -17,6 +17,9 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+
+require.resolve('/home/kdvolder/commandline-dev/new-tools/scripted/server/jsdepend/test-resources/node-with-different-relative-refs/project/snif');
+
 //var testCase = require('./module-types-test.js').bigFile;
 var testCase = require('./resolver-test.js').resolveNodeModulesWithProblem3;
 

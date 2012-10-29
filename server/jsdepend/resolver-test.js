@@ -477,3 +477,63 @@ exports.resolveDotDotReference = function (test) {
 	});
 	
 };
+
+exports.resolveDifferentStyleRelativeDotRefs = function (test) {
+	var api = makeApi('node-with-different-relative-refs');
+	var depNames = ['./libs/foo', './libs/bar', './libs/zor', './snif'];
+	var expectedPaths = [
+		'project/libs/foo.js',
+		'project/libs/bar/index.js',
+		'project/libs/zor/lib/zor-main.js',
+		'project/snif/sniffer.js'
+	];
+	
+	var deps = map(depNames, function (name) {
+		return {
+			name: name,
+			kind: 'commonjs'
+		};
+	});
+	mapk(deps, function (dep, k) {
+			api.resolve('project/main.js', dep, k);
+		},
+		function (resolveds) {
+			test.equals(resolveds.length, expectedPaths.length);
+			for (var i = 0; i < expectedPaths.length; i++) {
+				test.equals(expectedPaths[i], resolveds[i].path); 
+			}
+			//console.log(resolveds);
+			test.done();
+		}
+	);
+};
+
+exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
+	var api = makeApi('node-with-different-relative-refs');
+	var depNames = ['../project/libs/foo', '../project/libs/bar', '../project/libs/zor', '../project/snif'];
+	var expectedPaths = [
+		'project/libs/foo.js',
+		'project/libs/bar/index.js',
+		'project/libs/zor/lib/zor-main.js',
+		'project/snif/sniffer.js'
+	];
+	
+	var deps = map(depNames, function (name) {
+		return {
+			name: name,
+			kind: 'commonjs'
+		};
+	});
+	mapk(deps, function (dep, k) {
+			api.resolve('project/main.js', dep, k);
+		},
+		function (resolveds) {
+			test.equals(resolveds.length, expectedPaths.length);
+			for (var i = 0; i < expectedPaths.length; i++) {
+				test.equals(expectedPaths[i], resolveds[i].path); 
+			}
+			//console.log(resolveds);
+			test.done();
+		}
+	);
+};

@@ -252,6 +252,37 @@ function extend(proto, addProps) {
 	}
 	return obj;
 }
+
+/**
+ * Continuation passing style 'or' function. It takes variable number of computations
+ * as an argument. Each computation is a one-arg function that expects a callback.
+ * <p>
+ * The ork function returns a computation that tries each argument from left to
+ * to right until one computations yields a truthy value to its callback. This
+ * value is passed to the or callback. If none of the arguments yields a true
+ * value then or callback is passed a falsy value.
+ */
+function ork() {
+	var theArgs = arguments;
+	return function(k) {
+		function loop(i) {
+			if (i<theArgs.length) { 
+				//at least one argument remains
+				theArgs[i](function (r) {
+					if (r) {
+						k(r); 
+					} else {
+						loop(i+1);
+					}
+				});
+			} else {
+				//no more arguments to try.
+				k(false);
+			}
+		}
+		loop(0);
+	};
+}
 	
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
@@ -266,6 +297,7 @@ exports.filter = filter;
 exports.eachk = eachk;
 exports.extend = extend;
 exports.toRegexp = toRegexp;
+exports.ork = ork;
 
 //////////////////////////////////////////
 });

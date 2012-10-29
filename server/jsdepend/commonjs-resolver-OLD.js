@@ -11,6 +11,16 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
+//
+// This is the old 'home backed' implementation. At the moment it is not
+// used anymore. It has been replaced by something that calls the
+// 'enhanced-resolve' node module.
+// 
+// We are keeping it around still until we can make a final decision about
+// going with 'enhanced-resolve' is indeed the way to go forward.
+// See some discussion in here:
+// https://issuetracker.springsource.com/browse/SCRIPTED-117
+ 
 /*global resolve require define esprima console module process*/
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);

@@ -55,7 +55,8 @@ function configure(conf) {
 //		//For now don't need any config, we only support resolving of './' references.
 //		//and that only require access to the location of the current file.
 //	}
-	
+
+
 	function resolver(context, dep, callback) {
 		if (nodeNatives.isNativeNodeModule(dep.name)) {
 			dep.path = nodeNatives.MAGIC_PATH_PREFIX + dep.name;
