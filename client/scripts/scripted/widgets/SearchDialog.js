@@ -17,6 +17,8 @@ define(['require', 'dojo', 'dijit',
 		'dijit/Dialog', 'dijit/form/TextBox', 
 		'scripted/widgets/_OrionDialogMixin', 'text!scripted/widgets/templates/SearchDialog.html'], 
 		function(require, dojo, dijit, mFileLoader) {
+		
+var MINIMUM_LENGTH = 3; //Search Strings smaller than this are considered problematic and not executed.
 
 /**
  * Quick and dirty search history. It is not persisted and only retains a single search result.
@@ -30,7 +32,7 @@ var searchHistory = (function () {
 			return lastSearch;
 		},
 		put: function (search) {
-			if (typeof(search)==='string' && search.length>2) { 
+			if (typeof(search)==='string' && search.length>=MINIMUM_LENGTH) { 
 				//Ignore trivial or empty searches. Probably more useful to keep the
 				//previous search instead.
 				lastSearch = search;
@@ -298,7 +300,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 		//even with a 'suspendable' search, because the search cannot be suspended in the
 		//midle of a file (yet). With a big file to search the single char search can
 		//return a lot of results just in that one file... causing trouble.
-		if (text && text.length>=3) {
+		if (text && text.length>=MINIMUM_LENGTH) {
 			this.debug("SearchDialog: text changed '"+text+"'");
 			var that = this;
 			setTimeout(function() {
