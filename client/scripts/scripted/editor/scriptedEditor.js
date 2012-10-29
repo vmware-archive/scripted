@@ -18,13 +18,13 @@
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",  
 "orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", 
-"plugins/esprima/indexerService", "orion/editor/jslintdriver", 
+"plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar", 
 "plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify","orion/textview/textModel","orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save"],
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save","jshint"],
 
 function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler, 
-mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors, 
+mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors, 
 mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify,mTextModel,mProjectionModel,
 mHtmlContentAssist, mCssContentAssist) {
 	var determineIndentLevel = function(editor, startPos, options){
@@ -129,7 +129,11 @@ mHtmlContentAssist, mCssContentAssist) {
 		var postSave = function(text) {
 			var problems;
 			if (isJS || isHTML) {
-				problems = mJslintDriver.checkSyntax('', text).problems;
+				if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter==='jshint') {
+					problems = mJshintDriver.checkSyntax('', text).problems;
+				} else {
+					problems = mJslintDriver.checkSyntax('', text).problems;
+				}
 				editor.showProblems(problems);
 			} else {
 				problems = [];

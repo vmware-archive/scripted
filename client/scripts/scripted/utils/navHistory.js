@@ -57,7 +57,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#side_panel').trigger('open');
 	};
 	
-	var scrollDefinition = function(editor) {
+	var scrollToSelection = function(editor) {
 		var tv = editor.getTextView();
 		var model = tv.getModel();
 		var offset = tv.getCaretOffset();
@@ -78,6 +78,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			historyJSON = "[]";
 		}
 		return JSON.parse(historyJSON);
+	};
+	
+	var getHistoryAsObject = function() {
+		var histArr = getHistory();
+		var histObj = {};
+		for (var i = 0; i < histArr.length; i++) {
+			histObj[histArr[i].filepath] = histArr[i];
+		}
+		return histObj;
 	};
 	
 	var setHistory = function(history) {
@@ -161,7 +170,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			-Breadcrumb
 			-Open File
 	*/
-	var navigationEventHandler = function(event) {
+	var navigationEventHandler = function(event, editor) {
 		var filepath = event.testTarget ? event.testTarget : (
 			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
 		var query_index = filepath.indexOf('?');
@@ -179,13 +188,32 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}
 			filepath = filepath.substring(0, hashIndex);
 		}
+		if (!range) {
+			// try to get range from history
+			var histItem = getHistoryAsObject()[filepath];
+			if (histItem) {
+				range = histItem.range;
+			}
+		}
 		
 		if (isBinary(filepath)) {
 			alert("Cannot open binary files");
 			return false;
 		}
 		
+
+		
 		var target = findTarget(event);
+		if (editor) {
+			// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+			if (editor.type === EDITOR_TARGET.sub) {
+				if (target === EDITOR_TARGET.sub) {
+					target = EDITOR_TARGET.main;
+				} else if (target === EDITOR_TARGET.main) {
+					target = EDITOR_TARGET.sub;
+				}
+			}
+		}
 		navigate(filepath, range, target, true);	
 		return false;
 	};
@@ -233,31 +261,32 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}, 200);
 	};
 	
+	var confirmer;
+	var _setNavigationConfirmer = function(callback) {
+		confirmer = callback;
+	};
+
 	var confirmNavigation = function(editor) {
+	
 		if (editor && editor.isDirty()) {
-			return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+			if (confirmer) {
+				// non-blocking mode for tests
+				confirmer(true);
+				return true;
+			} else {
+				return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+			}
 		} else {
+			if (confirmer) {
+				confirmer(false);
+			}
 			return true;
 		}
 	};
 	
 	
-	// don't think we need this any more
-//	var highlightSelection  = function(editor) {	
-//		try{
-//			var loc = JSON.parse("[" + location.hash.substring(1) + "]");
-//			if (loc && loc.constructor === Array && loc.length > 0) {
-//				var start = loc[0];
-//				var end = loc.length > 1 ? loc[1] : start;
-//				editor.getTextView().setSelection(start, end, true);
-//				scrollDefinition(editor);
-//			}
-//		} catch (e) {
-//			console.log("Could not navigate to location specified in hash. Hash value: " + location.hash);
-//		}
-//	};
-	
 	/**
+	 * Opens the given editor on the given definition
 	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
 	 * @param {{range:List.<Number>,path:String}} definition
 	 * @param {{Editor}} editor
@@ -278,6 +307,16 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			target = modifier;
 		}
 		if (target) {
+			if (editor) {
+				// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+				if (editor.type === EDITOR_TARGET.sub) {
+					if (target === EDITOR_TARGET.sub) {
+						target = EDITOR_TARGET.main;
+					} else if (target === EDITOR_TARGET.main) {
+						target = EDITOR_TARGET.sub;
+					}
+				}
+			}
 			navigate(filepath, defnrange, target, true);
 		}
 	};
@@ -288,11 +327,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
 			var definition = editor.findDefinition(offset);
 			if (definition) {
-				openOnRange(event.shiftKey ? "sub" : "main", definition, editor);
+				openOnRange(event.shiftKey ? EDITOR_TARGET.sub : EDITOR_TARGET.main, definition, editor);
 			}
 		}
 	}
 	
+	/**
+	 * Adds one-time configuration to the main editor
+	 */
 	var buildMaineditor = function() {
 		$('#editor').click(function(event) {
 			openOnClick(event, window.editor);
@@ -521,7 +563,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		// from globalCommands.js
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenOutlineDialog({
-				changeFile: navigationEventHandler,
+				// TODO FIXADE Do we need this?
+//				changeFile: navigationEventHandler,
 				editor: editor
 			});
 			if (editor) {
@@ -578,7 +621,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	// TODO move to scriptedEditor.js
 	var attachDefinitionNavigation = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ false, /*alt*/ false), "Open declaration");
-		editor.getTextView().setAction("Open declaration", function() { 
+		editor.getTextView().setAction("Open declaration in same editor", function() { 
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
 				openOnRange(EDITOR_TARGET.main, definition, editor);
@@ -592,7 +635,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in subeditor");
-		editor.getTextView().setAction("Open declaration in subeditor", function() {
+		editor.getTextView().setAction("Open declaration in other editor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
 				openOnRange(EDITOR_TARGET.sub, definition, editor);
@@ -649,22 +692,14 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * handles the onpopstate event
 	 */
 	var popstateHandler = function(event) {
-		var cont = true;
-		if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
-			cont = confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
-		}
-		if (cont) {
-			var target = findTarget(event);
-			var state = event.originalEvent.state;
-			if (state && state.filepath) {
-				navigate(state.filepath, state.range, target);
-				return false;
-			} else {
-				return true;
-			}
-		} else {
+		var target = findTarget(event);
+		var state = event.originalEvent.state;
+		if (state && state.filepath) {
+			navigate(state.filepath, state.range, target);
 			return false;
-		}				
+		} else {
+			return true;
+		}
 	};
 	
 
@@ -702,7 +737,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			var targetEditor = target === EDITOR_TARGET.main ? window.editor : window.subeditors[0];
 			var hasEditor = targetEditor && targetEditor.getText;
 			var isSame = hasEditor && targetEditor.getFilePath() === filepath;
-			if (!isSame && hasEditor && !confirmNavigation(window.editor)) {
+			if (!isSame && hasEditor && !confirmNavigation(targetEditor)) {
 				return false;
 			}
 			
@@ -730,7 +765,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					console.log(range);
 				}
 				targetEditor.getTextView().setSelection(range[0], range[1], true);
-				scrollDefinition(targetEditor);
+				scrollToSelection(targetEditor);
 			}
 
 			if (target === EDITOR_TARGET.main) {
@@ -765,6 +800,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
+		_setNavigationConfirmer : _setNavigationConfirmer,
 		
 //		highlightSelection: highlightSelection,  don't think we need this
 		openOnRange: openOnRange,
