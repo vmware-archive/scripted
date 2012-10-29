@@ -298,7 +298,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 		//even with a 'suspendable' search, because the search cannot be suspended in the
 		//midle of a file (yet). With a big file to search the single char search can
 		//return a lot of results just in that one file... causing trouble.
-		if (text && text.length>=2) {
+		if (text && text.length>=3) {
 			this.debug("SearchDialog: text changed '"+text+"'");
 			var that = this;
 			setTimeout(function() {
