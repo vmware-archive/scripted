@@ -90,7 +90,6 @@ define(['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searc
 				}
 			});
 			return activeSearch;
-
 		},
 						
 		handleError: function(response, resultsNode) {

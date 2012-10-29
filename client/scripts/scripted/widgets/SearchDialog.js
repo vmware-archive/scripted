@@ -268,6 +268,28 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 		//console.log(msg);
 	},
 	
+	addMoreResultsNearScrollBottom: function () {
+		var target = this.results;
+		var activeFileSearch = this.activeFileSearch;
+		if (activeFileSearch && target) {
+//					    console.log('scrollTop: '+target.scrollTop);
+//					    console.log('scrollHeight: '+target.scrollHeight);
+//					    console.log('clientHeight: '+target.clientHeight);
+//					    console.log('clientHeight + scrollTop: '+(target.clientHeight + target.scrollTop));
+	
+			var scrollBottom = target.scrollTop + target.clientHeight;
+			var scrollHeight = target.scrollHeight;
+			if (scrollHeight) {
+				var leftOver = (scrollHeight - scrollBottom) / scrollHeight;
+				//console.log('left over %: '+Math.floor(leftOver*100));
+				if (leftOver < 0.1) {
+					//Less than 10% of the elements displayed below bottom of the visible scroll area.
+					this.activeFileSearch.more(); //ask more results.				
+				}
+			}
+		}
+	},
+	
 	/** @private */
 	render: function() {
 		var text = this.resourceName && this.resourceName.get("value");
@@ -286,6 +308,9 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 					var renderer = that.fileSearchRenderer.makeIncrementalRenderer(that.results,false,
 										null,dojo.hitch(that,that.decorateResult));
 					that.activeFileSearch = that.fileSearcher.search(text,false,renderer);
+					that.results.addEventListener('scroll', function (evt) {
+						that.addMoreResultsNearScrollBottom();
+					});
 				} else {
 					that.debug("SearchDialog: search active, updating it");
 					activeFileSearch.query(text);

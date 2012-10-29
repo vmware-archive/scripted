@@ -30,11 +30,11 @@ var searchFile = require('../textsearch/searcher').searchFile;
 var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
 
 var LOG_SOCKET_COUNT = true;
-var MAX_RESULTS = 30; // When this number is reached, then the walker will be paused.
+var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
 					  // Note that the walker can not be paused in the middle of a file
 					  // just yet (the contents of the file is not walked in a pausable way)
 					  // So the number of results may still exceed this limit.
-
+					  
 exports.install = function (server) {
 
 	var openSockets = 0;
@@ -42,6 +42,9 @@ exports.install = function (server) {
 	var sockServer = sockjs.createServer();
 	sockServer.on('connection', function (conn) {
 		//opening a websocket connection initiates a search.
+		
+		var maxResults = null; // set upon receipt of the initial query
+		                // can also be increased by a request for more results. 
 		
 		if (LOG_SOCKET_COUNT) {
 			openSockets++;
@@ -104,7 +107,7 @@ exports.install = function (server) {
 				//console.log("Sending result "+JSON.stringify(result));
 				send({add: [result]}); 
 				resultCount++;
-				if (resultCount >= MAX_RESULTS && activeWalker) {
+				if (resultCount >= maxResults && activeWalker) {
 					activeWalker.pause();
 				}
 			}
@@ -242,7 +245,8 @@ exports.install = function (server) {
 //					}
 					query = q;
 					options = opts || {};
-					//console.log('search options: '+JSON.stringify(options));
+					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
+					console.log('maxResults = '+maxResults);
 					activeWalker = startSearch();
 //					fileindexer.getIndexer(currentFile, function (ixr) {
 //						indexer = ixr;
@@ -252,6 +256,16 @@ exports.install = function (server) {
 					console.error("multiple queries received on the same /ifsearch connection");
 				}
 			},
+			//ask for more results: increases maxResults to be at least the current number
+			//of results plus 10%
+			more: function () {
+				if (activeWalker) {
+					maxResults = Math.max(maxResults, resultCount * 1.1);
+					console.log('maxResults = '+maxResults);
+					activeWalker.resume();
+				}
+			},
+			
 			//change the current query, possibly in midrun
 			requery: function (q) {
 				//console.log('change query '+query+' => ' + q);
@@ -278,7 +292,7 @@ exports.install = function (server) {
 							}
 						}
 					}
-					if (resultCount<MAX_RESULTS) {
+					if (resultCount<maxResults) {
 						//console.log("Resume walking");
 						activeWalker.resume();
 					} else {

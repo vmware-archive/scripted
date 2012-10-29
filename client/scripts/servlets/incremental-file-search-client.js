@@ -94,6 +94,13 @@ define(["sockjs"], function () {
 			 */
 			query: function (newQuery) {
 				send({requery: [newQuery]});
+			},
+			/**
+			 * Ask for more results. If the server-side process is currently paused
+			 * Then its result limit will be raised and the process resumed.
+			 */
+			more: function () {
+				send({more: []});
 			}
 		};
 	}
