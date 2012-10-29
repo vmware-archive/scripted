@@ -27,6 +27,7 @@ define(function(require, exports, module) {
 function configure(conf) {
 
 	var sloppy = conf.sloppy;
+	
 	if (typeof(sloppy)==='undefined') {
 		console.trace('WARNING: sloppy mode is undefined. Assuming it will be disabled');
 	}

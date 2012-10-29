@@ -36,19 +36,29 @@ function endsWith(str, suffix) {
 }
 
 var nodeNatives = require('./node-natives');
-var enhancedResolver = require('enhanced-resolve');
 
 function configure(conf) {
-
-	var handle2file = conf.handle2file;
-	var file2handle = conf.file2handle;
 
 	//Note: 
 	//   conf = the 'global' configuration for the api, provides file system type operations
 	//   resolverConf = configuration information for the resolver, varies based on the context
 	//                  of where a reference came from.
 
-	//var nodeModulesResolver = require('./node-modules-resolver').configure(conf);
+	var andPat = treeMatcher.andPat;
+	var orPat = treeMatcher.orPat;
+	
+	var getContents = conf.getContents;
+	var orMap = require('./utils').orMap;
+	var listFiles = conf.listFiles;
+	var getScriptTags = require('./script-tag-finder').getScriptTags;
+	var getScriptCode = require('./script-tag-finder').getScriptCode;
+	var objectPat = treeMatcher.objectPat;
+	var successPat = treeMatcher.successPat;
+	var containsPat = treeMatcher.containsPat;
+	var successMatcher = treeMatcher.successMatcher;
+	var variablePat = treeMatcher.variablePat;
+	var arrayWithElementPat = treeMatcher.arrayWithElementPat;
+	var nodeModulesResolver = require('./node-modules-resolver').configure(conf);
 	
 //	function getNodeConfig(context, callback) {
 //		callback({}); 
@@ -57,20 +67,21 @@ function configure(conf) {
 //	}
 	
 	function resolver(context, dep, callback) {
-		if (nodeNatives.isNativeNodeModule(dep.name)) {
+		if (startsWith(dep.name, './') || startsWith(dep.name, '../')) {
+			//can handle without determining some resolution base path etc.
+			//since it simply resolves relative to current file
+			var dir = getDirectory(context);
+			var searchFor = dep.name + '.js';
+			dep.path = pathResolve(dir, searchFor);
+			callback(dep);
+		} else if (nodeNatives.isNativeNodeModule(dep.name)) {
 			dep.path = nodeNatives.MAGIC_PATH_PREFIX + dep.name;
 			callback(dep);
 		} else {
-			//Notes:
-			//1: The enhanced resolver is a node module so it uses 'real' file system paths.
-			//Therfore we must make sure to translate back and forth between our own internal file handles.
-			
-			//2: enhanced resolver expects a directory as the 'context' not a file.
-			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {
-				if (err) {
-					dep.error = err; 
-				} else {
-					dep.path = file2handle(result);
+			var nodeResolver = nodeModulesResolver.getResolver(context);
+			nodeResolver(dep.name, function (path) {
+				if (path) {
+					dep.path = path;
 				}
 				callback(dep);
 			});
