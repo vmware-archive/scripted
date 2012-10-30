@@ -18,6 +18,8 @@ var orMap = require('./utils').orMap;
 var pathResolve = require('./utils').pathResolve;
 var jsonMerge = require('./json-merge');
 
+var JSON5 = require('json5');
+
 function configure(filesystem) {
 
 	var listFiles = filesystem.listFiles;
@@ -65,26 +67,27 @@ function configure(filesystem) {
 		}
 	}
 	
-	/**
-	 * Given the contents of a json config file, strip of the leading comment block
-	 * if there is one and return the remaining text.
-	 *
-	 * @param String
-	 * @return String
-	 */
-	function removeLeadingComments(contents) {
-		if (contents.length!==0) {
-			var commentBeginExp = new RegExp("^\\s*/\\*");
-			var hasLeadingComment = commentBeginExp.test(contents);
-			if (hasLeadingComment) {
-			    var endBlockCommentIndex = contents.indexOf('*/');
-			    if (endBlockCommentIndex!==-1) {
-					contents = contents.substr(endBlockCommentIndex+2);
-			    }
-			}
-		}
-		return contents;
-	}
+// JSON 5 parser does this much better than us.
+//	/**
+//	 * Given the contents of a json config file, strip of the leading comment block
+//	 * if there is one and return the remaining text.
+//	 *
+//	 * @param String
+//	 * @return String
+//	 */
+//	function removeLeadingComments(contents) {
+//		if (contents.length!==0) {
+//			var commentBeginExp = new RegExp("^\\s*/\\*");
+//			var hasLeadingComment = commentBeginExp.test(contents);
+//			if (hasLeadingComment) {
+//			    var endBlockCommentIndex = contents.indexOf('*/');
+//			    if (endBlockCommentIndex!==-1) {
+//					contents = contents.substr(endBlockCommentIndex+2);
+//			    }
+//			}
+//		}
+//		return contents;
+//	}
 	
 	/**
 	 * Tries to read data from a file and parse it as JSON data.
@@ -97,8 +100,7 @@ function configure(filesystem) {
 			function (contents) {
 				var data = null;
 				try {
-					contents = removeLeadingComments(contents);
-					data = JSON.parse(contents);
+					data = JSON5.parse(contents);
 				} catch (e) {
 					console.log(e);
 				}
