@@ -70,8 +70,13 @@ function configure(filesystem) {
 	/**
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
-	 * If any part of this operation fails, the callback will be called with
-	 * an empty object while errors will be logged to the console.
+	 * If any part of this operation fails, the callback will be still be
+	 * called with at least an empty object. All errors will be logged 
+	 * to the console.
+	 * <p>
+	 * Errors deemed serious enough to be brought to the user's attention
+	 * (i.e. problems parsing the user's config file) will be 'reported'
+	 * by adding an explanation to the object in a property called 'error'.
 	 */
 	function parseJsonFile(handle, callback) {
 		getContents(handle, 
@@ -90,8 +95,8 @@ function configure(filesystem) {
 			function (err) {
 				console.log(err);
 				callback({
-					//Don't report this as an error. Some people simply don't have a .scripted or .scriptedrc and that
-					//is perfectly fine / expected.
+					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc 
+					//so this error is expected.
 					//error: "Could not get contents of file '"+handle+"'" 
 				});
 			}
@@ -130,6 +135,9 @@ function configure(filesystem) {
 	 * This to ensure that all share the same logic of retrieving this data.
 	 * This will make it easier in the future to change how and where this data is 
 	 * loaded.
+	 *
+	 * The returned config object may contain an 'error' property if there was a
+	 * problem reading/parsing some or all of the configuration data.
 	 */
 	function getConfiguration(handle, callback) {
 		findAndParseDotScripted(handle, function (dotScripted) {
