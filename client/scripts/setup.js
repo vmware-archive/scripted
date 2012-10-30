@@ -104,9 +104,10 @@ requirejs.config({
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/utils/os", 
-		 "scripted/exec/exec-on-load"], 
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load"], 
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend, mOsUtils) {
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend, mOsUtils,
+		mExecConsole) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -188,8 +189,8 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	
 	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(filepath, function (dotScripted) {
-//		console.log("fetched dot-scripted conf from server");
-//		console.log(JSON.stringify(dotScripted, null, "  "));
+		console.log("fetched dot-scripted conf from server");
+		console.log(JSON.stringify(dotScripted, null, "  "));
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
 		if (window.scripted.config && window.scripted.config.ui && window.scripted.config.ui.navigator===false) {
@@ -449,6 +450,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				$(window).bind('popstate', mNavHistory.popstateHandler);
 			}, 1);
 		});
+		
+		//Report any errors getting the dotScripte configuration. This must be done near the end of setup 
+		//so we are sure that the various ui widgetry is already there.
+		if (dotScripted.error) {
+			mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
+		}
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// HACK sections

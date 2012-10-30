@@ -67,28 +67,6 @@ function configure(filesystem) {
 		}
 	}
 	
-// JSON 5 parser does this much better than us.
-//	/**
-//	 * Given the contents of a json config file, strip of the leading comment block
-//	 * if there is one and return the remaining text.
-//	 *
-//	 * @param String
-//	 * @return String
-//	 */
-//	function removeLeadingComments(contents) {
-//		if (contents.length!==0) {
-//			var commentBeginExp = new RegExp("^\\s*/\\*");
-//			var hasLeadingComment = commentBeginExp.test(contents);
-//			if (hasLeadingComment) {
-//			    var endBlockCommentIndex = contents.indexOf('*/');
-//			    if (endBlockCommentIndex!==-1) {
-//					contents = contents.substr(endBlockCommentIndex+2);
-//			    }
-//			}
-//		}
-//		return contents;
-//	}
-	
 	/**
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
@@ -102,14 +80,18 @@ function configure(filesystem) {
 				try {
 					data = JSON5.parse(contents);
 				} catch (e) {
-					console.log(e);
+					data = {
+						error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
+					};
 				}
 				data = data || {};
 				return callback(data);
 			},
 			function (err) {
 				console.log(err);
-				callback({});
+				callback({
+					error: "Could not get contents of file '"+handle+"'"
+				});
 			}
 		);
 	}
