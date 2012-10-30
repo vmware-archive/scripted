@@ -1554,7 +1554,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * Called differently depending on what job this content assistant is being called to do.
 	 */
 	function createEnvironment(options) {
-		var buffer = options.buffer, uid = options.uid, offset = options.offset, indexer = options.indexer, isInBrowser = options.isBrowser;
+		var buffer = options.buffer, uid = options.uid, offset = options.offset, indexer = options.indexer, globalObjName = options.globalObjName;
 		if (!offset) {
 			offset = buffer.length+1;
 		}
@@ -1574,12 +1574,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 
 		return {
 			/** Each element is the type of the current scope, which is a key into the types array */
-			_scopeStack : [(isInBrowser ? "Window" : "Global")],
+			_scopeStack : [globalObjName],
 			/** 
 			 * a map of all the types and their properties currently known 
 			 * when an indexer exists, local storage will be checked for extra type information
 			 */
-			_allTypes : new mTypes.Types(isInBrowser),
+			_allTypes : new mTypes.Types(globalObjName),
 			/** a counter used for creating unique names for object literals and scopes */
 			_typeCount : 0,
 			
@@ -2127,33 +2127,31 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		}
 	}
 	
-	function isBrowser(comments, jsLintOptions) {
+	var browserRegExp = /browser\s*:\s*true/;
+	var nodeRegExp = /node\s*:\s*true/;
+	function findGlobalObject(comments, jsLintOptions) {
 	
 		for (var i = 0; i < comments.length; i++) {
 			var comment = comments[i];
 			if (comment.type === "Block" && comment.value.substring(0, "jslint".length) === "jslint") {
-				var commentText = comment.value;
-				// the jslint options seciton.  now look for the browser
-				var browserIndex = comment.value.indexOf('browser');
-				if (browserIndex > 0) {
-					var colonIndex = commentText.indexOf(':', browserIndex);
-					if (colonIndex > 0) {
-						var trueIndex = commentText.indexOf('true', colonIndex);
-						var commaIndex = commentText.indexOf(',', colonIndex);
-						if (trueIndex > 0 && (trueIndex < commaIndex || commaIndex === -1)) {
-							return true;
-						} else {
-							return false;
-						}
-					}
+				// the jslint options section.  now look for the browser or node
+				if (comment.value.match(browserRegExp)) {
+					return "Window";
+				} else if (comment.value.match(nodeRegExp)) {
+					return "Module";
+				} else {
+					return "Global";
 				}
 			}
 		}
 		if (jsLintOptions && jsLintOptions.options) {
-			return jsLintOptions.options.browser;
-		} else {
-			return false;
+			if (jsLintOptions.options.browser) {
+				return "Window";
+			} else if (jsLintOptions.options.node) {
+				return "Node";
+			}
 		}
+		return "Global";
 	}
 	
 	function filterAndSortProposals(proposalsObj) {
@@ -2263,7 +2261,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// note that if selection has length > 0, then just ignore everything past the start
 				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 				if (completionKind) {
-					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, isBrowser : isBrowser(root.comments, this.jsLintOptions), comments : root.comments });
+					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments });
 					var target = this._doVisit(root, environment);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind, context.prefix, offset - context.prefix.length, proposalsObj);
@@ -2289,7 +2287,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		_internalFindDefinition : function(buffer, offset, findName) {
 			var toLookFor;
 			var root = mVisitor.parse(buffer);
-			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, isBrowser : isBrowser(root.comments, this.jsLintOptions), comments : root.comments });
+			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments });
 			var findIdentifier = function(node) {
 				if ((node.type === "Identifier" || node.type === "ThisExpression") && inRange(offset, node.range, true)) {
 					toLookFor = node;
@@ -2366,7 +2364,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		 */
 		computeSummary: function(buffer, fileName) {
 			var root = mVisitor.parse(buffer);
-			var environment = createEnvironment({ buffer: buffer, uid : fileName, isBrowser : isBrowser(root.comments, this.jsLintOptions), comments : root.comments, indexer : this.indexer });
+			var environment = createEnvironment({ buffer: buffer, uid : fileName, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments, indexer : this.indexer });
 			try {
 				this._doVisit(root, environment);
 			} catch (e) {

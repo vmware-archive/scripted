@@ -2218,6 +2218,116 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xx", "xx : Number"]
 		]);
 	};
+	
+	tests["test browser10"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	// browser takes higher precedence than node
+	tests["test browser11"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	// browser takes higher precedence than node
+	tests["test browser12"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true browser:true */\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	
+	// Node awareness
+	tests["test node1"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	tests["test node2"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"process", "process"
+		);
+		testProposals("process", results, [
+			["process", "process : Process"]
+		]);
+	};
+
+	tests["test node3"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:false node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+	
+	tests["test node4"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	
+	tests["test node5"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"var stream = require('stream');\n" +
+			"var s = new stream.Stream();\n" +
+			"s.foo = 9;\n" +
+			"s.foo", "foo"
+		);
+		testProposals("foo", results, [
+		]);
+	};
+
+	// just checking that our regex works
+	tests["test node6"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node: xxx true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	// just checking that our regex works
+	tests["test node7"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node  xxxx : true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
 
 	////////////////////////////////////////
 	// jsdoc tests

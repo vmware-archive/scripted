@@ -13,7 +13,7 @@
  *     Kris De Volder
  *     Christopher Johnson
  ******************************************************************************/
-/*global require*/
+/*jslint node:true */
 
 // Entry point for the node app
 // Basic construction.  Some requestHandlers are used for

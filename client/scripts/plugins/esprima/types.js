@@ -69,17 +69,17 @@ define("plugins/esprima/types", [], function() {
 		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError 
 	};
 	
-	var Window = function() {};
-	Window.prototype = {
-		// copied from Global
-		$$proto : new Definition("Object"),
-		
+	// Node module
+	var Module = function() {};
+	Module.prototype = {
+
+		// From Window
 		decodeURI : new Definition("?String:uri"),
 		encodeURI : new Definition("?String:uri"),
 		'eval' : new Definition("?Object:toEval"),
 		parseInt : new Definition("?Number:str,[radix]"),
 		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Window"),  // not Global!
+		"this": new Definition("Module"),  
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
 		Object: new Definition("*Object:[val]"),
@@ -91,6 +91,59 @@ define("plugins/esprima/types", [], function() {
 		RegExp: new Definition("*RegExp:[val]"),
 		Error: new Definition("*Error:[err]"),
 		'undefined' : new Definition("undefined"),
+		isNaN : new Definition("?Boolean:num"),
+		isFinite : new Definition("?Boolean:num"),
+		"NaN" : new Definition("Number"),
+		"Infinity" : new Definition("Number"),
+		decodeURIComponent : new Definition("?String:encodedURIString"),
+		encodeURIComponent : new Definition("?String:decodedURIString"),
+
+
+		Buffer: new Definition("Object"),
+		console: new Definition("Object"),
+		module: new Definition("Object"),
+		process: new Definition("Process"),
+
+		require: new Definition("?Object:module"),
+		exports: new Definition("Object"),
+		clearInterval: new Definition("?undefined:t"),
+		clearTimeout: new Definition("?undefined:t"),
+		setInterval: new Definition("?Number:callback,ms"),
+		setTimeout : new Definition("?Number:callback,ms"),
+		global: new Definition("Module"),
+		querystring: new Definition("String"),
+		__filename: new Definition("String"),
+		__dirname: new Definition("String")
+	};
+	
+	var Window = function() {};
+	Window.prototype = {
+		// copied from Global
+		$$proto : new Definition("Object"),
+		
+		decodeURI : new Definition("?String:uri"),
+		encodeURI : new Definition("?String:uri"),
+		'eval' : new Definition("?Object:toEval"),
+		parseInt : new Definition("?Number:str,[radix]"),
+		parseFloat : new Definition("?Number:str,[radix]"),
+		"this": new Definition("Window"),  
+		Math: new Definition("Math"),
+		JSON: new Definition("JSON"),
+		Object: new Definition("*Object:[val]"),
+		Function: new Definition("*Function:"),
+		Array: new Definition("*Array:[val]"),
+		Boolean: new Definition("*Boolean:[val]"),
+		Number: new Definition("*Number:[val]"),
+		Date: new Definition("*Date:[val]"),
+		RegExp: new Definition("*RegExp:[val]"),
+		Error: new Definition("*Error:[err]"),
+		'undefined' : new Definition("undefined"),
+		isNaN : new Definition("?Boolean:num"),
+		isFinite : new Definition("?Boolean:num"),
+		"NaN" : new Definition("Number"),
+		"Infinity" : new Definition("Number"),
+		decodeURIComponent : new Definition("?String:encodedURIString"),
+		encodeURIComponent : new Definition("?String:decodedURIString"),
 
 		// see https://developer.mozilla.org/en/DOM/window
 			// Properties
@@ -247,13 +300,15 @@ define("plugins/esprima/types", [], function() {
 	/**
 	 * A prototype that contains the common built-in types
 	 */
-	var Types = function(isBrowser) {
+	var Types = function(globalObjName) {
 	
 		// this object can be touched by clients
 		// and so must not be in the prototype
 		// the global 'this'
-		if (isBrowser) {
+		if (globalObjName === 'Window') {
 			this.Window = new Window();
+		} else if (globalObjName === 'Module') {
+			this.Module = new Module();
 		} else {
 			this.Global = new Global();
 		}
@@ -561,9 +616,79 @@ define("plugins/esprima/types", [], function() {
 		
 		
 		///////////////////////////////////////////////////
+		// Node specific types
+		///////////////////////////////////////////////////
+		// See http://nodejs.org/api/process.html
+		Process : {
+			$$isBuiltin: true,
+			$$proto : new Definition("Object"),
+		
+			on: new Definition("?undefined:kind,callback"),
+
+			abort: new Definition("?undefined:"),
+			stdout: new Definition("Stream"),
+			stderr: new Definition("Stream"),
+			stdin: new Definition("Stream"),
+			argv: new Definition("Array"), // Array.<String>
+			execPath: new Definition("String"),
+			chdir: new Definition("?undefined:directory"),
+			cwd: new Definition("?String:"),
+			env: new Definition("Pbject"),
+			getgid: new Definition("?Number:"),
+			setgid: new Definition("?undefined:id"),
+			getuid: new Definition("?Number:"),
+			setuid: new Definition("?undefined:id"),
+			version: new Definition("String"),
+			versions: new Definition("Object"), // TODO create a versions object?
+			config: new Definition("OBJECT"),
+			kill: new Definition("?undefined:pid,[signal]"),
+			pid: new Definition("Number"),
+			title: new Definition("String"),
+			arch: new Definition("String"),
+			platform: new Definition("String"),
+			memoryUsage: new Definition("?Object:"),
+			nextTick: new Definition("?undefined:callback"),
+			umask: new Definition("?undefined:[mask]"),
+			uptime: new Definition("?Number:"),
+			hrtime: new Definition("?Array:") // Array.<Number>
+		},
+		
+		// See http://nodejs.org/api/stream.html
+		// Stream is a wierd one since it is built into the stream module, 
+		// but this module isn't always around, so must explicitly define it.
+		Stream : {
+			$$isBuiltin: true,
+			$$proto : new Definition("Object"),
+			// combines readable and writable streams
+			
+			// readable
+			
+			// events
+			data: new Definition("?undefined:data"),
+			error: new Definition("?undefined:exception"),
+			close: new Definition("?undefined:"),
+
+			readable: new Definition("Boolean"),
+
+			setEncoding: new Definition("?undefined:[encoding]"),
+			pause: new Definition("?undefined:"),
+			resume: new Definition("?undefined:"),
+			pipe: new Definition("?undefined:destingation,[options]"),
+
+			// writable
+			drain: new Definition("?undefined:"),
+
+			writable: new Definition("Boolean"),
+
+			write: new Definition("?undefined:[nuffer]"),
+			end: new Definition("?undefined:[string],[encoding]"),
+			destroy: new Definition("?undefined:"),
+			destroySoon: new Definition("?undefined:")
+		},
+		
+		///////////////////////////////////////////////////
 		// Browser specific types
 		///////////////////////////////////////////////////
-		
 		
 		// https://developer.mozilla.org/en/DOM/window.screen
 		Screen : {
