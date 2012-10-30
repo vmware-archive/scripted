@@ -90,7 +90,9 @@ function configure(filesystem) {
 			function (err) {
 				console.log(err);
 				callback({
-					error: "Could not get contents of file '"+handle+"'"
+					//Don't report this as an error. Some people simply don't have a .scripted or .scriptedrc and that
+					//is perfectly fine / expected.
+					//error: "Could not get contents of file '"+handle+"'" 
 				});
 			}
 		);
