@@ -112,7 +112,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children().length, 0);
 		
 		// already on foo.js, navigate to itself
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 1);
@@ -127,7 +127,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children().length, 0);
 		
 		// navigate to new location.  remember foo
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 1);
@@ -141,8 +141,8 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		// history should be empty because no navigation happened
 		assert.equal(historyMenu.children().length, 0);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 2);
@@ -159,9 +159,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		window.editor.setSelection(15, 25);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 2);
@@ -178,15 +178,15 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		window.editor.setSelection(15, 25);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
 		window.editor.setSelection(5, 10);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		window.editor.setSelection(6, 7);
 		
 		// this one is not stored in history yet
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		window.editor.setSelection(6, 8);
 		historyMenu = $("#history_menu");
 		
@@ -207,15 +207,15 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
 		window.subeditors[0].setSelection(15, 25);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "baz.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js", shiftKey:true });
 		window.subeditors[0].setSelection(5, 10);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js", shiftKey:true });
 		window.subeditors[0].setSelection(6, 7);
 		
 		// this one is not stored in history yet
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		window.subeditors[0].setSelection(6, 8);
 		historyMenu = $("#history_menu");
 		
@@ -253,61 +253,61 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	
 	tests.testEditorNavigation1 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testEditorNavigation2 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testEditorNavigation3 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testEditorNavigation4 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation1 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation2 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:40,end:50});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation3 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation4 = function() {
 		setup();
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
@@ -315,19 +315,19 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		setup();
 		
 		// initial selection should be 0
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });		
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// explicit set of selection through url
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#40,50" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });		
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 		
 		// go to a new file 
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });		
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// back to original file and ensure selection is grabbed from history
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });		
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 	};
 	
@@ -338,10 +338,10 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		function confirmer(done) {
 			confirmed = done ? "yes" : "no";
 		}
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
 		
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// no edit sub --- no confirm
@@ -352,9 +352,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 			return true;
 		}
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// edit sub, navigate in main --- no confirm
@@ -365,12 +365,12 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 			return true;
 		}
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		window.subeditors[0].setText('foo', 0,0);
 		
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// edit main navigate in sub  --- no confirm
@@ -380,13 +380,13 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 			confirmed = done ? "yes" : "no";
 			return true;
 		}
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	
@@ -398,11 +398,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 			return true;
 		}
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		// should be false and not "no" since the confirmation never occurs if in same file
 		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
 	};
@@ -414,11 +414,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 			return true;
 		}
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
 		window.subeditors[0].setText('foo', 0,0);
 		
 		mNavHistory._setNavigationConfirmer(confirmer);
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
 		// should be false and not "no" since the confirmation never occurs if in same file
 		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
 	};
@@ -433,10 +433,10 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		}
 		mNavHistory._setNavigationConfirmer(confirmer);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
 	// edit sub navigate in sub  --- confirm
@@ -448,10 +448,10 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		}
 		mNavHistory._setNavigationConfirmer(confirmer);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
 		window.subeditors[0].setText('foo', 0,0);
 		
-		mNavHistory.navigationEventHandler({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
 	

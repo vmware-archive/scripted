@@ -170,7 +170,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 			-Breadcrumb
 			-Open File
 	*/
-	var navigationEventHandler = function(event, editor) {
+	var handleNavigationEvent = function(event, editor) {
 		var filepath = event.testTarget ? event.testTarget : (
 			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
 		var query_index = filepath.indexOf('?');
@@ -425,7 +425,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
 			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
-			$(newHistoryAnchor).click(navigationEventHandler);
+			$(newHistoryAnchor).click(handleNavigationEvent);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
 		}
@@ -472,7 +472,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 								newMenuItem.append(newMenuAnchor);
 								newMenu.prepend(newMenuItem);
 
-								$(newMenuAnchor).click(navigationEventHandler);
+								$(newMenuAnchor).click(handleNavigationEvent);
 							}
 						}
 					}
@@ -529,7 +529,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				searcher: searcher,
 				searchRenderer: searcher.defaultRenderer,
 				favoriteService: null,
-				changeFile: navigationEventHandler,
+				changeFile: handleNavigationEvent,
 				editor: editor
 			});
 			if (editor) {
@@ -564,7 +564,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenOutlineDialog({
 				// TODO FIXADE Do we need this?
-//				changeFile: navigationEventHandler,
+//				changeFile: handleNavigationEvent,
 				editor: editor
 			});
 			if (editor) {
@@ -805,7 +805,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 //		highlightSelection: highlightSelection,  don't think we need this
 		openOnRange: openOnRange,
 		initializeBreadcrumbs: initializeBreadcrumbs,
-		navigationEventHandler: navigationEventHandler,
+		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
 		navigate: navigate
