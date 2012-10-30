@@ -15,6 +15,11 @@
 // This module is supposed to provide a console-like api for displaying messages.
 // as well as some basic operations to reveal/hide the console.
 
+//TODO: We are now also using this console to display error messages. For example
+// when problems parsing .scripted file. 
+
+//So 'exec-console' is not a good name for this module.
+
 define(["jquery", "jquery_ui"], function () {
 
 	/**
