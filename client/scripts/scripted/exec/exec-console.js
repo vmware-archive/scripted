@@ -121,7 +121,7 @@ define(["jquery", "jquery_ui"], function () {
 			//TODO: should remember previous size not reset to 1/3 of the screen.
 			//If the console is presently hidden...
 			var editor_height = e.height();
-			var console_height = editor_height / 3;
+			var console_height = $(CONSOLE_WRAPPER).height() || (editor_height / 3);
 			editor_height = editor_height - console_height;
 			
 			var overhead = c.outerHeight() - c.height();
