@@ -66,11 +66,6 @@ function configure(conf) {
 		});
 	}
 	
-	function getBaseDirFromDataMain(scriptTag) {
-		var datamain = scriptTag.attribs && scriptTag.attribs['data-main'];
-		return datamain && getDirectory(datamain);
-	}
-	
 	function objectWithProperty(propName) {
 		return objectPat({
 			"type": "ObjectExpression",
@@ -188,9 +183,9 @@ function configure(conf) {
 			var analyzerForType = analyzeExp[type];
 			if (typeof(analyzerForType)==='function') {
 				return analyzerForType(exp);
-			} else {
-				console.log("No analyzer for exp type: " + type);
-				console.log(JSON.stringify(exp, null, "  "));
+//			} else {
+//				console.log("No analyzer for exp type: " + type);
+//				console.log(JSON.stringify(exp, null, "  "));
 			}
 		}
 	}
