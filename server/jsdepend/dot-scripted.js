@@ -67,6 +67,8 @@ function configure(filesystem) {
 		}
 	}
 	
+	var ALL_WHITE_SPACE = /^\s*$/;
+	
 	/**
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
@@ -82,12 +84,14 @@ function configure(filesystem) {
 		getContents(handle, 
 			function (contents) {
 				var data = null;
-				try {
-					data = JSON5.parse(contents);
-				} catch (e) {
-					data = {
-						error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
-					};
+				if (!ALL_WHITE_SPACE.test(contents)) {
+					try {
+						data = JSON5.parse(contents);
+					} catch (e) {
+						data = {
+							error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
+						};
+					}
 				}
 				data = data || {};
 				return callback(data);
