@@ -38,6 +38,7 @@ define([], function() {
 	var twoArgSig = JSON.stringify(['JSON', 'JSON', 'callback', 'errback']);
 	var oneArgSigNoErrback = JSON.stringify(['JSON', 'callback']); //Idiom where callback doubles also as errback (commonly used in nodejs lib code).
 	var twoArgSigNoErrback = JSON.stringify(['JSON', 'JSON', 'callback']); //Idiom where callback doubles also as errback (commonly used in nodejs lib code).
+	var threeArgSigNoErrback = JSON.stringify(['JSON', 'JSON', 'JSON', 'callback']);
 
 	function makeServletStub(path, sig) {
 		sig = JSON.stringify(sig);
@@ -134,6 +135,29 @@ define([], function() {
 					xhrobj.send();
 					xhrobj.onreadystatechange= function() {
 				        if(xhrobj.readyState === 4) { // 4 means content has finished loading		
+							if (xhrobj.status===200) {
+								callback.apply(null, JSON.parse(xhrobj.responseText));
+							} else if (xhrobj.status===500) {
+								callback("Error: xhr request status = "+xhrobj.responseText);
+							}
+						}
+					};
+				} catch (err) {
+					callback(err);
+				}
+			};
+		} else if (sig===threeArgSigNoErrback) {
+			stub = function(arg1, arg2, arg3, callback) {
+				callback = singleFire(callback);
+				var xhrobj = new XMLHttpRequest();
+				try {
+					var args = JSON.stringify([arg1, arg2, arg3]);
+					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					// console.log("url is "+url);
+					xhrobj.open("GET",url,true);
+					xhrobj.send();
+					xhrobj.onreadystatechange= function() {
+						if(xhrobj.readyState === 4) { // 4 means content has finished loading		
 							if (xhrobj.status===200) {
 								callback.apply(null, JSON.parse(xhrobj.responseText));
 							} else if (xhrobj.status===500) {

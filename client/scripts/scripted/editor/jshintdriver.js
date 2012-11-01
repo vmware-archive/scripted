@@ -1,14 +1,16 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 VMware and others
+ * Copyright (c) 2012 IBM, VMware and others
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
  * Contributors:
- *     Andy Clement - based on jslintdriver, this invokes jshint
+ *     Derivative of jslintdriver
+ *     Andy Clement - changed to invoke jshint
  *******************************************************************************/
+ 
 /*jslint browser:true*/ 
 /*global JSHINT define window */
 define(["jshint"], function() {
@@ -99,7 +101,7 @@ define(["jshint"], function() {
 						}
 					}
 					// Convert to format expected by validation service
-					error.description = error.reason + "(jshint)";
+					error.description = error.reason;// + "(jshint)";
 					error.start = error.character;
 					error.end = end;
 					error = cleanup(error);

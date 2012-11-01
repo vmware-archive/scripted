@@ -8,7 +8,8 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Kris De Volder - initial API and implementation
+ *	Kris De Volder
+ *	Andy Clement
  ******************************************************************************/
 
 /*global console exports require*/
@@ -26,39 +27,31 @@ function configure(filesystem) {
 	var getContents = filesystem.getContents;
 	var getUserHome = filesystem.getUserHome;
 
-	// For a given file handle the '.scripted' configuration info is found and composed as follows:
-	
-	// 1) find the corresponding rootDir. This is closest directory in the path to the file
-	//    that contains a rootMarkerFile.
-	// 2) if the rootDir has a .scripted file read its JSON data
-	//  2.b) add the rootdir to the parsed data as a property 'fsroot'
-	// 3) read the '.scriptedrc' file in the user's home directory.
-	// 4) merge the data from both where '.scriptedrc' has lower priority than '.scripted'
-	//    for any properties that are contained in both.
-
-	function isRootMarkerFile(name) {
-		if (name==='.scripted' || name==='.project' || name==='.git') {
-			return name;
-		}
-	}
+	// From a specified path this searches 'up' for a file with the specified name,
+	// stopping the search when it reaches a specified point.
 
 	/**
-	 * Find the root dir associated with a given file handle. This is the closest directory
-	 * on the path that contains a root marker file.
-	 * <p>
-	 * If no directory on any of the parent directories contains a root marker file, then
-	 * this function will return a falsy value.
+	 * Search up from the context until the stop location is reached. If the specified
+	 * file is found in any folder on the way up, that is the file to return.
 	 */
-	function getRootDir(context, callback) {
+	function getRootDir(context, wheretostop, searchName, callback) {
+		if (context===wheretostop) {
+			callback(false);
+		}
 		var dir = getDirectory(context);
 		if (dir) {
 			listFiles(dir, 
 				function (names) {
-					var rootMarkerName = orMap(names, isRootMarkerFile); 
-					if (rootMarkerName) { 
+					var fileFound = orMap(names, function(name) {
+						if (name===searchName) {
+							return name;
+						}
+					}); 
+					console.log("fileFound? "+fileFound);
+					if (fileFound) { 
 						callback(dir);
 					} else {
-						getRootDir(dir, callback);
+						getRootDir(dir, wheretostop, searchName, callback);
 					}
 				}
 			);
@@ -67,8 +60,7 @@ function configure(filesystem) {
 		}
 	}
 	
-	var ALL_WHITE_SPACE = /^\s*$/;
-	
+	// TODO move to util library
 	/**
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
@@ -84,14 +76,12 @@ function configure(filesystem) {
 		getContents(handle, 
 			function (contents) {
 				var data = null;
-				if (!ALL_WHITE_SPACE.test(contents)) {
-					try {
-						data = JSON5.parse(contents);
-					} catch (e) {
-						data = {
-							error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
-						};
-					}
+				try {
+					data = JSON5.parse(contents);
+				} catch (e) {
+					data = {
+						error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
+					};
 				}
 				data = data || {};
 				return callback(data);
@@ -107,31 +97,24 @@ function configure(filesystem) {
 		);
 	}
 	
-	function findAndParseDotScripted(handle, callback) {
-		getRootDir(handle, function (root) {
-			root = root || getDirectory(handle);
+	function findAndParseFile(handle, wheretostop, name, callback) {
+		getRootDir(handle, wheretostop, name, function (root) {
+//			root = root || getDirectory(handle);
 			if (!root) {
 				return callback({});
 			} else {
-				var dotScriptedFile = pathResolve(root, '.scripted');
-				parseJsonFile(dotScriptedFile, function (dotScripted) {
-					dotScripted.fsroot = root;
-					callback(dotScripted);
+				console.log("root is "+root);
+				console.log("name is "+name);
+				var file = pathResolve(root, name);
+				console.log("file is "+file);
+				parseJsonFile(file, function (parsedFile) {
+					parsedFile.fsroot = root;
+					callback(parsedFile);
 				});
 			}
 		});
 	}
 	
-	function findAndParseScriptedRc(callback) {
-		var home = getUserHome();
-		if (home) {
-			var configFile = pathResolve(home, ".scriptedrc");
-			return parseJsonFile(configFile, callback);
-		} else {
-			return callback({});
-		}
-	}
-
 	/**
 	 * Retrieve the scripted configuration data for a given file or directory.
 	 * Ideally anybody interested in the '.scripted' configuration data
@@ -143,16 +126,14 @@ function configure(filesystem) {
 	 * The returned config object may contain an 'error' property if there was a
 	 * problem reading/parsing some or all of the configuration data.
 	 */
-	function getConfiguration(handle, callback) {
-		findAndParseDotScripted(handle, function (dotScripted) {
-			findAndParseScriptedRc(function (scriptedRc) {
-				callback(jsonMerge(scriptedRc, dotScripted));
-			});
+	function retrieveNearestFile(handle, wheretostop, name, callback) {
+		findAndParseFile(handle, wheretostop, name, function (parsedFile) {
+			callback(parsedFile);
 		});
 	}
 
 	return {
-		getConfiguration: getConfiguration
+		retrieveNearestFile: retrieveNearestFile
 	};
 
 }

@@ -1132,18 +1132,21 @@ var JSHINT = (function () {
             if (at >= 0)
                 warningAt("Mixed spaces and tabs.", line, at + 1);
 
-            s = s.replace(/\t/g, tab);
-            at = s.search(cx);
+			// TODO: modified by Andy: see https://github.com/jshint/jshint/issues/430
+			// without the change the character position is off for reported problems.
+			// original line: s=s.replace(/\t/g, tab);
+            var s2 = s.replace(/\t/g, tab);
+            at = s2.search(cx);
 
             if (at >= 0)
                 warningAt("Unsafe character.", line, at);
 
-            if (option.maxlen && option.maxlen < s.length)
+            if (option.maxlen && option.maxlen < s2.length)
                 warningAt("Line too long.", line, s.length);
 
             // Check for trailing whitespaces
-            tw = option.trailing && s.match(/^(.*?)\s+$/);
-            if (tw && !/^\s+$/.test(s)) {
+            tw = option.trailing && s2.match(/^(.*?)\s+$/);
+            if (tw && !/^\s+$/.test(s2)) {
                 warningAt("Trailing whitespace.", line, tw[1].length + 1);
             }
             return true;
