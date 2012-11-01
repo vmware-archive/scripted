@@ -145,14 +145,28 @@ exports.likeScripted = function (test) {
 
 	api.getAmdConfig('client/scripts/editor.js', function(amdConf) {
 		test.equals(toCompareString({
-			  paths: {
-				i18n: 'requirejs/i18n',
-				text: 'requirejs/text',
-				fileapi: 'orion/editor/fileapi',
-				jquery: 'lib/jquery-1.7.2.min',
-				jquery_ui: 'lib/jquery-ui-custom',
-				jsbeautify: 'orion/editor/jsbeautify',
-				jsrender: 'lib/jsrender'
+			  "packages": [
+			    {
+			      "name": "dojo",
+			      "location": "dojo",
+			      "main": "lib/main-browser",
+			      "lib": "."
+			    },
+			    {
+			      "name": "dijit",
+			      "location": "dijit",
+			      "main": "lib/main",
+			      "lib": "."
+			    }
+			  ],
+			  "paths": {
+			    "i18n": "requirejs/i18n",
+			    "text": "requirejs/text",
+			    "fileapi": "orion/editor/fileapi",
+			    "jquery": "lib/jquery-1.7.2.min",
+			    "jquery_ui": "lib/jquery-ui-custom",
+			    "jsbeautify": "orion/editor/jsbeautify",
+			    "jsrender": "lib/jsrender"
 			  },
 			  "baseDir": "client/scripts"
 			}),
@@ -220,3 +234,65 @@ exports.configBlockPat = function (test) {
 
 };
 
+exports.findAmdConfigIn511Project = function (test) {
+	var api = makeApi('511');
+	
+	var context = 'goats/client/app/game/restApi.js';
+	api.getAmdConfig(context, function (amdConf) {
+		test.equals(
+			toCompareString(amdConf),
+			toCompareString({
+			  "baseUrl": "",
+			  "pluginPath": "curl/plugin",
+			  "paths": {},
+			  "packages": [
+			    {
+			      "name": "cola",
+			      "location": "lib/cola",
+			      "main": "./cola"
+			    },
+			    {
+			      "name": "wire",
+			      "location": "lib/wire",
+			      "main": "./wire"
+			    },
+			    {
+			      "name": "when",
+			      "location": "lib/when",
+			      "main": "when"
+			    },
+			    {
+			      "name": "meld",
+			      "location": "lib/meld",
+			      "main": "meld"
+			    },
+			    {
+			      "name": "poly",
+			      "location": "lib/poly",
+			      "main": "./poly"
+			    },
+			    {
+			      "name": "curl",
+			      "location": "lib/curl/src/curl",
+			      "main": "../curl"
+			    },
+			    {
+			      "name": "rest",
+			      "location": "lib/rest",
+			      "main": "./rest"
+			    },
+			    {
+			      "name": "0.6",
+			      "location": "lib/0.6",
+			      "main": "./src/curl"
+			    }
+			  ],
+			  "preloads": [
+			    "poly/all"
+			  ],
+			  "baseDir": "goats/client"
+			})
+		);
+		test.done();
+	});
+};

@@ -38,6 +38,8 @@ function configure(conf) {
 	var getContents = conf.getContents;
 	var getDirectory = require('./utils').getDirectory;
 	var orMap = require('./utils').orMap;
+	var ork = require('./utils').ork;
+	var deref = require('./utils').deref;
 	var listFiles = conf.listFiles;
 	var pathResolve = require('./utils').pathResolve;
 	var getScriptTags = require('./script-tag-finder').getScriptTags;
@@ -85,13 +87,67 @@ function configure(conf) {
 
 	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths"]));
 	
-	function findConfigBlock(tree) {
+	function findCurlConfigBlock(tree) {
+	
+		//TODO: this pattern, where the configblock is assigned to
+		// a variable and then the variable passed to curl call
+		// should also be supported for requirejs, not just curl.
+		
+		var configIdNameVar = variablePat('string');
+		
+		var curlCallWithIdentifier = containsPat(objectPat({
+			"type": "CallExpression",
+			"callee": {
+				"type": "Identifier",
+				"name": "curl"
+			},
+			"arguments": [ {
+                      "type": "Identifier",
+                      "name": configIdNameVar
+            }]
+		}));
+		var configBlock = null;
+		curlCallWithIdentifier(tree)(
+			//Success
+			function () {
+				var configIdName = configIdNameVar.value;
+				var configDecl = objectPat({
+                    "type": "VariableDeclarator",
+                    "id": {
+                      "type": "Identifier",
+                      "name": configIdName
+                    }
+				});
+				var pattern = containsPat(
+					andPat([
+							configDecl,
+							containsPat(configBlockPat)
+					])
+				);
+				pattern(tree)(
+					//success
+					function (found) {
+						configBlock = found;
+					},
+					//fail
+					function () {
+					}
+				);
+			},
+			//Fail
+			function () {
+			}
+		);
+		return configBlock;
+	}
+	
+	function findRequireConfigBlock(tree) {
 		//configBlockPat.debug = 'configBlockPat';
 		var requireCall = objectPat({
 			"type": "CallExpression",
 			"callee": containsPat(objectPat({
 				"type": "Identifier",
-				"name": orPat(["require", "requirejs"])
+				"name": orPat(["require", "requirejs", "curl"])
 			}))
 		});
 		var requireAssignment = objectPat({
@@ -103,10 +159,10 @@ function configure(conf) {
 			}
 		});
 		var pattern = containsPat(
-			andPat([
-				orPat([requireCall, requireAssignment]),
-				containsPat(configBlockPat)
-			])
+				andPat([
+					orPat([requireCall, requireAssignment]),
+					containsPat(configBlockPat)
+				])
 		);
 
 		var configBlock = null;
@@ -132,6 +188,9 @@ function configure(conf) {
 			var analyzerForType = analyzeExp[type];
 			if (typeof(analyzerForType)==='function') {
 				return analyzerForType(exp);
+			} else {
+				console.log("No analyzer for exp type: " + type);
+				console.log(JSON.stringify(exp, null, "  "));
 			}
 		}
 	}
@@ -208,6 +267,24 @@ function configure(conf) {
 	
 	analyzeExp.ObjectExpression = analyzeObjectExp;
 	
+	function analyzeArrayExp(exp) {
+		//Exp looks something like this:
+		//		{
+		//		  "type": "ArrayExpression",
+		//		  "elements": [ ... ]
+		var elements = exp && exp.elements;
+		var arr;
+		if (elements) {
+			arr = [];
+			for (var i=0; i<elements.length; i++) {
+				arr[i] = analyzeExp(elements[i]);
+			}
+		}
+		return arr;
+	}
+	
+	analyzeExp.ArrayExpression = analyzeArrayExp;
+	
 	var stringVar = variablePat("string");
 	var literalPat = objectPat({
        "type": "Literal",
@@ -234,7 +311,7 @@ function configure(conf) {
 			try {
 				var tree = parser.parseAndThrow(code);
 				//console.log(JSON.stringify(tree, null, "  "));
-				return analyzeObjectExp(findConfigBlock(tree));
+				return analyzeObjectExp(findRequireConfigBlock(tree) || findCurlConfigBlock(tree));
 			} catch (err) {
 				//couldn't parse it. Ignore that code.
 			}
@@ -248,11 +325,12 @@ function configure(conf) {
 			var baseDir = getDirectory(datamain);
 			conf.baseDir = baseDir;
 			if (endsWith(datamain, '.js')) {
-				// the tag points to a js file relative to the html file in the tag was found.
+				// the tag points to a js file relative to the html file in which the tag was found.
 				var jsFile = pathResolve(getDirectory(htmlFile), datamain);
 				getContents(jsFile, function (jsCode) {
 					conf = getAmdConfigFromCode(jsCode) || conf;
 					conf.baseDir = conf.baseDir || baseDir; //ensure we always have a baseDir set.
+					console.log("conf.baseDir = "+baseDir);
 					callback(conf);
 				});
 			} else {
@@ -285,6 +363,46 @@ function configure(conf) {
 			return rawConfig;
 		}
 	}
+
+	var CURL_JS = /(.*\/)?curl\.js$/;
+	
+	/**
+	 * Helper to extract amd config out of a typical 511 project. This 
+	 * is called at the point where a html file was found and script
+	 * tags have been extracted from the file. The script tags are
+	 * passed to this function for analysis.
+	 * 
+	 * If based on the tags this html file is deemed to be 511-ish then
+	 * the config block extracted and passed to the callback otherwise
+	 * a falsy value is passed to the callback.
+	 */
+	function getCurlConfig(htmlFile, scriptTags, callback) {
+		var baseDir = getDirectory(htmlFile);
+		
+		//The 'main' html file in a 511 project has two script tags.
+		if (deref(scriptTags, ["length"]) === 2) {
+			//The first one loads the curl.js loader.
+			var tag = scriptTags[0];
+			var curlPath = deref(tag, ["attribs", "src"]);
+			if (curlPath && CURL_JS.test(curlPath)) {
+				//The second one loads another js file that is supposed to
+				//configure curl and kick-off the app. It is typically called
+				//"app/run.js" but we will not assume that.
+				tag = scriptTags[1];
+				var appJsPath = deref(tag, ["attribs", "src"]);
+				if (appJsPath) {
+					var appJsFile = pathResolve(getDirectory(htmlFile), appJsPath);
+					return getContents(appJsFile, function (jsCode) {
+						var conf = getAmdConfigFromCode(jsCode);
+						return callback(conf);
+					});
+				}
+			}
+		}
+		//If we reach here, some condition failed and callback wasn't called yet.
+		return callback();
+	}
+	
 	
 	//determine basedir setting from a given file by:
 	//   - fetch contents of file
@@ -299,16 +417,23 @@ function configure(conf) {
 	function getAmdConfigFromHtmlFile(file, callback) {
 		getContents(file, function (contents) {
 				var scriptTags = getScriptTags(contents);
-				orMap(scriptTags, 
-					function (scriptTag, callback) {
-						getAmdConfigFromDataMain(file, scriptTag, function (config) {
-							callback(config || getAmdConfigFromScriptTag(scriptTag));
-						});
+				ork(
+					function (callback) {
+						getCurlConfig(file, scriptTags, callback);
 					},
-					function (config) {
-						callback(tailorToContext(file, config));
+					function (callback) {
+						orMap(scriptTags, 
+							function (scriptTag, callback) {
+								getAmdConfigFromDataMain(file, scriptTag, function (config) {
+									callback(config || getAmdConfigFromScriptTag(scriptTag));
+								});
+							},
+							callback
+						);
 					}
-				);
+				)(function (config) {
+					callback(tailorToContext(file, config));
+				});
 			},
 			function (err) {
 				callback(false);
@@ -350,39 +475,6 @@ function configure(conf) {
 		}
 	}
 	 
-	 
-//	function getAmdConfig(context, callback, errback) {
-//		// Version 2: 
-//		//  - looks for a parent directory that has a html file. 
-//		//  - assumes that the baseDir is the directory where this file was found.
-//		var dir = getDirectory(context);
-//		if (dir) {
-//			listFiles(dir, 
-//				function (names) {
-//					var htmlFile = orMap(names, isHtml);
-//					if (htmlFile) {
-//						callback({baseDir: dir});
-//					} else {
-//						getAmdConfig(dir, callback, errback);
-//					}
-//				},
-//				function (err) {
-//					errback(err);
-//				}
-//			);
-//		}
-//	}
-	
-//	function getAmdConfig(context, callback, errback) {
-//		//Version 1: 
-//		//Stupid implementation: assumes that requirejs baseDir is the same
-//		//directory as the file in which the reference was discovered.
-//		
-//		callback({
-//			baseDir: getDirectory(context)
-//		});
-//	}
-	
 	function amdResolver(context, dep, callback) {
 		getAmdConfig(context, function (resolverConf) {
 			//console.log(resolverConf);

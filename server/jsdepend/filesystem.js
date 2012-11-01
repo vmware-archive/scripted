@@ -128,6 +128,7 @@ function withBaseDir(baseDir) {
 					errback(err);
 				} else {
 					console.error(err);
+					callback("");
 				}
 			} else {
 				callback(data);
