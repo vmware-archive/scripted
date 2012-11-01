@@ -537,3 +537,27 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 		}
 	);
 };
+
+exports.relatveRefsInAmdModuleDotDot = function (test) {
+	var api = makeApi('nested-web-with-scripts-folder');
+	var dep = {
+		kind: 'AMD',
+		name: '../relative'
+	};
+	api.resolve('web-app/scripts/sub/submain.js', dep, function (dep) {
+		test.equals(dep.path, 'web-app/scripts/relative.js');
+		test.done();
+	});
+};
+
+exports.relatveRefsInAmdModuleDot = function (test) {
+	var api = makeApi('nested-web-with-scripts-folder');
+	var dep = {
+		kind: 'AMD',
+		name: './relative'
+	};
+	api.resolve('web-app/scripts/main.js', dep, function (dep) {
+		test.equals(dep.path, 'web-app/scripts/relative.js');
+		test.done();
+	});
+};
