@@ -92,6 +92,22 @@ function makeRequestHandler(fun) {
 				}
 			);
 		};
+	} else if (sig === JSON.stringify(['JSON', 'JSON', 'JSON', 'callback'])) {
+        return function (response, request) {
+            var args = JSON.parse(url.parse(request.url,true).query.args);
+            //Note: the code here is rather specific and expects a certain function signature
+            // of the functions in the api that is being exposed through this servlet
+            fun(args[0], args[1], args[2],
+                function () {
+                    response.writeHead(200, {
+                        "Content-Type": "text/json",
+                        "Cache-Control": "no-store"
+                    });
+                    response.write(JSON.stringify(Array.prototype.slice.call(arguments)));
+                    response.end();
+                }
+            );
+        };
 	} else {
 		throw "Don't know how to make handler for: "+fun; 
 	}

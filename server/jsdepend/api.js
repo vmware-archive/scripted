@@ -59,6 +59,7 @@ function configure(config) {
 	var resolve = require("./resolver").configure(config).resolve;
 	var getIndexer = require('./file-indexer').configure(config).getIndexer;
 	var getConf = require('./dot-scripted').configure(config).getConfiguration;
+	var retrieveNearestFile = require('./retrieve-nearest-file').configure(config).retrieveNearestFile;
 	
 //	console.log('jsdepend/api is using encoding: '+encoding);
 	
@@ -260,7 +261,8 @@ function configure(config) {
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	findFileNamesContaining.remoteType =  ['JSON', 'JSON', 'callback', 'errback'];
 	getConf.remoteType = ['JSON', 'callback'];
-
+	retrieveNearestFile.remoteType = ['JSON', 'JSON', 'JSON', 'callback'];
+	
 	//Creates the API object containing all exported operations for this API.
 	return {
 		getContents: getContents,
@@ -268,7 +270,8 @@ function configure(config) {
 		getTransitiveDependencies: getTransitiveDependencies,
 		getDGraph: getDGraph,
 		findFileNamesContaining: findFileNamesContaining,
-		getConf: getConf
+		getConf: getConf,
+		retrieveNearestFile: retrieveNearestFile
 	};
 }
 

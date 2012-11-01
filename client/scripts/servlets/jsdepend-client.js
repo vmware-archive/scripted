@@ -29,7 +29,8 @@ define(function(require, exports, module) {
 		getContents: ['JSON', 'callback', 'errback'],
 		findFileNamesContaining: ['JSON', 'JSON', 'callback', 'errback'],
 		getDGraph: ['JSON', 'callback'],
-		getConf: ['JSON', 'callback']
+		getConf: ['JSON', 'callback'],
+		retrieveNearestFile: ['JSON', 'JSON', 'JSON', 'callback']
 	};
 	
 	for (var functionName in signatures) {

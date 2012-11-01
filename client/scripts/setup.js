@@ -190,9 +190,37 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(filepath, function (dotScripted) {
 		console.log("fetched dot-scripted conf from server");
-		console.log(JSON.stringify(dotScripted, null, "  "));
+//		console.log(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
+		
+		// Locate the nearest .jshintrc. It will look relative to the initially opened 
+		// location - so ok if the .jshintrc is at the project root. But if the file is
+		// elsewhere in the tree it sometimes won't find it depending on what is opened.
+		// TODO fix it up to do a better job of finding it
+		// TODO return value shouldn't be trampling on the config object itself, should be an object in
+		// which the config is a member.
+		// TODO a timing window problem does exist here - where if the .jshintrc file isn't 
+		// found quickly enough the first linting will not respect it. fix it!
+		mJsdepend.retrieveNearestFile(filepath, window.fsroot, '.jshintrc', function(jshintrc) {
+			if (jshintrc && jshintrc.fsroot) {
+				// it was found at that location
+				console.log("Found .jshintrc at "+jshintrc.fsroot);
+				if (jshintrc.error) {
+					console.error(jshintrc.error);
+				} else {
+//					console.log(JSON.stringify(jshintrc,null," "));
+					window.scripted.config.jshint = jshintrc;
+					if (!window.scripted.config.editor) {
+						window.scripted.config.editor = { "linter": "jshint" };
+					} else {
+						window.scripted.config.editor.linter = "jshint";
+					}
+				}
+			} else {
+				console.log("No .jshintrc found");
+			}
+		});
 		if (window.scripted.config && window.scripted.config.ui && window.scripted.config.ui.navigator===false) {
 			window.scripted.navigator=false; // default is true
 			$('#navigator-wrapper').hide();
