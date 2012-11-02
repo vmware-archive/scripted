@@ -17,7 +17,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	//////////////////////////////////////////////////////////
 	// helpers
 	//////////////////////////////////////////////////////////
-	function computeContentAssist(buffer, prefix, offset, jsLintOptions) {
+	function computeContentAssist(buffer, prefix, offset, lintOptions) {
 		if (!prefix) {
 			prefix = "";
 		}
@@ -27,7 +27,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				offset = buffer.length;
 			}
 		}
-		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, jsLintOptions);
+		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, lintOptions);
 		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true });
 	}
 	

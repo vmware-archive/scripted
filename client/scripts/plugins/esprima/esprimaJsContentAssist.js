@@ -1350,13 +1350,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 
 	
 	/**
-	 * add variable names from inside a jslint global directive
+	 * add variable names from inside a lint global directive
 	 */
-	function addJSLintGlobals(env, jsLintOptions) {
+	function addLintGlobals(env, lintOptions) {
 		var i, globName;
-		if (jsLintOptions && isArray(jsLintOptions.global)) {
-			for (i = 0; i < jsLintOptions.global.length; i++) {
-				globName = jsLintOptions.global[i];
+		if (lintOptions && isArray(lintOptions.global)) {
+			for (i = 0; i < lintOptions.global.length; i++) {
+				globName = lintOptions.global[i];
 				if (!env.lookupName(globName)) {
 					env.addOrSetVariable(globName);
 				}
@@ -2129,12 +2129,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	
 	var browserRegExp = /browser\s*:\s*true/;
 	var nodeRegExp = /node\s*:\s*true/;
-	function findGlobalObject(comments, jsLintOptions) {
+	function findGlobalObject(comments, lintOptions) {
 	
 		for (var i = 0; i < comments.length; i++) {
 			var comment = comments[i];
-			if (comment.type === "Block" && comment.value.substring(0, "jslint".length) === "jslint") {
-				// the jslint options section.  now look for the browser or node
+			if (comment.type === "Block" && (comment.value.substring(0, "jslint".length) === "jslint" ||
+											  comment.value.substring(0,"jshint".length) === "jshint")) {
+				// the lint options section.  now look for the browser or node
 				if (comment.value.match(browserRegExp)) {
 					return "Window";
 				} else if (comment.value.match(nodeRegExp)) {
@@ -2144,10 +2145,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				}
 			}
 		}
-		if (jsLintOptions && jsLintOptions.options) {
-			if (jsLintOptions.options.browser) {
+		if (lintOptions && lintOptions.options) {
+			if (lintOptions.options.browser) {
 				return "Window";
-			} else if (jsLintOptions.options.node) {
+			} else if (lintOptions.options.node) {
 				return "Node";
 			}
 		}
@@ -2214,11 +2215,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * indexer is optional.  When there is no indexer passed in
 	 * the indexes will not be consulted for extra references
 	 * @param {{hasDependency,performIndex,retrieveSummary,retrieveGlobalSummaries}} indexer
-	 * @param {{global:[],options:{browser:Boolean}}=} jsLintOptions optional set of extra jslint options that can be overridden in the source
+	 * @param {{global:[],options:{browser:Boolean}}=} lintOptions optional set of extra lint options that can be overridden in the source (jslint or jshint)
 	 */
-	function EsprimaJavaScriptContentAssistProvider(indexer, jsLintOptions) {
+	function EsprimaJavaScriptContentAssistProvider(indexer, lintOptions) {
 		this.indexer = indexer;
-		this.jsLintOptions = jsLintOptions;
+		this.lintOptions = lintOptions;
 	}
 	
 	/**
@@ -2228,7 +2229,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	
 		_doVisit : function(root, environment) {
 			// first augment the global scope with things we know
-			addJSLintGlobals(environment, this.jsLintOptions);
+			addLintGlobals(environment, this.lintOptions);
 			addIndexedGlobals(environment);
 			
 			// now we can remove all non-doc comments from the comments list
@@ -2261,7 +2262,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// note that if selection has length > 0, then just ignore everything past the start
 				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 				if (completionKind) {
-					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments });
+					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 					var target = this._doVisit(root, environment);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind, context.prefix, offset - context.prefix.length, proposalsObj);
@@ -2287,7 +2288,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		_internalFindDefinition : function(buffer, offset, findName) {
 			var toLookFor;
 			var root = mVisitor.parse(buffer);
-			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments });
+			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 			var findIdentifier = function(node) {
 				if ((node.type === "Identifier" || node.type === "ThisExpression") && inRange(offset, node.range, true)) {
 					toLookFor = node;
@@ -2364,7 +2365,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		 */
 		computeSummary: function(buffer, fileName) {
 			var root = mVisitor.parse(buffer);
-			var environment = createEnvironment({ buffer: buffer, uid : fileName, globalObjName : findGlobalObject(root.comments, this.jsLintOptions), comments : root.comments, indexer : this.indexer });
+			var environment = createEnvironment({ buffer: buffer, uid : fileName, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments, indexer : this.indexer });
 			try {
 				this._doVisit(root, environment);
 			} catch (e) {

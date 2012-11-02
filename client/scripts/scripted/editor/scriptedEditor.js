@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010 - 2012 IBM Corporation, VMware and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -16,16 +16,16 @@
 /*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage $*/
 /*jslint browser:true devel:true*/
 
-define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",  
-"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist", 
+define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
+"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
 "plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
-"orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar", 
-"plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify","orion/textview/textModel","orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save","jshint"],
+"orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
+"plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint"],
 
-function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler, 
-mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors, 
-mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify,mTextModel,mProjectionModel,
+function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
+mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
+mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify, mTextModel, mProjectionModel,
 mHtmlContentAssist, mCssContentAssist) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -113,7 +113,13 @@ mHtmlContentAssist, mCssContentAssist) {
 		}
 		
 		var indexer = new mIndexerService.Indexer();
-		indexer.jslintConfig = window.scripted && window.scripted.config && window.scripted.config.jslint;
+		if (window.scripted && window.scripted.config) {
+			if (window.scripted.config.jslint) {
+				indexer.lintConfig = window.scripted.config.jslint;
+			} else if (window.scripted.config.jshint) {
+				indexer.lintConfig = window.scripted.config.jshint;
+			}
+		}
 		
 		var selection = new mSelection.Selection();
 		var commandService = new mCommands.CommandService({
@@ -129,12 +135,14 @@ mHtmlContentAssist, mCssContentAssist) {
 		var postSave = function(text) {
 			var problems;
 			if (isJS || isHTML) {
-				if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter==='jshint') {
-					problems = mJshintDriver.checkSyntax('', text).problems;
-				} else {
-					problems = mJslintDriver.checkSyntax('', text).problems;
-				}
-				editor.showProblems(problems);
+				window.scripted.promises.loadJshintrc.then(function completed() {
+					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter==='jshint') {
+						problems = mJshintDriver.checkSyntax('', text).problems;
+					} else {
+						problems = mJslintDriver.checkSyntax('', text).problems;
+					}
+					editor.showProblems(problems);
+				});
 			} else {
 				problems = [];
 			}
@@ -154,7 +162,7 @@ mHtmlContentAssist, mCssContentAssist) {
 		/**
 		 * This function is called after successful save.
 		 */
-		function afterSaveSuccess(filePath) { 
+		function afterSaveSuccess(filePath) {
 			editor.dispatchEvent({type: "afterSave", file: filePath});
 		}
 		
