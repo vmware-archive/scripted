@@ -1,5 +1,5 @@
 /*global define window console document*/
-define(['sub/submain'], function (submain) {
+define(['sub/submain', './relative'], function (submain) {
 	window.onload = function () {
 		var f = submain.submainFun;
 //		var target = document.getElementById('target');

@@ -249,7 +249,7 @@ exports.findAmdConfigIn511Project = function (test) {
 			    {
 			      "name": "cola",
 			      "location": "lib/cola",
-			      "main": "./cola"
+			      "main": "./cola-main"
 			    },
 			    {
 			      "name": "wire",
@@ -288,7 +288,7 @@ exports.findAmdConfigIn511Project = function (test) {
 			    }
 			  ],
 			  "preloads": [
-			    "poly/all"
+			    "curl/debug"
 			  ],
 			  "baseDir": "goats/client"
 			})

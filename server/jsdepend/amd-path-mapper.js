@@ -13,17 +13,58 @@
 
 /*global exports resolve require define esprima console module*/
 
+var pathResolve = require('./utils').pathResolve;
+
+/**
+ * Dummy map function. It maps nothing. (i.e. it returns undefined regardless of
+ * what is passed into it.
+ */ 
+function nullMap() {}
+
+function getPackageMap(resolverConf) {
+	var packages = resolverConf && resolverConf.packages;
+	
+	function map(name) {
+		for (var i=0; i<packages.length; i++) {
+			var p = packages[i];
+			if (p.name === name) {
+				var location = p.location || '.';
+				if (typeof(location)==='string') {
+					var main = p.main || 'main';
+					return pathResolve(location, main);
+				}
+			}
+		}
+	}
+	
+	if (packages && packages.length > 0) {
+		return map;
+	}
+	return nullMap; //dummy mapper doesn't map anything.
+}
+
+/**
+ * Create a function that maps paths based on the 'paths' section of
+ * a resolverConf
+ */
+function getPathMap(resolverConf) {
+	var pathBlock = resolverConf && resolverConf.paths;
+	if (pathBlock) {
+		return function (name) {
+			//TODO: For now we only support if module names are listed exactly in the
+			//path's block. We don't handle nested path blocks or remapping directories
+			return pathBlock[name];
+		};
+	}
+	return nullMap;
+}
+
 //Perform path substitution based on a resolverConf extracted from
 //some requirejs configuration block.
 function mapPaths(resolverConf, depName) {
-	var pathBlock = resolverConf && resolverConf.paths;
-	if (pathBlock) {
-		//TODO: For now we only support if module names are listed exactly in the
-		//path's block. We don't handle nested path blocks or remapping directories
-		return pathBlock[depName] || depName;
-	} else {
-		return depName;
-	}
+	var pathMap = getPathMap(resolverConf);
+	var packageMap = getPackageMap(resolverConf);
+	return packageMap(depName) || pathMap(depName) || depName;
 }
 
 exports.mapPaths = mapPaths;

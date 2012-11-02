@@ -19,9 +19,14 @@
 
 
 //var testCase = require('./module-types-test.js').bigFile;
-var testCase = require('./amd-resolver-test.js')
-	//.likeScripted;
-	.findAmdConfigIn511Project;
+//var testCase = require('./amd-resolver-test.js')
+//	//.likeScripted;
+//	.findAmdConfigIn511Project;
+
+var testCase = require('./resolver-test')
+	.resolveInScriptsFolder;
+//	.relatveRefsInAmdModuleDot;
+//	.amdResolveBasedOnPackagesConfig;
 
 testCase({
 	equals: function (a, b) {

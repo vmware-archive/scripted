@@ -538,7 +538,7 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 	);
 };
 
-exports.relatveRefsInAmdModuleDotDot = function (test) {
+exports.relativeRefsInAmdModuleDotDot = function (test) {
 	var api = makeApi('nested-web-with-scripts-folder');
 	var dep = {
 		kind: 'AMD',
@@ -550,7 +550,7 @@ exports.relatveRefsInAmdModuleDotDot = function (test) {
 	});
 };
 
-exports.relatveRefsInAmdModuleDot = function (test) {
+exports.relativeRefsInAmdModuleDot = function (test) {
 	var api = makeApi('nested-web-with-scripts-folder');
 	var dep = {
 		kind: 'AMD',
@@ -561,3 +561,16 @@ exports.relatveRefsInAmdModuleDot = function (test) {
 		test.done();
 	});
 };
+
+exports.amdResolveBasedOnPackagesConfig = function (test) {
+	var api = makeApi('511');
+	var dep = {
+		kind: 'AMD',
+		name: 'cola'
+	};
+	api.resolve('goats/client/app/main.js', dep, function (dep) {
+		test.equals(dep.path, 'goats/client/lib/cola/cola-main.js');
+		test.done();
+	});
+};
+
