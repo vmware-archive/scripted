@@ -1,0 +1,263 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Chris Johnson - initial implementation
+ *      Andy Clement
+ *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
+ ******************************************************************************/
+/*jslint browser:true */
+/*global localStorage JSON5 */
+
+/**
+ * This module provides oeprations for manipulating scripted URLs, history, and page state.
+ * The current state of a page is captured in the hash of the page's url.
+ * See https://issuetracker.springsource.com/browse/SCRIPTED-234 for a full description of how a url is described
+ * A simple description is that the following json fully describes the page state:
+<pre>
+main : { // main editor
+	path : <full path to file>
+	range : [offset,length]  of selected text
+	scroll : <scroll position>
+},
+side : { // side panel can be specified as an array for multiple side panels
+	path : <full path to file>
+	range : [offset,length]  of selected text
+	scroll : <scroll position>
+}
+
+</pre> 
+ * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
+ */
+define(['lib/json5'], function() {
+	var BASE_URL = location.origin + location.pathname;
+	
+	
+	return {
+		/**
+		 * A function that extracts page layout from a hash and path
+		 * including all open editors, the currently selected text
+		 * and their scroll positions
+		 * 
+		 * @param {String} hash the hash of the url to parse. The hash might just be a fully qualified path or it could be a full JSON object
+		 * @param {String} path the path of the url to parse
+		 * @return {{main:{path:String,range:Array,scroll:Number},side0:{path:String,range:Array,scroll:Number}}} an object describing the full page state
+		 */
+		extractPageState : function(hash, path) {
+			if (!hash && !path) {
+				// create empty page state to be filled later
+				return {main: {path: ""}};
+			}
+		
+			if (hash.charAt(0) === '#') {
+				hash = hash.substring(1);
+			}
+		
+			if (!isNaN(parseInt(hash.charAt(0)))) {
+				// http://localhost:7261?path.js#10,20
+				hash = "main:{range:[" + hash + "]}";
+			}
+		
+			if (hash.charAt(0) !== '{') {
+				// http://localhost:7261?path.js#main:{range:10,20}
+				hash = '{' + hash +'}';
+			}
+
+			var sliced = hash.slice(0, 5);
+		    if (sliced !== "{main" && sliced !== "{side" &&
+		        sliced !== "{\"mai" && sliced !== "{\"sid") {
+				// assume implicit main
+				// http://localhost:7261/#range:10,20,path:'/path.js'
+				hash = "{main:" + hash + "}";
+			}
+
+		
+			if (path && path.charAt(0) === '?') {
+				path = path.substring(1);
+			}
+			try {
+				var state = JSON5.parse(hash);
+				if (typeof state !== "object") {
+					// assume invalid
+					// TOD use scriptedLogger
+					console.warn("Invalid hash: " + hash);
+					state = {main:{}};
+				}
+				if (!state.main) {
+					state.main = {};
+				}
+			
+				if (path && !state.main.path) {
+					state.main.path = path;
+				}
+				return state;
+			} catch (e) {
+				// TOD use scriptedLogger
+				console.warn("Invalid hash: " + hash);
+				// return empty state.  use path if exists
+				return {main: {path : (path ? path : "") } };
+			}
+		},
+	
+		extractPageStateFromUrl : function(url) {
+			if (url.substring(0,"http://".length) !== "http://") {
+				// assume path, not a url
+				return this.extractPageState("{}", url);
+			}
+		
+			var hashIndex = url.indexOf('#');
+			var queryIndex = url.indexOf('?');
+			var path;
+			if (queryIndex >= 0 && queryIndex < hashIndex) {
+				path = url.substring(queryIndex,hashIndex);
+			}
+			if (hashIndex >= 0) {
+				url = url.substring(hashIndex +1);
+			}
+			return this.extractPageState(url, path);
+		},
+		
+		/**
+		 * Retrieves the history from local storage
+		 * @return {Array.<{path:String,range:Array,scroll:Number}>}
+		 */
+		getHistory : function() {
+			var historyJSON = localStorage.getItem("scriptedHistory");
+			if (!historyJSON) {
+				return [];
+			}
+			var arr = JSON5.parse(historyJSON);
+			for (var i = 0; i < arr.length; i++) {
+				if (!arr[i].path) {
+					arr.splice(i, 1);
+					i--;
+				}
+			}
+			return arr;
+		},
+	
+		getHistoryAsObject : function() {
+			var histArr = this.getHistory();
+			var histObj = {};
+			for (var i = 0; i < histArr.length; i++) {
+				if (histArr[i].path) {
+					histObj[histArr[i].path] = histArr[i];
+				}
+			}
+			return histObj;
+		},
+	
+		setHistory : function(history) {
+			localStorage.setItem("scriptedHistory", JSON5.stringify(history));
+		},
+	
+		/**
+		 * generates an item to be stored in scriptedHistory as well as browser state
+		 */
+		generateHistoryItem : function(editor) {
+			var path = editor.getFilePath();
+			var scrollPos = $(editor._domNode).find('.textview').scrollTop();
+			var selection = editor.getSelection();
+			return {
+				path: path,
+				range: [selection.start, selection.end],
+				scroll: scrollPos
+			};
+		},
+	
+		generateHash : function(histItem, editorKind) {
+			// check to see if we should shortcut and have a simple range as the hash
+			if (!histItem.side) {
+				var item = histItem.main ? histItem.main : histItem;
+				if (!item.path && (!item.scroll || item.scroll === 0)) {
+					if (item.range) {
+						return item.range.toString();
+					} else {
+						// nothing here;
+						return "";
+					}
+				}
+			}
+		
+			if (histItem.main || histItem.side) {
+				return JSON5.stringify(histItem);
+			}
+		
+			if (!editorKind) {
+				editorKind = "main";
+			}
+			
+			var newItem = {};
+			newItem[editorKind] = history;
+			return JSON5.stringify(newItem);
+		},
+	
+		/**
+		 * Generates a url to open a file on a given file path or
+		 * history object
+		 * @param {{path:String,range:Array,scroll:Number}|String} loc item to generate a link for
+		 * this item could be a full path to a file, or it could be a history item
+		 * @return {String}
+		 */
+		generateUrl : function(loc) {
+			if (typeof loc === 'string') {
+				// assume a simple file path
+				return BASE_URL + "?" + loc;
+			} else {
+				var path;
+				if (loc.path) {
+					path = loc.path;
+					delete loc.path;
+				} else if (loc.main && loc.main.path) {
+					path = loc.main.path;
+					delete loc.main.path;
+				}
+				return BASE_URL + (path ? "?" + path : "") + "#" + this.generateHash(loc);
+			}
+		},
+	
+		storeScriptedHistory : function(histItem) {
+			var scriptedHistory = this.getHistory();
+			for (var i = 0; i < scriptedHistory.length; i++) {
+				if (scriptedHistory[i].path === histItem.path) {
+					scriptedHistory.splice(i,1);
+				}
+			}
+			scriptedHistory.push(histItem);
+		
+			// arbitrarily keep track of 8 scriptedHistory items
+			// TODO should we have a .scripted setting to customize this?
+			while (scriptedHistory.length > 8) {
+				scriptedHistory.shift();
+			}
+		
+			this.setHistory(scriptedHistory);
+		},
+	
+		storeBrowserState : function(mainItem, subItem, doReplace) {
+			try {
+				var name = mainItem.path.split('/').pop();
+				var histItem;
+				if (subItem) {
+					histItem = { main: mainItem, side: subItem};
+				} else {
+					histItem = mainItem;
+				}
+				var url = this.generateUrl(histItem);
+				if (doReplace) {
+					window.history.replaceState(histItem, name, url);
+				} else {
+					window.history.pushState(histItem, name, url);
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		}
+	};
+});
