@@ -196,7 +196,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		// which the config is a member.
 		// TODO a timing window problem does exist here - where if the .jshintrc file isn't 
 		// found quickly enough the first linting will not respect it. fix it!
-		mJsdepend.retrieveNearestFile(filepath, window.fsroot, '.jshintrc', function(jshintrc) {
+		mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
 			if (jshintrc && jshintrc.fsroot) {
 				// it was found at that location
 				console.log("Found .jshintrc at "+jshintrc.fsroot);
@@ -321,7 +321,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				});
 
-				var command_file = "resources/_command.tmpl.html";
+				var command_file = "/resources/_command.tmpl.html";
 				// use a copy so we can sort
 				var keyBindings = window.editor.getTextView()._keyBindings.slice(0); 
 				

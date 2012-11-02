@@ -111,7 +111,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 				return false;
 			}
 
-			var range = pageState.main.rangel;
+			var range = pageState.main.range;
 			if (!range) {
 				// try to get range from history
 				var histItem = mPageState.getHistoryAsObject()[path];
@@ -344,7 +344,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
-			var newHistoryAnchor = $('<a href="' + mPageState.generateUrl(history[i]) + '">' + 
+			var newHistoryAnchor = $("<a href='" + mPageState.generateUrl(history[i]) + "'>" + 
 				history[i].path.split('/').pop() + '</a>');
 			$(newHistoryAnchor).click(handleNavigationEvent);
 			newHistoryElem.append(newHistoryAnchor);
@@ -388,7 +388,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 							if (kids[j].name.lastIndexOf('.',0)!==0) {
 								var href = mPageState.generateUrl(kids[j].Location);
 								var newMenuItem = $('<li></li>');
-								var newMenuAnchor = $('<a href="'+href+'">'+kids[j].name+'</a>');
+								var newMenuAnchor = $("<a href='"+href+"'>"+kids[j].name+'</a>');
 								newMenuItem.append(newMenuAnchor);
 								newMenu.prepend(newMenuItem);
 

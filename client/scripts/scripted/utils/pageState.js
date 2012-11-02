@@ -108,7 +108,14 @@ define(['lib/json5'], function() {
 		extractPageStateFromUrl : function(url) {
 			if (url.substring(0,"http://".length) !== "http://") {
 				// assume path, not a url
-				return this.extractPageState("{}", url);
+				var splits = url.split("#");
+				var hash;
+				if (splits.length > 1) {
+					hash = "{range:[" + splits[1] + "]}";
+				} else {
+					hash = "{}";
+				}
+				return this.extractPageState(hash, splits[0]);
 			}
 		
 			var hashIndex = url.indexOf('#');
@@ -194,7 +201,7 @@ define(['lib/json5'], function() {
 			}
 			
 			var newItem = {};
-			newItem[editorKind] = history;
+			newItem[editorKind] = histItem;
 			return JSON5.stringify(newItem);
 		},
 	
@@ -210,15 +217,23 @@ define(['lib/json5'], function() {
 				// assume a simple file path
 				return BASE_URL + "?" + loc;
 			} else {
-				var path;
+				var path, wasPathDel, wasMainPathDel;
 				if (loc.path) {
 					path = loc.path;
+					wasPathDel = true;
 					delete loc.path;
 				} else if (loc.main && loc.main.path) {
 					path = loc.main.path;
+					wasMainPathDel = true;
 					delete loc.main.path;
 				}
-				return BASE_URL + (path ? "?" + path : "") + "#" + this.generateHash(loc);
+				var gen = this.generateHash(loc);
+				if (wasPathDel) {
+					loc.path = path;
+				} else if (wasMainPathDel) {
+					loc.main.path = path;
+				}
+				return BASE_URL + (path ? "?" + path : "") + "#" + gen;
 			}
 		},
 	
