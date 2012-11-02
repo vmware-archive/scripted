@@ -307,7 +307,7 @@ function put(response, request) {
       // fields.text is the data to save
 //      console.log("Text to be written is of length: "+text.length);
 	  var dataToSave = fields.data;
-      if (dataToSave.length !== fields.length) {
+      if (dataToSave.length != fields.length) {
         // return an error, it failed to save!
         response.writeHead(500, {'content-type': 'text/plain'});
         response.write('problem with save: received data length: '+dataToSave.length+' does not match transmitted length '+fields.length);
