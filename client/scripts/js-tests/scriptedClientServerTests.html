@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../lib/qunit/qunit-1.10.0.css" />
   <script src="../lib/qunit/qunit-1.10.0.js"></script>
   <script src="../lib/requirejs/require.js"></script>
+  <script src="../lib/jquery-1.7.2.min.js"></script>
   <script type="text/javascript">
 	/*global window require test module asyncTest console */
 	require({
@@ -27,29 +28,57 @@
 			fileapi: 'scripted/fileapi'
 		}
 	});
+
+	function fixUrl() {
+		var xhrobj = new XMLHttpRequest();
+		xhrobj.open("GET", '/test-api/server-root', false);
+		xhrobj.send();  // synchronous xhr request
+		var testResourcesRoot = xhrobj.responseText;
+		if (testResourcesRoot.charAt(testResourcesRoot.length-1) !== '/') {
+			testResourcesRoot += '/';
+		}
+		
+		var popper = function() { 
+			$(window).unbind('popstate', popper);
+			return false; 
+		};
+		$(window).bind('popstate', popper);
+		window.location.search = testResourcesRoot + 'foo.js';
+		window.location.hash = "";
+	}
 	
-	window.onload = function() {
-		require(["js-tests/navHistory/navHistoryTests"], 
-			function(navHistoryTests) {
-				function testShim(tests) {
-					for (var t in tests) {
-						if (tests.hasOwnProperty(t)) {
-							if (t.indexOf('test') === 0) {
-								test(t, tests[t]);
-							} else if (t.indexOf('asyncTest') === 0) {
-								asyncTest(t, tests[t]);
+	$('document').ready(function() {
+		// first ensure that the url is correct
+		window.setTimeout(function() {
+//			fixUrl();		
+			require(["js-tests/navHistory/navHistoryTests"], 
+				function(navHistoryTests) {
+					function testShim(tests) {
+						for (var t in tests) {
+							if (tests.hasOwnProperty(t)) {
+								if (t.indexOf('test') === 0) {
+									test(t, tests[t]);
+								} else if (t.indexOf('asyncTest') === 0) {
+									asyncTest(t, tests[t]);
+								}
 							}
 						}
 					}
-				}
-				testShim(navHistoryTests);
+					testShim(navHistoryTests);
+			});
 		});
-	};
+	});
   </script>
 </head>
 <body>
 	<div id="qunit"></div>
 	<!-- the following markup is used to create the test page.  This markup should be similar to what is in editor.html -->
+	
+	<!--
+	<iframe id="testEditorFrame" src="../../editor.html?/Users/andrew/Eclipse/git-repos/scripted/play-area/foo.js">
+		
+	</iframe>
+	-->
 	<div id="main">
 		<div id="navigator-wrapper">
 			<div id="navigator-container">
@@ -79,6 +108,6 @@
 		<div id="status"></div>
 	</footer>
 
-	<div id="contentassist" class="contentassist"></div>
+	<div id="contentassist" class="contentassist"></div> 
 </body>
 </html>

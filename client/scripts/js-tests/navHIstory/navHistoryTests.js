@@ -16,6 +16,7 @@
 /*global $ define module localStorage window console */
 
 define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], function(assert, mNavHistory) {
+	
 	var xhrobj = new XMLHttpRequest();
 	xhrobj.open("GET", '/test-api/server-root', false);
 	xhrobj.send();  // synchronous xhr request
@@ -27,6 +28,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	} else {
 		testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
 	}
+
 	
 	function getFileContents(fname, callback) {
 		var xhrobj = new XMLHttpRequest();
@@ -454,12 +456,6 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
-	
-	// still to test
-	
-	// raw history object
-	// click navigate
-	
 	
 	return tests;
 });

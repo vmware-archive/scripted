@@ -14,9 +14,8 @@
 /*global define window uri scriptedLogger alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "orion/editor/jslintdriver", "jquery", "scripted/utils/navHistory"
-//,'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number' 
-], function(require, dojo, mExplorer, mJslintDriver, mJquery, mFileLoader /*,dijit, mUtil, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands*/ ) {
+define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "orion/editor/jslintdriver", "jquery", "scripted/utils/pageState", "scripted/utils/navHistory"], 
+	function(require, dojo, mExplorer, mJslintDriver, mJquery, mPageState, mNavHistory) {
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -283,17 +282,17 @@ if (mExtensionCommands) {
 			//link = dojo.create("a", {className:"navlinkonpage",id:tableRow.id+"NameColumn", href:"#"+item.ChildrenLocation},span,"last");
 
 			//var span2 = dojo.create("span", null, span, "last");
-
-			var path = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + item.Location;
+			var span2;
+			var path = mPageState.generateUrl(item.Location);
 			if (item.directory) {
-				var span2 = dojo.create("span", null, span, "last");
+				span2 = dojo.create("span", null, span, "last");
 				// When the directory name is clicked, simulate a keypress on the expand/collapse image
 				tableRow.onclick = function(event){
 					$(event.currentTarget).find('.modelDecorationSprite').click();
 				};
 				
 			} else {
-				var span2 = dojo.create("a", {
+				span2 = dojo.create("a", {
 					href: path
 				}, span, "last");
 			}
@@ -302,7 +301,7 @@ if (mExtensionCommands) {
 			dojo.place(textnode, span2, "last");
 
 			if (!item.directory) {
-				$(span2).click(mFileLoader.handleNavigationEvent);
+				$(span2).click(mNavHistory.handleNavigationEvent);
 			}
 
 			return col;

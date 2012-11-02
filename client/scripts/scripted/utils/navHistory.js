@@ -12,12 +12,15 @@
  *      Andy Clement
  *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
  ******************************************************************************/
-
 /*jslint browser:true */
-/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage*/
-define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os"], 
-function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
+/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage JSON5 */
+
+/**
+ * This module defines the navigation and history functionality of scripted.
+ */
+define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
+"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5'], 
+function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
 	mFileSearchClient, mSearchDialog, mOsUtils) {
 	
 	var EDITOR_TARGET = {
@@ -26,6 +29,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		tab : "tab"
 	};
 	var LINE_SCROLL_OFFSET = 5;
+	var GET_URL = "http://localhost:7261/get?file=";
+	var FS_LIST_URL = "http://localhost:7261/fs_list/";
 	
 	// define as forward reference
 	var navigate;
@@ -68,84 +73,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		tv.setTopIndex(line);
 	};
 
-	/**
-	 * Retrieves the history from local storage
-	 * @return {Array.<{filename:string,filepath:string,range:Array.<Number>,posiiion,url:string}>}
-	 */
-	var getHistory = function() {
-		var historyJSON = localStorage.getItem("scriptedHistory");
-		if (!historyJSON) {
-			historyJSON = "[]";
-		}
-		return JSON.parse(historyJSON);
-	};
-	
-	var getHistoryAsObject = function() {
-		var histArr = getHistory();
-		var histObj = {};
-		for (var i = 0; i < histArr.length; i++) {
-			histObj[histArr[i].filepath] = histArr[i];
-		}
-		return histObj;
-	};
-	
-	var setHistory = function(history) {
-		localStorage.setItem("scriptedHistory", JSON.stringify(history));
-	};
-	
-	
-	/**
-	 * generates an item to be stored in scriptedHistory as well as browser state
-	 */
-	var generateHistoryItem = function(editor) {
-		var filepath = editor.getFilePath();
-		var scrollPos = $(editor._domNode).find('.textview').scrollTop();
-		var selection = editor.getSelection();
-		var url = window.location.pathname + '?' + filepath + "#" + selection.start + "," + selection.end;
-		return {
-			filename: filepath.split('/').pop(),
-			filepath: filepath,
-			range: [selection.start, selection.end],
-			position: scrollPos,
-			url: url
-		};
-	};
-	
-	
-	var storeScriptedHistory = function(histItem) {
-		var scriptedHistory = getHistory();
-		for (var i = 0; i < scriptedHistory.length; i++) {
-			if (scriptedHistory[i].filepath === histItem.filepath) {
-				scriptedHistory.splice(i,1);
-			}
-		}
-		scriptedHistory.push(histItem);
+
 		
-		// arbitrarily keep track of 8 scriptedHistory items
-		// TODO should we have a .scripted setting to customize this?
-		while (scriptedHistory.length > 8) {
-			scriptedHistory.shift();
-		}
-		
-		setHistory(scriptedHistory);
-	};
-	
-	var storeBrowserState = function(histItem, doReplace) {
-		try {
-			if (doReplace) {
-				window.history.replaceState(histItem, histItem.filename, histItem.url);
-			} else {
-				window.history.pushState(histItem, histItem.filename, histItem.url);
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	};
-		
-	var isBinary = function(filepath) {
+	var isBinary = function(path) {
 		try {
 			var xhrobj = new XMLHttpRequest();
-			var url = 'http://localhost:7261/get?file=' + filepath;
+			var url = GET_URL + path;
 			xhrobj.open("GET", url, false); // synchronous xhr
 			xhrobj.send();
 			if (xhrobj.readyState === 4) {
@@ -156,7 +89,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				}
 			}
 		} catch (e) {
-			console.log(filepath);
+			console.log("Error getting " + path);
 			console.log(e);
 			return true;
 		}
@@ -164,57 +97,43 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 
 
-	/*
-		This handles navigations from
-			-Navigator
-			-Breadcrumb
-			-Open File
-	*/
+	/**
+	 * Handles navigation requests from clicking on links
+	 */
 	var handleNavigationEvent = function(event, editor) {
-		var filepath = event.testTarget ? event.testTarget : (
+		var url = event.testTarget ? event.testTarget : (
 			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
-		var query_index = filepath.indexOf('?');
-		if (query_index !== -1) {
-			filepath = filepath.substring(query_index+1, filepath.length);
-		}
-		
-		var hashIndex = filepath.indexOf('#');
-		var range;
-		if (hashIndex !== -1) {
-			try {
-				range = JSON.parse("[" + filepath.substring(hashIndex+1) + "]");
-			} catch (e) {
-				console.log("Invalid hash: " + filepath);
+		var pageState = mPageState.extractPageStateFromUrl(url);
+		if (pageState.main) {
+			var path = pageState.main.path;
+			if (isBinary(path)) {
+				alert("Cannot open binary files");
+				return false;
 			}
-			filepath = filepath.substring(0, hashIndex);
-		}
-		if (!range) {
-			// try to get range from history
-			var histItem = getHistoryAsObject()[filepath];
-			if (histItem) {
-				range = histItem.range;
-			}
-		}
-		
-		if (isBinary(filepath)) {
-			alert("Cannot open binary files");
-			return false;
-		}
-		
 
-		
-		var target = findTarget(event);
-		if (editor) {
-			// if coming from sub-editor, we want to stay in same editor if no modifiers are used
-			if (editor.type === EDITOR_TARGET.sub) {
-				if (target === EDITOR_TARGET.sub) {
-					target = EDITOR_TARGET.main;
-				} else if (target === EDITOR_TARGET.main) {
-					target = EDITOR_TARGET.sub;
+			var range = pageState.main.rangel;
+			if (!range) {
+				// try to get range from history
+				var histItem = mPageState.getHistoryAsObject()[path];
+				if (histItem) {
+					range = histItem.range;
 				}
 			}
+			var target = findTarget(event);
+			if (editor) {
+				// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+				if (editor.type === EDITOR_TARGET.sub) {
+					if (target === EDITOR_TARGET.sub) {
+						target = EDITOR_TARGET.main;
+					} else if (target === EDITOR_TARGET.main) {
+						target = EDITOR_TARGET.sub;
+					}
+				}
+			}
+			navigate(path, range, target, true);	
+		} else {
+			// not a valid url
 		}
-		navigate(filepath, range, target, true);	
 		return false;
 	};
 	
@@ -298,7 +217,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		var defnrange = definition.range ? definition.range : editor.getSelection();
 		var filepath = definition.path ? definition.path : editor.getFilePath();
 		
-		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
+		console.log("navigation: "+JSON5.stringify({path: filepath, range: defnrange}));
 		
 		var target;
 		if (typeof modifier === "object") {
@@ -334,6 +253,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	/**
 	 * Adds one-time configuration to the main editor
+	 * TODO Should go somewhere else
 	 */
 	var buildMaineditor = function() {
 		$('#editor').click(function(event) {
@@ -420,11 +340,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#main').append(historyMenu);
 		
 		
-		var history = getHistory();
+		var history = mPageState.getHistory();
 		
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
-			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
+			var newHistoryAnchor = $('<a href="' + mPageState.generateUrl(history[i]) + '">' + 
+				history[i].path.split('/').pop() + '</a>');
 			$(newHistoryAnchor).click(handleNavigationEvent);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
@@ -433,7 +354,6 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	var initializeBreadcrumbs = function(path) {
 		var root = window.fsroot;
-		var basepath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
 	
 //		$('#breadcrumb li:not(:first)').remove();
 		$('.breadcrumb_menu').remove();
@@ -453,11 +373,11 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				constructedPath += crumbs[i];
 			} else {
 				constructedPath += crumbs[i] + '/';
-				url = 'http://localhost:7261/fs_list/'+constructedPath.substring(0, constructedPath.length-1);
+				url = FS_LIST_URL + constructedPath.substring(0, constructedPath.length-1);
 				xhrobj = new XMLHttpRequest();
 				xhrobj.open("GET",url,false); // TODO naughty? synchronous xhr
 				xhrobj.send();
-				var kids = JSON.parse(xhrobj.responseText).children;
+				var kids = JSON5.parse(xhrobj.responseText).children;
 				if (kids) {
 
 					kids.sort(fileEntryCompare);
@@ -466,7 +386,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					for(var j = 0; j < kids.length; j++) {
 						if (kids[j].directory === false) {
 							if (kids[j].name.lastIndexOf('.',0)!==0) {
-								var href = basepath + kids[j].Location;
+								var href = mPageState.generateUrl(kids[j].Location);
 								var newMenuItem = $('<li></li>');
 								var newMenuAnchor = $('<a href="'+href+'">'+kids[j].name+'</a>');
 								newMenuItem.append(newMenuAnchor);
@@ -687,15 +607,25 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 		return editor;
 	};
+	
+	var setupPage = function(state, doSaveState) {
+		if (state.main) {
+			navigate(state.main.path, state.main.range, EDITOR_TARGET.main, doSaveState);
+			if (state.side) {
+				navigate(state.side.path, state.side.range, EDITOR_TARGET.sub, doSaveState);
+			}
+		} else {
+			navigate(state.path, state.range, EDITOR_TARGET.main);
+		}
+	};
 
 	/**
 	 * handles the onpopstate event
 	 */
 	var popstateHandler = function(event) {
-		var target = findTarget(event);
 		var state = event.originalEvent.state;
-		if (state && state.filepath) {
-			navigate(state.filepath, state.range, target);
+		if (state) {
+			setupPage(state);
 			return false;
 		} else {
 			return true;
@@ -716,20 +646,23 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 * @return {boolean} true if navigation occurred successfully and false otherwise.
 	 */
 	navigate = function(filepath, range, target, doSaveState) {
-		var histItem;
+		var mainItem;
 		// check if the editor has been created yet, or if
 		// window.editor is a dom node
 		var hasMainEditor = window.editor && window.editor.getText;
 		var hasSubEditpr = hasMainEditor && window.subeditors.length > 0;
 		if (hasMainEditor) {
-			histItem = generateHistoryItem(window.editor);
-			storeScriptedHistory(histItem);
-			if (doSaveState) {
-				storeBrowserState(histItem, true);
-			}
+			mainItem = mPageState.generateHistoryItem(window.editor);
+			mPageState.storeScriptedHistory(mainItem);
+			var sideItem;
 			if (hasSubEditpr) {
-				histItem = generateHistoryItem(window.subeditors[0]);
-				storeScriptedHistory(histItem);
+				sideItem = mPageState.generateHistoryItem(window.subeditors[0]);
+				mPageState.storeScriptedHistory(sideItem);
+			}
+			
+			// replace existing history with current page state (ie- update selection ranges and scroll pos
+			if (doSaveState) {
+				mPageState.storeBrowserState(mainItem, sideItem, true);
 			}
 		}
 
@@ -778,25 +711,26 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				}
 				initializeBreadcrumbs(filepath);
 				window.editor = targetEditor;
-				if (doSaveState) {
-					histItem = generateHistoryItem(targetEditor);
-					storeBrowserState(histItem);
-				}
 			} else {
 				window.subeditors[0] = targetEditor;
 				initializeHistoryMenu();
 			}
+			
+			// now add a history entry for the new page state
+			if (doSaveState) {
+				mPageState.storeBrowserState(
+					mPageState.generateHistoryItem(window.editor), 
+					window.subeditors && window.subeditors.length > 0 ? mPageState.generateHistoryItem(window.subeditors[0]) : null);
+			}
 			targetEditor.getTextView().focus();
 
 		} else if (target === EDITOR_TARGET.tab) {
-			var targetPath = range ? filepath + "#" + range : filepath;
-			var rootpath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
-			window.open(rootpath + targetPath);
+			window.open(mPageState.generateUrl({path:filepath, range:range}));
 		}
 
 		return false;
 	};
-		
+	
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
@@ -808,6 +742,6 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
-		navigate: navigate
+		setupPage: setupPage
 	};
 });

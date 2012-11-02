@@ -14,8 +14,10 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searchUtils', 'servlets/jsdepend-client',
-	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-file-search-client' ], function(require, dojo, dijit, /*mAuth, */mUtil, mSearchUtils, jsdepend) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/searchUtils', "scripted/utils/pageState", 'servlets/jsdepend-client',
+	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-file-search-client' ], 
+	
+	function(require, dojo, dijit, mUtil, mSearchUtils, mPageState, jsdepend) {
 
 //	var findFileNamesContaining = jsdepend.findFileNamesContaining; 
 	var isearch = require('servlets/incremental-file-search-client');
@@ -289,7 +291,7 @@ define(['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searc
 					col.colspan = 2;
 					var resourceLink = document.createElement('a');
 					dojo.place(document.createTextNode(resource.name), resourceLink);
-					if (resource.LineNumber) { // FIXME LineNumber === 0 
+					if (resource.LineNumber) { // TODO LineNumber === 0 
 						dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink);
 					}
 					var loc = resource.location;
@@ -297,8 +299,7 @@ define(['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searc
 						// should open link in new tab, but for now, follow the behavior of navoutliner.js
 						loc = resource.path;
 					} else {
-						//loc = "http://localhost:8888/editor.html?"+resource.path;
-						loc = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + resource.path;								
+						loc = mPageState.generateUrl(resource.path);
 					}
 
 					resourceLink.setAttribute('href', loc);

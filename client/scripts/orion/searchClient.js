@@ -13,8 +13,10 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searchUtils', 'servlets/jsdepend-client',
-	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-search-client' ], function(require, dojo, dijit, /*mAuth, */mUtil, mSearchUtils, jsdepend) {
+define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orion/util', 'orion/searchUtils', 'scripted/utils/pageState', 'servlets/jsdepend-client',
+	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-search-client' ], 
+	
+	function(require, dojo, dijit, /*mAuth, */mUtil, mSearchUtils, mPageState, jsdepend) {
 
 	var findFileNamesContaining = jsdepend.findFileNamesContaining;
 	var isearch = require('servlets/incremental-search-client');
@@ -30,10 +32,6 @@ define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orio
 			'folderName':parent,
 			'directory':parent
 		};
-	}
-	function getFileName(path) {
-		var segments = path.split('/');
-		segments.splice(-1,1);
 	}
 
 	/**
@@ -63,11 +61,8 @@ define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orio
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
 		search: function(query, excludeFile, renderer) {
-			//console.log("incoming query is "+query);
-
-			var filetoedit = window.location.getPath();
-			//console.log("current file is " + filetoedit);
-
+			// TODO this is not right.  Why are we using the main editor here?
+			var filetoedit = window.editor.getFilePath();
 			renderer.start(query);
 			var activeSearch = isearch(filetoedit, query, {
 				//	maxResults: 30, (if not specified then a default value is chosen by the server)
@@ -277,21 +272,12 @@ define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orio
 						if (resource.LineNumber) { // FIXME LineNumber === 0 
 							dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink);
 						}
-						var loc = resource.location;
+						var loc;
 						if (resource.isExternalResource) {
 							// should open link in new tab, but for now, follow the behavior of navoutliner.js
 							loc = resource.path;
 						} else {
-							//loc = "http://localhost:7261/editor.html?"+resource.path;
-							loc = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + resource.path;								
-	/*								
-							loc	= resource.directory ? 
-									require.toUrl("navigate/table.html") + "#" + resource.path : 
-									require.toUrl("edit/edit.html") + "#" + resource.path;
-							if (loc === "#") {
-								loc = "";
-							}
-	*/
+							loc = mPageState.generateUrl(resource.path);
 						}
 	
 						resourceLink.setAttribute('href', loc);
@@ -397,21 +383,12 @@ define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orio
 							if (resource.LineNumber) { // FIXME LineNumber === 0 
 								dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink);
 							}
-							var loc = resource.location;
+							var loc;
 							if (resource.isExternalResource) {
 								// should open link in new tab, but for now, follow the behavior of navoutliner.js
 								loc = resource.path;
 							} else {
-//								loc = "http://localhost:7261/editor.html?"+resource.path;
-								loc = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + resource.path;								
-/*								
-								loc	= resource.directory ? 
-										require.toUrl("navigate/table.html") + "#" + resource.path : 
-										require.toUrl("edit/edit.html") + "#" + resource.path;
-								if (loc === "#") {
-									loc = "";
-								}
-*/
+								loc = mPageState.generateUrl(resource.path);
 							}
 		
 							resourceLink.setAttribute('href', loc);

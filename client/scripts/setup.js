@@ -16,11 +16,6 @@
 
 /*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
-window.location.getPath = function(){
-	var url = this.search.substr(1);
-	url = url.replace(/%20/g, " "); // replace all %20's with spaces
-	return url;
-};
 
 /**
  * Set to false to disable a category
@@ -103,18 +98,16 @@ requirejs.config({
 });
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
-		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/utils/os", 
+		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os", 
 		 "scripted/exec/exec-console", "scripted/exec/exec-on-load"], 
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend, mOsUtils,
-		mExecConsole) {
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, 
+		mPageState, mJsdepend, mOsUtils, mExecConsole) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
 	}
 
-	var filepath = window.location.getPath();
-	
 	/**
 	 * This function will perform checks on the configuration and where appropriate ensure options are consistent.
 	 * Currently, it:
@@ -186,9 +179,10 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		}
 	};
 	
+	var pageState = mPageState.extractPageState(location.hash, location.search);
 	
 	// TODO why is getConf on jsdepend?
-	mJsdepend.getConf(filepath, function (dotScripted) {
+	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
 		console.log("fetched dot-scripted conf from server");
 //		console.log(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
 		window.fsroot = dotScripted.fsroot;
@@ -239,20 +233,11 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		});
 
 		window.explorer = explorer;
-		var range;
-		try {
-			range = JSON.parse('[' + location.hash.substring(1) +']');
-			if (!range.length || range.length < 2) {
-				range = null;
-			}
-		} catch (e) {
-		}
-		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {
 					//	mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
 					// highlight the row we are using
-				setTimeout(function() {explorer.highlight(filepath);},500);
+				setTimeout(function() {explorer.highlight(pageState.main.path);},500);
 			});
 		} else {
 			$('#editor').css('margin-left', 0);
@@ -260,7 +245,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			$('#explorer-tree').remove();
 		}
 		window.subeditors = [];
-		mNavHistory.navigate(filepath, range, "main", false);
+		mNavHistory.setupPage(pageState, false);
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
