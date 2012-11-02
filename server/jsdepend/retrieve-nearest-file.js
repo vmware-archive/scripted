@@ -36,7 +36,7 @@ function configure(filesystem) {
 	 */
 	function getRootDir(context, wheretostop, searchName, callback) {
 		if (context===wheretostop) {
-			callback(false);
+			return callback(false);
 		}
 		var dir = getDirectory(context);
 		if (dir) {
