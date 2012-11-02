@@ -49,9 +49,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	if ((this.window && this.window.Worker) && !this.window.isTest) {
 		try {
 			// comment this line out if you want to run w/o webworkers
-			worker = new Worker('scripts/plugins/esprima/indexerWorker.js');
+			worker = new Worker('/scripts/plugins/esprima/indexerWorker.js');
 		} catch (e) {
 			if (this.console) {
+				// TODO temporarily add the popup for debugging on firefox
+				this.alert("Webworker not found");
 				this.console.error(e);
 			} else {
 				throw e;
@@ -59,7 +61,13 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 		}
 	} else {
 		if (this.console) {
-			this.console.warn("Web worker not available for background indexing.  Falling back to in-browser indexing.");
+			if (this.window.isTest) {
+				this.console.warn("Not using webworker since in a test");
+			} else {
+				// TODO temporarily add the popup for debugging on firefox
+				this.alert("Webworker not found");
+				this.console.warn("Web worker not available for background indexing.  Falling back to in-browser indexing.");
+			}
 		}
 	}
 
