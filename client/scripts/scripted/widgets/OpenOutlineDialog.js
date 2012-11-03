@@ -222,6 +222,7 @@ var OpenOutlineDialog = dojo.declare("scripted.widgets.OpenOutlineDialog", [diji
 	/** @private */
 	onHide: function() {
 		this.inherited(arguments);
+		this.editor.focus();
 	}
 	
 });

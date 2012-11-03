@@ -261,6 +261,7 @@ var OpenResourceDialog = dojo.declare("scripted.widgets.OpenResourceDialog", [di
 		}
 		clearTimeout(this.timeoutId);
 		this.inherited(arguments);
+		this.editor.focus();
 	}
 	
 });

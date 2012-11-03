@@ -337,6 +337,7 @@ var SearchDialog = dojo.declare("scripted.widgets.SearchDialog", [dijit.Dialog, 
 			delete this.activeFileSearch;
 		}
 		this.inherited(arguments);
+		this.editor.focus();
 	}
 	
 });
