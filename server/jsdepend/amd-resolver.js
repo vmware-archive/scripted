@@ -326,7 +326,7 @@ function configure(conf) {
 				getContents(jsFile, function (jsCode) {
 					conf = getAmdConfigFromCode(jsCode) || conf;
 					conf.baseDir = conf.baseDir || baseDir; //ensure we always have a baseDir set.
-					console.log("conf.baseDir = "+baseDir);
+					//console.log("conf.baseDir = "+baseDir);
 					callback(conf);
 				});
 			} else {
