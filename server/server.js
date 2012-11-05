@@ -19,14 +19,14 @@
 var express = require('express');
 
 function start(route, handle) {
-	function onRequest(req, res) {
+	function onRequest(req, res, next) {
 		var path = req.path;
 		// Don't bother for favicon.ico
 		if (path === '/favicon.ico') {
 			return;
 		}
 		//console.log("Request for " + path + " received.");
-		route(handle, path, res, req);
+		route(handle, path, res, req, next);
 	}
 
 	var app = express.createServer();
@@ -34,7 +34,7 @@ function start(route, handle) {
 	app.configure(function() {
 		app.use(app.router);
 		app.use(onRequest); // bridge to 'servlets', we should remove over time
-		app.use(express.static(process.env.PWD + '/../client'));
+		app.use(express.static(process.env.PWD + '/../client'), { maxAge: 6e5 });
 		app.use(express.errorHandler({
 			dumpExceptions: true,
 			showStack: true
