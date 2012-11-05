@@ -42,15 +42,16 @@
 			$(window).unbind('popstate', popper);
 			return false; 
 		};
-		$(window).bind('popstate', popper);
-		window.location.search = testResourcesRoot + 'foo.js';
-		window.location.hash = "";
+		
+		if (window.location.search !== "?" + testResourcesRoot + 'foo.js') {
+			history.pushState(null, "Starting", "?" + testResourcesRoot + 'foo.js');
+		}
 	}
 	
 	$('document').ready(function() {
 		// first ensure that the url is correct
 		window.setTimeout(function() {
-//			fixUrl();		
+			fixUrl();		
 			require(["js-tests/navHistory/navHistoryTests"], 
 				function(navHistoryTests) {
 					function testShim(tests) {

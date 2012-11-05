@@ -119,6 +119,9 @@ define(['lib/json5'], function() {
 			}
 		
 			var hashIndex = url.indexOf('#');
+			if (hashIndex < 0) {
+				hashIndex = url.length;
+			}
 			var queryIndex = url.indexOf('?');
 			var path;
 			if (queryIndex >= 0 && queryIndex < hashIndex) {

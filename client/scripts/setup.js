@@ -179,6 +179,18 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		}
 	};
 	
+	// Create new FileExplorer
+	var explorer  = new mExplorerTable.FileExplorer({
+		//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
+		//searcher: searcher, fileClient: fileClient, commandService: commandService,
+		//contentTypeService: contentTypeService,
+		parentId: "explorer-tree"
+		//breadcrumbId: "location", toolbarId: "pageActions",
+	    //selectionToolsId: "selectionTools", preferences: preferences
+	});
+
+	window.explorer = explorer;
+	
 	var pageState = mPageState.extractPageState(location.hash, location.search);
 	
 	// TODO why is getConf on jsdepend?
@@ -222,17 +234,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		
 		processConfiguration();
 		
-		// Create new FileExplorer
-		var explorer  = new mExplorerTable.FileExplorer({
-			//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
-			//searcher: searcher, fileClient: fileClient, commandService: commandService,
-			//contentTypeService: contentTypeService,
-			parentId: "explorer-tree"
-			//breadcrumbId: "location", toolbarId: "pageActions",
-		    //selectionToolsId: "selectionTools", preferences: preferences
-		});
-
-		window.explorer = explorer;
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {
 					//	mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
