@@ -643,10 +643,10 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		// when navigating, don't store browser state, since that 
 		// is taken care of in this function
 		if (state.main) {
+			navigate(state.main, EDITOR_TARGET.main, false);
 			if (state.side) {
 				navigate(state.side, EDITOR_TARGET.sub, false);
 			}
-			navigate(state.main, EDITOR_TARGET.main, false);
 		} else {
 			navigate(state, EDITOR_TARGET.main, false);
 		}

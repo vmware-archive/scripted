@@ -37,7 +37,7 @@ var scriptedLoggerCategories = {
 
 var scriptedLogger = {
 	SHOW_CALLER : false,
-	INFO : true, 
+	INFO : true,
 	DEBUG : true,
 	WARN : true,
 	ERROR : true,  // I don't know why we'd want to disable error handling, but I'll keep it here
@@ -93,16 +93,17 @@ requirejs.config({
 		fileapi: 'scripted/fileapi',
 		'esprima/esprima' : 'lib/esprima/esprima',
 		'doctrine/doctrine' : 'lib/doctrine/doctrine',
-		jshint: 'lib/jshint-r12-80277ef'
+		jshint: 'lib/jshint-r12-80277ef',
+		when: 'lib/when-aaa0898-1.6.1'
 	}
 });
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os", 
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load"], 
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"], 
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, 
-		mPageState, mJsdepend, mOsUtils, mExecConsole) {
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
+		mExecConsole, mExecOnLoad, mWhen) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -190,32 +191,28 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	});
 
 	window.explorer = explorer;
-	
+
 	var pageState = mPageState.extractPageState(location.hash, location.search);
-	
-	// TODO why is getConf on jsdepend?
-	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
-		console.log("fetched dot-scripted conf from server");
-//		console.log(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
-		window.fsroot = dotScripted.fsroot;
-		window.scripted.config = dotScripted;
-		
-		// Locate the nearest .jshintrc. It will look relative to the initially opened 
-		// location - so ok if the .jshintrc is at the project root. But if the file is
-		// elsewhere in the tree it sometimes won't find it depending on what is opened.
+
+	/* Locate the nearest .jshintrc. It will look relative to the initially opened 
+	 * location - so ok if the .jshintrc is at the project root. But if the file is
+	 * elsewhere in the tree it sometimes won't find it depending on what is opened.
+	 */
+	var loadJshintrc = function() {
 		// TODO fix it up to do a better job of finding it
 		// TODO return value shouldn't be trampling on the config object itself, should be an object in
 		// which the config is a member.
 		// TODO a timing window problem does exist here - where if the .jshintrc file isn't 
 		// found quickly enough the first linting will not respect it. fix it!
+		var deferred = mWhen.defer();
 		mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
 			if (jshintrc && jshintrc.fsroot) {
 				// it was found at that location
-				console.log("Found .jshintrc at "+jshintrc.fsroot);
+				scriptedLogger.info("Found .jshintrc at "+jshintrc.fsroot);
 				if (jshintrc.error) {
-					console.error(jshintrc.error);
+					scriptedLogger.error(jshintrc.error);
 				} else {
-//					console.log(JSON.stringify(jshintrc,null," "));
+//					scriptedLogger.info(JSON.stringify(jshintrc,null," "));
 					window.scripted.config.jshint = jshintrc;
 					if (!window.scripted.config.editor) {
 						window.scripted.config.editor = { "linter": "jshint" };
@@ -224,15 +221,28 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				}
 			} else {
-				console.log("No .jshintrc found");
+				scriptedLogger.info("No .jshintrc found");
 			}
+			deferred.resolve();
 		});
+		return deferred.promise;
+	};
+	
+	// TODO why is getConf on jsdepend?
+	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
+		scriptedLogger.info("fetched dot-scripted conf from server");
+//		scriptedLogger.info(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
+		window.fsroot = dotScripted.fsroot;
+		window.scripted.config = dotScripted;
+		
 		if (window.scripted.config && window.scripted.config.ui && window.scripted.config.ui.navigator===false) {
 			window.scripted.navigator=false; // default is true
 			$('#navigator-wrapper').hide();
 		}
 		
 		processConfiguration();
+		// Start the search for .jshintrc
+		window.scripted.promises = { "loadJshintrc": loadJshintrc()};
 		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {

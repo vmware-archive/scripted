@@ -52,6 +52,7 @@ function configure(conf) {
 	var variablePat = treeMatcher.variablePat;
 	var arrayWithElementPat = treeMatcher.arrayWithElementPat;
 	var mapPaths = require('./amd-path-mapper').mapPaths;
+	var startsWith = require('./utils').startsWith;
 	
 	function endsWith(str, suffix) {
 		return str.indexOf(suffix, str.length - suffix.length) !== -1;
@@ -80,7 +81,7 @@ function configure(conf) {
 		});
 	}
 
-	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths"]));
+	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths", "packages"]));
 	
 	function findCurlConfigBlock(tree) {
 	
@@ -325,7 +326,7 @@ function configure(conf) {
 				getContents(jsFile, function (jsCode) {
 					conf = getAmdConfigFromCode(jsCode) || conf;
 					conf.baseDir = conf.baseDir || baseDir; //ensure we always have a baseDir set.
-					console.log("conf.baseDir = "+baseDir);
+					//console.log("conf.baseDir = "+baseDir);
 					callback(conf);
 				});
 			} else {
@@ -382,7 +383,7 @@ function configure(conf) {
 			if (curlPath && CURL_JS.test(curlPath)) {
 				//The second one loads another js file that is supposed to
 				//configure curl and kick-off the app. It is typically called
-				//"app/run.js" but we will not assume that.
+				//"app/run.js" in a 511 project but we will not assume that.
 				tag = scriptTags[1];
 				var appJsPath = deref(tag, ["attribs", "src"]);
 				if (appJsPath) {
@@ -470,16 +471,28 @@ function configure(conf) {
 		}
 	}
 	 
+	function isRelative(path) {
+		return startsWith(path, './') || startsWith(path, '../');
+	}
+	
+	 
 	function amdResolver(context, dep, callback) {
-		getAmdConfig(context, function (resolverConf) {
-			//console.log(resolverConf);
-			var dir = resolverConf.baseDir || getDirectory(context);
-			var searchFor = mapPaths(resolverConf, dep.name);
-			searchFor = searchFor + '.js'; //TODO: handle case where file amd module
-												//name ends with .js already.
-			dep.path = pathResolve(dir, searchFor);
-			callback(dep);
-		});
+		if (isRelative(dep.name)) {
+			//Relative resolution doesn't require the resolverConf so avoid fetching it
+			var baseDir = getDirectory(context); //relative to context file, not global config
+			dep.path = pathResolve(baseDir, dep.name + ".js"); //TODO: case where already has .js?
+			return callback(dep);
+		} else {
+			getAmdConfig(context, function (resolverConf) {
+				//console.log(resolverConf);
+				var dir = resolverConf.baseDir || getDirectory(context);
+				var searchFor = mapPaths(resolverConf, dep.name);
+				searchFor = searchFor + '.js'; //TODO: handle case where amd module
+											   //name ends with .js already.
+				dep.path = pathResolve(dir, searchFor);
+				callback(dep);
+			});
+		}
 	}
 	
 	//A 'resolver support' module provides a resolver for a particular kind of dependency.

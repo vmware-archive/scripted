@@ -376,6 +376,10 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 		},
 		
+		focus: function() {
+			this._textView.focus();
+		},
+		
 		/**
 		 * Creates the underlying TextView and installs the editor's features.
 		 */

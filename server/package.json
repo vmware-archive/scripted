@@ -8,7 +8,8 @@
     "formidable":"1.0.9",
 	"sockjs":"0.3.1",
     "amdefine": "0.0.2", 
-    "htmlparser": "1.7.6"
+    "htmlparser": "1.7.6",
+    "when": "1.6.1"
   },
   "devDependencies": {},
   "optionalDependencies": {},

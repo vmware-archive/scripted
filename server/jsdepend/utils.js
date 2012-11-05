@@ -298,6 +298,9 @@ function deref(obj, props) {
 	return it;
 }
 
+function startsWith(string, prefix) {
+	return string.substring(0, prefix.length)===prefix;
+}
 	
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
@@ -314,6 +317,7 @@ exports.extend = extend;
 exports.toRegexp = toRegexp;
 exports.ork = ork;
 exports.deref = deref;
+exports.startsWith = startsWith;
 
 //////////////////////////////////////////
 });

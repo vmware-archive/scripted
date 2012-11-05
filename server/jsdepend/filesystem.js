@@ -28,16 +28,19 @@
 var nodeNatives = require('./node-natives');
 
 function ignore(name) {
-	var result = (
-		typeof(name)!=='string' || 
-		name.length<=1 || 
-		name[0]==='.'
-	) && !(
-		name==='.scripted' || 
-		name ==='.project'
-	);
-	result = result || name==='scripted.log';
-	//console.log('ignore? '+name+' => '+result);
+	var result = false;
+	if (typeof(name)!=='string') {
+		result = true;
+	} else if (name.length<=1) {
+		result = true;
+	} else if (name===".git") {
+		result = true;
+	} else if (name===".svn") {
+		result = true;
+	} else if (name === "scripted.log") {
+		result = true;
+	}
+	// console.log('ignore? '+name+' => '+result);
 	return result;
 }
 

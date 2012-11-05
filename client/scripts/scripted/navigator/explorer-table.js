@@ -93,11 +93,19 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 							// skip kids that start '.'
 							if (children) {
 								var newchildren = [];
+								// TODO move to serverside and make it consistent with search/lookfor - see filesystem.js.ignore()
 								for (var i=0;i<children.length;i++) {
 									var kid = children[i];
-									if (kid.name.lastIndexOf('.',0)!==0) {
+									if (kid.name[0]!=='.' || !(kid.name==='.git' || kid.name==='.svn')) {
 										newchildren.push(kid);
 									}
+//									if (kid.name.lastIndexOf('.',0)!==0) {
+//										newchildren.push(kid);
+//									} else {
+//										if (kid.name !== '.git' && kid.name !== '.svn') {
+//											newchildren.push(kid);
+//										}
+//									}
 								}
 								children = newchildren;
 								children = children.sort(function (a,b) {
@@ -606,9 +614,13 @@ if (mExtensionCommands) {
 							var newchildren = [];
 							for (var i=0;i<response.children.length;i++) {
 								var kid = response.children[i];
-								if (kid.name.lastIndexOf('.',0)!==0) {
+								// TODO this is duplicate code 								
+								if (kid.name[0]!=='.' || !(kid.name==='.git' || kid.name==='.svn')) {
 									newchildren.push(kid);
 								}
+//								if (kid.name.lastIndexOf('.',0)!==0) {
+//									newchildren.push(kid);
+//								}
 							}
 							response.children = newchildren;
 							response.children = response.children.sort(function (a,b) {
