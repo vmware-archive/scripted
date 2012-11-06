@@ -377,7 +377,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				$.get(command_file, null, function(template){
 					var tmpl = $.templates(template);
 					$('#command_list').append(tmpl.render(importantKeyBindings));
-					$('#command_list').append('<li>========================</li>');				
+					$('#command_list').append('<li><hr /></li>');				
 					$('#command_list').append(tmpl.render(otherKeyBindings));
 				});
 
@@ -386,7 +386,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		});	
 
 		/*Command help panel*/
-		var help_panel_width = $('#help_panel').width();
 		var help_close, help_open;
 
 		help_open = function(){
@@ -412,7 +411,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		var footer_height = $('footer').outerHeight();
 		var header_height = $('header').outerHeight();
 		var breadcrumb_height = $('#breadcrumb').outerHeight();
-		var total_header_offset = header_height + breadcrumb_height;
 		var main_height = $(window).height() - footer_height - header_height;
 
 		$('#main').height(main_height);
