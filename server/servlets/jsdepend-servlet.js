@@ -25,7 +25,7 @@ var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 
 var conf = configuration.withBaseDir(null);
-conf.sloppy = true;
+conf.sloppy = false;
 var api = apiMaker.configure(conf);
 
 var basePath = "/jsdepend"; 

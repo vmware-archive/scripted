@@ -51,38 +51,51 @@ var requirePat = objectPat({
 	} ]
 });
 
-// Given a parse-tree, find references to other modules in that module. 
-function findReferences(tree, callback) {
+/**
+ * We use this commonjs references finder both for straigh-up 'commonjs' modules
+ * but also for 'commonjs,AMD' modules (i.e. commonjs wrapped inside an amd
+ * compatibility wrapper).
+ * <p>
+ * Thus a commonjs reference finder needs to be configured with its module type.
+ */
+function configure(moduleType) {
 
-	var foundList = [];
-	var foundSet = {};
-	
-	function addFound(name) {
-		if (typeof(name)==='string') {
-			if (!foundSet.hasOwnProperty(name)) {
-				foundSet[name] = true;
-				foundList.push(name);
+	// Given a parse-tree, find references to other modules in that module. 
+	function findReferences(tree, callback) {
+
+		var foundList = [];
+		var foundSet = {};
+		
+		function addFound(name) {
+			if (typeof(name)==='string') {
+				if (!foundSet.hasOwnProperty(name)) {
+					foundSet[name] = true;
+					foundList.push(name);
+				}
 			}
 		}
-	}
-	
-	walk(tree, function (node) {
-		//dumpTree(node);
-		if (matches(requirePat, node)) {
-			var name = requireParam.value;
-			addFound(name);
-		}
-		return true;
-	});
+		
+		walk(tree, function (node) {
+			//dumpTree(node);
+			if (matches(requirePat, node)) {
+				var name = requireParam.value;
+				addFound(name);
+			}
+			return true;
+		});
 
-	callback(foundList.map(function (name) {
-		return {
-			kind: 'commonjs',
-			name: name
-		};
-	}));
+		callback(foundList.map(function (name) {
+			return {
+				kind: moduleType,
+				name: name
+			};
+		}));
+	}
+
+	return findReferences;
+
 }
 
-exports.findReferences = findReferences;
+exports.configure = configure;
 
 });

@@ -29,7 +29,7 @@ var searchFile = require('../textsearch/searcher').searchFile;
 //var fileindexer = require('../jsdepend/file-indexer').configure(conf);
 var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
 
-var LOG_SOCKET_COUNT = true;
+var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
 					  // Note that the walker can not be paused in the middle of a file
 					  // just yet (the contents of the file is not walked in a pausable way)

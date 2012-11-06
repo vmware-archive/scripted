@@ -99,8 +99,8 @@ exports.commonjsRefs = function (test) {
 		//dumpTree(parseTree);
 		findReferences(parseTree, function (references) {
 			test.equals(toCompareString(references), toCompareString([
-				{kind: 'commonjs', name: 'amdefine'}, //TODO: perhaps we should filter this out.
-				{kind: 'commonjs', name: './utils'}
+				{kind: 'commonjs,AMD', name: 'amdefine'}, //TODO: perhaps we should filter this out.
+				{kind: 'commonjs,AMD', name: './utils'}
 			]));
 			test.done();
 		});	

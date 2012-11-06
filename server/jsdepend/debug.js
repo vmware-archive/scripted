@@ -23,10 +23,13 @@
 //	//.likeScripted;
 //	.findAmdConfigIn511Project;
 
-var testCase = require('./resolver-test')
-	.resolveInScriptsFolder;
+//var testCase = require('./resolver-test')
+//	.resolveInScriptsFolder;
 //	.relatveRefsInAmdModuleDot;
 //	.amdResolveBasedOnPackagesConfig;
+
+var testCase = require('./reference-finder-test')
+	.commonjsRefs;
 
 testCase({
 	equals: function (a, b) {

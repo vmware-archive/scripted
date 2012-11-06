@@ -86,18 +86,19 @@ function callPat(name) {
 }
 
 var commonJsRequire = notWithinPat(callPat('define'), callPat('require'));
-var commonJs = orPat([
-	containsPat(orPat([
-		commonJsDefine, 
-		exportsAssignment
-	])),
+var commonJsPlain = orPat([
+	containsPat(exportsAssignment),
 	commonJsRequire
 ]);
+
+var commonJsWrapper = containsPat(commonJsDefine);
 
 function getModuleType(tree) {
 	if (matches(amdDefine, tree)) {
 		return 'AMD'; 
-	} else if (matches(commonJs, tree)) {
+	} else if (matches(commonJsWrapper, tree)) {
+		return 'commonjs,AMD';
+	} else if (matches(commonJsPlain, tree)) {
 		return 'commonjs';
 	} else {
 		return 'unknown';

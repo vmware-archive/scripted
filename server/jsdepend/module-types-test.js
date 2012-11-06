@@ -53,7 +53,7 @@ exports.nodeModuleWithAmdDefine = function (test) {
 	api.getContents("utils.js", function (contents) {
 		var parseTree = esprima.parse(contents);
 		//dumpTree(parseTree);
-		test.equals('commonjs', getModuleType(parseTree));
+		test.equals('commonjs,AMD', getModuleType(parseTree));
 		test.done();
 	});
 };
@@ -83,7 +83,7 @@ exports.bigFile = function (test) {
 	api.getContents("tree-matcher.js", function (contents) {
 		var parseTree = esprima.parse(contents);
 		//dumpTree(parseTree);
-		test.equals('commonjs', getModuleType(parseTree));
+		test.equals('commonjs,AMD', getModuleType(parseTree));
 		test.done();
 	});	
 };

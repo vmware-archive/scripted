@@ -85,93 +85,6 @@ function configure(config) {
 		});
 	}
 
-	/**
-	 * Create a 'store' to record the result of getTransitiveDependencies function. 
-	 * This store is used to keep track of all the dependencies we have found so far (i.e. the result
-	 * of the operation), as well as some state needed to detect cycles.
-	 */
-	function makeStore() {
-		var list = [];
-		var seen = {}; //The properties of this are path strings. It is assumed that the a path uniquely identifies
-					   //modules we have already seen (i.e. we have already processed them, or are currently processing them).
-					   //This is used to detect and break cycles.
-		return {
-			/**
-			 * Mark a given file handle as being processed. The function returns true if the mark was succesfully
-			 * added (i.e. it was not 'marked' before).
-			 *
-			 * @param String handle
-			 * @return boolean 
-			 */
-			mark: function (handle, mark) {
-				var notMarked = !seen.hasOwnProperty(handle);
-				if (notMarked) {
-					seen[handle] = true;
-				}
-				return notMarked;
-			},
-			/**
-			 * Add a dependency to the result.
-			 *
-			 * @param Dependency
-			 * @return void
-			 */
-			add: function (dep) {
-				//Avoid adding duplicates!
-				if (seen[dep.path]!=='added') {
-					seen[dep.path]='added';
-					list.push(dep);
-				}
-			},
-			/**
-			 * Retrieve all the dependencies in the order they where added.
-			 *
-			 * @return Array.<Dependency>
-			 */
-			getAll: function () {
-				return list;
-			}
-		};
-	}
-	
-	//Transitive version of getDependencies
-	function _getTransitiveDependencies(handle, callback, store) {
-		if (store.mark(handle)) {
-			getDependencies(handle, function (deps) {
-				eachk(deps, 
-					function (dep, k) {
-						//Called after we finish with the current dependency.
-						function atEnd() {
-							store.add(dep);
-							//process.nextTick(k); //To avoid the stack getting 'too deep'
-							k();
-						}
-						if (dep.path) {
-							_getTransitiveDependencies(dep.path, atEnd, store);
-						} else {
-							atEnd();
-						}
-					},
-					callback
-				);
-			});
-		} else {
-			//process.nextTick(callback);
-			callback();
-		}
-	}
-
-    function getTransitiveDependencies(handle, callback) {
-//		callback = logBack("getDependencies("+handle+") ==> ", callback);
-		var store = makeStore();
-		_getTransitiveDependencies(handle, 
-			function () {
-				callback(store.getAll());
-			},
-			store
-		);
-	}
-	
     /**
 	 * Create a 'store' to record the result of getDGraph function. 
 	 */
@@ -256,7 +169,6 @@ function configure(config) {
 	}
 	
 	getDGraph.remoteType =  ['JSON', 'callback'];
-	getTransitiveDependencies.remoteType = ['JSON', 'callback'];
 	getDependencies.remoteType = ['JSON', 'callback'];
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	findFileNamesContaining.remoteType =  ['JSON', 'JSON', 'callback', 'errback'];
@@ -267,7 +179,6 @@ function configure(config) {
 	return {
 		getContents: getContents,
 		getDependencies: getDependencies,
-		getTransitiveDependencies: getTransitiveDependencies,
 		getDGraph: getDGraph,
 		findFileNamesContaining: findFileNamesContaining,
 		getConf: getConf,

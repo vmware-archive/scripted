@@ -119,6 +119,10 @@ function withBaseDir(baseDir) {
 	}
 	
 	function getContents(handle, callback, errback) {
+		errback = errback || function (err) {
+			console.error(err);
+			callback(null, err);
+		};
 		if (isNativeNodeModulePath(handle)) {
 			var contents = nodeNatives.getCode(nativeNodeModuleName(handle));
 			if (contents) {

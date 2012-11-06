@@ -51,6 +51,9 @@ function makeApi(relativeBaseDir, sloppy) {
 			api[p] = api.forTesting[p];
 		}
 	}
+	
+	api.getContents = conf.getContents;	
+	api.findReferences = require('./reference-finder').findReferences;
 	return api;
 }
 
@@ -571,6 +574,25 @@ exports.amdResolveBasedOnPackagesConfig = function (test) {
 	api.resolve('goats/client/app/main.js', dep, function (dep) {
 		test.equals(dep.path, 'goats/client/lib/cola/cola-main.js');
 		test.done();
+	});
+};
+
+exports.commonsJsWrappedModuleInAmdEnabledContext = function (test) {
+	var api = makeApi('511');
+	var file = "goats/client/app/game/cola-user.js";
+	api.getContents(file, function (code) {
+		var tree = require('./parser').parse(code);
+		api.findReferences(tree, function (refs) {
+			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
+				toCompareString(["cola"])
+			);
+			api.resolve(file, refs, function (resolveds) {
+				test.equals(toCompareString(map(resolveds, function(ref) {return ref.path; })),
+					toCompareString(["goats/client/lib/cola/cola-main.js"])
+				);
+				test.done();
+			});
+		});
 	});
 };
 

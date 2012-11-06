@@ -25,7 +25,6 @@ define(function(require, exports, module) {
 	// it shouldn't be.
 	var signatures = {
 		getDependencies: ['JSON', 'callback'],
-		getTransitiveDependencies: ['JSON', 'callback'],
 		getContents: ['JSON', 'callback', 'errback'],
 		findFileNamesContaining: ['JSON', 'JSON', 'callback', 'errback'],
 		getDGraph: ['JSON', 'callback'],

@@ -189,10 +189,17 @@ function configure(conf) {
 		}
 	}
 	
+	var amdResolver = require('./amd-resolver').configure(conf).resolver;
+	var commonjsResolver = require('./commonjs-resolver').configure(conf).resolver;
+	
 	var resolvers = {
 		'list': listResolver,
-		'AMD': require('./amd-resolver').configure(conf).resolver,
-		'commonjs': require('./commonjs-resolver').configure(conf).resolver
+		'AMD': amdResolver,
+		'commonjs':commonjsResolver,
+		'commonjs,AMD': compose(amdResolver, commonjsResolver) 
+		//TODO: replace 'commonjs,AMD' resolver with a custom implementation.
+		// Custom resolver should try to pick the 'correct' resolver instead of 
+		// simply trying both of them.
 	};
 	if (sloppy) {
 		resolvers.AMD = compose(resolvers.AMD, searchByNameResolver);
@@ -214,7 +221,7 @@ function configure(conf) {
 	}
 
 	//resolve :: Handle -> UnresolvedDependency -> ResolvedDependency
-	//Curried function that first takes a handle identifying context.
+	//Function that first takes a handle identifying context.
 	//then takes a dep and callback. Resolves dependency in given context
 	//and passes resolved dependency to callback.
 	function resolve(context, dep, callback) {
