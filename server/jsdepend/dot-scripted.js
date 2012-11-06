@@ -57,7 +57,7 @@ function configure(filesystem) {
 					if (rootMarkerName) { 
 						callback(dir);
 					} else {
-						getRootDir(getDirectory(context), callback);
+						getRootDir(getDirectory(dir), callback);
 					}
 				}
 			);
