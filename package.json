@@ -1,33 +1,40 @@
 {
-  "name": "scripted",
-  "version": "0.2.0",
-  "description": "A fast and lightweight browser based code editor",
-  "keywords": [
-    "javascript",
-    "browser",
-    "code",
-    "editor"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/scripted-editor/scripted.git"
-  },
-  "bugs": {
-    "url": "http://github.com/scripted-editor/scripted/issues"
-  },
-  "contributors": [
-    "Andy Clement <andrew.clement@gmail.com>",
-    "Andrew Eisenberg <aeisenberg@vmware.com>",
-    "Alain Kalker <a.c.kalker@gmail.com>",
-    "Kris De Volder <kdvolder@vmware.com>"
-  ],
-  "bin": {
-    "scr": "./bin/scr",
-    "scripted": "./bin/scripted"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "license": "EPL",
-  "readmeFilename": "README.md"
+	"name": "scripted",
+	"version": "0.2.0",
+	"description": "A fast and lightweight browser based code editor",
+	"keywords": [ "javascript", "browser", "code", "editor" ],
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/scripted-editor/scripted.git"
+	},
+	"bugs": {
+		"url": "http://github.com/scripted-editor/scripted/issues"
+	},
+	"contributors": [
+		"Andy Clement <aclement@vmware.com>",
+		"Andrew Eisenberg <aeisenberg@vmware.com>",
+		"Alain Kalker <a.c.kalker@gmail.com>",
+		"Nieraj Singh <nierajsingh@vmware.com>",
+		"Scott Andrews <andrewss@vmware.com>"
+	],
+	"bin": {
+		"scr": "./bin/scr",
+		"scripted": "./bin/scripted"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+        "amdefine": "0.0.2",
+		"enhance-resolve": "https://github.com/kdvolder/enhanced-resolve/archive/master.tar.gz",
+        "express": "2.5.11",
+        "formidable": "1.0.9",
+        "htmlparser": "1.7.6",
+        "json5": "0.1.0",
+        "node-static": "0.5.9",
+        "sockjs": "0.3.1",
+        "when": "1.6.1"
+	},
+	"license": "EPL",
+	"readmeFilename": "README.md"
 }
