@@ -36,7 +36,7 @@ side : { // side panel can be specified as an array for multiple side panels
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
 define(['lib/json5'], function() {
-	var BASE_URL = location.origin + location.pathname;
+	var BASE_URL = location.protocol + "//" + location.hostname + ":" + location.port + location.pathname;
 	
 	
 	return {
