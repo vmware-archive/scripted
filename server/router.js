@@ -32,7 +32,7 @@ var jsdepend = new(stat.Server)('../jsdepend', {
     cache: 600
 });
 
-function route(handle, pathname, response, request) {
+function route(handle, pathname, response, request, next) {
     //console.log("About to route a request for " + request.url);
 
     // Check if there is a custom handler - if not then serve it as static content
@@ -94,22 +94,7 @@ function route(handle, pathname, response, request) {
             response.write(path.resolve('../play-area/'));
             response.end();
         } else {
-
-            //console.log("No request handler found for " + pathname+" so serving static content");
-            file.serve(request, response, function(err, result) {
-                if (err) {
-                    console.error('Error serving %s - %s', request.url, err.message);
-                    if (err.errno === process.ENOENT) {
-                        response.writeHead(404, {
-                            "Content-Type": "text/html"
-                        });
-                        response.write("404 Not found");
-                        response.end();
-                    }
-                } else {
-                    console.log('%s - %s', request.url, response.message);
-                }
-            });
+            next();
         }
     }
 }

@@ -216,23 +216,40 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
 		window.subeditors[0].setSelection(15, 25);
+//		$(window.editor._domNode).find('.textview').scrollTop(10);
+//		var scrollTop1 = $(window.editor._domNode).find('.textview').scrollTop();
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js", shiftKey:true });
 		window.subeditors[0].setSelection(5, 10);
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js", shiftKey:true });
 		window.subeditors[0].setSelection(6, 7);
+//		$(window.editor._domNode).find('.textview').scrollTop(12);
+//		var scrollTop2 = $(window.editor._domNode).find('.textview').scrollTop();
+		
 		
 		// this one is not stored in history yet
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		window.subeditors[0].setSelection(6, 8);
 		historyMenu = $("#history_menu");
 		
+		// TODO the scroll positions are a bit brittle and don't seem to work on firefox at all.
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+		var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
+		if (isFirefox) {
+			// scrollTop not working on firefox
+			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		} else {
+			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+		}
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
 		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+		if (isFirefox) {
+			// scrollTop not working on firefox
+			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		} else {
+			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+		}
 	};
 	
 	tests.asyncTestGetContentsSubEditor = function() {
