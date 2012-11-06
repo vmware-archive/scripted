@@ -1,45 +1,97 @@
 #!/bin/bash
 # Launch script for Scripted 
-
+ 
 # Does the following:
-# 1. locate any existing running node (big assumption that 'node scripted.js' is the node app we want)
-# 2. Kills it
-# 3. Calls 'launchnode' to start a new node
+# 1. locate any existing running node 
+# 2. kills server
+# 3. call 'launchnode' to start a new node
 # 4. Opens a URL that loads the editor - the url encodes the file we want to edit
 
+
+# Discover pid for server process
 pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
-# echo "pid = " $pid
+# echo "server pid = " $pid
 
-DIRNAME=`dirname "$0"`
+# Here is the linux equivalent of the code block below *sigh*
+#DIRNAME=`dirname $(readlink -f "$0")`
 
+# Assume the path 
+realScriptLocation=$0
+
+file=$1
+
+# If $0 is really a link, chase it down to the real location
+linked=`ls -l "$0" | grep " -> "`
+while [ ! -z "$linked" ]
+do
+    # echo "realScriptLocation currently $realScriptLocation"
+	linkedLocation=`echo $linked | sed 's/^.* -> \(.*\)$/\1/'`
+	# echo "linked location is $linkedLocation"
+
+	# cope with links to './foo' '../foo' 'foo'
+    firstchar=`echo $linkedLocation | head -c1`
+    if [ $firstchar == '/' ]
+    then
+    	# starts with slash, absolute location
+    	realScriptLocation=$linkedLocation
+    else
+    	# no slash, is there a dot?
+    	if [ $firstchar == '.' ]
+    	then
+			if [ `echo $linkedLocation | head -c2` == '..' ]
+			then
+				# echo "starts with dotdot"
+				# this does not cope with:
+				# - multiple '..' are not dereferenced
+				# - invoking from a non absolute path
+				dir=`dirname $realScriptLocation`
+				dir=`dirname $dir`
+				realScriptLocation=${dir}/`echo $linkedLocation | cut -c4-`
+			else
+				# echo "it is *probably* ./ then something"
+				dir=`dirname $realScriptLocation`
+				realScriptLocation=${dir}/`echo $linkedLocation | cut -c3-`
+			fi
+    	else
+			# echo "no dots so it is another relative to this directory"
+			dir=`dirname $realScriptLocation`
+			realScriptLocation=${dir}/$linkedLocation
+    	fi
+    fi
+
+	linked=`ls -l "$realScriptLocation" | grep " -> "`
+done;
+
+# Now realScriptLocation points at the real scripted executable.
+# The other support scripts can be referenced relative to this
+# known location
+# echo $realScriptLocation
+
+DIRNAME=`dirname $realScriptLocation`
+# echo "dirname is $DIRNAME"
+
+LOGDIR="/tmp"
+
+# kill the server process
 if [ ! -z "$pid" ]
 then
 #  echo "killing node"
   kill -9 $pid
 fi
-echo "===" >> $DIRNAME/../scripted.log
-echo "launching node again: `date`" >> $DIRNAME/../scripted.log
+
+# Log truncation - if > 2Meg then delete it
+LOG_TOO_LONG=`find ${LOGDIR}/* -name "scripted.log" -size +2000000c 2>/dev/null`
+if [ ! -z "$LOG_TOO_LONG" ]
+then
+  echo "${LOGDIR}/scripted.log is too large, emptying it..."
+  rm $LOG_TOO_LONG
+fi
+
+echo "===" >> $LOGDIR/scripted.log
+echo "launching node again: `date`" >> $LOGDIR/scripted.log
 # echo $DIRNAME/launchnode
 
-$DIRNAME/launchnode >> $DIRNAME/../scripted.log 2>&1 &
-
-# DONT DO THIS, IF EDITING A FILE TO CREATE IT, YOU MAY DISAPPEAR INTO A COSTLY SEARCH
-# If the file does not exist, try to find it with a quick search.
-#fileexists=`ls $1 2>/dev/null`
-#if [ -z "$fileexists" ]
-#then
-#candidate=`find . -name "$1" | head -1 | sed 's/^..//'`
-#if [ -z "$candidate" ]
-#then
-#  echo "Cannot find $1"
-#  exit 1
-#else
-#  file=$candidate
-#fi
-#else 
-#file="$1"
-#fi
-file="$1"
+$DIRNAME/launchnode >> $LOGDIR/scripted.log 2>&1 &
 
 dir=`pwd`
 
@@ -57,9 +109,9 @@ else
   # does it start with a slash or is it relative?
   if [ `echo "$file " | cut -c1` == '/' ]
   then
-	URL=http://localhost:7261?$file
+	URL=http://localhost:7261/editor.html?$file
   else
-	URL=http://localhost:7261?$dir/$file
+	URL=http://localhost:7261/editor.html?$dir/$file
   fi
 fi
 
