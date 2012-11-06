@@ -19,17 +19,19 @@
 
 
 //var testCase = require('./module-types-test.js').bigFile;
-//var testCase = require('./amd-resolver-test.js')
-//	//.likeScripted;
+var testCase = require('./amd-resolver-test.js')
+	.likeScripted;
 //	.findAmdConfigIn511Project;
+//	.findAmdConfIn511ProjectWithRequireJs;
+//	.getAmdConfig2;
 
 //var testCase = require('./resolver-test')
 //	.resolveInScriptsFolder;
 //	.relatveRefsInAmdModuleDot;
 //	.amdResolveBasedOnPackagesConfig;
 
-var testCase = require('./reference-finder-test')
-	.commonjsRefs;
+//var testCase = require('./reference-finder-test')
+//	.commonjsRefs;
 
 testCase({
 	equals: function (a, b) {

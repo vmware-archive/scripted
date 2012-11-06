@@ -81,6 +81,32 @@ function configure(conf) {
 		});
 	}
 
+	var requireIdPat = orPat(["curl", "require", "requirejs"]);
+
+	/**
+	 * Matches an expression that refers to the require function to
+	 * be called with configuration data.
+	 * This is a pattern so that we can more easily allow for 
+	 * a few different ways to refer to this function.
+	 */
+	var requireConfigFunctionPat = orPat([
+		objectPat({
+			"type": "Identifier",
+			"name": requireIdPat
+		}),
+		objectPat({
+          "type": "MemberExpression",
+          "object": {
+            "type": "Identifier",
+            "name": requireIdPat
+          },
+          "property": {
+            "type": "Identifier",
+            "name": "config"
+          }
+        })
+    ]);
+
 	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths", "packages"]));
 	
 	function findCurlConfigBlock(tree) {
@@ -93,10 +119,7 @@ function configure(conf) {
 		
 		var curlCallWithIdentifier = containsPat(objectPat({
 			"type": "CallExpression",
-			"callee": {
-				"type": "Identifier",
-				"name": "curl"
-			},
+			"callee": requireConfigFunctionPat,
 			"arguments": [ {
                       "type": "Identifier",
                       "name": configIdNameVar
@@ -141,10 +164,7 @@ function configure(conf) {
 		//configBlockPat.debug = 'configBlockPat';
 		var requireCall = objectPat({
 			"type": "CallExpression",
-			"callee": containsPat(objectPat({
-				"type": "Identifier",
-				"name": orPat(["require", "requirejs", "curl"])
-			}))
+			"callee": requireConfigFunctionPat
 		});
 		var requireAssignment = objectPat({
 			"type": "AssignmentExpression",
@@ -306,8 +326,11 @@ function configure(conf) {
 		if (code) {
 			try {
 				var tree = parser.parseAndThrow(code);
+				//console.log('------------------------------------------------------');
 				//console.log(JSON.stringify(tree, null, "  "));
-				return analyzeObjectExp(findRequireConfigBlock(tree) || findCurlConfigBlock(tree));
+				return analyzeObjectExp(findRequireConfigBlock(tree) || 
+					findCurlConfigBlock(tree)
+				);
 			} catch (err) {
 				//couldn't parse it. Ignore that code.
 			}
@@ -360,7 +383,7 @@ function configure(conf) {
 		}
 	}
 
-	var CURL_JS = /(.*\/)?curl\.js$/;
+	var REQUIRE_JS = /(.*\/)?(curl|require)\.js$/;
 	
 	/**
 	 * Helper to extract amd config out of a typical 511 project. This 
@@ -372,15 +395,13 @@ function configure(conf) {
 	 * the config block extracted and passed to the callback otherwise
 	 * a falsy value is passed to the callback.
 	 */
-	function getCurlConfig(htmlFile, scriptTags, callback) {
-		var baseDir = getDirectory(htmlFile);
-		
+	function getConfigFromDoubleTag(htmlFile, scriptTags, callback) {
 		//The 'main' html file in a 511 project has two script tags.
 		if (deref(scriptTags, ["length"]) === 2) {
 			//The first one loads the curl.js loader.
 			var tag = scriptTags[0];
 			var curlPath = deref(tag, ["attribs", "src"]);
-			if (curlPath && CURL_JS.test(curlPath)) {
+			if (curlPath && REQUIRE_JS.test(curlPath)) {
 				//The second one loads another js file that is supposed to
 				//configure curl and kick-off the app. It is typically called
 				//"app/run.js" in a 511 project but we will not assume that.
@@ -400,22 +421,17 @@ function configure(conf) {
 	}
 	
 	
-	//determine basedir setting from a given file by:
-	//   - fetch contents of file
-	//   - find all scripttags in the file 
-	//      - if script tag that has a basedir attribute
-	//        -  assume basedir points to a file.
-	//        => the directory this file is in is the basedir
-	//      - if script code has require({... baseDir: "some-string"  })
-	//        => determine baseDir from the string value.
-	//If the required information isn't found in this file, then
+	//determine basedir setting from a given html file by looking for 
+	// amd config blocks in the html file, or ... in some specific idioms.
+	// looking in the .js files that get loaded by the script tags.
+	//If the required information isn't found then
 	//the result is 'false'.
 	function getAmdConfigFromHtmlFile(file, callback) {
 		getContents(file, function (contents) {
 				var scriptTags = getScriptTags(contents);
 				ork(
 					function (callback) {
-						getCurlConfig(file, scriptTags, callback);
+						getConfigFromDoubleTag(file, scriptTags, callback);
 					},
 					function (callback) {
 						orMap(scriptTags, 
@@ -474,7 +490,6 @@ function configure(conf) {
 	function isRelative(path) {
 		return startsWith(path, './') || startsWith(path, '../');
 	}
-	
 	 
 	function amdResolver(context, dep, callback) {
 		if (isRelative(dep.name)) {
