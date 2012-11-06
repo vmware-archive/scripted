@@ -10,7 +10,7 @@
 pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
 # echo "pid = " $pid
 
-DIRNAME=`dirname "$0"`
+DIRNAME=`dirname $(readlink -f "$0")`
 
 if [ ! -z "$pid" ]
 then
