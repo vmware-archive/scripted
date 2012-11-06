@@ -49,8 +49,7 @@ function configure(filesystem) {
 	 * If no directory on any of the parent directories contains a root marker file, then
 	 * this function will return a falsy value.
 	 */
-	function getRootDir(context, callback) {
-		var dir = getDirectory(context);
+	function getRootDir(dir, callback) {
 		if (dir) {
 			listFiles(dir, 
 				function (names) {
@@ -58,7 +57,7 @@ function configure(filesystem) {
 					if (rootMarkerName) { 
 						callback(dir);
 					} else {
-						getRootDir(dir, callback);
+						getRootDir(getDirectory(context), callback);
 					}
 				}
 			);
