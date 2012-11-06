@@ -16,11 +16,6 @@
 
 /*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
-window.location.getPath = function(){
-	var url = this.search.substr(1);
-	url = url.replace(/%20/g, " "); // replace all %20's with spaces
-	return url;
-};
 
 /**
  * Set to false to disable a category
@@ -104,18 +99,16 @@ requirejs.config({
 });
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
-		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "servlets/jsdepend-client", "scripted/utils/os", 
+		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os", 
 		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"], 
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mJsdepend, mOsUtils,
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
 		mExecConsole, mExecOnLoad, mWhen) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
 	}
 
-	var filepath = window.location.getPath();
-	
 	/**
 	 * This function will perform checks on the configuration and where appropriate ensure options are consistent.
 	 * Currently, it:
@@ -187,6 +180,20 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		}
 	};
 	
+	// Create new FileExplorer
+	var explorer  = new mExplorerTable.FileExplorer({
+		//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
+		//searcher: searcher, fileClient: fileClient, commandService: commandService,
+		//contentTypeService: contentTypeService,
+		parentId: "explorer-tree"
+		//breadcrumbId: "location", toolbarId: "pageActions",
+	    //selectionToolsId: "selectionTools", preferences: preferences
+	});
+
+	window.explorer = explorer;
+
+	var pageState = mPageState.extractPageState(location.hash, location.search);
+
 	/* Locate the nearest .jshintrc. It will look relative to the initially opened 
 	 * location - so ok if the .jshintrc is at the project root. But if the file is
 	 * elsewhere in the tree it sometimes won't find it depending on what is opened.
@@ -198,14 +205,14 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		// TODO a timing window problem does exist here - where if the .jshintrc file isn't 
 		// found quickly enough the first linting will not respect it. fix it!
 		var deferred = mWhen.defer();
-		mJsdepend.retrieveNearestFile(filepath, window.fsroot, '.jshintrc', function(jshintrc) {
+		mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
 			if (jshintrc && jshintrc.fsroot) {
 				// it was found at that location
-				console.log("Found .jshintrc at "+jshintrc.fsroot);
+				scriptedLogger.info("Found .jshintrc at "+jshintrc.fsroot);
 				if (jshintrc.error) {
-					console.error(jshintrc.error);
+					scriptedLogger.error(jshintrc.error);
 				} else {
-//					console.log(JSON.stringify(jshintrc,null," "));
+//					scriptedLogger.info(JSON.stringify(jshintrc,null," "));
 					window.scripted.config.jshint = jshintrc;
 					if (!window.scripted.config.editor) {
 						window.scripted.config.editor = { "linter": "jshint" };
@@ -214,7 +221,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				}
 			} else {
-				console.log("No .jshintrc found");
+				scriptedLogger.info("No .jshintrc found");
 			}
 			deferred.resolve();
 		});
@@ -222,9 +229,9 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	};
 	
 	// TODO why is getConf on jsdepend?
-	mJsdepend.getConf(filepath, function (dotScripted) {
-		console.log("fetched dot-scripted conf from server");
-//		console.log(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
+	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
+		scriptedLogger.info("fetched dot-scripted conf from server");
+//		scriptedLogger.info(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
 		
@@ -237,31 +244,11 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		// Start the search for .jshintrc
 		window.scripted.promises = { "loadJshintrc": loadJshintrc()};
 		
-		// Create new FileExplorer
-		var explorer  = new mExplorerTable.FileExplorer({
-			//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
-			//searcher: searcher, fileClient: fileClient, commandService: commandService,
-			//contentTypeService: contentTypeService,
-			parentId: "explorer-tree"
-			//breadcrumbId: "location", toolbarId: "pageActions",
-		    //selectionToolsId: "selectionTools", preferences: preferences
-		});
-
-		window.explorer = explorer;
-		var range;
-		try {
-			range = JSON.parse('[' + location.hash.substring(1) +']');
-			if (!range.length || range.length < 2) {
-				range = null;
-			}
-		} catch (e) {
-		}
-		
 		if (window.scripted.navigator === undefined || window.scripted.navigator === true) {
 			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, false, function() {
 					//	mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
 					// highlight the row we are using
-				setTimeout(function() {explorer.highlight(filepath);},500);
+				setTimeout(function() {explorer.highlight(pageState.main.path);},500);
 			});
 		} else {
 			$('#editor').css('margin-left', 0);
@@ -269,7 +256,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			$('#explorer-tree').remove();
 		}
 		window.subeditors = [];
-		mNavHistory.navigate(filepath, range, "main", false);
+		mNavHistory.setupPage(pageState, false);
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
@@ -345,7 +332,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					}
 				});
 
-				var command_file = "resources/_command.tmpl.html";
+				var command_file = "/resources/_command.tmpl.html";
 				// use a copy so we can sort
 				var keyBindings = window.editor.getTextView()._keyBindings.slice(0); 
 				

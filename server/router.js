@@ -39,7 +39,7 @@ function route(handle, pathname, response, request) {
     if (typeof handle(pathname) === 'function') {
         handle(pathname)(response, request);
     } else {
-        if (pathname === '/') {
+        if (pathname === '/' || pathname === '/eeditor.html') {
             // for a '/' reference, give them the editor
             file.serveFile('/editor.html', 200, {
                 'content-type': 'text/html'

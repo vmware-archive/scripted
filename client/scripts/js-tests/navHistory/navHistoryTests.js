@@ -15,7 +15,8 @@
 /*jslint browser:true */
 /*global $ define module localStorage window console */
 
-define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], function(assert, mNavHistory) {
+define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'setup', 'jquery'], function(assert, mNavHistory, mPageState) {
+	
 	var xhrobj = new XMLHttpRequest();
 	xhrobj.open("GET", '/test-api/server-root', false);
 	xhrobj.send();  // synchronous xhr request
@@ -27,6 +28,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 	} else {
 		testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
 	}
+
 	
 	function getFileContents(fname, callback) {
 		var xhrobj = new XMLHttpRequest();
@@ -46,7 +48,12 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		localStorage.removeItem("scriptedHistory");
 		$('.subeditor_wrapper').remove();
 		window.subeditors = [];
-		window.editor = mNavHistory._loadEditor(testResourcesRoot + "foo.js");
+		var editor = mNavHistory._loadEditor(testResourcesRoot + "foo.js");
+		if (window.isSub) {
+			window.subeditors[0] = editor;
+		} else {
+			window.editor = editor;
+		}
 		mNavHistory.initializeBreadcrumbs(testResourcesRoot + "foo.js");
 	}
 
@@ -117,7 +124,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb1a = function() {
@@ -132,7 +139,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb2 = function() {
@@ -147,9 +154,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#0,0");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb3 = function() {
@@ -166,9 +173,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#10,20");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#10,20");
 	};
 	
 	tests.testHistorycrumb4 = function() {
@@ -192,11 +199,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 	};
 	
 	// test subeditor navigation applies to history
@@ -221,11 +228,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
 	};
 	
 	tests.asyncTestGetContentsSubEditor = function() {
@@ -273,13 +280,13 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
-	tests.testEditorNavigation4 = function() {
-		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
-		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
-		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
-	};
+//	tests.testEditorNavigation4 = function() {
+//		setup();
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
+//		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+//		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
+//	};
 	
 	tests.testSubeditorNavigation1 = function() {
 		setup();
@@ -303,13 +310,13 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
-	tests.testSubeditorNavigation4 = function() {
-		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
-		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
-		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
-	};
+//	tests.testSubeditorNavigation4 = function() {
+//		setup();
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
+//		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+//		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
+//	};
 	
 	tests.testNavigateUsingImplicitHistory = function() {
 		setup();
@@ -454,12 +461,160 @@ define(['orion/assert', 'scripted/utils/navHistory', 'setup', 'jquery'], functio
 		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
+
+	// tests a single page only
+	function oddUrlTest(fname, urlSuffix, selection) {
+		setup();
+		getFileContents(fname,
+			function(contents) {
+				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html" + urlSuffix }, 
+					window.editor);
+				assert.equal(window.editor.getText(), contents);
+				assert.deepEqual(window.editor.getSelection(), {start:selection[0],end:selection[1]});
+				assert.start();				
+			});
+	}
 	
-	// still to test
+	// now we throw a whole bunch of urls at the editor and test to make sure it behaves correctly
+	tests.asyncTestOddUrl1= function() {
+		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js", [0,0]);
+	};
+	tests.asyncTestOddUrl1a= function() {
+		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#", [0,0]);
+	};
+	tests.asyncTestOddUrl2= function() {
+		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#10,20", [10,20]);
+	};
+	tests.asyncTestOddUrl3= function() {
+		oddUrlTest("bar.js", "?#path:'" + testResourcesRoot + "bar.js',range:[10,20]", [10,20]);
+	};
+	tests.asyncTestOddUrl4= function() {
+		oddUrlTest("bar.js", "?#main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}", [10,20]);
+	};
+	tests.asyncTestOddUrl5= function() {
+		oddUrlTest("bar.js", "?#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+	};
+	tests.asyncTestOddUrl6= function() {
+		oddUrlTest("bar.js", "#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+	};
+	tests.asyncTestOddUrl7= function() {
+		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#{main:{range:[10,20]}}", [10,20]);
+	};
 	
-	// raw history object
-	// click navigate
+	function changeLocation(url) {
+		var state = mPageState.extractPageStateFromUrl("http://localhost:7261" + url);
+		mNavHistory.setupPage(state, true);
+	}
 	
+	function testLocation(mainPath, mainSel, subPath, subSel) {
+		assert.equal(window.editor.getFilePath(),testResourcesRoot +  mainPath);
+		assert.deepEqual(window.editor.getSelection(), {start: mainSel[0], end: mainSel[1]});
+		if (subPath) {
+			if (!window.subeditors[0]) {
+				assert.fail('Expected a subeditor');
+			} else {
+				assert.equal(window.subeditors[0].getFilePath(), testResourcesRoot + subPath);
+				assert.deepEqual(window.subeditors[0].getSelection(), {start: subSel[0], end: subSel[1]});
+			}
+		} else {
+			assert.ok(!window.subeditors[0]);
+		}
+	}
+	
+	tests.testPageSetup1 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js");
+		testLocation("bar.js", [0,0]);
+	};
+
+	tests.asyncTestPageSetup2 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js");
+		changeLocation("?" + testResourcesRoot + "foo.js");
+		testLocation("foo.js", [0,0]);
+		history.back();
+		setTimeout(function() {
+			testLocation("bar.js", [0,0]);
+			history.forward();
+			setTimeout(function() {
+				testLocation("foo.js", [0,0]);
+				assert.start();
+			}, 1000);
+		}, 1000);
+	};
+
+	tests.asyncTestPageSetup3 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js");
+		changeLocation("?" + testResourcesRoot + "foo.js");
+		testLocation("foo.js", [0,0]);
+		history.back();
+		setTimeout(function() {
+			testLocation("bar.js", [0,0]);
+			history.back();
+			setTimeout(function() {
+				testLocation("foo.js", [0,0]);
+				assert.start();
+			}, 1000);
+		}, 1000);
+	};
+
+	tests.asyncTestPageSetup4 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
+		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		testLocation("foo.js", [5,7]);
+		history.back();
+		setTimeout(function() {
+			testLocation("bar.js", [20,21]);
+			history.back();
+			setTimeout(function() {
+				testLocation("foo.js", [0,0]);
+				assert.start();
+			}, 1000);
+		}, 1000);
+	};
+
+	tests.asyncTestPageSetup5 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
+		changeLocation("?" + testResourcesRoot + "bar.js#5,7");
+		changeLocation("?" + testResourcesRoot + "bar.js#8,10");
+		testLocation("bar.js", [8,10]);
+		history.back();
+		setTimeout(function() {
+			testLocation("bar.js", [5,7]);
+			history.back();
+			setTimeout(function() {
+				testLocation("bar.js", [20,21]);
+				assert.start();
+			}, 1000);
+		}, 1000);
+	};
+
+	// with sub editor
+	tests.asyncTestPageSetup6 = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourcesRoot + "baz.js\",range:[9,10]}");
+		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		testLocation("foo.js", [5,7]);
+		history.back();
+		setTimeout(function() {
+			testLocation("bar.js", [20,21], "baz.js", [9,10]);
+			history.back();
+			setTimeout(function() {
+				testLocation("foo.js", [0,0]);
+				history.forward();
+				setTimeout(function() {
+					testLocation("bar.js", [20,21], "baz.js", [9,10]);
+					assert.start();
+				}, 1000);
+			}, 1000);
+		}, 1000);
+	};
+
+	
+
 	
 	return tests;
 });

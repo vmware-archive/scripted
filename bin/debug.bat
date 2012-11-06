@@ -32,4 +32,4 @@ start /MIN cmd /c node --debug-brk %rootdir%\server\scripted.js^>^>scripted.log
 
 start http://127.0.0.1:8080/debug?port=5858
 
-start http://localhost:7261/editor.html?%patharg%
+start http://localhost:7261?%patharg%

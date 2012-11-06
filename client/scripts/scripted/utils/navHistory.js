@@ -12,12 +12,15 @@
  *      Andy Clement
  *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
  ******************************************************************************/
-
 /*jslint browser:true */
-/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage*/
-define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os"], 
-function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
+/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage JSON5 scriptedLogger */
+
+/**
+ * This module defines the navigation and history functionality of scripted.
+ */
+define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
+"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5'], 
+function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
 	mFileSearchClient, mSearchDialog, mOsUtils) {
 	
 	var EDITOR_TARGET = {
@@ -26,6 +29,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		tab : "tab"
 	};
 	var LINE_SCROLL_OFFSET = 5;
+	var GET_URL = "http://localhost:7261/get?file=";
+	var FS_LIST_URL = "http://localhost:7261/fs_list/";
 	
 	// define as forward reference
 	var navigate;
@@ -68,84 +73,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		tv.setTopIndex(line);
 	};
 
-	/**
-	 * Retrieves the history from local storage
-	 * @return {Array.<{filename:string,filepath:string,range:Array.<Number>,posiiion,url:string}>}
-	 */
-	var getHistory = function() {
-		var historyJSON = localStorage.getItem("scriptedHistory");
-		if (!historyJSON) {
-			historyJSON = "[]";
-		}
-		return JSON.parse(historyJSON);
-	};
-	
-	var getHistoryAsObject = function() {
-		var histArr = getHistory();
-		var histObj = {};
-		for (var i = 0; i < histArr.length; i++) {
-			histObj[histArr[i].filepath] = histArr[i];
-		}
-		return histObj;
-	};
-	
-	var setHistory = function(history) {
-		localStorage.setItem("scriptedHistory", JSON.stringify(history));
-	};
-	
-	
-	/**
-	 * generates an item to be stored in scriptedHistory as well as browser state
-	 */
-	var generateHistoryItem = function(editor) {
-		var filepath = editor.getFilePath();
-		var scrollPos = $(editor._domNode).find('.textview').scrollTop();
-		var selection = editor.getSelection();
-		var url = window.location.pathname + '?' + filepath + "#" + selection.start + "," + selection.end;
-		return {
-			filename: filepath.split('/').pop(),
-			filepath: filepath,
-			range: [selection.start, selection.end],
-			position: scrollPos,
-			url: url
-		};
-	};
-	
-	
-	var storeScriptedHistory = function(histItem) {
-		var scriptedHistory = getHistory();
-		for (var i = 0; i < scriptedHistory.length; i++) {
-			if (scriptedHistory[i].filepath === histItem.filepath) {
-				scriptedHistory.splice(i,1);
-			}
-		}
-		scriptedHistory.push(histItem);
+
 		
-		// arbitrarily keep track of 8 scriptedHistory items
-		// TODO should we have a .scripted setting to customize this?
-		while (scriptedHistory.length > 8) {
-			scriptedHistory.shift();
-		}
-		
-		setHistory(scriptedHistory);
-	};
-	
-	var storeBrowserState = function(histItem, doReplace) {
-		try {
-			if (doReplace) {
-				window.history.replaceState(histItem, histItem.filename, histItem.url);
-			} else {
-				window.history.pushState(histItem, histItem.filename, histItem.url);
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	};
-		
-	var isBinary = function(filepath) {
+	var isBinary = function(path) {
 		try {
 			var xhrobj = new XMLHttpRequest();
-			var url = 'http://localhost:7261/get?file=' + filepath;
+			var url = GET_URL + path;
 			xhrobj.open("GET", url, false); // synchronous xhr
 			xhrobj.send();
 			if (xhrobj.readyState === 4) {
@@ -156,7 +89,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				}
 			}
 		} catch (e) {
-			console.log(filepath);
+			console.log("Error getting " + path);
 			console.log(e);
 			return true;
 		}
@@ -164,57 +97,50 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	};
 
 
-	/*
-		This handles navigations from
-			-Navigator
-			-Breadcrumb
-			-Open File
-	*/
+	/**
+	 * Handles navigation requests from clicking on links
+	 */
 	var handleNavigationEvent = function(event, editor) {
-		var filepath = event.testTarget ? event.testTarget : (
+		var url = event.testTarget ? event.testTarget : (
 			event.altTarget ? $(event.altTarget).attr('href') : $(event.currentTarget).attr('href'));
-		var query_index = filepath.indexOf('?');
-		if (query_index !== -1) {
-			filepath = filepath.substring(query_index+1, filepath.length);
-		}
-		
-		var hashIndex = filepath.indexOf('#');
-		var range;
-		if (hashIndex !== -1) {
-			try {
-				range = JSON.parse("[" + filepath.substring(hashIndex+1) + "]");
-			} catch (e) {
-				console.log("Invalid hash: " + filepath);
+		var pageState = mPageState.extractPageStateFromUrl(url);
+		if (pageState.main) {
+			var path = pageState.main.path;
+			if (isBinary(path)) {
+				alert("Cannot open binary files");
+				return false;
 			}
-			filepath = filepath.substring(0, hashIndex);
-		}
-		if (!range) {
-			// try to get range from history
-			var histItem = getHistoryAsObject()[filepath];
-			if (histItem) {
-				range = histItem.range;
-			}
-		}
-		
-		if (isBinary(filepath)) {
-			alert("Cannot open binary files");
-			return false;
-		}
-		
 
-		
-		var target = findTarget(event);
-		if (editor) {
-			// if coming from sub-editor, we want to stay in same editor if no modifiers are used
-			if (editor.type === EDITOR_TARGET.sub) {
-				if (target === EDITOR_TARGET.sub) {
-					target = EDITOR_TARGET.main;
-				} else if (target === EDITOR_TARGET.main) {
-					target = EDITOR_TARGET.sub;
+			var histItem = mPageState.getHistoryAsObject()[path];
+			var range = pageState.main.range;
+			if (!range) {
+				// try to get range from history
+				if (histItem) {
+					range = histItem.range;
 				}
 			}
+			var scroll = pageState.main.scroll;
+			if (!scroll) {
+				// try to get scroll from history
+				if (histItem) {
+					scroll = histItem.scroll;
+				}
+			}
+			var target = findTarget(event);
+			if (editor) {
+				// if coming from sub-editor, we want to stay in same editor if no modifiers are used
+				if (editor.type === EDITOR_TARGET.sub) {
+					if (target === EDITOR_TARGET.sub) {
+						target = EDITOR_TARGET.main;
+					} else if (target === EDITOR_TARGET.main) {
+						target = EDITOR_TARGET.sub;
+					}
+				}
+			}
+			navigate({path:path, range:range, scroll:scroll}, target, true);	
+		} else {
+			// not a valid url
 		}
-		navigate(filepath, range, target, true);	
 		return false;
 	};
 	
@@ -239,8 +165,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		// clicking on the button will call a blur() on the active editor
 		var main_active = window.editor.getTextView().hasFocus();
 		
-		navigate(main_path, [main_sel.start, main_sel.end], EDITOR_TARGET.sub, true);
-		navigate(sub_path, [sub_sel.start, sub_sel.end], EDITOR_TARGET.main, true);
+		navigate({path:main_path, range:[main_sel.start, main_sel.end], scroll:main_scrollpos}, EDITOR_TARGET.sub, true);
+		navigate({path:sub_path, range:[sub_sel.start, sub_sel.end], scroll:sub_scrollpos}, EDITOR_TARGET.main, true);
 		
 		$(window.editor._domNode).find('.textview').scrollTop(sub_scrollpos);
 		$(window.subeditors[0]._domNode).find('.textview').scrollTop(main_scrollpos);
@@ -295,10 +221,8 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		if (!definition.range && !definition.path) {
 			return;
 		}
-		var defnrange = definition.range ? definition.range : editor.getSelection();
+		var defnrange = definition.range ? definition.range : [0,0];
 		var filepath = definition.path ? definition.path : editor.getFilePath();
-		
-		console.log("navigation: "+JSON.stringify({path: filepath, range: defnrange}));
 		
 		var target;
 		if (typeof modifier === "object") {
@@ -317,7 +241,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					}
 				}
 			}
-			navigate(filepath, defnrange, target, true);
+			navigate({path:filepath, range:defnrange}, target, true);
 		}
 	};
 
@@ -334,6 +258,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	/**
 	 * Adds one-time configuration to the main editor
+	 * TODO Should go somewhere else
 	 */
 	var buildMaineditor = function() {
 		$('#editor').click(function(event) {
@@ -341,6 +266,15 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		});
 	};
 	
+	var closeSidePanel = function() {
+		if (window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
+			$('.subeditor_wrapper').remove();
+			window.subeditors.pop();
+			close_side(window.editor);
+			window.editor.getTextView().focus();
+		}
+	};
+
 	var buildSubeditor = function(filepath) {
 		var filename = filepath.split('/').pop();
 		
@@ -368,14 +302,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		);
 		
 		// must reattach these handlers on every new subeditor open since we always delete the old editor
-		$('.subeditor_close').click(function() {
-			if (window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
-				$('.subeditor_wrapper').remove();
-				window.subeditors.pop();
-				close_side(window.editor);
-				window.editor.getTextView().focus();
-			}
-		});
+		$('.subeditor_close').click(closeSidePanel);
 		
 		$('.subeditor_switch').click(switchEditors);
 		
@@ -385,14 +312,18 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		return subeditor;
 	};
 	
+	
 	var toggleSidePanel = function() {
 		if ($('#side_panel').css('display') === 'none') {
 			var sel = window.editor.getSelection();
 			var range = [sel.start, sel.end];
-			navigate(window.editor.getFilePath(), range, EDITOR_TARGET.sub);
+			navigate({path:window.editor.getFilePath(), range:range, 
+					scroll:$(window.editor._domNode).find('.textview').scrollTop()}, EDITOR_TARGET.sub);
 			window.subeditors[0].getTextView().focus();
 		} else {
-			$('.subeditor_close').click();
+			closeSidePanel();
+			var mainItem = mPageState.generateHistoryItem(window.editor);
+			mPageState.storeBrowserState(mainItem, null, false);
 		}
 	};
 	
@@ -420,11 +351,12 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		$('#main').append(historyMenu);
 		
 		
-		var history = getHistory();
+		var history = mPageState.getHistory();
 		
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
-			var newHistoryAnchor = $('<a href="' + history[i].url + '">'+history[i].filename+'</a>');
+			var newHistoryAnchor = $("<a href='" + mPageState.generateUrl(history[i]) + "'>" + 
+				history[i].path.split('/').pop() + '</a>');
 			$(newHistoryAnchor).click(handleNavigationEvent);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
@@ -433,7 +365,6 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	
 	var initializeBreadcrumbs = function(path) {
 		var root = window.fsroot;
-		var basepath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
 	
 //		$('#breadcrumb li:not(:first)').remove();
 		$('.breadcrumb_menu').remove();
@@ -453,11 +384,11 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				constructedPath += crumbs[i];
 			} else {
 				constructedPath += crumbs[i] + '/';
-				url = 'http://localhost:7261/fs_list/'+constructedPath.substring(0, constructedPath.length-1);
+				url = FS_LIST_URL + constructedPath.substring(0, constructedPath.length-1);
 				xhrobj = new XMLHttpRequest();
 				xhrobj.open("GET",url,false); // TODO naughty? synchronous xhr
 				xhrobj.send();
-				var kids = JSON.parse(xhrobj.responseText).children;
+				var kids = JSON5.parse(xhrobj.responseText).children;
 				if (kids) {
 
 					kids.sort(fileEntryCompare);
@@ -466,9 +397,9 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 					for(var j = 0; j < kids.length; j++) {
 						if (kids[j].directory === false) {
 							if (kids[j].name.lastIndexOf('.',0)!==0) {
-								var href = basepath + kids[j].Location;
+								var href = mPageState.generateUrl(kids[j].Location);
 								var newMenuItem = $('<li></li>');
-								var newMenuAnchor = $('<a href="'+href+'">'+kids[j].name+'</a>');
+								var newMenuAnchor = $("<a href='"+href+"'>"+kids[j].name+'</a>');
 								newMenuItem.append(newMenuAnchor);
 								newMenu.prepend(newMenuItem);
 
@@ -668,7 +599,7 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		if (editor.loadResponse === 'error') {
 			$(domNode).hide();
 			attachSearchClient(null);
-			$('.subeditor_close').click();
+			closeSidePanel();
 			return editor;
 		}
 		
@@ -687,15 +618,52 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		}
 		return editor;
 	};
+	
+	var setupPage = function(state, doSaveState) {
+		var mainItem;
+		var subItem;
+		var hasMainEditor = window.editor && window.editor.getText;
+		if (doSaveState && hasMainEditor) {
+			var hasSubEditor = hasMainEditor && window.subeditors.length > 0;
+			mainItem = mPageState.generateHistoryItem(window.editor);
+			if (hasSubEditor) {
+				subItem = mPageState.generateHistoryItem(window.subeditors[0]);
+			}
+			
+			// replace existing history with current page state (ie- update selection ranges and scroll pos
+			mPageState.storeBrowserState(mainItem, subItem, true);
+		}
+
+		if (!state.side) {
+			if ($('#side_panel').css('display') !== 'none') {
+				closeSidePanel();
+			}
+		}
+		
+		// when navigating, don't store browser state, since that 
+		// is taken care of in this function
+		if (state.main) {
+			navigate(state.main, EDITOR_TARGET.main, false);
+			if (state.side) {
+				navigate(state.side, EDITOR_TARGET.sub, false);
+			}
+		} else {
+			navigate(state, EDITOR_TARGET.main, false);
+		}
+		mainItem  = state.main ? state.main : state;
+		subItem = state.side;
+		if (doSaveState) {
+			mPageState.storeBrowserState(mainItem, subItem);
+		}
+	};
 
 	/**
 	 * handles the onpopstate event
 	 */
 	var popstateHandler = function(event) {
-		var target = findTarget(event);
 		var state = event.originalEvent.state;
-		if (state && state.filepath) {
-			navigate(state.filepath, state.range, target);
+		if (state) {
+			setupPage(state);
 			return false;
 		} else {
 			return true;
@@ -715,21 +683,24 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 	 *
 	 * @return {boolean} true if navigation occurred successfully and false otherwise.
 	 */
-	navigate = function(filepath, range, target, doSaveState) {
-		var histItem;
+	navigate = function(editorDesc, target, doSaveState) {
+		var mainItem, filepath = editorDesc.path, range = editorDesc.range, scroll = editorDesc.scroll;
 		// check if the editor has been created yet, or if
 		// window.editor is a dom node
 		var hasMainEditor = window.editor && window.editor.getText;
-		var hasSubEditpr = hasMainEditor && window.subeditors.length > 0;
+		var hasSubEditor = hasMainEditor && window.subeditors.length > 0;
 		if (hasMainEditor) {
-			histItem = generateHistoryItem(window.editor);
-			storeScriptedHistory(histItem);
-			if (doSaveState) {
-				storeBrowserState(histItem, true);
+			mainItem = mPageState.generateHistoryItem(window.editor);
+			mPageState.storeScriptedHistory(mainItem);
+			var sideItem;
+			if (hasSubEditor) {
+				sideItem = mPageState.generateHistoryItem(window.subeditors[0]);
+				mPageState.storeScriptedHistory(sideItem);
 			}
-			if (hasSubEditpr) {
-				histItem = generateHistoryItem(window.subeditors[0]);
-				storeScriptedHistory(histItem);
+			
+			// replace existing history with current page state (ie- update selection ranges and scroll pos
+			if (doSaveState) {
+				mPageState.storeBrowserState(mainItem, sideItem, true);
 			}
 		}
 
@@ -761,10 +732,22 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 
 			if (range) {
 				if (isNaN(range[0]) || isNaN(range[1])) {
-					console.log("invalid range");
-					console.log(range);
+					scriptedLogger.warn("invalid range, ignoring", scriptedLogger.SETUP);
+					scriptedLogger.warn(range, scriptedLogger.SETUP);
+				} else {
+					targetEditor.getTextView().setSelection(range[0], range[1], true);
 				}
-				targetEditor.getTextView().setSelection(range[0], range[1], true);
+			}
+			
+			if (scroll) {
+				if (isNaN(range[0])) {
+					scriptedLogger.warn("invalid scroll, ignoring", scriptedLogger.SETUP);
+					scriptedLogger.warn(scroll, scriptedLogger.SETUP);
+					scrollToSelection(targetEditor);
+				} else {
+					$(targetEditor._domNode).find('.textview').scrollTop(scroll);					
+				}
+			} else {
 				scrollToSelection(targetEditor);
 			}
 
@@ -778,25 +761,26 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 				}
 				initializeBreadcrumbs(filepath);
 				window.editor = targetEditor;
-				if (doSaveState) {
-					histItem = generateHistoryItem(targetEditor);
-					storeBrowserState(histItem);
-				}
 			} else {
 				window.subeditors[0] = targetEditor;
 				initializeHistoryMenu();
 			}
+			
+			// now add a history entry for the new page state
+			if (doSaveState) {
+				mPageState.storeBrowserState(
+					mPageState.generateHistoryItem(window.editor), 
+					window.subeditors && window.subeditors.length > 0 ? mPageState.generateHistoryItem(window.subeditors[0]) : null);
+			}
 			targetEditor.getTextView().focus();
 
 		} else if (target === EDITOR_TARGET.tab) {
-			var targetPath = range ? filepath + "#" + range : filepath;
-			var rootpath = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
-			window.open(rootpath + targetPath);
+			window.open(mPageState.generateUrl({path:filepath, range:range}));
 		}
 
 		return false;
 	};
-		
+	
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
@@ -808,6 +792,6 @@ function(mEditor, mKeyBinding, mSearchClient, mOpenResourceDialog, mOpenOutlineD
 		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
-		navigate: navigate
+		setupPage: setupPage
 	};
 });
