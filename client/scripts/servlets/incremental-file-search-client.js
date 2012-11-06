@@ -18,6 +18,9 @@ define(["sockjs"], function () {
 	var nextId = 0;
 
 	function incrementalFileSearch(searchRoot, query, requestor) {
+	
+		var message_queue = []; //push messages in here while waiting for onopen event.
+		                        // once connection is opened this is set to null
 		var options = {}; 
 		var id = nextId++;
 		var sock = new SockJS('/ifsearch');
@@ -34,19 +37,12 @@ define(["sockjs"], function () {
 		}
 		
 		function send(json) {
-			//TODO: occasional INVALID_STATE execption have been thrown by SockJS library. 
-			// Suspect that this because send is getting called before the socket is actually opened.
-			// i.e. we have already instantiated the SockJS object but not yet received the
-			// 'onOpen' event that should follow shortly thereafter.
-			// Since the onOpen happens asychronously it is theorethically possible we get to call send
-			// before onOpen happens. Therefore, this method should queue up send request in case
-			// the socket is not yet open. And the 'onOpen' handler should check for and send
-			// any queued requests.
-			// Scenarios in which this is possible if typing very fast, the request to update the
-			// query comes very quickly after the initial request to open the query. 
-			
 			//console.log("["+id+"] << "+JSON.stringify(json));
-			sock.send(JSON.stringify(json));
+			if (message_queue) {
+				message_queue.push(json);
+			} else {
+				sock.send(JSON.stringify(json));
+			}
 		}
 		
 		function receive(json) {
@@ -63,10 +59,18 @@ define(["sockjs"], function () {
 		}
 		 
 		sock.onopen = function (conn) {
-			console.log('['+id+'] opened');	
+			var pending = message_queue;
+			message_queue = null;
+			//Important: this message allways needs to be sent first.
 			send({
 				query:[searchRoot, query, options]
 			});
+			//These may have been sent earlier... but logically they were intented to
+			//be sent after the onopen / init sequence has played out. So it should
+			//be sent *after* the initial query parameters.
+			for (var i = 0; i < pending.length; i++) {
+				send(pending[i]);
+			}
 		};
 		sock.onmessage = function (e) {
 			//console.log('['+id+'] >> '+ e.data);
