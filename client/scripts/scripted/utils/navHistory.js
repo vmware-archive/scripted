@@ -62,6 +62,9 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		$('#side_panel').trigger('open');
 	};
 	
+	/**
+	 * @param {Editor} editor
+	 */
 	var scrollToSelection = function(editor) {
 		var tv = editor.getTextView();
 		var model = tv.getModel();
@@ -275,6 +278,37 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		}
 	};
 
+	var toggleSidePanel = function() {
+		var sidePanelClosed = $('#side_panel').css('display') === 'none';
+		var mainItem = mPageState.generateHistoryItem(window.editor);
+		var subItem = sidePanelClosed ? null : mPageState.generateHistoryItem(window.subeditors[0]);
+		mPageState.storeBrowserState(mainItem, subItem, true);
+		if (sidePanelClosed) {
+			var sel = window.editor.getSelection();
+			var range = [sel.start, sel.end];
+			navigate({path:window.editor.getFilePath(), range:range, 
+					scroll:$(window.editor._domNode).find('.textview').scrollTop()}, EDITOR_TARGET.sub);
+			window.subeditors[0].getTextView().focus();
+		} else {
+			closeSidePanel();
+		}
+		mainItem = mPageState.generateHistoryItem(window.editor);
+		subItem = sidePanelClosed ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
+		mPageState.storeBrowserState(mainItem, subItem, false);
+	};
+	
+	var fileEntryCompare = function(a, b) {
+		a = a.name.toLowerCase();
+		b = b.name.toLowerCase();
+		if (a<b) {
+			return +1;
+		} else if (a>b) {
+			return -1;
+		} else {
+			return 0;
+		}
+	};
+
 	var buildSubeditor = function(filepath) {
 		var filename = filepath.split('/').pop();
 		
@@ -302,7 +336,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		);
 		
 		// must reattach these handlers on every new subeditor open since we always delete the old editor
-		$('.subeditor_close').click(closeSidePanel);
+		$('.subeditor_close').click(toggleSidePanel);
 		
 		$('.subeditor_switch').click(switchEditors);
 		
@@ -312,33 +346,6 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		return subeditor;
 	};
 	
-	
-	var toggleSidePanel = function() {
-		if ($('#side_panel').css('display') === 'none') {
-			var sel = window.editor.getSelection();
-			var range = [sel.start, sel.end];
-			navigate({path:window.editor.getFilePath(), range:range, 
-					scroll:$(window.editor._domNode).find('.textview').scrollTop()}, EDITOR_TARGET.sub);
-			window.subeditors[0].getTextView().focus();
-		} else {
-			closeSidePanel();
-			var mainItem = mPageState.generateHistoryItem(window.editor);
-			mPageState.storeBrowserState(mainItem, null, false);
-		}
-	};
-	
-	var fileEntryCompare = function(a, b) {
-		a = a.name.toLowerCase();
-		b = b.name.toLowerCase();
-		if (a<b) {
-			return +1;
-		} else if (a>b) {
-			return -1;
-		} else {
-			return 0;
-		}
-	};
-
 	var initializeHistoryMenu = function() {
 		var historyCrumb = $('#historycrumb');
 		if (!historyCrumb.html()) {

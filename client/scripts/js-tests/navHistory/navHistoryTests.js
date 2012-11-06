@@ -534,7 +534,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 				assert.deepEqual(window.subeditors[0].getSelection(), {start: subSel[0], end: subSel[1]});
 			}
 		} else {
-			assert.ok(!window.subeditors[0]);
+			assert.ok(!window.subeditors[0], "expected no sub-editor");
 		}
 	}
 	
@@ -631,7 +631,25 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 	};
 
 	
-
+	tests.asyncTestToggleSide = function() {
+		setup();
+		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		testLocation("foo.js", [5,7]);
+		mNavHistory.toggleSidePanel();
+		testLocation("foo.js", [5,7], "foo.js", [5,7]);
+		mNavHistory.toggleSidePanel();
+		testLocation("foo.js", [5,7]);
+		history.back();
+		setTimeout(function() {
+			testLocation("foo.js", [5,7], "foo.js", [5,7]);
+			history.back();
+			setTimeout(function() {
+				testLocation("foo.js", [5,7]);
+				history.forward();
+				assert.start();
+			}, 1000);
+		}, 1000);
+	};
 	
 	return tests;
 });
