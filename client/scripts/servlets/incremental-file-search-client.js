@@ -40,7 +40,7 @@ define(["sockjs"], function () {
 			//console.log("["+id+"] << "+JSON.stringify(json));
 			if (message_queue) {
 				message_queue.push(json);
-			} else {
+			} else if (sock) {
 				sock.send(JSON.stringify(json));
 			}
 		}
@@ -90,7 +90,10 @@ define(["sockjs"], function () {
 			 * have opened to the server.
 			 */
 			close: function () {
-				sock.close();
+				if (sock) {
+					sock.close();
+					sock = null;
+				}
 			},
 			/**
 			 * Change the query. This may result in some already received results being
