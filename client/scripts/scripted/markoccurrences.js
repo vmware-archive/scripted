@@ -29,26 +29,37 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			char === '_' || char === '$'; 
 	}
 	
+	function isWord(selstart, selend, buffer) {
+		if (selstart < 0 || selend >= buffer.length || selstart > selend || !isWordChar(buffer[selstart])) {
+			return false;
+		}
+		var i = selstart;
+		while (i < selend) {
+			if (!isWordChar(buffer[i])) {
+				return false;
+			}
+			i++;
+		}
+		return true;
+	}
+	
+	function isDelineatedWord(selstart, selend, buffer) {
+		return isWord(selstart, selend, buffer) && !isWordChar(buffer[selstart-1]) && !isWordChar(buffer[selend]);
+	}
+	
 	/**
 	 * Find word from selection
 	 * A word is a contiguous block of alphanumerics or $ or _
 	 * @return {word:String,start:number,end:number}
 	 */
 	function findSelectedWord(selstart, selend, buffer) {
-		if (selstart < 0 || selend >= buffer.length || selstart > selend || !isWordChar(buffer[selstart])) {
+		if (!isWord(selstart, selend, buffer)) {
 			return null;
-		}
-		var i = selstart;
-		while (i < selend) {
-			if (!isWordChar(buffer[i])) {
-				return null;
-			}
-			i++;
 		}
 		
 		// at this point, we know there is a word selected, must find the start and the end
 		var start, end;
-		i = selstart;
+		var i = selstart;
 		while (i >= 0) {
 			if (!isWordChar(buffer[i])) {
 				start = ++i;
@@ -167,7 +178,9 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 				// add new markers
 				var annotations = [];
 				for (var i = 0; i < matches.length; i++) {
-					annotations.push(mAnnotations.AnnotationType.createAnnotation(ANNOTATION_TYPE, matches[i], matches[i] + toFind.word.length));
+					if (isDelineatedWord(matches[i], matches[i] + toFind.word.length, buffer)) {
+						annotations.push(mAnnotations.AnnotationType.createAnnotation(ANNOTATION_TYPE, matches[i], matches[i] + toFind.word.length));
+					}
 				}
 				annotationModel.replaceAnnotations(null, annotations);
 			}
