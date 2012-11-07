@@ -42,10 +42,6 @@ function map(array, f, keepfalse) {
 	return result;
 }
 
-Array.prototype.map = function (f, keepFalse) {
-	return map(this, f, keepFalse);
-};
-
 /**
  * Convert a pattern that uses '*' into a regexp. 
  *

@@ -32,16 +32,23 @@
 var toCompareString = require('./utils').toCompareString;
 var configuration = require('./filesystem');
 
+function addApi(into, from) {
+	//We are in test mode so the 'private' apis are ok to use:
+	for (var p in from) {
+		if (from.hasOwnProperty(p)) {
+			into[p] = from[p];
+		}
+	}
+}
+
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var conf = configuration.withBaseDir(baseDir);
 	var api = require('./amd-resolver').configure(conf);
-	//We are in test mode so the 'private' apis are ok to use:
-	for (var p in api.forTesting) {
-		if (api.forTesting.hasOwnProperty(p)) {
-			api[p] = api.forTesting[p];
-		}
-	}
+	var finderApi = require('./amd-config-finder').configure(conf);
+	addApi(api, api.forTesting);
+	addApi(api, finderApi);
+	addApi(api, finderApi.forTesting);
 	return api;
 }
 

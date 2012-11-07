@@ -597,6 +597,7 @@ exports.commonsJsWrappedModuleInAmdEnabledContext = function (test) {
 };
 
 exports.useTextPlugin = function (test) {
+	//TODO: this test fails because tested functionality is not implemented yet.
 	var api = makeApi('use-text-plugin');
 	var file = "p1/bork.js";
 	api.getContents(file, function (code) {
