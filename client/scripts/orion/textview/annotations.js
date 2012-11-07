@@ -138,6 +138,12 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 	 */
 	AnnotationType.ANNOTATION_MATCHING_SEARCH = "orion.annotation.matchingSearch";
 	
+	// SCRIPTED
+	/**
+	 * Mark occurrences annotations type
+	 */
+	AnnotationType.ANNOTATION_MARK_OCCURRENCES = "scripted.annotation.markOccurrences";
+	
 	/** @private */
 	var annotationTypes = {};
 	
@@ -217,6 +223,10 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 	registerType(AnnotationType.ANNOTATION_MATCHING_SEARCH);
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
 	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
+	
+	// SCRIPTED
+	registerType(AnnotationType.ANNOTATION_MARK_OCCURRENCES);
+	
 	
 	/** 
 	 * Constructs a new AnnotationTypeList object.
