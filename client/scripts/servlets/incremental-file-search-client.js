@@ -59,6 +59,7 @@ define(["sockjs"], function () {
 		}
 		 
 		sock.onopen = function (conn) {
+			console.log('ifsearch ['+id+'] opened');
 			var pending = message_queue;
 			message_queue = null;
 			//Important: this message allways needs to be sent first.
@@ -77,7 +78,7 @@ define(["sockjs"], function () {
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
-			console.log('['+id+'] closed');	
+			console.log('ifsearch ['+id+'] closed');	
 		};
 		
 		return {
