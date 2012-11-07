@@ -101,8 +101,8 @@ mHtmlContentAssist, mCssContentAssist) {
 
 		var fileName = filePath.split('/');
 		fileName = fileName[fileName.length - 1];
-		var isJS = (fileName.indexOf('.js') + '.js'.length === fileName.length) ||
-					(fileName.indexOf('.json') + '.json'.length === fileName.length);
+		var isJSON = (fileName.indexOf('.json') + '.json'.length === fileName.length);
+		var isJS = (fileName.indexOf('.js') + '.js'.length === fileName.length) || isJSON;
 		var isHTML = fileName.indexOf('.html') + '.html'.length === fileName.length;
 		
 		if (editorType === 'main'){
@@ -132,12 +132,14 @@ mHtmlContentAssist, mCssContentAssist) {
 		var htmlContentAssistant = new mHtmlContentAssist.HTMLContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		
-		var postSave = function(text) {
+		var postSave = function (text) {
 			var problems;
 			if (isJS || isHTML) {
 				window.scripted.promises.loadJshintrc.then(function completed() {
-					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter==='jshint') {
-						problems = mJshintDriver.checkSyntax('', text).problems;
+					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter === 'jshint') {
+						if (!(isHTML || isJSON)) {
+							problems = mJshintDriver.checkSyntax('', text).problems;
+						}
 					} else {
 						problems = mJslintDriver.checkSyntax('', text).problems;
 					}
