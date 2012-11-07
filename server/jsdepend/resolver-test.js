@@ -596,3 +596,23 @@ exports.commonsJsWrappedModuleInAmdEnabledContext = function (test) {
 	});
 };
 
+exports.useTextPlugin = function (test) {
+	var api = makeApi('use-text-plugin');
+	var file = "p1/bork.js";
+	api.getContents(file, function (code) {
+		var tree = require('./parser').parse(code);
+		api.findReferences(tree, function (refs) {
+			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
+				toCompareString(["foo", "text!template.html"])
+			);
+			api.resolve(file, refs, function (resolveds) {
+				test.equals(toCompareString(map(resolveds, function(ref) {return ref.path; })),
+					toCompareString(["p1/foo.js", "p1/template.html"])
+				);
+				test.done();
+			});
+		});
+	});
+	
+};
+
