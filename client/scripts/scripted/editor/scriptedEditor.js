@@ -21,12 +21,12 @@ define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orio
 "plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
 "plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint"],
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint"],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
 mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
 mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify, mTextModel, mProjectionModel,
-mHtmlContentAssist, mCssContentAssist) {
+mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
@@ -460,7 +460,7 @@ mHtmlContentAssist, mCssContentAssist) {
 				return null;
 			}
 		});
-		editor.setInput("Content", null, "Initizal contentz.");
+		editor.setInput("Content", null, "Inishul contentz.");
 		
 		/*function that fixes Firefox cursor problem*/
 		editor.cursorFix = function(focusTarget){
@@ -577,6 +577,9 @@ mHtmlContentAssist, mCssContentAssist) {
 				editor.getTextView().update(true);
 			}
 		}
+		
+		// TODO should we persist the instance of mark occurrences?
+		new mMarkoccurrences.SelectionMatcher().install(editor);
 		
 		editor.type = editorType;
 		

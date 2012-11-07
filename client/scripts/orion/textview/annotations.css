@@ -12,7 +12,9 @@
 .annotation.matchingBracket, 
 .annotation.currentLine, 
 .annotation.matchingSearch,  
-.annotation.currentSearch {
+.annotation.currentSearch,
+/* SCRIPTED */
+.annotationRange.markOccurrence {
 }
 
 /* Styles for the annotation ruler (first line) */
@@ -89,6 +91,13 @@
 	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAALClrLu1ubOpsKqdp6eapKufqMTAw7attLSrsrGnr62jq8C7v765vaebpb22vLmyuMbCxsnGycfEx8G+wcrIysTBxUltof//yf///v70jergpPvws+nWc/npqvrpqvrpq/raffffnvXVkfTVkvXUkd+9f+SiOemvV+uyXa2OX7mYZqeIXKuNX/ClO7KQYqiIXJ59Vp19VpFvTo9uTZBvTpNyUJNyUf///////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADgALAAAAAAQABAAAAZ4QJxwSCwajS2aS1U6DlunzcagcuKgG4sn5HJiLZ2QiHbEbj6hEapVTKVYr3OItG5TIhVGLF0npigUEAsPAjV9Q24pEhMBCAoybEUmGRcrDgcAAzNGkxcYNzAJBQSbRJ0YqBc2DaVEHJ6pGTStRBqfGBcZILRWvThBADs=");
 }
 
+/* SCRIPTED */
+/* TODO Create custom image */
+.annotationHTML.markOccurrences {
+	/* images/search.gif */
+	background-image: url("data:image/gif;base64,R0lGODlhEAAQANUAALClrLu1ubOpsKqdp6eapKufqMTAw7attLSrsrGnr62jq8C7v765vaebpb22vLmyuMbCxsnGycfEx8G+wcrIysTBxUltof//yf///v70jergpPvws+nWc/npqvrpqvrpq/raffffnvXVkfTVkvXUkd+9f+SiOemvV+uyXa2OX7mYZqeIXKuNX/ClO7KQYqiIXJ59Vp19VpFvTo9uTZBvTpNyUJNyUf///////wAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADgALAAAAAAQABAAAAZ4QJxwSCwajS2aS1U6DlunzcagcuKgG4sn5HJiLZ2QiHbEbj6hEapVTKVYr3OItG5TIhVGLF0npigUEAsPAjV9Q24pEhMBCAoybEUmGRcrDgcAAzNGkxcYNzAJBQSbRJ0YqBc2DaVEHJ6pGTStRBqfGBcZILRWvThBADs=");
+}
+
 /* Styles for the overview ruler  */
 .annotationOverview {
 	cursor: pointer;
@@ -136,6 +145,11 @@
 	background-color: #53D1FF;
 	border: 1px solid black;
 }
+/* SCRIPTED */
+.annotationOverview.markOccurrences {
+	background-color: #53D1FF;
+	border: 1px solid black;
+}
 
 /* Styles for text range */
 .annotationRange {
@@ -173,8 +187,9 @@
 .annotationRange.matchingSearch {
 	background-color: #C3E1FF;
 }
-.annotationRange.currentSearch {
-	background-color: #53D1FF;
+/* SCRIPTED */
+.annotationRange.markOccurrences {
+	border: 1px Indigo solid;
 }
 
 /* Styles for lines of text */

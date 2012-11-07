@@ -33,8 +33,8 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 
 	/**
 	 * @param {String} handle
-	 @ @param {function(String)} callback
-	 @ @param {function(String)} errback
+	 * @param {function(String)} callback
+	 * @param {function(String)} errback
 	 * @return String
 	 */
 	function getContents(handle, callback, errback) {

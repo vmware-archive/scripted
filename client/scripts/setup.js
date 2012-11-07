@@ -459,11 +459,18 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			window.editor._textView._updatePage();
 		});
 		
-		window.onbeforeunload = function() {
+		$(window).bind('beforeunload', function() {
+			var sidePanelOpen = window.subeditors && window.subeditors[0];
+			var mainItem = mPageState.generateHistoryItem(window.editor);
+			var subItem = sidePanelOpen ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
+			mPageState.storeBrowserState(mainItem, subItem, false);
+		});
+		
+		$(window).bind('beforeunload', function() {
 			if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
 				return "There are unsaved changes.";
 			}
-		};
+		});
 		
 		$(document).ready(function(){
 			require("scripted/exec/exec-on-load").installOn(window.fsroot);
@@ -486,7 +493,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// CHROME section
 		// clears back-forward cache in chrome
-		$(window).unload(function(){});  
+		$(window).unload(function(){});
 	 
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

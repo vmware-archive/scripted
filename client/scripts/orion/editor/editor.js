@@ -373,6 +373,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 				this._annotationStyler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
+				
+				// SCRIPTED
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
 			}
 		},
 		
@@ -522,6 +525,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+
+				// SCRIPTED
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
+
+
 				textView.addRuler(this._annotationRuler);
 				textView.addRuler(this._overviewRuler);
 			}
