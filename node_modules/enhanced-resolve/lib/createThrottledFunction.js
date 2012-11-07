@@ -2,7 +2,7 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 	Author Tobias Koppers @sokra
 */
-module.exports = function createThrottledFunction(fn, MAX_DURATION, cache) {
+var createThrottledFunction = module.exports = function createThrottledFunction(fn, MAX_DURATION, cache) {
 	MAX_DURATION = MAX_DURATION || 2000;
 	var RESOLUTION = Math.floor(Math.min(MAX_DURATION / 20, 300));
 	cache = cache || {};
@@ -78,7 +78,7 @@ module.exports.sync = function createThrottledFunctionSync(fn, MAX_DURATION) {
 		try {
 			retVal = fn.apply(null, args);
 		} catch(e) { callback(e); }
-		callback();
+		callback(null, retVal);
 		return retVal;
 	}, MAX_DURATION);
 	return function() {

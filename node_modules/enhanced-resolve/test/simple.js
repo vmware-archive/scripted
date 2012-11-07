@@ -1,13 +1,13 @@
-var resolve = require("../lib/resolve");
+var resolve = require("../");
 var should = require("should");
 var path = require("path");
 
 describe("simple", function() {
 	var pathsToIt = [
-		[__dirname, "../lib/resolve", "direct"],
+		[__dirname, "../lib/cachedFsResolve", "direct"],
 		[__dirname, "../", "as directory"],
 		[path.join(__dirname, "..", ".."), "./enhanced-resolve", "as module"],
-		[path.join(__dirname, "..", ".."), "./enhanced-resolve/lib/resolve", "in module"]
+		[path.join(__dirname, "..", ".."), "./enhanced-resolve/lib/cachedFsResolve", "in module"]
 	];
 	pathsToIt.forEach(function(pathToIt) {
 		it("should resolve itself " + pathToIt[2], function(done) {
@@ -15,7 +15,7 @@ describe("simple", function() {
 				if(err) return done(err);
 				should.exist(filename);
 				filename.should.be.a("string");
-				filename.should.be.eql(path.join(__dirname, "..", "lib", "resolve.js"));
+				filename.should.be.eql(path.join(__dirname, "..", "lib", "cachedFsResolve.js"));
 				done();
 			});
 		});
@@ -23,7 +23,7 @@ describe("simple", function() {
 			var filename = resolve.sync(pathToIt[0], pathToIt[1]);
 			should.exist(filename);
 			filename.should.be.a("string");
-			filename.should.be.eql(path.join(__dirname, "..", "lib", "resolve.js"));
+			filename.should.be.eql(path.join(__dirname, "..", "lib", "cachedFsResolve.js"));
 		});
 	});
 

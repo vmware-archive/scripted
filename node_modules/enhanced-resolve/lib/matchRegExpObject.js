@@ -1,0 +1,50 @@
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+/*
+
+# matchRegExpObject(obj, str)
+
+tests if "str" matches "obj" with the following format:
+
+{
+	test: PART,
+	include: PART,
+	exclude: PART
+}
+
+PART can be
+* string -> new RegExp(string)
+* RegExp
+* array of string of RegExp
+  array is OR
+
+*/
+
+function asRegExp(test) {
+	if(typeof test == "string") test = new RegExp(test);
+	return test;
+}
+
+function matchPart(test, str) {
+	if(!test) return true;
+	test = asRegExp(test);
+	if(Array.isArray(test)) {
+		return test.map(asRegExp).filter(function(regExp) {
+			return regExp.test(str);
+		}).length > 0;
+	} else {
+		return test.test(str);
+	}
+}
+
+module.exports = function(obj, str) {
+	if(obj.test)
+		if(!matchPart(obj.test, str)) return false;
+	if(obj.include)
+		if(!matchPart(obj.include, str)) return false;
+	if(obj.exclude)
+		if(matchPart(obj.include, str)) return false;
+	return true;
+}
