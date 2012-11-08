@@ -183,7 +183,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			var buffer = this.editor.getText();
 			var result = this.findMatches(selstart, selend, buffer);
 			var matches = result.matches;
-			var word = matches.word;
+			var word = result.word;
 			// delete old markers
 			if (matches || !this.retain) {
 				annotationModel.removeAnnotations(ANNOTATION_TYPE);
