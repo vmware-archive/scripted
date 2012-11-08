@@ -144,9 +144,11 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 						problems = mJslintDriver.checkSyntax('', text).problems;
 					}
 					editor.showProblems(problems);
+					editor.problems = problems;
 				});
 			} else {
 				problems = [];
+				editor.problems = problems;
 			}
 
 			if (isJS) {
