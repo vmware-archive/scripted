@@ -30,7 +30,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 	}
 	
 	function isWord(selstart, selend, buffer) {
-		if (selstart < 0 || selend >= buffer.length || selstart > selend || !isWordChar(buffer[selstart])) {
+		if (selstart < 0 || selend > buffer.length || selstart > selend || !isWordChar(buffer[selstart])) {
 			return false;
 		}
 		var i = selstart;
@@ -53,6 +53,9 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 	 * @return {word:String,start:number,end:number}
 	 */
 	function findSelectedWord(selstart, selend, buffer) {
+		if (selstart === selend && selstart !== 0) {
+			selstart--;
+		}
 		if (!isWord(selstart, selend, buffer)) {
 			return null;
 		}
@@ -125,6 +128,22 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			this.editor = editor;
 			editor.getTextView().addEventListener("Selection", this);
 		},
+		initOptions : function() {
+			if (window.scripted && scripted.config && scripted.config.mark_occurrences) {
+				var opts = scripted.config.mark_occurrences;
+				if (typeof opts.interval === "number") {
+					this.interval = opts.interval;
+				}
+				if (typeof opts.disable === "boolean") {
+					this.disable = opts.disable;
+				}
+				if (typeof opts.retain === "boolean") {
+					this.retain = opts.retain;
+				}
+			}
+		},
+
+		// TODO not used
 		uninstall : function() {
 			if (this.editor) {
 				this.editor.getTextView().removeEventListener("Selection", this);
@@ -145,21 +164,16 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			}, this.interval);
 		},
 		
-		initOptions : function() {
-			if (scripted.config && scripted.config.mark_occurrences) {
-				var opts = scripted.config.mark_occurrences;
-				if (typeof opts.interval === "number") {
-					this.interval = opts.interval;
-				}
-				if (typeof opts.disable === "boolean") {
-					this.disable = opts.disable;
-				}
-				if (typeof opts.retain === "boolean") {
-					this.retain = opts.retain;
-				}
+		findMatches : function(selstart, selend, buffer) {
+			var toFind = findSelectedWord(selstart, selend, buffer);
+			var matches;
+			if (toFind) {
+				matches = findMatches(buffer, toFind.word);
+				return { matches : matches, word : toFind.word };
+			} else {
+				return { matches : null, word : null };
 			}
 		},
-
 		
 		markOccurrences : function(selstart, selend) {
 			/** @type AnnotationModel*/
@@ -167,22 +181,24 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			
 			// find new matches
 			var buffer = this.editor.getText();
-			var toFind = findSelectedWord(selstart, selend, buffer);
+			var result = this.findMatches(selstart, selend, buffer);
+			var matches = result.matches;
+			var word = matches.word;
 			// delete old markers
-			if (toFind || !this.retain) {
+			if (matches || !this.retain) {
 				annotationModel.removeAnnotations(ANNOTATION_TYPE);
 			}
-			if (toFind) {
-				var matches = findMatches(buffer, toFind.word);
-				
+			if (matches) {
 				// add new markers
 				var annotations = [];
 				for (var i = 0; i < matches.length; i++) {
-					if (isDelineatedWord(matches[i], matches[i] + toFind.word.length, buffer)) {
-						annotations.push(mAnnotations.AnnotationType.createAnnotation(ANNOTATION_TYPE, matches[i], matches[i] + toFind.word.length));
+					if (isDelineatedWord(matches[i], matches[i] + word.length, buffer)) {
+						annotations.push(mAnnotations.AnnotationType.createAnnotation(ANNOTATION_TYPE, matches[i], matches[i] + word.length));
 					}
 				}
-				annotationModel.replaceAnnotations(null, annotations);
+				if (annotations.length > 0) {
+					annotationModel.replaceAnnotations(null, annotations);
+				}
 			}
 		}
 	};

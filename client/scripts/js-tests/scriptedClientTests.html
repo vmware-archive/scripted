@@ -36,8 +36,9 @@
 				 "js-tests/esprima/navigationTests", 
 				 "js-tests/esprima/summaryBuildingTests", 
 				 "js-tests/esprima/contentAssistDependencyTests",
+				 "js-tests/markoccurrences/markOccurrencesTests",
 				 "js-tests/indexer/indexerTests"], 
-			function(jsTests, navTests, summaryTests, dependencyTests, indexerTests, navHistoryTests) {
+			function(jsTests, navTests, summaryTests, dependencyTests, markOccurrencesTests, indexerTests) {
 				function testShim(tests) {
 					for (var t in tests) {
 						if (tests.hasOwnProperty(t)) {
@@ -59,6 +60,8 @@
 				testShim(dependencyTests);
 				module("Indexer tests");
 				testShim(indexerTests);
+				module("Mark occurrences tests");
+				testShim(markOccurrencesTests);
 		});
 	};
   </script>
