@@ -270,7 +270,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 	};
 	
 	var closeSidePanel = function() {
-		if (window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
+		if (window.subeditors && window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
 			$('.subeditor_wrapper').remove();
 			window.subeditors.pop();
 			close_side(window.editor);
@@ -799,6 +799,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
 		toggleSidePanel: toggleSidePanel,
-		setupPage: setupPage
+		setupPage: setupPage,
+		closeSidePanel: closeSidePanel
 	};
 });

@@ -46,7 +46,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 	function setup() {
 		window.fsroot = testResourcesRootNoSlash;
 		localStorage.removeItem("scriptedHistory");
-		$('.subeditor_wrapper').remove();
+		mNavHistory.closeSidePanel();
 		window.subeditors = [];
 		var editor = mNavHistory._loadEditor(testResourcesRoot + "foo.js");
 		if (window.isSub) {
