@@ -50,7 +50,9 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 	var close_side = function(editor) {
 		$('#side_panel').hide();
 		$('#editor').css('margin-right', '0');
-		editor._textView._updatePage();
+		if (editor && editor._textView) {
+			editor._textView._updatePage();
+		}
 		$('#side_panel').trigger('close');
 	};
 	
@@ -273,7 +275,10 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		if (window.subeditors && window.subeditors[0] && confirmNavigation(window.subeditors[0])) {
 			$('.subeditor_wrapper').remove();
 			window.subeditors.pop();
-			close_side(window.editor);
+		}
+		close_side(window.editor);
+		// might be the dom element 'editor' or the actual editor so check for getTextview
+		if (window.editor.getTextView) {
 			window.editor.getTextView().focus();
 		}
 	};
