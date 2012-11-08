@@ -278,7 +278,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		}
 		close_side(window.editor);
 		// might be the dom element 'editor' or the actual editor so check for getTextview
-		if (window.editor.getTextView) {
+		if (window.editor && window.editor.getTextView) {
 			window.editor.getTextView().focus();
 		}
 	};
