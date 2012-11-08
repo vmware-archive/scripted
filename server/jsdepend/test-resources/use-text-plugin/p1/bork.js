@@ -1,8 +1,9 @@
 /*global define exports window console document*/
-define(['foo', 'text!template.html'], function (foo, html) {
+define(['foo', 'text!template.html', 'text!to-strip.html!strip'], function (foo, html, stripped) {
 
 	console.log('---- Html template loaded ----');
 	console.log(html);
-	console.log('---- Html template loaded ----');
+	console.log('---- Html to-strip loaded ----');
+	console.log(stripped);
 
 });

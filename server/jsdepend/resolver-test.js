@@ -604,11 +604,11 @@ exports.useTextPlugin = function (test) {
 		var tree = require('./parser').parse(code);
 		api.findReferences(tree, function (refs) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
-				toCompareString(["foo", "text!template.html"])
+				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip"])
 			);
 			api.resolve(file, refs, function (resolveds) {
 				test.equals(toCompareString(map(resolveds, function(ref) {return ref.path; })),
-					toCompareString(["p1/foo.js", "p1/template.html"])
+					toCompareString(["p1/foo.js", "p1/template.html", "p1/to-strip.html"])
 				);
 				test.done();
 			});

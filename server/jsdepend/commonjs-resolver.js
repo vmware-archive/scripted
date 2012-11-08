@@ -64,7 +64,7 @@ function configure(conf) {
 		} else {
 			//Notes:
 			//1: The enhanced resolver is a node module so it uses 'real' file system paths.
-			//Therfore we must make sure to translate back and forth between our own internal file handles.
+			//Therefore we must make sure to translate back and forth between our own internal file handles.
 			
 			//2: enhanced resolver expects a directory as the 'context' not a file.
 			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {

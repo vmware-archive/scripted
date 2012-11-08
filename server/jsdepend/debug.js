@@ -26,7 +26,10 @@
 //	.getAmdConfig2;
 
 var testCase = require('./resolver-test')
-	.resolveOne;
+	.useTextPlugin;
+//	.resolveInScriptsFolder;
+//	.pathAwarenessSimple;
+//	.resolveOne;
 //	.resolveInScriptsFolder;
 //	.relatveRefsInAmdModuleDot;
 //	.amdResolveBasedOnPackagesConfig;
