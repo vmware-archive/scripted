@@ -66,7 +66,7 @@ function configure(conf) {
 
 	//dep must be parsed before calling this!	
 	function getResource(dep) {
-		return dep.resource || dep.name;
+		return dep.hasOwnProperty('plugin') ? dep.resource : dep.name;
 	}
 	
 	function getExtension(dep) {
@@ -87,7 +87,12 @@ function configure(conf) {
 		// treated specially in requirejs.
 		var resource = getResource(dep);
 		var ext = getExtension(dep);
-		if (isRelative(resource)) {
+		if (!resource) {
+			//This is a case like 'domReady!'
+			//There's nothing to resolve. Let client know not to report this as an error.
+			dep.ignore = true; 
+			return callback(dep);
+		} else if (isRelative(resource)) {
 			//Relative resolution doesn't require the resolverConf so avoid fetching it
 			var baseDir = getDirectory(context); //relative to context file, not amd config
 			dep.path = pathResolve(baseDir, resource) + ext;

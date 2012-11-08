@@ -1,5 +1,6 @@
 /*global define exports window console document*/
-define(['foo', 'text!template.html', 'text!to-strip.html!strip'], function (foo, html, stripped) {
+define(['foo', 'text!template.html', 'text!to-strip.html!strip', 'domReady!'], 
+function (foo, html, stripped, doc) {
 
 	console.log('---- Html template loaded ----');
 	console.log(html);

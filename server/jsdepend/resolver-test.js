@@ -596,19 +596,48 @@ exports.commonsJsWrappedModuleInAmdEnabledContext = function (test) {
 	});
 };
 
+/**
+ * Create a function that takes an object and copies all interesting properties
+ * of the object to a new 'sanitized' object.
+ */
+function makeObjectSanitizer(interestingProps) {
+	function sanitize(obj) {
+		var sanitized = {};
+		for (var i=0; i<interestingProps.length; i++) {
+			var p = interestingProps[i];
+			sanitized[p] = obj[p];
+		}
+		return sanitized;
+	}
+	return sanitize;
+}
+
 exports.useTextPlugin = function (test) {
-	//TODO: this test fails because tested functionality is not implemented yet.
-	var api = makeApi('use-text-plugin');
+	var api = makeApi('use-plugins');
 	var file = "p1/bork.js";
+	var sanitize = makeObjectSanitizer(['name', 'path', 'ignore']);
 	api.getContents(file, function (code) {
 		var tree = require('./parser').parse(code);
 		api.findReferences(tree, function (refs) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
-				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip"])
+				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip", "domReady!"])
 			);
 			api.resolve(file, refs, function (resolveds) {
-				test.equals(toCompareString(map(resolveds, function(ref) {return ref.path; })),
-					toCompareString(["p1/foo.js", "p1/template.html", "p1/to-strip.html"])
+				test.equals(toCompareString(map(resolveds, sanitize)),
+					toCompareString([{
+						name: 'foo',
+						path: "p1/foo.js"
+					}, {
+						name: 'text!template.html',
+						path: "p1/template.html"
+					}, { 
+						name: 'text!to-strip.html!strip',
+						path: "p1/to-strip.html"
+					}, {
+						name: 'domReady!',
+						path: undefined,
+						ignore: true
+					}])
 				);
 				test.done();
 			});
