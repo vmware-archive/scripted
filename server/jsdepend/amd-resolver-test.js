@@ -33,7 +33,6 @@ var toCompareString = require('./utils').toCompareString;
 var configuration = require('./filesystem');
 
 function addApi(into, from) {
-	//We are in test mode so the 'private' apis are ok to use:
 	for (var p in from) {
 		if (from.hasOwnProperty(p)) {
 			into[p] = from[p];
@@ -307,3 +306,19 @@ function findAmdConfigIn511Project(project) {
 
 exports.findAmdConfIn511Project = findAmdConfigIn511Project('goats');
 exports.findAmdConfIn511ProjectWithRequireJs = findAmdConfigIn511Project('goats-with-requirejs');
+
+exports.findIndirectAmdConfigInHtmlFileWithThreeScriptTags = function (test) {
+	var api = makeApi('simple-web-with-shared-configjs'); 
+	api.getAmdConfig("client/main", function (amdConf) {
+		test.equals(toCompareString(amdConf),
+			toCompareString({
+				baseUrl: '.',
+				paths: {
+					'utils' : 'lib/utils'
+				},
+				baseDir: 'client'
+			})
+		);
+		test.done();
+	});
+};

@@ -21,6 +21,7 @@
 var parser = require("./parser");
 var treeMatcher = require('./tree-matcher');
 var map = require('./utils').map;
+var eachk = require('./utils').eachk;
 
 function configure(filesystem) {
 
@@ -106,11 +107,11 @@ function configure(filesystem) {
 
 	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths", "packages"]));
 	
-	function findCurlConfigBlock(tree) {
+	function findIndirectConfigBlock(tree) {
 	
 		var configIdNameVar = variablePat('string');
 		
-		var curlCallWithIdentifier = containsPat(objectPat({
+		var requireCallWithIdentifier = containsPat(objectPat({
 			"type": "CallExpression",
 			"callee": requireConfigFunctionPat,
 			"arguments": [ {
@@ -119,7 +120,7 @@ function configure(filesystem) {
             }]
 		}));
 		var configBlock = null;
-		curlCallWithIdentifier(tree)(
+		requireCallWithIdentifier(tree)(
 			//Success
 			function () {
 				var configIdName = configIdNameVar.value;
@@ -322,7 +323,7 @@ function configure(filesystem) {
 				//console.log('------------------------------------------------------');
 				//console.log(JSON.stringify(tree, null, "  "));
 				return analyzeObjectExp(findRequireConfigBlock(tree) || 
-					findCurlConfigBlock(tree)
+					findIndirectConfigBlock(tree)
 				);
 			} catch (err) {
 				//couldn't parse it. Ignore that code.
@@ -378,35 +379,48 @@ function configure(filesystem) {
 
 	var REQUIRE_JS = /(.*\/)?(curl|require)\.js$/;
 	
+	function find(array, pred) {
+		var pos = 0;
+		while (pos<array.length) {
+			if (pred(array[pos])) {
+				return pos;
+			}
+			pos++;
+		}
+		return -1;
+	}
+	
 	/**
-	 * Helper to extract amd config out of a typical 511 project. This 
-	 * is called at the point where a html file was found and script
-	 * tags have been extracted from the file. The script tags are
-	 * passed to this function for analysis.
-	 * 
-	 * If based on the tags this html file is deemed to be 511-ish then
-	 * the config block extracted and passed to the callback otherwise
-	 * a falsy value is passed to the callback.
+	 * Helper to extract amd config out of an html file that loads the require config
+	 * from another file via a script tag.
 	 */
-	function getConfigFromDoubleTag(htmlFile, scriptTags, callback) {
+	function getConfigFromTagIndirectly(htmlFile, scriptTags, callback) {
 		//The 'main' html file in a 511 project has two script tags.
-		if (deref(scriptTags, ["length"]) === 2) {
-			//The first one loads the curl.js loader.
-			var tag = scriptTags[0];
-			var curlPath = deref(tag, ["attribs", "src"]);
-			if (curlPath && REQUIRE_JS.test(curlPath)) {
-				//The second one loads another js file that is supposed to
-				//configure curl and kick-off the app. It is typically called
-				//"app/run.js" in a 511 project but we will not assume that.
-				tag = scriptTags[1];
-				var appJsPath = deref(tag, ["attribs", "src"]);
-				if (appJsPath) {
-					var appJsFile = pathResolve(getDirectory(htmlFile), appJsPath);
-					return getContents(appJsFile, function (jsCode) {
-						var conf = getAmdConfigFromCode(jsCode);
-						return callback(conf);
-					});
-				}
+		if ((deref(scriptTags, ["length"])||0) > 1) {
+			//First find a tag that loads requirejs or curl.
+			var pos = find(scriptTags, function (tag) {
+				var scriptPath = deref(tag, ["attribs", "src"]);
+				return scriptPath && REQUIRE_JS.test(scriptPath);
+			});
+			
+			if (pos>=0) {
+				//a tag loading the loader was found...
+				//now look in the remaining tags for a config.
+				scriptTags = scriptTags.slice(pos);
+				return orMap(scriptTags, 
+					//Called on each tag, must call 'callback' to pass result
+					function (tag, callback) {
+						var appJsPath = deref(tag, ["attribs", "src"]);
+						if (appJsPath) {
+							var appJsFile = pathResolve(getDirectory(htmlFile), appJsPath);
+							return getContents(appJsFile, function (jsCode) {
+								return callback(getAmdConfigFromCode(jsCode));
+							});
+						}
+						return callback(false);
+					},
+					callback
+				);
 			}
 		}
 		//If we reach here, some condition failed and callback wasn't called yet.
@@ -424,7 +438,7 @@ function configure(filesystem) {
 				var scriptTags = getScriptTags(contents);
 				ork(
 					function (callback) {
-						getConfigFromDoubleTag(file, scriptTags, callback);
+						getConfigFromTagIndirectly(file, scriptTags, callback);
 					},
 					function (callback) {
 						orMap(scriptTags, 
