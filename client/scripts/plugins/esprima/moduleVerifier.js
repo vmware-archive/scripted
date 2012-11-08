@@ -45,7 +45,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 			var missing = [];
 			for (var i = 0; i < arrayElts.length; i++) {
 				if (arrayElts[i].type === "Literal" && typeof arrayElts[i].value === "string") {
-					if (!indexer.hasDependency(arrayElts[i].value)) {
+					if (indexer.hasProblem(arrayElts[i].value)) {
 						// module is unresolvable report it.
 						missing.push({
 							description : "Cannot find module '" + arrayElts[i].value + "'",

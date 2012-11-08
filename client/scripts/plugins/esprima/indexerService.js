@@ -234,9 +234,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 		if (!statusFn) {
 			statusFn = function(msg) { scriptedLogger.debug(msg, "INDEXER"); };
 		}
+
 		
 		// private instance variable
 		var indexTargetFile;
+
+		// private helper method		
+		function getDeps(name) {		
+			if (!indexTargetFile || !name) {
+				return null;
+			}
+			// check local storage for file
+			var deps = retrieveFn(indexTargetFile + "-deps");
+			if (!deps) {
+				return null;
+			}
+			return JSON.parse(deps);
+		}
 		
 		/**
 		 * retrieves the summaries for all dependencies in the global scope
@@ -312,20 +326,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 			return indexTargetFile;
 		};
 		
+		this.hasProblem = function(name) {
+			var deps = getDeps(name);
+			if (deps) {
+				var dep = deps.refs[name];
+				return !dep.ignore && !dep.path;
+			}
+			return true;
+		};
+		
 		/**
 		 * looks for a dependency with the given module name
 		 * returns the path to that dependency
 		 */
 		this.hasDependency = function(name) {
-			if (!indexTargetFile || !name) {
-				return null;
-			}
-			// check local storage for file
-			var deps = retrieveFn(indexTargetFile + "-deps");
-			if (!deps) {
-				return null;
-			}
-			deps = JSON.parse(deps);
+			var deps = getDeps(name);
 			if (deps && deps.refs[name]) {
 				return deps.refs[name].path;
 			}
