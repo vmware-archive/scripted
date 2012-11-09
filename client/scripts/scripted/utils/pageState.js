@@ -37,7 +37,10 @@ side : { // side panel can be specified as an array for multiple side panels
  */
 define(['lib/json5'], function() {
 
-	var editorPrefix = "/editor";
+	var editorPrefix, windowsPathRE;
+
+	editorPrefix = "/editor";
+	windowsPathRE = /^\/?.+:/;
 
 	return {
 		/**
@@ -82,6 +85,10 @@ define(['lib/json5'], function() {
 			}
 			if (path === "") {
 				path = "/";
+			}
+			if (windowsPathRE.test(path) && path.charAt(0) === "/") {
+				// remove the loading slash for windows paths
+				path = path.substring(1);
 			}
 			try {
 				var state = JSON5.parse(hash);
@@ -235,7 +242,7 @@ define(['lib/json5'], function() {
 				} else if (wasMainPathDel) {
 					loc.main.path = path;
 				}
-				return editorPrefix + (path ? path : "") + "#" + gen;
+				return editorPrefix + (windowsPathRE.test(path) ? "/" : "") + path + "#" + gen;
 			}
 		},
 
