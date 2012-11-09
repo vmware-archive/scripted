@@ -301,12 +301,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				localStorage.setItem("scripted.sideWidth", side_width);
 			});
 			
-			// use last size if known
-			storedWidth = localStorage.getItem("scripted.sideWidth");
-			if (storedWidth) {
-				sidePanel.width(storedWidth);
-				sidePanel.resize();
-			}
+//			// use last size if known
+//			storedWidth = localStorage.getItem("scripted.sideWidth");
+//			if (storedWidth) {
+//				sidePanel.width(storedWidth);
+//				sidePanel.resize();
+//			}
 
 
 			/* Load keyboard shortcuts*/

@@ -57,11 +57,21 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 	};
 	
 	var open_side = function(editor) {
-		if ( $('#side_panel').css('display') === 'block') { return false; }
-		$('#side_panel').show();
+		var sidePanel = $('#side_panel');
+		if ( sidePanel.css('display') === 'block') {
+			return false;
+		}
+		sidePanel.show();
 		$('#editor').css('margin-right', $('#side_panel').width());
 		editor._textView._updatePage();
-		$('#side_panel').trigger('open');
+		sidePanel.trigger('open');
+
+		// restore last size if known
+		var storedWidth = localStorage.getItem("scripted.sideWidth");
+		if (storedWidth) {
+			sidePanel.width(storedWidth);
+			sidePanel.resize();
+		}
 	};
 	
 	/**
@@ -596,6 +606,26 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 	};
 	
 	/**
+	 * Adds a listener to the browser to update page state when the state of an editor changes
+	 */
+	var installPageStateListener = function(editor) {
+		var currentRequest;
+		function selListener(evt) {
+			if (currentRequest) {
+				clearTimeout(currentRequest);
+			}
+			currentRequest = setTimeout(function() {
+				var mainItem = mPageState.generateHistoryItem(window.editor);
+				var subItem = window.subeditors && window.subeditors.length > 0 ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
+				mPageState.storeBrowserState(mainItem, subItem, true);
+			}, 1000);
+			
+		}
+		editor.getTextView().addEventListener("Selection", selListener);
+	};
+
+	
+	/**
 	 * This handles initial page load
 	 */
 	var loadEditor = function(filepath, domNode, type) {
@@ -628,6 +658,8 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 				editor.getTextView().focus();
 			}, 5);
 		}
+		
+		installPageStateListener(editor);
 		return editor;
 	};
 	
@@ -681,9 +713,6 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 			return true;
 		}
 	};
-	
-
-	
 
 	/**
 	 * Navigates to a new editor
