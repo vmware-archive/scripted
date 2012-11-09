@@ -181,11 +181,11 @@
 .annotationRange.matchingBracket {
 	outline: 1px solid red;
 }
-.annotationRange.currentSearch {
-	background-color: #53D1FF;
-}
 .annotationRange.matchingSearch {
 	background-color: #C3E1FF;
+}
+.annotationRange.currentSearch {
+	background-color: #53D1FF;
 }
 /* SCRIPTED */
 .annotationRange.markOccurrences {
