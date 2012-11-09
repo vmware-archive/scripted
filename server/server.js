@@ -12,9 +12,8 @@
  *     Andrew Clement
  *     Kris De Volder
  *     Christopher Johnson
+ *     Scott Andrews
  ******************************************************************************/
- 
-/*global require exports console*/
 
 var express = require('express');
 

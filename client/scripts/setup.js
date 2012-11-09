@@ -12,6 +12,7 @@
  *     Andrew Clement
  *     Kris De Volder
  *     Christopher Johnson
+ *     Scott Andrews
  ******************************************************************************/
 
 /*global location confirm localStorage requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/

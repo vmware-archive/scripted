@@ -9,8 +9,9 @@
  *
  * Contributors:
  *     Chris Johnson - initial implementation
- *      Andy Clement
- *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
+ *     Andy Clement
+ *     Andrew Eisenberg - refactoring for a more consistent approach to navigation
+ *     Scott Andrews
  ******************************************************************************/
 /*jslint browser:true */
 /*global localStorage JSON5 */
