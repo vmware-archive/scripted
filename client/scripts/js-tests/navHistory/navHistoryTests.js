@@ -124,7 +124,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb1a = function() {
@@ -139,7 +139,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb2 = function() {
@@ -154,9 +154,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#0,0");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb3 = function() {
@@ -173,9 +173,9 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#10,20");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#10,20");
 	};
 	
 	tests.testHistorycrumb4 = function() {
@@ -199,11 +199,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 	};
 	
 	// test subeditor navigation applies to history
@@ -237,18 +237,18 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
 		} else {
-			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
 		}
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
 		} else {
-			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
 		}
 	};
 	

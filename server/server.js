@@ -12,9 +12,8 @@
  *     Andrew Clement
  *     Kris De Volder
  *     Christopher Johnson
+ *     Scott Andrews
  ******************************************************************************/
- 
-/*global require exports console*/
 
 var express = require('express');
 
@@ -40,6 +39,8 @@ function start(route, handle) {
 			showStack: true
 		}));
 	});
+
+	require('./routes/editor').install(app);
 
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);

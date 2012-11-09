@@ -52,8 +52,9 @@
 		// first ensure that the url is correct
 		window.setTimeout(function() {
 			fixUrl();		
-			require(["js-tests/navHistory/navHistoryTests"], 
-				function(navHistoryTests) {
+			require(["scripted/utils/pageState", "js-tests/navHistory/navHistoryTests"],
+				function(pageState, navHistoryTests) {
+					pageState._setEditorPrefix(window.location.pathname + '?');
 					function testShim(tests) {
 						for (var t in tests) {
 							if (tests.hasOwnProperty(t)) {
