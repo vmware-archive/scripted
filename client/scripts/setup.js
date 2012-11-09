@@ -272,13 +272,14 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				localStorage.setItem("scripted.navigatorWidth", width);
 			});
 			
-			// use last size if known
-			var storedWidth = localStorage.getItem("scripted.navigatorWidth");
-			if (storedWidth) {
-				nav.width(storedWidth);
-				nav.resize();
+			if (window.scripted.navigator === true) {
+				// use last size if known
+				var storedWidth = localStorage.getItem("scripted.navigatorWidth");
+				if (storedWidth) {
+					nav.width(storedWidth);
+					nav.resize();
+				}
 			}
-
 			
 			/*Resizable side panel*/
 			var sidePanel = $('#side_panel');
