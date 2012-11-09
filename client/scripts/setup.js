@@ -192,7 +192,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 	window.explorer = explorer;
 
-	var pageState = mPageState.extractPageState(location.hash, location.search);
+	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 
 	/* Locate the nearest .jshintrc. It will look relative to the initially opened 
 	 * location - so ok if the .jshintrc is at the project root. But if the file is

@@ -47,7 +47,7 @@ define(["jquery"], function() {
 
 	function insertEditor() {
 		var id = 'editorHook';
-		var url = '/editor.html';
+		var url = '/editor';
 		var req = new XMLHttpRequest();
 		var element=document.getElementById(id);
 		req.open('GET',url,false);

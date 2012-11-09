@@ -104,14 +104,14 @@ fi
 
 if [ "$file" == "." ]
 then
-	URL=http://localhost:7261/editor.html?$dir
+  URL=http://localhost:7261/editor$dir
 else
   # does it start with a slash or is it relative?
   if [ `echo "$file " | cut -c1` == '/' ]
   then
-	URL=http://localhost:7261/editor.html?$file
+    URL=http://localhost:7261/editor/$file
   else
-	URL=http://localhost:7261/editor.html?$dir/$file
+    URL=http://localhost:7261/editor$dir/$file
   fi
 fi
 

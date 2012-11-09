@@ -25,7 +25,7 @@ echo "launching node again: `date`" >> $DIRNAME/../scripted.log
 $DIRNAME/launchnode >> $DIRNAME/../scripted.log 2>&1 &
 
 file="$1"
-URL=http://localhost:7261?$file
+URL=http://localhost:7261/editor$file
 
 sleep 0.10
 echo "opening $file"

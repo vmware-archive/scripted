@@ -41,6 +41,8 @@ function start(route, handle) {
 		}));
 	});
 
+	require('./routes/editor').install(app);
+
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);
 
