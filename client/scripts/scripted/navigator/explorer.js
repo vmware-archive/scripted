@@ -134,80 +134,90 @@ exports.ExplorerModel = (function() {
 	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
 	 * and calculating id based on Location attribute.
 	 */
-	function ExplorerModel(rootPath, /* function returning promise */fetchItems) {
+	function ExplorerModel(rootPath, /* function returning promise */ fetchItems) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
 	}
-	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */{
-		destroy: function(){
-		},
-		getRoot: function(onItem){
-			this.fetchItems(this.rootPath).then(
-					dojo.hitch(this, function(item){
-						this.root = item;
-						onItem(item);
-					})
-					);
-		},
-		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
-			// the parent already has the children fetched
-			if (parentItem.Children) {
-				onComplete(parentItem.Children);
-			} else if (parentItem.ChildrenLocation) {
-				this.fetchItems(parentItem.ChildrenLocation).then( 
-					dojo.hitch(this, function(Children) {
-						parentItem.Children = Children;
-						onComplete(Children);
-					})
-				);
-			} else {
-				onComplete([]);
-			}
-		},
 
-		getIdFromString: function(string) {
-//TODO refactor - dup of below
-// first strip slashes so we aren't processing path separators.
-            var stripSlashes = string.replace(/[\\\/]/g, "");
-            // these id's are used in the DOM, so we can't use characters that aren't valid in DOM id's.
-            // However we need a unique substitution string for these characters, so that we don't duplicate id's
-            // So we are going to substitute ascii values for invalid characters.
-            // See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363062
-
-            var id = "";
-            for (var i=0; i<stripSlashes.length; i++) {
-                if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
-                    id += stripSlashes.charCodeAt(i);
-                } else {
-                    id += stripSlashes[i];
-                }
-            }
-            return id;
-        },
-		getId: function(/* item */ item){
-                        if (item.Location === undefined) {
-                           throw "no location set for item "+item;
-                        }
-			if (item.Location === this.root.Location) {
-				return this.rootId;
-			} 
+	var getNoPathSeparatorID = function(item) {
 			// first strip slashes so we aren't processing path separators.
-			var stripSlashes = item.Location.replace(/[\\\/]/g, "");
+			var toProcess = item.Location ? item.Location : item;
+			
+			var stripSlashes = toProcess.replace(/[\\\/]/g, "");
 			// these id's are used in the DOM, so we can't use characters that aren't valid in DOM id's.
 			// However we need a unique substitution string for these characters, so that we don't duplicate id's
 			// So we are going to substitute ascii values for invalid characters.
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363062
-			
+
 			var id = "";
-			for (var i=0; i<stripSlashes.length; i++) {
+			for (var i = 0; i < stripSlashes.length; i++) {
 				if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
 					id += stripSlashes.charCodeAt(i);
 				} else {
 					id += stripSlashes[i];
 				}
 			}
+
 			return id;
+
+
+		};
+
+	var getFullPathID = function(item) {
+			return "" + (item.Location ? item.Location : item);
+		};
+
+	var resolveID = function(item) {
+			var shouldUseNoPath = false;
+
+			return shouldUseNoPath ? getNoPathSeparatorID(item) : getFullPathID(item);
+
+		};
+	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */
+	{
+		destroy: function() {},
+		
+		getRoot: function(onItem) {
+			this.fetchItems(this.rootPath).then(
+			dojo.hitch(this, function(item) {
+				this.root = item;
+				onItem(item);
+			}));
+		},
+		
+		getChildren: function( /* dojo.data.Item */ parentItem, /* function(items) */ onComplete) {
+			// the parent already has the children fetched
+			if (parentItem.Children) {
+				onComplete(parentItem.Children);
+			} else if (parentItem.ChildrenLocation) {
+				this.fetchItems(parentItem.ChildrenLocation).then(
+				dojo.hitch(this, function(Children) {
+					parentItem.Children = Children;
+					onComplete(Children);
+				}));
+			} else {
+				onComplete([]);
+			}
+		},
+
+		getIdFromString: function(item) {
+			var id = resolveID(item);
+			return id;
+		},
+		
+		
+		getId: function( /* item */ item) {
+			if (item.Location === undefined) {
+				throw "no location set for item " + item;
+			}
+			if (item.Location === this.root.Location) {
+				return this.rootId;
+			}
+
+			return resolveID(item);
 		}
+
+
 	};
 	return ExplorerModel;
 }());
