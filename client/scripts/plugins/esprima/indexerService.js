@@ -115,7 +115,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	 */
 	function createSummary(dependency, indexer, persistFn, statusFn, k) {
 		var file = dependency.path;
-		if (file) {
+		// only index JS files
+		if (file && file.substr(-3, 3) === ".js") {
 			jsdepend.getContents(file, function (contents) {
 					var oldFile = indexer.getTargetFile();
 					indexer.setTargetFile(file);
