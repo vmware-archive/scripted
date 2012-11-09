@@ -101,11 +101,11 @@ define("plugins/esprima/types", [], function() {
 
 		Buffer: new Definition("Object"),
 		console: new Definition("Object"),
-		module: new Definition("Object"),
+		module: new Definition("Module"),
 		process: new Definition("Process"),
 
 		require: new Definition("?Object:module"),
-		exports: new Definition("Object"),
+//		exports: new Definition("Object"),
 		clearInterval: new Definition("?undefined:t"),
 		clearTimeout: new Definition("?undefined:t"),
 		setInterval: new Definition("?Number:callback,ms"),

@@ -356,5 +356,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"});", "a");
 	};
 
+	tests["test jslint settings"] = function() {
+		assertCreateSummary('{"provided":"?undefined:","types":{},"kind":"commonjs"}', 
+			"/*jslint node:true */\n" +
+			"function foo() {}\n" +
+			"exports = foo;", "a");
+	};
+
 	return tests;
 });
