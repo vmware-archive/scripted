@@ -2251,6 +2251,29 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
+	// configuration from lint options
+	tests["test browser13"] = function() {
+		var results = computeContentAssist(
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	
+	// configuration from lint options overridden by options
+	tests["test browser13"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:false */\n" +
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+	
+	
 	
 	// Node awareness
 	tests["test node1"] = function() {
@@ -2325,6 +2348,49 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		);
 		testProposals("thi", results, [
 			["this", "this : Global"]
+		]);
+	};
+
+	// configuration from .scripted
+	tests["test node8"] = function() {
+		var results = computeContentAssist(
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node9"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node10"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node11"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true*/\n" +
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
 		]);
 	};
 

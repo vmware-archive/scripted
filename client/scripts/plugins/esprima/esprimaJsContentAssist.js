@@ -2146,10 +2146,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 		}
 		if (lintOptions && lintOptions.options) {
-			if (lintOptions.options.browser) {
+			if (lintOptions.options.browser === true) {
 				return "Window";
-			} else if (lintOptions.options.node) {
-				return "Node";
+			} else if (lintOptions.options.node === true) {
+				return "Module";
 			}
 		}
 		return "Global";
