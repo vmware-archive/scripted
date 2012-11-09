@@ -35,4 +35,4 @@ echo Starting scripted.js... >> scripted.log
 
 start /MIN cmd /c node %rootdir%\server\scripted.js^>^>scripted.log
 
-start "" "http://localhost:7261/editor%patharg%"
+start "" "http://localhost:7261/editor/%patharg%"
