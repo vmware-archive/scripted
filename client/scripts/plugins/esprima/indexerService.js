@@ -122,13 +122,18 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 					indexer.setTargetFile(file);
 					var esprimaContentAssistant = new mEsprimaContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, indexer.lintConfig);
 					var structure = esprimaContentAssistant.computeSummary(contents, file);
-					var textStructure = JSON.stringify(structure);
-					var ts = generateTimeStamp();
-					statusFn("Persisting summary of " + file);
-					
-					persistFn(file + "-summary", textStructure);
-					persistFn(file + "-summary-ts", ts);
-					indexer.setTargetFile(oldFile);
+					if (structure) {
+						var textStructure = JSON.stringify(structure);
+						var ts = generateTimeStamp();
+						statusFn("Persisting summary of " + file);
+						
+						persistFn(file + "-summary", textStructure);
+						persistFn(file + "-summary-ts", ts);
+						indexer.setTargetFile(oldFile);
+					} else {
+						// couldn't create structure. likely a bad parse
+						statusFn("Warning: could not summarize " + file + ". likely there is a problem with the file.");
+					}
 					k();
 				},
 				function (err) {

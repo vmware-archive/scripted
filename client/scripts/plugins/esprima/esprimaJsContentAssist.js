@@ -2259,6 +2259,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		computeProposals: function(buffer, offset, context) {
 			try {
 				var root = mVisitor.parse(buffer);
+				if (!root) {
+					// assume a bad parse
+					return null;
+				}
 				// note that if selection has length > 0, then just ignore everything past the start
 				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 				if (completionKind) {
@@ -2288,6 +2292,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		_internalFindDefinition : function(buffer, offset, findName) {
 			var toLookFor;
 			var root = mVisitor.parse(buffer);
+			if (!root) {
+				// assume a bad parse
+				return null;
+			}
 			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 			var findIdentifier = function(node) {
 				if ((node.type === "Identifier" || node.type === "ThisExpression") && inRange(offset, node.range, true)) {
@@ -2365,6 +2373,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		 */
 		computeSummary: function(buffer, fileName) {
 			var root = mVisitor.parse(buffer);
+			if (!root) {
+				// assume a bad parse
+				return null;
+			}
 			var environment = createEnvironment({ buffer: buffer, uid : fileName, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments, indexer : this.indexer });
 			try {
 				this._doVisit(root, environment);

@@ -11,7 +11,7 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define esprima*/
+/*global define esprima scriptedLogger*/
 define("plugins/esprima/esprimaVisitor", [], function() {
 
 
@@ -34,8 +34,17 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 			if (!extraOptions.comment) {
 				extraOptions.comment = true;
 			}
-			var parsedProgram = esprima.parse(contents, extraOptions);
-			return parsedProgram;
+			try {
+				var parsedProgram = esprima.parse(contents, extraOptions);
+				return parsedProgram;
+			} catch (e) {
+				if (typeof scriptedLogger !== "undefined") {
+					scriptedLogger.warn("Problem parsing file", "CONTENT_ASSIST");
+					scriptedLogger.warn(e.message, "CONTENT_ASSIST");
+					scriptedLogger.warn(e.stack, "CONTENT_ASSIST");
+				}
+				return null;
+			}
 		},
 
 		/**
