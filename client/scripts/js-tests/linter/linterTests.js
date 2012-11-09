@@ -21,7 +21,7 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 	
 	function setup() { 
 		window.fsroot = testroot.slice(0,-1);
-		localStorage.removeItem("scriptedHistory");
+		localStorage.removeItem("scripted.recentFileHistory");
 		$('.subeditor_wrapper').remove();
 		window.subeditors = [];
 		var editor = mNavHistory._loadEditor(testroot + "foo.js");

@@ -14,7 +14,7 @@
  *     Christopher Johnson
  ******************************************************************************/
 
-/*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
+/*global location confirm localStorage requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
 
 /**
@@ -260,35 +260,54 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
-			$('#navigator-wrapper').resizable({
+			var nav = $('#navigator-wrapper');
+			nav.resizable({
 				handles: "e"
 			});
 
-			$('#navigator-wrapper').resize(function(){
+			nav.resize(function(){
 				var width = $('#navigator-wrapper').width();
 				$('#editor').css('margin-left', width);
 				window.editor._textView._updatePage();
+				localStorage.setItem("scripted.navigatorWidth", width);
 			});
 			
-			/*Resizable side panel*/
+			// use last size if known
+			var storedWidth = localStorage.getItem("scripted.navigatorWidth");
+			if (storedWidth) {
+				nav.width(storedWidth);
+				nav.resize();
+			}
+
 			
-			$('#side_panel').resizable({
+			/*Resizable side panel*/
+			var sidePanel = $('#side_panel');
+			sidePanel.resizable({
 				handles: "w"
 			});
 			
-			$('#side_panel').resize(function(){
-				var side_width = $('#side_panel').width();
+			sidePanel.resize(function(){
+				var side_width = sidePanel.width();
 				$('#editor').css('margin-right', side_width);
-				$('#side_panel').css('left', '');
+				sidePanel.css('left', '');
 				
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
-				$('#side_panel').css('width', side_percent + "%");		
+				sidePanel.css('width', side_percent + "%");		
 				
 				window.editor._textView._updatePage();
 				for (var i = 0; i < window.subeditors.length; i++){
 					window.subeditors[i].getTextView().update();
 				}
+				localStorage.setItem("scripted.sideWidth", side_width);
 			});
+			
+			// use last size if known
+			storedWidth = localStorage.getItem("scripted.sideWidth");
+			if (storedWidth) {
+				sidePanel.width(storedWidth);
+				sidePanel.resize();
+			}
+
 
 			/* Load keyboard shortcuts*/
 			require(['jsrender'], function(mJsRender){

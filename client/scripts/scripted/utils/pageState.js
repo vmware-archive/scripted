@@ -138,7 +138,7 @@ define(['lib/json5'], function() {
 		 * @return {Array.<{path:String,range:Array,scroll:Number}>}
 		 */
 		getHistory : function() {
-			var historyJSON = localStorage.getItem("scriptedHistory");
+			var historyJSON = localStorage.getItem("scripted.recentFileHistory");
 			if (!historyJSON) {
 				return [];
 			}
@@ -164,11 +164,11 @@ define(['lib/json5'], function() {
 		},
 	
 		setHistory : function(history) {
-			localStorage.setItem("scriptedHistory", JSON5.stringify(history));
+			localStorage.setItem("scripted.recentFileHistory", JSON5.stringify(history));
 		},
 	
 		/**
-		 * generates an item to be stored in scriptedHistory as well as browser state
+		 * generates an item to be stored in scripted.recentFileHistory as well as browser state
 		 */
 		generateHistoryItem : function(editor) {
 			var path = editor.getFilePath();
