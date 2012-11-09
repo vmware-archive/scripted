@@ -62,16 +62,16 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 			return false;
 		}
 		sidePanel.show();
-		$('#editor').css('margin-right', $('#side_panel').width());
-		editor._textView._updatePage();
-		sidePanel.trigger('open');
-
 		// restore last size if known
 		var storedWidth = localStorage.getItem("scripted.sideWidth");
 		if (storedWidth) {
 			sidePanel.width(storedWidth);
 			sidePanel.resize();
 		}
+		$('#editor').css('margin-right', $('#side_panel').width());
+		editor._textView._updatePage();
+		sidePanel.trigger('open');
+
 	};
 	
 	/**
