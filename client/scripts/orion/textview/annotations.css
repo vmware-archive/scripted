@@ -189,7 +189,7 @@
 }
 /* SCRIPTED */
 .annotationRange.markOccurrences {
-	border: 1px Indigo solid;
+	outline: 1px Indigo solid;
 }
 
 /* Styles for lines of text */
