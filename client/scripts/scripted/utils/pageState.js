@@ -9,8 +9,9 @@
  *
  * Contributors:
  *     Chris Johnson - initial implementation
- *      Andy Clement
- *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
+ *     Andy Clement
+ *     Andrew Eisenberg - refactoring for a more consistent approach to navigation
+ *     Scott Andrews
  ******************************************************************************/
 /*jslint browser:true */
 /*global localStorage JSON5 */
@@ -36,9 +37,12 @@ side : { // side panel can be specified as an array for multiple side panels
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
 define(['lib/json5'], function() {
-	var BASE_URL = location.protocol + "//" + location.hostname + ":" + location.port + location.pathname;
-	
-	
+
+	var editorPrefix, windowsPathRE;
+
+	editorPrefix = "/editor";
+	windowsPathRE = /^\/?.+:/;
+
 	return {
 		/**
 		 * A function that extracts page layout from a hash and path
@@ -60,12 +64,12 @@ define(['lib/json5'], function() {
 			}
 		
 			if (!isNaN(parseInt(hash.charAt(0)))) {
-				// http://localhost:7261?path.js#10,20
+				// http://localhost:7261/editor/path.js#10,20
 				hash = "main:{range:[" + hash + "]}";
 			}
 		
 			if (hash.charAt(0) !== '{') {
-				// http://localhost:7261?path.js#main:{range:10,20}
+				// http://localhost:7261/editor/path.js#main:{range:10,20}
 				hash = '{' + hash +'}';
 			}
 
@@ -77,8 +81,14 @@ define(['lib/json5'], function() {
 				hash = "{main:" + hash + "}";
 			}
 
-		
-			if (path && path.charAt(0) === '?') {
+			if (path.indexOf(editorPrefix) === 0) {
+				path = path.substr(editorPrefix.length);
+			}
+			if (path === "") {
+				path = "/";
+			}
+			if (windowsPathRE.test(path) && path.charAt(0) === "/") {
+				// remove the loading slash for windows paths
 				path = path.substring(1);
 			}
 			try {
@@ -118,17 +128,14 @@ define(['lib/json5'], function() {
 				return this.extractPageState(hash, splits[0]);
 			}
 		
+			var path = url.replace(/^https?:\/\/[^\/]+/, '');
 			var hashIndex = url.indexOf('#');
 			if (hashIndex < 0) {
 				hashIndex = url.length;
 			}
-			var queryIndex = url.indexOf('?');
-			var path;
-			if (queryIndex >= 0 && queryIndex < hashIndex) {
-				path = url.substring(queryIndex,hashIndex);
-			}
 			if (hashIndex >= 0) {
 				url = url.substring(hashIndex +1);
+				path = path.split('#', 1)[0];
 			}
 			return this.extractPageState(url, path);
 		},
@@ -218,7 +225,7 @@ define(['lib/json5'], function() {
 		generateUrl : function(loc) {
 			if (typeof loc === 'string') {
 				// assume a simple file path
-				return BASE_URL + "?" + loc;
+				return editorPrefix + loc;
 			} else {
 				var path, wasPathDel, wasMainPathDel;
 				if (loc.path) {
@@ -236,8 +243,16 @@ define(['lib/json5'], function() {
 				} else if (wasMainPathDel) {
 					loc.main.path = path;
 				}
-				return BASE_URL + (path ? "?" + path : "") + "#" + gen;
+				return editorPrefix + (windowsPathRE.test(path) ? "/" : "") + path + "#" + gen;
 			}
+		},
+
+		/**
+		 * Define a custom URL prefix for the editor. Useful within unit tests
+		 * @param {String} prefix the new path prefix
+		 */
+		_setEditorPrefix : function(prefix) {
+			editorPrefix = prefix;
 		},
 	
 		storeScriptedHistory : function(histItem) {
