@@ -54,6 +54,8 @@ define(['lib/json5'], function() {
 		 * @return {{main:{path:String,range:Array,scroll:Number},side0:{path:String,range:Array,scroll:Number}}} an object describing the full page state
 		 */
 		extractPageState : function(hash, path) {
+			hash = decodeURI(hash);
+			path = decodeURI(path);
 			if (!hash && !path) {
 				// create empty page state to be filled later
 				return {main: {path: ""}};
