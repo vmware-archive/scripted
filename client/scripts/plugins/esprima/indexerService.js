@@ -336,7 +336,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 			var deps = getDeps(name);
 			if (deps) {
 				var dep = deps.refs[name];
-				return !dep.ignore && !dep.path;
+				return dep && !dep.ignore && !dep.path;
 			}
 			return true;
 		};
