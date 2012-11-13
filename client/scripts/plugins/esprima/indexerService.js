@@ -141,6 +141,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 					k();
 				}
 			);
+		} else {
+			k();
 		}
 	}
 	
