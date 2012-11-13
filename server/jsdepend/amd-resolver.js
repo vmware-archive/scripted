@@ -16,7 +16,7 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 define(function(require, exports, module) {
-
+ 
 ////////////////////////////////////////
 // amd-support
 //
@@ -25,6 +25,7 @@ define(function(require, exports, module) {
 
 var mPathMapper = require('./amd-path-mapper');
 var startsWith = require('./utils').startsWith;
+var endsWith = require('./utils').endsWith;
 var pathResolve = require('./utils').pathResolve;
 var getDirectory = require('./utils').getDirectory;
 var when = require('when');
@@ -71,11 +72,13 @@ function configure(conf) {
 	
 	function getExtension(dep) {
 		if (dep.plugin) {
-			return ""; //TODO: This is a flaky assumption. It really depends on the plugin how
+			if (dep.plugin==='text' || endsWith(dep.plugin, '/text')) {
+				return "";
+			}
+			return ".js"; //TODO: This is a flaky assumption. It really depends on the plugin how
 						// resolution works. But lacking an implementation of a resolve
 						// for every possible plugin, we'll assume it just resolves 
-						// with the same rules but without expecting an extra extension.
-						// This is how the the 'text!' plugin works.
+						// with the same rules as a javascript file.
 		} else {
 			return ".js"; //We'll be trying to load a js file.
 		}
