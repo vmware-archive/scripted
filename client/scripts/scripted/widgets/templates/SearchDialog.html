@@ -6,22 +6,22 @@
 		</span>
 	</div>
 	<div dojoAttachPoint="containerNode" class="dijitDialogPaneContent">
-		<div style="display:table">
-			<div style="display:table-row">
-				<div style="display:table-cell; padding:3px;">
+		<div class="searchDialogTable">
+			<div class="searchDialogRow">
+				<div class="search">
 					<input type="text" dojoType="dijit.form.TextBox" dojoAttachPoint="resourceName" 
 						placeHolder="${searchPlaceHolder}"
 						intermediateChanges="true" style="width:30em;outline:none;">
 				</div>
 			</div>
-			<div style="display:table-row">
-				<div dojoAttachPoint="favresults" style="max-width:800px; max-height:400px; height:auto; overflow-y:auto;"></div>
+			<div class="searchDialogRow">
+				<div dojoAttachPoint="favresults" class="results searchDialogRowFavResults"></div>
 			</div>
-			<div style="display:table-row">
-				<div dojoAttachPoint="results" style="max-width:790px; max-height:400px; overflow:auto;"></div><!--height:auto; overflow-y:auto;"></div-->
+			<div class="searchDialogRow">
+				<div dojoAttachPoint="results" class="results"></div><!--height:auto; overflow-y:auto;"></div-->
 			</div>
-			<div style="display:table-row">
-				<div dojoAttachPoint="statusbar" style="display:table-cell;"></div>
+			<div class="searchDialogRow">
+				<div dojoAttachPoint="statusbar" class="searchDialogStatus"></div>
 			</div>
 		</div>
 	</div>
