@@ -1,5 +1,6 @@
 @import "../scripts/orion/editor/editor.css";
 @import "../scripts/scripted/exec/console.css";
+@import "../scripts/scripted/widgets/templates/SearchDialog.css";
 
 ul{
 	display: block;
