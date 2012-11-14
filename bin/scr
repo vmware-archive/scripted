@@ -132,12 +132,21 @@ sleep 0.20
 
 
 # echo "opening $dir/$file"
-if which gnome-open > /dev/null; then
-  gnome-open "$URL"
-elif which xdg-open > /dev/null; then
-  xdg-open "$URL"
-elif which open > /dev/null; then
-  open "$URL"
+if [ -z "$SCRIPTED_BROWSER" ]
+then
+  if which gnome-open > /dev/null; then
+    gnome-open "$URL" > /dev/null
+  elif which xdg-open > /dev/null; then
+    xdg-open "$URL" > /dev/null
+  elif which open > /dev/null; then
+    open "$URL" > /dev/null
+  else
+    echo "Could not detect the web browser to use."
+  fi
+elif which "$SCRIPTED_BROWSER" > /dev/null; then
+  # if SCRIPTED_BROWSER is indeed executable...
+  ( $SCRIPTED_BROWSER "$URL" & ) > /dev/null
 else
   echo "Could not detect the web browser to use."
+  echo "Try setting \$SCRIPTED_BROWSER in your env."
 fi
