@@ -234,14 +234,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/searchUtils', "scripted
 
 					// Attach all the result data, usefull for handling navigation etc.
 					row.resultData = resource; 
-
-					dojo.style(row,"width","780px");
-					dojo.style(row,"max-width","780px");
+					dojo.addClass(row, "rowResult");
 					// Column: context for the match						
 					var col = row.insertCell(0);
 //					dojo.style(col,"width","780px");
 //					dojo.style(col,"white-space","nowrap");
-					dojo.style(col,"font-family","monospace");
+					dojo.addClass(col, "col1");
 					var textnode = document.createTextNode(resource.context);
 					
 					
