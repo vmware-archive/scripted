@@ -22,11 +22,11 @@ function start(route, handle) {
 		var path = req.path;
 		// Don't bother for favicon.ico
 		if (path === '/favicon.ico') {
-            response.writeHead(404, {
+            res.writeHead(404, {
                 "Content-Type": "text/html"
             });
-            response.write("404 Not found");
-            response.end();
+            res.write("404 Not found");
+            res.end();
 			return;
 		}
 		//console.log("Request for " + path + " received.");
