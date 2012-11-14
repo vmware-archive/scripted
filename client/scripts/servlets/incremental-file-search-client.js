@@ -10,10 +10,14 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
-/*global require define console exports SockJS */
-define(["sockjs"], function () {
-	//var sockjs = require('sockjs'); 
+/*global require define console exports SockJS WebSocketMultiplex */
+define(["./websockets-client"], function (multiplexer) {
+	//var sockjs = require('sockjs');
 	//sockjs library actually stuffs its api into globals (i.e. you simple do 'new SockJS(...)')
+	
+	//TODO: The two lines below do not belong here. The whole point of using WebSocketMultiplex
+	//is to create only a single webscoket so this shoud be done in a 'central' location so
+	//anyone interested in a socketlike connection can request one from there.
 	
 	var nextId = 0;
 
@@ -21,9 +25,9 @@ define(["sockjs"], function () {
 	
 		var message_queue = []; //push messages in here while waiting for onopen event.
 		                        // once connection is opened this is set to null
-		var options = {}; 
+		var options = {};
 		var id = nextId++;
-		var sock = new SockJS('/ifsearch');
+		var sock = multiplexer.channel('ifsearch');
 		
 		for (var p in requestor) {
 			//any non-function properties in the requestor will be treated as 'options'
@@ -78,16 +82,16 @@ define(["sockjs"], function () {
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
-			console.log('ifsearch ['+id+'] closed');	
+			console.log('ifsearch ['+id+'] closed');
 		};
 		
 		return {
-			//This returns some functions that may useful to call on the client side to 
-			//manipulate an existing interactive file search. 
+			//This returns some functions that may useful to call on the client side to
+			//manipulate an existing interactive file search.
 			
 			/**
 			 * should be called when the search is no longer needed. Allows releasing
-			 * resources associated with it (e.g. closing the websocket connection we 
+			 * resources associated with it (e.g. closing the websocket connection we
 			 * have opened to the server.
 			 */
 			close: function () {

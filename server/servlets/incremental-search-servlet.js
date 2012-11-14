@@ -13,7 +13,9 @@
  
 /*global require exports console*/
 
-//This servlet is 'special' and doesn't get registered in the same 
+var SERVICE_NAME = 'isearch';
+
+//This servlet is 'special' and doesn't get registered in the same
 //way/place that other servlets do.
 
 //See server.js to find where this 'servlet' handlers gets registered.
@@ -21,7 +23,7 @@
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
-var sockjs = require('sockjs');
+var websockets = require('./websockets-servlet');
 var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var toRegexp = require('../jsdepend/utils').toRegexp;
@@ -33,9 +35,11 @@ var LOG_SOCKET_COUNT = true;
 
 exports.install = function (server) {
 
+	websockets.install(server); // the websockets servlet is a prerequisite. Ensure its installed.
+
 	var openSockets = 0;
 
-	var sockServer = sockjs.createServer();
+	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
 		//opening a websocket connection initiates a search.
 		
@@ -65,7 +69,7 @@ exports.install = function (server) {
 		function addResult(path) {
 			if (!results[path]) {
 				results[path] = path;
-				send({add: [path]}); 
+				send({add: [path]});
 			}
 		}
 		function revokeResult(path) {
@@ -85,7 +89,7 @@ exports.install = function (server) {
 				console.error('Can not start search: the search context is not defined');
 			}
 			var canceled = false;
-			fswalk(indexer.getRootDir(), 
+			fswalk(indexer.getRootDir(),
 				/*called for eachFile*/
 				function (filepath) {
 					//Test for canceled status before matching / adding. This is to
@@ -112,8 +116,8 @@ exports.install = function (server) {
 		}
 
 		/**
-		 * @param Query newQ 
-		 * @param Query oldQ 
+		 * @param {Query} newQ
+		 * @param {Query} oldQ 
 		 * @return true if and only if results of oldQ include should at least include the results of newQ.
 		 */
 		function isMoreSpecificThan(newQ, oldQ) {
@@ -200,6 +204,6 @@ exports.install = function (server) {
 			}
 		});
 	});
-	sockServer.installHandlers(server, {prefix: '/isearch'});
+	//sockServer.installHandlers(server, {prefix: '/isearch'});
 	
 };

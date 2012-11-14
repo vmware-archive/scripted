@@ -33,7 +33,7 @@ function start(route, handle) {
 	app.configure(function() {
 		app.use(app.router);
 		app.use(onRequest); // bridge to 'servlets', we should remove over time
-		app.use(express.static(process.env.PWD + '/../client'), { maxAge: 6e5 });
+		app.use(express['static'](process.env.PWD + '/../client'), { maxAge: 6e5 });
 		app.use(express.errorHandler({
 			dumpExceptions: true,
 			showStack: true
@@ -41,7 +41,7 @@ function start(route, handle) {
 	});
 
 	require('./routes/editor').install(app);
-
+	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);
 

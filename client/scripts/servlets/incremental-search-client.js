@@ -12,16 +12,16 @@
  ******************************************************************************/
  
 /*global require define console exports SockJS */
-define(["sockjs"], function () {
-	//var sockjs = require('sockjs'); 
+define(["./websockets-client"], function (multiplexer) {
+	//var sockjs = require('sockjs');
 	//sockjs library actually stuffs its api into globals (i.e. you simple do 'new SockJS(...)')
 	
 	var nextId = 0;
 
 	function incrementalSearch(currentFile, query, requestor) {
-		var options = {}; 
+		var options = {};
 		var id = nextId++;
-		var sock = new SockJS('/isearch');
+		var sock = multiplexer.channel('isearch');
 		
 		for (var p in requestor) {
 			//any non-function properties in the requestor will be treated as 'options'
@@ -52,7 +52,7 @@ define(["sockjs"], function () {
 		}
 		
 		sock.onopen = function (conn) {
-			console.log('['+id+'] opened');	
+			console.log('['+id+'] opened');
 			send({
 				query:[currentFile, query, options]
 			});
@@ -62,16 +62,16 @@ define(["sockjs"], function () {
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
-			console.log('['+id+'] closed');	
+			console.log('['+id+'] closed');
 		};
 		
 		return {
-			//This returns some functions that may useful to call on the client side to 
-			//manipulate an existing interactive search. 
+			//This returns some functions that may useful to call on the client side to
+			//manipulate an existing interactive search.
 			
 			/**
 			 * should be called when the search is no longer needed. Allows releasing
-			 * resources associated with it (e.g. closing the websocket connection we 
+			 * resources associated with it (e.g. closing the websocket connection we
 			 * have opened to the server.
 			 */
 			close: function () {

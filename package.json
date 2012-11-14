@@ -34,6 +34,7 @@
         "json5": "0.1.0",
         "node-static": "0.5.9",
         "sockjs": "0.3.1",
+        "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "1.6.1"
 	},
 	"license": "EPL",

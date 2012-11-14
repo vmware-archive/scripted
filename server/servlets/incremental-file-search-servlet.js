@@ -13,6 +13,8 @@
  ******************************************************************************/
  /*global require exports process console*/
 
+var SERVICE_NAME = 'ifsearch';
+
 //This servlet is 'special' and doesn't get registered in the same 
 //way/place that other servlets do.
 
@@ -21,7 +23,7 @@
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
-var sockjs = require('sockjs');
+var websockets = require('./websockets-servlet');
 var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
@@ -37,19 +39,21 @@ var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker wi
 					  
 exports.install = function (server) {
 
+	websockets.install(server);
+
 	var openSockets = 0;
 
-	var sockServer = sockjs.createServer();
+	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
 		//opening a websocket connection initiates a search.
 		
 		var maxResults = null; // set upon receipt of the initial query
-		                // can also be increased by a request for more results. 
+		                // can also be increased by a request for more results.
 		
 		if (LOG_SOCKET_COUNT) {
 			openSockets++;
 			console.log('ifsearch socket opened ['+openSockets+']');
-		} 
+		}
 		
 		var idCount = 1; //counter used to assing unique id's to all query results. This used to
 		                 // identify results for later 'revoke' events.
@@ -92,7 +96,7 @@ exports.install = function (server) {
 		
 		function updateResult(result) {
 			//Search term already update by 'isMatch' check as a side effect.
-			//result.term = query; 
+			//result.term = query;
 			
 			//The actual result object is being re-used so we don't need to
 			//update our map associating id's to result objects.
@@ -105,7 +109,7 @@ exports.install = function (server) {
 			if (!results[id]) {
 				results[id] = result;
 				//console.log("Sending result "+JSON.stringify(result));
-				send({add: [result]}); 
+				send({add: [result]});
 				resultCount++;
 				if (resultCount >= maxResults && activeWalker) {
 					activeWalker.pause();
@@ -164,12 +168,12 @@ exports.install = function (server) {
 				}
 			}
 
-			fswalk(searchRoot, 
+			fswalk(searchRoot,
 				/*called for each file*/
 				function (filepath, k) {
 					pauseOrRun(function(){
 						if (!canceled) {
-							searchFile(query, filepath, 
+							searchFile(query, filepath,
 								//called on each match in the file (may be called 0 or more times)
 								function (match) {
 									if (!canceled) {
@@ -203,7 +207,7 @@ exports.install = function (server) {
 				pause: function () {
 					//If double pausing, take care not to accidentally wipe out a work function that may 
 					//already be stored in the 'paused' variable.
-					paused = paused || true; 
+					paused = paused || true;
 				},
 				resume: function () {
 					if (typeof(paused)==='function') {
@@ -220,8 +224,8 @@ exports.install = function (server) {
 		}
 
 		/**
-		 * @param Query newQ 
-		 * @param Query oldQ 
+		 * @param Query newQ
+		 * @param Query oldQ
 		 * @return true if and only if results of oldQ include should at least include the results of newQ.
 		 */
 		function isMoreSpecificThan(newQ, oldQ) {
@@ -331,6 +335,6 @@ exports.install = function (server) {
 			}
 		});
 	});
-	sockServer.installHandlers(server, {prefix: '/ifsearch'});
+	//sockServer.installHandlers(server, {prefix: '/ifsearch'});
 	
 };

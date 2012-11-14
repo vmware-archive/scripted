@@ -95,13 +95,14 @@ requirejs.config({
 		'esprima/esprima' : 'lib/esprima/esprima',
 		'doctrine/doctrine' : 'lib/doctrine/doctrine',
 		jshint: 'lib/jshint-r12-80277ef',
-		when: 'lib/when-aaa0898-1.6.1'
+		when: 'lib/when-aaa0898-1.6.1',
+		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
 	}
 });
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os", 
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"], 
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
 		mExecConsole, mExecOnLoad, mWhen) {
