@@ -76,7 +76,7 @@ function configure(conf) {
 	 * This function is written in 'continuation passing style'. This means
 	 * that the the entire state of the computation is always represented by
 	 * any of the 'k' functions passed around. Thus it is possible for the function
-	 * 'f' to pause the search, simply by refraining from calling it's k 
+	 * 'f' to pause the search, simply by refraining from calling it's k
 	 * and store it somewhere instead. To resume the search it just needs to
 	 * call the stored function.
 	 */
@@ -87,7 +87,7 @@ function configure(conf) {
 				listFiles(node,
 
 				function(names) {
-					eachk(names, 
+					eachk(names,
 						function(name, k) {
 							if (ignore(name)) {
 								k();

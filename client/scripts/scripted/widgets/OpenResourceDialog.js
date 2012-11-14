@@ -146,6 +146,30 @@ var OpenResourceDialog = dojo.declare("scripted.widgets.OpenResourceDialog", [di
 		// this.populateFavorites();
 	},
 	
+	
+	addMoreResultsNearScrollBottom: function () {
+		var target = this.results;
+		var activeSearch = this.activeSearch;
+		if (activeSearch && target) {
+//					    console.log('scrollTop: '+target.scrollTop);
+//					    console.log('scrollHeight: '+target.scrollHeight);
+//					    console.log('clientHeight: '+target.clientHeight);
+//					    console.log('clientHeight + scrollTop: '+(target.clientHeight + target.scrollTop));
+	
+			var scrollBottom = target.scrollTop + target.clientHeight;
+			var scrollHeight = target.scrollHeight;
+			if (scrollHeight) {
+				var leftOver = (scrollHeight - scrollBottom) / scrollHeight;
+				//console.log('left over %: '+Math.floor(leftOver*100));
+				if (leftOver < 0.1) {
+					//Less than 10% of the elements displayed below bottom of the visible scroll area.
+					this.activeSearch.more(); //ask more results.
+				}
+			}
+		}
+	},
+
+	
 	/** @private kick off initial population of favorites */
 	populateFavorites: function() {
 		dojo.place("<div>Populating favorites&#x2026;</div>", this.favresults, "only");
@@ -224,6 +248,9 @@ var OpenResourceDialog = dojo.declare("scripted.widgets.OpenResourceDialog", [di
 					//var query = that.searcher.createSearchQuery(null, text, "Name");
 					var renderer = that.searchRenderer.makeIncrementalRenderer(that.results, false, null, dojo.hitch(that, that.decorateResult));
 					that.activeSearch = that.searcher.search(text/*was query*/, false, renderer);
+					that.results.addEventListener('scroll', function (evt) {
+						that.addMoreResultsNearScrollBottom();
+					});
 				} else {
 					activeSearch.query(text);
 				}

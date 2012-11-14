@@ -795,7 +795,7 @@ exports.sameThreadMatching = function (test) {
         } ]
 	}));
 	
-	var tree = { 
+	var tree = {
 		"type": "Program",
 		"children": [
 			{
