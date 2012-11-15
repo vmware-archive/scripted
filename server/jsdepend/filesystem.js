@@ -54,7 +54,8 @@ function withBaseDir(baseDir) {
 	}
 	
 	function nativeNodeModuleName(handle) {
-		return handle.substring(nodeNatives.MAGIC_PATH_PREFIX.length);
+		//handle looks like: '/NODE_NATVE/<name>.js'
+		return handle.substring(nodeNatives.MAGIC_PATH_PREFIX.length, handle.length-3);
 	}
 	
 	function getUserHome() {

@@ -59,7 +59,7 @@ function configure(conf) {
 
 	function resolver(context, dep, callback) {
 		if (nodeNatives.isNativeNodeModule(dep.name)) {
-			dep.path = nodeNatives.MAGIC_PATH_PREFIX + dep.name;
+			dep.path = nodeNatives.MAGIC_PATH_PREFIX + dep.name + '.js';
 			callback(dep);
 		} else {
 			//Notes:
