@@ -99,7 +99,12 @@
 		"global" : ["console", "define", "exports", "module", "process",
 					"require", "$", "window"]
 	},
-	
+
+    "lint" : {
+	    /* The directories to exclude while running jslint/jshint */
+	    exclude_dirs : 'node_modules',
+    },
+
 	/* Configuring the mark occurrences behavior */
 	mark_occurrences : {
 		interval :500,  // interval between requests. set to 0 for instantaneous, or higher numbers for more of a delay
