@@ -95,7 +95,40 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 			}
 		}
 	}
-	
+
+    /**
+     * Follow a 'trail' of properties starting at given object.
+     * If one of the values on the trail is 'falsy' then
+     * this value is returned instead of trying to keep following the
+     * trail down.
+     */
+    function deref(obj, props) {
+        //TODO func copied from jsdepend.utils
+        var it = obj;
+        for (var i = 0; it && i < props.length; i++) {
+            it = it[props[i]];
+        }
+        return it;
+    }
+
+    function shouldExclude(filePath) {
+        var exclude_dirs = deref(scripted, ['config', 'lint', 'exclude_dirs']);
+        if (exclude_dirs) {
+
+            if (!Array.isArray(exclude_dirs)) {
+                exclude_dirs = [exclude_dirs]; //make it an array if not
+            }
+
+            for (var i = 0; i < exclude_dirs.length; i++) {
+                if (filePath.indexOf(exclude_dirs[i]) != -1) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
 	var makeEditor = function(domNode, filePath, editorType){
 		var editor;
 
@@ -134,7 +167,7 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 		
 		var postSave = function (text) {
 			var problems;
-			if (isJS || isHTML) {
+			if (!shouldExclude(filePath) && (isJS || isHTML)) {
 				window.scripted.promises.loadJshintrc.then(function completed() {
 					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter === 'jshint') {
 						if (!(isHTML || isJSON)) {
