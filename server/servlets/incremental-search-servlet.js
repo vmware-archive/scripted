@@ -39,9 +39,12 @@ exports.install = function (server) {
 	websockets.install(server); // the websockets servlet is a prerequisite. Ensure its installed.
 
 	var openSockets = 0;
+	var nextId = 0;
 
 	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
+		var id = nextId++; // usef for log messages only.	
+		
 		//opening a websocket connection initiates a search.
 		
 		var maxResults = null; // set upon receipt of the initial query
@@ -172,7 +175,7 @@ exports.install = function (server) {
 
 		/**
 		 * @param {Query} newQ
-		 * @param {Query} oldQ 
+		 * @param {Query} oldQ
 		 * @return true if and only if results of oldQ should at least include the results of newQ.
 		 */
 		function isMoreSpecificThan(newQ, oldQ) {
@@ -238,7 +241,10 @@ exports.install = function (server) {
 					cancelActiveWalker();
 					activeWalker = startSearch();
 				} else {
-					if (resultCount<maxResults) {
+					if (activeWalker && resultCount<maxResults) {
+						//Note: we can get here with activeWalker still null if the the
+						//initial query is not started yet. This can happen because we have ascynch
+						//code in determining the search context.
 						activeWalker.resume();
 					}
 				}
@@ -261,7 +267,7 @@ exports.install = function (server) {
 			}
 		}
 		conn.on('data', function (message) {
-			//console.log("message received: "+message);
+			//console.log("isearch ["+id+"] << "+message);
 			receive(JSON.parse(message));
 		});
 		
