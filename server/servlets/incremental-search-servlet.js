@@ -43,7 +43,7 @@ exports.install = function (server) {
 
 	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
-		var id = nextId++; // usef for log messages only.	
+		var id = nextId++; // used for log messages only.
 		
 		//opening a websocket connection initiates a search.
 		
@@ -57,10 +57,7 @@ exports.install = function (server) {
 
 		var query = null; //The thing we are searching for... set once received via the socket.
 		var regexp = null; //the query as a regexp.
-		var currentFile = null; //The file the query was launched from, this determines the search context.
-		var indexer = null; //Set when we have determined/received the search context.
-							//right now the indexer is really not used, except to determine the 'root' of
-							//scripted file system associated with the currentFile
+		var searchRoot = null; //Set when we have determined/received the search context.
 		var options = {};
 		
 		var results = {}; //The 'keys' of this map are the results we have already sent to the client.
@@ -98,7 +95,7 @@ exports.install = function (server) {
 		}
 		
 		function startSearch() {
-			if (!currentFile) {
+			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
 			}
 			var canceled = false;
@@ -128,7 +125,7 @@ exports.install = function (server) {
 				}
 			}
 			
-			fswalk(indexer.getRootDir(),
+			fswalk(searchRoot,
 				/*called for eachFile*/
 				function (filepath, k) {
 					pauseOrRun(function () {
@@ -190,18 +187,15 @@ exports.install = function (server) {
 		
 		var handlers = {
 			//initial query and other info needed to setup a search
-			query: function (cf, q, opts) {
+			query: function (sr, q, opts) {
 				if (!query) {
-					currentFile = cf;
+					searchRoot = sr;
 					query = q;
 					regexp = toRegexp(q);
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('search options: '+JSON.stringify(options));
-					fileindexer.getIndexer(currentFile, function (ixr) {
-						indexer = ixr;
-						activeWalker = startSearch();
-					});
+					activeWalker = startSearch();
 				} else {
 					console.error("multiple queries received on the same /isearch connection");
 				}
@@ -232,20 +226,27 @@ exports.install = function (server) {
 						}
 					}
 				}
-				if (!isMoreSpecificThan(query, oldQuery) && indexer) {
-					console.log('new query is not an "extension": restarting query');
-					//If the query is not more specialized from the oldQuery, we have to restart the search
-					//or we risk not getting all matches in the already processed part of the tree.
-					//It is possible, (when typing really fast :-) a query update is received before the indexer got set.
-					//This really means the 'activeSearch hasn't quite started yet so in that case, we we don't need to and restart it.
-					cancelActiveWalker();
-					activeWalker = startSearch();
-				} else {
-					if (activeWalker && resultCount<maxResults) {
-						//Note: we can get here with activeWalker still null if the the
-						//initial query is not started yet. This can happen because we have ascynch
-						//code in determining the search context.
-						activeWalker.resume();
+				if (activeWalker) {
+					//It is possible, (when typing really fast :-) a query update is received before walker got set.
+					//This really means the 'activeWalker hasn't quite started yet so in that case, we we don't need
+					//to restart or resume it.
+					//Note: this is only possible if starting the activewalker is an 'asynch' thing.
+					//Right now it isn't any more, so strictly speaking the if above is not needed and
+					//should always be true. Leave it in anyway in case we might go back to
+					//needing some asynch work in getting the walker going.
+					if (!isMoreSpecificThan(query, oldQuery)) {
+						console.log('new query is not an "extension": restarting query');
+						//If the query is not more specialized from the oldQuery, we have to restart the search
+						//or we risk not getting all matches in the already processed part of the tree.
+						cancelActiveWalker();
+						activeWalker = startSearch();
+					} else {
+						if (activeWalker && resultCount<maxResults) {
+							//Note: we can get here with activeWalker still null if the the
+							//initial query is not started yet. This can happen because we have ascynch
+							//code in determining the search context.
+							activeWalker.resume();
+						}
 					}
 				}
 			}

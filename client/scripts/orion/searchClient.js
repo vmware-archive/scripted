@@ -61,10 +61,9 @@ define("orion/searchClient",['require', 'dojo', 'dijit', /*'orion/auth',*/ 'orio
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
 		 */
 		search: function(query, excludeFile, renderer) {
-			// TODO this is not right.  Why are we using the main editor here?
-			var filetoedit = window.editor.getFilePath();
+			var searchRoot = window.fsroot;
 			renderer.start(query);
-			var activeSearch = isearch(filetoedit, query, {
+			var activeSearch = isearch(searchRoot, query, {
 				//	maxResults: 30, (if not specified then a default value is chosen by the server)
 				add: function(path) {
 					renderer.add(parseFile(path));
