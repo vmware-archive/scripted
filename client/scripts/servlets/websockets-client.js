@@ -12,8 +12,9 @@
  ******************************************************************************/
 /*global SockJS WebSocketMultiplex*/
 define(["sockjs", "websocket-multiplex"], function () {
-	var sockjs;
-	var multiplexer;
+
+	var sockjs; //A websocket... the one and only used by the client
+	var multiplexer; // The multiplexer that create multiple 'fake' websockets using just the one.
 
 	/**
 	 * Lazy initialize the websocket multiplexer.
@@ -21,6 +22,12 @@ define(["sockjs", "websocket-multiplex"], function () {
 	function init() {
 		if (!multiplexer) {
 			sockjs = new SockJS('/websockets');
+			sockjs.addEventListener('close', function () {
+				//console.log('Oh no our one and only websocket just got closed!');
+				//Not to worry... next time we need one, just open a new one.
+				sockjs = null;
+				multiplexer = null;
+			});
 			multiplexer = new WebSocketMultiplex(sockjs);
 		}
 	}
