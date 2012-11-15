@@ -117,6 +117,14 @@ define(["esprima/esprima"],function () {
 		            _addChild(container,newContainer);
 		            container = newContainer;
 		          } else if (value === "VariableDeclarator") {
+		          	if (ast.init && ast.init.type && ast.init.type === "FunctionExpression") {
+		          	var name = ast.id.name+toParamString(ast.params);
+			            newContainer = {label: name, children:null, line:toLine(ast.range[0],root.linebreaks), text:"xyz"};
+			            _addChild(container,newContainer);
+			            container = newContainer;
+			        }
+
+
 ///		            if (ast.init && ast.init.type && ast.init.type === "ObjectExpression") {
 ///		                newContainer = {label: ast.id.name+" {}", children:null, line:toLine(ast.init.range[0],root.linebreaks), text:"xyz"};
 ///		                _addChild(container,newContainer);
