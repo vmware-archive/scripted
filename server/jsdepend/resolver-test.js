@@ -335,7 +335,7 @@ exports.resolveNativeNodeModules = function(test) {
 			toCompareString({
 				name: 'path',
 				kind: 'commonjs',
-				path: nodeNatives.MAGIC_PATH_PREFIX + 'path'
+				path: nodeNatives.MAGIC_PATH_PREFIX + 'path' + '.js'
 			})
 		);
 		test.done();
@@ -612,7 +612,7 @@ function makeObjectSanitizer(interestingProps) {
 	return sanitize;
 }
 
-exports.useTextPlugin = function (test) {
+exports.usePlugins = function (test) {
 	var api = makeApi('use-plugins');
 	var file = "p1/bork.js";
 	var sanitize = makeObjectSanitizer(['name', 'path', 'ignore']);
@@ -620,7 +620,9 @@ exports.useTextPlugin = function (test) {
 		var tree = require('./parser').parse(code);
 		api.findReferences(tree, function (refs) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
-				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip", "domReady!"])
+				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip",
+					 "i18n!stuff/nls/messages",
+					"domReady!"])
 			);
 			api.resolve(file, refs, function (resolveds) {
 				test.equals(toCompareString(map(resolveds, sanitize)),
@@ -630,9 +632,12 @@ exports.useTextPlugin = function (test) {
 					}, {
 						name: 'text!template.html',
 						path: "p1/template.html"
-					}, { 
+					}, {
 						name: 'text!to-strip.html!strip',
 						path: "p1/to-strip.html"
+					}, {
+					    "name": "i18n!stuff/nls/messages",
+						"path": "p1/stuff/nls/messages.js"
 					}, {
 						name: 'domReady!',
 						path: undefined,

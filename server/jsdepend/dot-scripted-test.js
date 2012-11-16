@@ -57,6 +57,7 @@ exports.readDotScripted = function (test) {
 	api.getConfiguration('client/scripts/editor.js', function (conf) {
 		test.equals(
 			toCompareString({
+				"lint" : { exclude_dirs : 'node_modules' },
 			    "exec": {
 			        "onKeys" : {
 				        "ctrl+alt+c": "node releng/copycheck.js"
@@ -78,6 +79,7 @@ exports.readScriptedRc = function (test) {
 	api.getConfiguration('bork/foo.js', function (conf) {
 		test.equals(
 			toCompareString({
+				"lint" : { exclude_dirs : 'node_modules' },
 			    "ui": {
 					"font_size": 99
 				},
@@ -94,7 +96,8 @@ exports.combineScriptedRcAndDotScripted = function (test) {
 	api.getConfiguration('bork/foo.js', function (conf) {
 		test.equals(
 			toCompareString({
-				"readScriptedRc" : true, 
+				"lint" : { exclude_dirs : 'node_modules' },
+				"readScriptedRc" : true,
 			    "ui": {
 					"font_size": 5
 				},

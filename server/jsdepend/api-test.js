@@ -120,7 +120,7 @@ exports.nodePlain = function (test) {
 exports.getDependenciesForUnparsable = function (test) {
 	//Even if file is unparsable one of the callbacks should get called.
 	var api = makeApi('broken');
-	api.getDependencies('unparsable.js', 
+	api.getDependencies('unparsable.js',
 		function (deps) {
 			//It is ok if this gets called (e.g. with empty deps)
 			test.done();
@@ -134,7 +134,7 @@ exports.getDependenciesForUnparsable = function (test) {
 
 exports.getNativeNodeModuleContentsTest = function (test) {
 	var api = makeApi("node-plain");
-	api.getContents(nodeNatives.MAGIC_PATH_PREFIX+"path", function (contents) {
+	api.getContents(nodeNatives.MAGIC_PATH_PREFIX+"path.js", function (contents) {
 		test.equals(typeof(contents), 'string');
 		test.ok(contents.indexOf('exports.normalize'));
 		test.done();
