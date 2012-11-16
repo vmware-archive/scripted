@@ -78,6 +78,10 @@
 	        "ctrl+alt+c": "node releng/copycheck.js"
 	    }
 	},
+    "lint" : {
+	    //The directories to exclude while running jslint/jshint
+	    exclude_dirs : 'node_modules',
+    },
 	"formatter": {
 		"js": {
 			"indent_size": 1,
@@ -99,11 +103,6 @@
 		"global" : ["console", "define", "exports", "module", "process",
 					"require", "$", "window"]
 	},
-
-    "lint" : {
-	    /* The directories to exclude while running jslint/jshint */
-	    exclude_dirs : 'node_modules',
-    },
 
 	/* Configuring the mark occurrences behavior */
 	mark_occurrences : {
