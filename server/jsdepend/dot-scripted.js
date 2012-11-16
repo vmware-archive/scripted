@@ -17,6 +17,7 @@ var getDirectory = require('./utils').getDirectory;
 var orMap = require('./utils').orMap;
 var pathResolve = require('./utils').pathResolve;
 var jsonMerge = require('./json-merge');
+var defaults = require('./dot-scripted-defaults');
 
 var JSON5 = require('json5');
 
@@ -51,10 +52,10 @@ function configure(filesystem) {
 	 */
 	function getRootDir(dir, callback) {
 		if (dir) {
-			listFiles(dir, 
+			listFiles(dir,
 				function (names) {
-					var rootMarkerName = orMap(names, isRootMarkerFile); 
-					if (rootMarkerName) { 
+					var rootMarkerName = orMap(names, isRootMarkerFile);
+					if (rootMarkerName) {
 						callback(dir);
 					} else {
 						getRootDir(getDirectory(dir), callback);
@@ -72,7 +73,7 @@ function configure(filesystem) {
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
 	 * If any part of this operation fails, the callback will be still be
-	 * called with at least an empty object. All errors will be logged 
+	 * called with at least an empty object. All errors will be logged
 	 * to the console.
 	 * <p>
 	 * Errors deemed serious enough to be brought to the user's attention
@@ -80,7 +81,7 @@ function configure(filesystem) {
 	 * by adding an explanation to the object in a property called 'error'.
 	 */
 	function parseJsonFile(handle, callback) {
-		getContents(handle, 
+		getContents(handle,
 			function (contents) {
 				var data = null;
 				if (!ALL_WHITE_SPACE.test(contents)) {
@@ -98,9 +99,9 @@ function configure(filesystem) {
 			function (err) {
 				console.log(err);
 				callback({
-					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc 
+					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc
 					//so this error is expected.
-					//error: "Could not get contents of file '"+handle+"'" 
+					//error: "Could not get contents of file '"+handle+"'"
 				});
 			}
 		);
@@ -136,7 +137,7 @@ function configure(filesystem) {
 	 * Ideally anybody interested in the '.scripted' configuration data
 	 * should be using this method and this method alone to retrieve the config info.
 	 * This to ensure that all share the same logic of retrieving this data.
-	 * This will make it easier in the future to change how and where this data is 
+	 * This will make it easier in the future to change how and where this data is
 	 * loaded.
 	 *
 	 * The returned config object may contain an 'error' property if there was a
@@ -145,7 +146,7 @@ function configure(filesystem) {
 	function getConfiguration(handle, callback) {
 		findAndParseDotScripted(handle, function (dotScripted) {
 			findAndParseScriptedRc(function (scriptedRc) {
-				callback(jsonMerge(scriptedRc, dotScripted));
+				callback(jsonMerge(defaults, scriptedRc, dotScripted));
 			});
 		});
 	}

@@ -37,9 +37,10 @@
 var toCompareString = require('./utils').toCompareString;
 var _jsonMerge = require('./json-merge');
 
-function jsonMerge(l, r) {
-	var m = _jsonMerge(l, r);
-	//console.log(toCompareString({l: l, r: r, "==>" : m})); //makes it easier to see what we are actually testing 
+function jsonMerge() {
+	var m = _jsonMerge.apply(this, arguments);
+	//makes it easier to see what we are actually testing:
+	//console.log(toCompareString({args: arguments, "==>" : m}));
 	return m;
 }
 
@@ -83,9 +84,9 @@ exports.mergeWithUndefined = function (test) {
 exports.mergeObjects = function (test) {
 
 	function doit(t) {
-		test.equals(toCompareString(t), 
+		test.equals(toCompareString(t),
 			toCompareString({
-				l: t.l, r: t.r, 
+				l: t.l, r: t.r,
 				"==>":jsonMerge(t.l, t.r)
 			})
 		);
@@ -127,6 +128,42 @@ exports.mergeObjects = function (test) {
 			l: { a: 1, b: {y: {x: 2 }}},
 			r: { a: 100, b: { x: { y: 200 }}},
 			"==>" : { a: 100, b: {y: {x: 2}, x: {y: 200} }}
+		}
+	];
+	for (var i = 0; i < tests.length; i++) {
+		var t = tests[i];
+		doit(t);
+	}
+	test.done();
+};
+
+exports.mergeVarArguments = function (test) {
+	function doit(t) {
+		var result = jsonMerge.apply(null, t.args);
+		test.equals(toCompareString(t),
+			toCompareString({
+				args  : t.args,
+				'==>' : result
+			})
+		);
+	}
+	
+	var tests = [
+		{ //0 args
+			args: [],
+			'==>' : {}
+		},
+		{ //2 args
+			args: [{a:1}],
+			'==>' : {a:1}
+		},
+		{ //3 args
+			args: [{a:1, c:1}, {a:2, b:3}],
+			'==>' : {a:2, c:1, b:3}
+		},
+		{
+			args: [{a:1, b:1}, {a:2, c:2}, {a:3, d:3}],
+			'==>' : {a:3, b:1, c:2, d:3}
 		}
 	];
 	for (var i = 0; i < tests.length; i++) {

@@ -34,7 +34,7 @@ function isObject(x) {
  * The merge is purely functional: properties are copied into a new object,
  * leaving the original objects as is.
  */
-function jsonMerge(l, r) {
+function jsonMerge2(l, r) {
 
 	//Note: merge treats "undefined" differently from other falsy values:
 	// The undefined value always has lower priority regardless of whether it
@@ -65,7 +65,7 @@ function jsonMerge(l, r) {
 		
 		for (p in r) {
 			if (r.hasOwnProperty(p)) {
-				m[p] = jsonMerge(m[p], r[p]); //yes, it is ok if m[p] is undefined!
+				m[p] = jsonMerge2(m[p], r[p]); //yes, it is ok if m[p] is undefined!
 			}
 		}
 		return m;
@@ -75,6 +75,18 @@ function jsonMerge(l, r) {
 	//This means we cannot really merge the two values so we must choose one over the other.
 	
 	return r; //right most param takes precedence.
+}
+
+function jsonMerge() {
+	var args = arguments;
+	if (args.length === 0) {
+		return {};
+	}
+	var merged = args[0];
+	for (var i = 1; i < args.length; i++) {
+		merged = jsonMerge2(merged, args[i]);
+	}
+	return merged;
 }
 
 module.exports = jsonMerge;
