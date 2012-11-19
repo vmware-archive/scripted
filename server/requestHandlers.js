@@ -16,9 +16,10 @@
  
 /*global console require exports process*/
 var querystring = require("querystring"); 
-var fs = require("fs");
+var fs = require("fs"); 
 var formidable = require("formidable");
 var url = require('url');
+var templates = require('./templates/template-provider');
 
 // TODO handle binary files
 /*
@@ -166,6 +167,23 @@ function get2(response, request) {
   });
 }
 
+function handleTemplates(response, request) {
+	console.log('Client requested content assist templates');
+	response.writeHead(200, {'content-type': 'application/json'});
+	if (!templates.completed) {
+		templates.process().then(
+			function(res) {
+				response.write(JSON.stringify(templates.allCompletions));	
+				response.end();
+				console.log('Client requested content assist templates complete');
+			},
+			function(err) {
+				response.write('{"error" : true, "val" : "' + err + '"}');
+			}
+		);
+	}
+}
+
 
 
 /*
@@ -307,7 +325,7 @@ function put(response, request) {
       // fields.text is the data to save
 //      console.log("Text to be written is of length: "+text.length);
 	  var dataToSave = fields.data;
-      if (dataToSave.length != fields.length) {
+      if (dataToSave.length != fields.length) { // DO NOT change to !== because fields.length is a string
         // return an error, it failed to save!
         response.writeHead(500, {'content-type': 'text/plain'});
         response.write('problem with save: received data length: '+dataToSave.length+' does not match transmitted length '+fields.length);
@@ -333,4 +351,5 @@ exports.get = get;
 exports.get2 = get2;
 exports.put = put;
 exports.fs_list = fs_list;
+exports.templates = handleTemplates;
 
