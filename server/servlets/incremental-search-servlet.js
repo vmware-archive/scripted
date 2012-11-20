@@ -31,7 +31,7 @@ var getFileName = require('../jsdepend/utils').getFileName;
 var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
 var fileindexer = require('../jsdepend/file-indexer').configure(conf);
 
-var LOG_SOCKET_COUNT = true;
+var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
 
 exports.install = function (server) {
