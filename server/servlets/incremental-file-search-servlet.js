@@ -52,7 +52,7 @@ exports.install = function (server) {
 		
 		if (LOG_SOCKET_COUNT) {
 			openSockets++;
-			console.log('ifsearch socket opened ['+openSockets+']');
+			//console.log('ifsearch socket opened ['+openSockets+']');
 		}
 		
 		var idCount = 1; //counter used to assing unique id's to all query results. This used to
@@ -250,7 +250,7 @@ exports.install = function (server) {
 					query = q;
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
-					console.log('maxResults = '+maxResults);
+					//console.log('maxResults = '+maxResults);
 					activeWalker = startSearch();
 //					fileindexer.getIndexer(currentFile, function (ixr) {
 //						indexer = ixr;
@@ -265,7 +265,7 @@ exports.install = function (server) {
 			more: function () {
 				if (activeWalker) {
 					maxResults = Math.max(maxResults, resultCount * 1.1);
-					console.log('maxResults = '+maxResults);
+					//console.log('maxResults = '+maxResults);
 					activeWalker.resume();
 				}
 			},
@@ -331,7 +331,7 @@ exports.install = function (server) {
 			cancelActiveWalker();
 			if (LOG_SOCKET_COUNT) {
 				openSockets--;
-				console.log('ifsearch socket CLOSED ['+openSockets+']');
+				//console.log('ifsearch socket CLOSED ['+openSockets+']');
 			}
 		});
 	});
