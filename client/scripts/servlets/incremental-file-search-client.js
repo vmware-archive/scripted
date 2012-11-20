@@ -63,7 +63,7 @@ define(["./websockets-client"], function (multiplexer) {
 		}
 		 
 		sock.onopen = function (conn) {
-			console.log('ifsearch ['+id+'] opened');
+			//console.log('ifsearch ['+id+'] opened');
 			var pending = message_queue;
 			message_queue = null;
 			//Important: this message allways needs to be sent first.
@@ -82,7 +82,7 @@ define(["./websockets-client"], function (multiplexer) {
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
-			console.log('ifsearch ['+id+'] closed');
+			//console.log('ifsearch ['+id+'] closed');
 		};
 		
 		return {
