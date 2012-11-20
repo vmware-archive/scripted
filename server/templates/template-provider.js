@@ -31,6 +31,7 @@ var t;
 exports.process = function() {
 	var deferred = when.defer();
 	if (exports.completed) {
+		// don't redo the work
 		deferred.resolve(allCompletions);
 		return deferred.promise;
 	}
@@ -48,7 +49,9 @@ exports.process = function() {
 		} else {
 			var deferreds = [];
 			for (var i = 0; i < files.length; i++) {
+				console.log("Starting to find completions in " + files[i]);
 				deferreds.push(completions.findCompletions(completions.completionsFolder + "/" + files[i]));
+				console.log("Finished finding completions in " + files[i]);
 			}
 			
 			when.all(deferreds).then(

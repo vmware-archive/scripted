@@ -168,20 +168,28 @@ function get2(response, request) {
 }
 
 function handleTemplates(response, request) {
-	console.log('Client requested content assist templates');
-	response.writeHead(200, {'content-type': 'application/json'});
-	if (!templates.completed) {
-		templates.process().then(
-			function(res) {
-				response.write(JSON.stringify(templates.allCompletions));	
-				response.end();
-				console.log('Client requested content assist templates complete');
-			},
-			function(err) {
-				response.write('{"error" : true, "val" : "' + err + '"}');
-			}
-		);
+
+	var scope = url.parse(request.url,true).query.scope;
+	if (!scope) {
+		response.writeHead(400, {'content-type': 'application/json'});
+		response.write('{"error" : "no scope provided" }');
+		response.end();
+		return;
 	}
+	console.log('Client requested content assist templates. Looking for scope "' + scope + '"');
+	templates.process().then(
+		function(res) {
+			response.writeHead(200, {'content-type': 'application/json'});
+			response.write(JSON.stringify(templates.allCompletions[scope]));	
+			response.end();
+			console.log('Client requested content assist templates complete');
+		},
+		function(err) {
+			response.writeHead(500, {'content-type': 'application/json'});
+			response.write('{"error" : true, "val" : "' + err + '"}');
+			response.end();
+		}
+	);
 }
 
 

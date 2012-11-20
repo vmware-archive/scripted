@@ -30,24 +30,40 @@ define(['when'], function(when) {
 	 * shared templates
 	 * @type {{completions:Array}}
 	 */
-	var allTemplates;
+	var allTemplates = {};
 	
-	var templatesDeferred;
+	/**
+	 * keeps track of existing requests so that we don't ask for the same 
+	 * deferred multiple times.
+	 */ 
+	var deferreds = {};
 	
-	function loadRawTemplates() {
+	function loadRawTemplates(scope) {
+		if (deferreds[scope]) {
+			return deferreds[scope];
+		}
+	
+		
 		var deferred = when.defer();
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/templates", true);
+		xhr.open("GET", "/templates?scope=" + scope, true);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				if (xhr.status === 200) {
-					deferred.resolve(JSON.parse(xhr.responseText));
+					var res = xhr.responseText;
+					if (res) {
+						res = JSON.parse(res);
+					} else {
+						res = {};
+					}
+					deferred.resolve(res);
 				} else {
 					deferred.reject("Error loading templates");
 				}
 			}
 		};
-	    xhr.send();		
+	    xhr.send();
+	    deferreds[scope] = deferred;
 		return deferred.promise;
 	}
 	
@@ -73,9 +89,9 @@ define(['when'], function(when) {
 	TemplateContentAssist.prototype = {
 		install : function(scope) {
 			this.scope = scope;
-			if (!templatesDeferred) {
-				templatesDeferred = loadRawTemplates();
-				templatesDeferred.then(function(templates) { allTemplates = templates; });
+			if (! allTemplates[scope]) {
+				var templatesDeferred = loadRawTemplates(scope);
+				templatesDeferred.then(function(templates) { allTemplates[scope] = templates; });
 			}
 		},
 		computeProposals: function(buffer, invocationOffset, context) {

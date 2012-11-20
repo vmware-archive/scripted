@@ -189,6 +189,7 @@ exports.findCompletions = function(fName) {
 	
 	// 2. Read the completions
 	fs.readFile(fName, "utf-8", function(err,data) {
+		console.log("Starting to find completions in " + fName);
 
 		if (err && (err.errno === 28 /*EISDIR directory */ || err.errno === 30 /*EISDIR file not found */)) {
 			deferred.reject(err);
@@ -202,7 +203,6 @@ exports.findCompletions = function(fName) {
 			} else {
 				rawCompletions = data;
 			}
-			console.log(rawCompletions);
 
 			// 4. Convert from pure JSON into proposals suitable for content assist
 			var scope = exports.extractScope(rawCompletions.scope);
@@ -225,6 +225,7 @@ exports.findCompletions = function(fName) {
 					console.warn("Invalid completion: " + JSON5.stringify(completionsArr[i]) + " ...ignoring");
 				}
 			}
+			console.log("Finished finding completions in " + fName);
 			deferred.resolve({scope : scope, completions : realCompletions });
 		} catch (e) {
 			console.warn("Invalid completions file " + fName + " ...ignoring");
