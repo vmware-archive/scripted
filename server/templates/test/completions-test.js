@@ -68,42 +68,35 @@ exports.findCompletions = function(test) {
 
 			var completion = '<a href="arg1"></a>';
 			test.equals(completions[0].proposal, completion);
-			test.equals(completions[0].description, completion);
+			test.equals(completions[0].description, completions[0].trigger + " : " + completion);
 			test.equals(completions[0].trigger, "a");
 			test.deepEqual(completions[0].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}]);
 			test.equals(completions[0].escapePosition, completion.indexOf("</a>"));
 			
 			completion = '<abbr></abbr>';
 			test.equals(completions[1].proposal, completion);
-			test.equals(completions[1].description, completion);
+			test.equals(completions[1].description, completions[1].trigger + " : " + completion);
 			test.equals(completions[1].trigger, "abbr");
 			test.deepEqual(completions[1].positions, []);
 			test.equals(completions[1].escapePosition, completion.indexOf("</abbr>"));
 			
 			completion = '<acronym></acronym>';
 			test.equals(completions[2].proposal, completion);
-			test.equals(completions[2].description, completion);
+			test.equals(completions[2].description, completions[2].trigger + " : " + completion);
 			test.equals(completions[2].trigger, "acronym");
 			test.deepEqual(completions[2].positions, []);
 			test.equals(completions[2].escapePosition, completion.indexOf("</acronym>"));
 			
 			completion = '<acronym>arg1</acronym>';
 			test.equals(completions[3].proposal, completion);
-			test.equals(completions[3].description, completion);
-			test.equals(completions[3].trigger, "acronym");
-			test.deepEqual(completions[3].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}]);
-			test.equals(completions[3].escapePosition, completion.indexOf("</acronym>"));
-			
-			completion = '<acronym>arg1</acronym>';
-			test.equals(completions[3].proposal, completion);
-			test.equals(completions[3].description, completion);
+			test.equals(completions[3].description, completions[3].trigger + " : " + completion);
 			test.equals(completions[3].trigger, "acronym");
 			test.deepEqual(completions[3].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}]);
 			test.equals(completions[3].escapePosition, completion.indexOf("</acronym>"));
 			
 			completion = '<acronym>arg1arg2</acronym>';
 			test.equals(completions[4].proposal, completion);
-			test.equals(completions[4].description, completion);
+			test.equals(completions[4].description, completions[4].trigger + " : " + completion);
 			test.equals(completions[4].trigger, "acronym");
 			test.deepEqual(completions[4].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}, {offset:completion.indexOf("arg2"), length:"arg2".length}]);
 			test.equals(completions[4].escapePosition, completion.indexOf("</acronym>"));
@@ -118,7 +111,7 @@ exports.findCompletions = function(test) {
 			var i = 0;
 			var completion = '<acronym>arg1arg2</acronym>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}, {offset:completion.indexOf("arg2"), length:"arg2".length}]);
 			test.equals(completions[i].escapePosition, completion.indexOf("arg1"));
@@ -126,7 +119,7 @@ exports.findCompletions = function(test) {
 			
 			completion = 'arg1<acronym></acronym>arg2';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}, {offset:completion.indexOf("arg2"), length:"arg2".length}]);
 			test.equals(completions[i].escapePosition, completion.indexOf("</acronym>"));
@@ -134,7 +127,7 @@ exports.findCompletions = function(test) {
 			
 			completion = 'arg2<acronym></acronym>arg1';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [ 
 				{offset:completion.indexOf("arg1"), length:"arg1".length},
@@ -145,7 +138,7 @@ exports.findCompletions = function(test) {
 			
 			completion = 'arg2<acronym></acronym>arg1';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [ 
 				{offset:completion.indexOf("arg1"), length:"arg1".length},
@@ -165,31 +158,31 @@ exports.findCompletions = function(test) {
 			var i = 0;
 			var completion = '<acronym>foo</acronym>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.ok(!completions[i].escapePosition);
+			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
 			completion = 'foo<acronym></acronym>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.ok(!completions[i].escapePosition);
+			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
 			completion = '<acronym></acronym>foo';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.ok(!completions[i].escapePosition);
+			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
 			completion = '<acronym>foobar</acronym>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [
 				{offset:completion.indexOf("foo"), length:"foo".length},
@@ -200,7 +193,7 @@ exports.findCompletions = function(test) {
 			
 			completion = 'bar<acronym></acronym>fooarg3';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [
 				{offset:completion.indexOf("foo"), length:"foo".length},
@@ -212,18 +205,18 @@ exports.findCompletions = function(test) {
 			
 			completion = '${bar}';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, []);
-			test.ok(!completions[i].escapePosition);
+			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
 			completion = '$bar';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, []);
-			test.ok(!completions[i].escapePosition);
+			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
 			test.done();
