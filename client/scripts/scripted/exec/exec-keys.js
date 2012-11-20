@@ -24,7 +24,7 @@ define(["require", "orion/textview/keyBinding", "scripted/exec/exec-shared",
 
 	var modifiers = {
 		"ctrl": "mod1",
-		"cmd": "mod1", 
+		"cmd": "mod1",
 
 		"shift": "mod2",
 		"alt": "mod3",
@@ -95,15 +95,16 @@ define(["require", "orion/textview/keyBinding", "scripted/exec/exec-shared",
 			tv.setKeyBinding(
 				new mKeyBinding.KeyBinding(
 					keySpec.key, !!keySpec.mod1, !!keySpec.mod2, !!keySpec.mod3, !!keySpec.mod4
-				), 
+				),
 				commandName
 			);
 			tv.setAction(commandName, function() {
 				cmdExec(replaceParams);
+				return true; //stop event propagation.
 			});
 		}
 		
-		//BEGIN installOn function body		
+		//BEGIN installOn function body
 		var execKeyConfig = getConfig("onKeys");
 		if (execKeyConfig) {
 			for (var key in execKeyConfig) {
