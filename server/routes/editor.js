@@ -12,12 +12,17 @@
  ******************************************************************************/
 
 var fs = require('fs');
+var path = require('path');
+
+var EDITOR_HTML = path.resolve(__dirname, '../../client/editor.html');
+
+console.log("EDITOR_HTML = '" +EDITOR_HTML+"'");
 
 exports.install = function (app) {
 
 	function sendEditor(req, res) {
 		res.header('Content-Type', 'text/html');
-		fs.createReadStream(process.env.PWD + '/../client/editor.html').pipe(res);
+		fs.createReadStream(EDITOR_HTML).pipe(res);
 	}
 
 	app.get('/editor', sendEditor);
