@@ -23,19 +23,27 @@ var completions = require("./completions");
 var eachk = require("../jsdepend/utils").eachk;
 var when = require('when');
 
-var allCompletions = {};
-exports.allCompletions = allCompletions;
+exports.allCompletions = {};
 exports.completed = false;
 
 var t;
-exports.process = function() {
+exports.process = function(root) {
 	var deferred = when.defer();
+
+	if (root) {
+		if (completions.setCompletionsFolder(root)) {
+			exports.allCompletions = {};
+			exports.completed = false;
+			console.log("Templates root reset");
+		}
+	}
+
 	if (exports.completed) {
 		// don't redo the work
-		deferred.resolve(allCompletions);
+		deferred.resolve(exports.allCompletions);
 		return deferred.promise;
 	}
-	
+		
 	console.log("Processing templates");
 	// can be called synchronously
 	clearTimeout(t);
@@ -59,14 +67,14 @@ exports.process = function() {
 				function(completionsArr) {
 					for (var i = 0; i < completionsArr.length; i++) {
 						var res = completionsArr[i];
-						if (!allCompletions[res.scope]) {
-							allCompletions[res.scope] = res.completions;
+						if (!exports.allCompletions[res.scope]) {
+							exports.allCompletions[res.scope] = res.completions;
 						} else {
-							allCompletions[res.scope] = 
-								allCompletions[res.scope].concat(res.completions);
+							exports.allCompletions[res.scope] = 
+								exports.allCompletions[res.scope].concat(res.completions);
 						}
 					}
-					deferred.resolve(allCompletions);
+					deferred.resolve(exports.allCompletions);
 				},
 				function(err) {
 					console.warn("Error processing completions: " + err);

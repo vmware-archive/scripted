@@ -51,6 +51,10 @@ define(['when'], function(when) {
 	    xhr.send();
 	    deferreds[scope] = deferred;
 		return deferred.promise;
-	} };
+	},
+	_reset : function() {
+		deferreds = {};
+	}
+	};
 
 });

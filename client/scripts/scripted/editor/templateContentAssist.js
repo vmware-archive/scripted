@@ -24,7 +24,7 @@ if(!Array.isArray) {
  * This module provides content assist gathered from .scripted-completion files
  */
 
-define(['servlets/get-templates'], function(getTemplates) {
+define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 
 	/** 
 	 * shared templates
@@ -51,12 +51,21 @@ define(['servlets/get-templates'], function(getTemplates) {
 	}
 	
 	TemplateContentAssist.prototype = {
-		install : function(scope) {
+		install : function(scope, root) {
 			this.scope = scope;
+			var deferred = when.defer();
 			if (! allTemplates[scope]) {
-				var templatesDeferred = getTemplates.loadRawTemplates(scope);
-				templatesDeferred.then(function(templates) { allTemplates[scope] = templates; });
+				var templatesDeferred = getTemplates.loadRawTemplates(scope, root);
+				templatesDeferred.then(function(templates) { 
+					allTemplates[scope] = templates; 
+					deferred.resolve(templates);
+				}, function(err) {
+					deferred.reject(err);
+				});
+			} else {
+				deferred.resolve(allTemplates[scope]);
 			}
+			return deferred.promise;
 		},
 		computeProposals: function(buffer, invocationOffset, context) {
 			if (!allTemplates) {
@@ -88,6 +97,11 @@ define(['servlets/get-templates'], function(getTemplates) {
 	};
 
 	return {
-		TemplateContentAssist : TemplateContentAssist
+		TemplateContentAssist : TemplateContentAssist,
+		_getAllTemplates : function() { return allTemplates; },
+		_reset : function() { 
+			allTemplates = {}; 
+			getTemplates._reset();
+		}
 	};
 });

@@ -41,8 +41,13 @@ exports.extractScope = function(rawScope) {
 exports.completionsFolder = process.env.HOME + '/' + EXTENSION;
 
 // exported for testing only
-exports._setCompletionsFolder = function(folder) {
-	exports.completionsFolder = folder;
+exports.setCompletionsFolder = function(folder) {
+	if (exports.completionsFolder !== folder) {
+		console.log("Resetting templates root");
+		exports.completionsFolder = folder;
+		return true;
+	}
+	return false;
 };
 
 

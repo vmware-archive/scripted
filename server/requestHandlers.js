@@ -177,8 +177,8 @@ function handleTemplates(response, request) {
 		response.end();
 		return;
 	}
-	console.log('Client requested content assist templates. Looking for scope "' + scope + '"');
-	templates.process().then(
+	console.log('Client requested content assist templates. Looking for scope "' + scope + '" with root: ' + root);
+	templates.process(root).then(
 		function(res) {
 			response.writeHead(200, {'content-type': 'application/json'});
 			response.write(JSON.stringify(templates.allCompletions[scope]));	

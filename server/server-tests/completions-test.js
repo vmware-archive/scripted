@@ -37,7 +37,7 @@ exports.extractScope = function(test) {
 
 // no test is too silly!
 exports.findCompletionsFiles = function(test) {
-	completionsModule._setCompletionsFolder(testResourcesFolder);
+	completionsModule.setCompletionsFolder(testResourcesFolder);
 	completionsModule.findCompletionsFiles(
 		function(files) {
 			test.equals(files.length, 3, "Should have found 3 files");

@@ -1,0 +1,12 @@
+{
+        "scope": "text.html - dup of test1.scripted-completions. completions should be added",
+
+        "completions":
+        [
+                { "trigger": "a", "contents": "<a href=\"$1\">$0</a>" },
+                { "trigger": "abbr", "contents": "<abbr>$0</abbr>" },
+                { "trigger": "acronym1", "contents": "<acronym>$0</acronym>" },
+                { "trigger": "acronym2", "contents": "<acronym>$1$0</acronym>" },
+                { "trigger": "acronym3", "contents": "<acronym>$1$2$0</acronym>" }
+        ]
+}

@@ -18,7 +18,7 @@ var provider = require('../templates/template-provider');
 var completionsModule = require("../templates/completions");
 
 var testResourcesFolder = __dirname + "/test-resources/";
-completionsModule._setCompletionsFolder(testResourcesFolder);
+completionsModule.setCompletionsFolder(testResourcesFolder);
 
 exports.providerTest = function(test) {
 	provider.process().then(function(allCompletions) {
