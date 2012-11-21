@@ -40,5 +40,4 @@ servlets.register("/put", requestHandlers.put);
 servlets.register("/fs_list", requestHandlers.fs_list);
 servlets.register("/templates", requestHandlers.templates);
 
-
 server.start(router.route, servlets.lookup);

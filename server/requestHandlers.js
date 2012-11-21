@@ -168,8 +168,9 @@ function get2(response, request) {
 }
 
 function handleTemplates(response, request) {
-
-	var scope = url.parse(request.url,true).query.scope;
+	var params = url.parse(request.url,true).query;
+	var scope = params.scope;
+	var root = params.root;
 	if (!scope) {
 		response.writeHead(400, {'content-type': 'application/json'});
 		response.write('{"error" : "no scope provided" }');

@@ -43,10 +43,11 @@ exports.process = function() {
 	completions.findCompletionsFiles(function(files) {
 		console.log("found template files: " + files);
 		if (!files) {
-			console.warn("Error finding the completions directory.");
 			exports.completed = true;
+			console.warn("Error finding the completions directory.");
 			deferred.reject("Error finding the completions directory.");
 		} else {
+			exports.completed = true;
 			var deferreds = [];
 			for (var i = 0; i < files.length; i++) {
 				console.log("Starting to find completions in " + files[i]);

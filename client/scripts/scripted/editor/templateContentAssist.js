@@ -24,7 +24,7 @@ if(!Array.isArray) {
  * This module provides content assist gathered from .scripted-completion files
  */
 
-define(['when'], function(when) {
+define(['servlets/get-templates'], function(getTemplates) {
 
 	/** 
 	 * shared templates
@@ -32,42 +32,6 @@ define(['when'], function(when) {
 	 */
 	var allTemplates = {};
 	
-	/**
-	 * keeps track of existing requests so that we don't ask for the same 
-	 * deferred multiple times.
-	 */ 
-	var deferreds = {};
-	
-	function loadRawTemplates(scope) {
-		if (deferreds[scope]) {
-			return deferreds[scope];
-		}
-	
-		
-		var deferred = when.defer();
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/templates?scope=" + scope, true);
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === 4) {
-				if (xhr.status === 200) {
-					var res = xhr.responseText;
-					if (res) {
-						res = JSON.parse(res);
-					} else {
-						res = {};
-					}
-					deferred.resolve(res);
-				} else {
-					deferred.reject("Error loading templates");
-				}
-			}
-		};
-	    xhr.send();
-	    deferreds[scope] = deferred;
-		return deferred.promise;
-	}
-	
-
 	function extractPositions(origPositions, offset) {
 		if (!origPositions) {
 			return null;
@@ -90,7 +54,7 @@ define(['when'], function(when) {
 		install : function(scope) {
 			this.scope = scope;
 			if (! allTemplates[scope]) {
-				var templatesDeferred = loadRawTemplates(scope);
+				var templatesDeferred = getTemplates.loadRawTemplates(scope);
 				templatesDeferred.then(function(templates) { allTemplates[scope] = templates; });
 			}
 		},
@@ -124,14 +88,6 @@ define(['when'], function(when) {
 	};
 
 	return {
-		TemplateContentAssist : TemplateContentAssist,
-		/** 
-		 * installs templates from the server in this client
-		 */
-		isInstalled: function() {
-			return !!allTemplates;
-		}
-		
-		
+		TemplateContentAssist : TemplateContentAssist
 	};
 });
