@@ -15,8 +15,7 @@ var fs = require('fs');
 var path = require('path');
 
 var EDITOR_HTML = path.resolve(__dirname, '../../client/editor.html');
-
-console.log("EDITOR_HTML = '" +EDITOR_HTML+"'");
+//console.log("EDITOR_HTML = '" +EDITOR_HTML+"'");
 
 exports.install = function (app) {
 
