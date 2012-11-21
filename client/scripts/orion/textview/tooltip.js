@@ -28,8 +28,21 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 	Tooltip.prototype = /** @lends orion.textview.Tooltip.prototype */ {
 		_create: function(document) {
 			if (this._tooltipDiv) { return; }
-			var tooltipDiv = this._tooltipDiv = document.createElement("DIV");
+			
+			// SCRIPTED start
+			// ensure we don't add multiple tooltip divs per page
+			var tooltipDiv = this._tooltipDiv = document.getElementById("tooltip");
+			if (tooltipDiv) {
+				this._tooltipContents = tooltipDiv.firstChild;
+				return;
+			}
+			// SCRIPTED end
+			
+			/* var */ tooltipDiv = this._tooltipDiv = document.createElement("DIV");
 			tooltipDiv.className = "textviewTooltip";
+			// SCRIPTED start
+			tooltipDiv.id = "tooltip";
+			// SCRIPTED end
 			var tooltipContents = this._tooltipContents = document.createElement("DIV");
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
