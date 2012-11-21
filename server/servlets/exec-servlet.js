@@ -11,10 +11,10 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
-/*global console require*/ 
+/*global console require*/
 
 var servlets = require('../servlets');
-var makeRequestHandler = require('./servlet-utils').makeRequestHandler; 
+var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 
 var cpExec = require('child_process').exec;
 
@@ -23,11 +23,10 @@ function exec(cmd, callback, errback) {
 	//cmd looks like this:
 	// {cmd: "ls -la", ...other options to pass to the nodejs exec function...}
 
-	var options = cmd; 
+	var options = cmd;
 	cmd = cmd.cmd;
 
 	/*var process = */cpExec(cmd, options, callback);
 }
 exec.remoteType = ['JSON', 'callback'];
-
 servlets.register('/exec', makeRequestHandler(exec));

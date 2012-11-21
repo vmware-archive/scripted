@@ -11,10 +11,10 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
-/*global console require*/ 
+/*global console require*/
 
 //
-// A servlet that provides access to the jsdepend api via  
+// A servlet that provides access to the jsdepend api via
 // http.
 //
 

@@ -52,7 +52,7 @@ define(["./websockets-client"], function (multiplexer) {
 		}
 		
 		sock.onopen = function (conn) {
-			console.log('['+id+'] opened');
+			//console.log('['+id+'] opened');
 			send({
 				query:[currentFile, query, options]
 			});
@@ -62,7 +62,7 @@ define(["./websockets-client"], function (multiplexer) {
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
-			console.log('['+id+'] closed');
+			//console.log('['+id+'] closed');
 		};
 		
 		return {

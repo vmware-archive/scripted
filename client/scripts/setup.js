@@ -42,11 +42,11 @@ var scriptedLogger = {
 	DEBUG : true,
 	WARN : true,
 	ERROR : true,  // I don't know why we'd want to disable error handling, but I'll keep it here
-	info : function(msg, category) { 
+	info : function(msg, category) {
 		if (this.INFO && this.isEnabled(category)) {
 			msg = this.SHOW_CALLER ? msg + " --- " + this.info.caller : msg;
 			console.info(msg);
-		}  
+		}
 	},
 	debug : function(msg, category) {
 		if (this.DEBUG && this.isEnabled(category)) {
@@ -67,13 +67,13 @@ var scriptedLogger = {
 		}
 	},
 	
-	// A message is 
+	// A message is
 	isEnabled : function(catName) {
 		if (!scriptedLoggerCategories.ALL) {
 			return false;
 		}
-		return !catName || scriptedLoggerCategories[catName] === undefined ? 
-			scriptedLoggerCategories.OTHER : 
+		return !catName || scriptedLoggerCategories[catName] === undefined ?
+			scriptedLoggerCategories.OTHER :
 			scriptedLoggerCategories[catName];
 	}
 };
@@ -81,7 +81,7 @@ var scriptedLogger = {
 
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}], 
+				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}],
 	paths: {
 	//require: 'lib/requirejs/require',
 		i18n: 'lib/requirejs/i18n',
@@ -100,12 +100,12 @@ requirejs.config({
 	}
 });
 
-require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient", 
-		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os", 
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"],
+require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient",
+		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/keybindings/keybinder"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
-		mExecConsole, mExecOnLoad, mWhen) {
+		mExecConsole, mExecOnLoad, mWhen, mKeybinder) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -196,7 +196,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 
-	/* Locate the nearest .jshintrc. It will look relative to the initially opened 
+	/* Locate the nearest .jshintrc. It will look relative to the initially opened
 	 * location - so ok if the .jshintrc is at the project root. But if the file is
 	 * elsewhere in the tree it sometimes won't find it depending on what is opened.
 	 */
@@ -204,7 +204,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		// TODO fix it up to do a better job of finding it
 		// TODO return value shouldn't be trampling on the config object itself, should be an object in
 		// which the config is a member.
-		// TODO a timing window problem does exist here - where if the .jshintrc file isn't 
+		// TODO a timing window problem does exist here - where if the .jshintrc file isn't
 		// found quickly enough the first linting will not respect it. fix it!
 		var deferred = mWhen.defer();
 		mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
@@ -259,6 +259,9 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		}
 		window.subeditors = [];
 		mNavHistory.setupPage(pageState, false);
+		
+		//At this point all key bindings should be initialized.
+		mKeybinder.dumpCurrentKeyBindings(window.editor);
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
@@ -295,7 +298,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				sidePanel.css('left', '');
 				
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
-				sidePanel.css('width', side_percent + "%");		
+				sidePanel.css('width', side_percent + "%");	
 				
 				window.editor._textView._updatePage();
 				for (var i = 0; i < window.subeditors.length; i++){
@@ -399,7 +402,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				$.get(command_file, null, function(template){
 					var tmpl = $.templates(template);
 					$('#command_list').append(tmpl.render(importantKeyBindings));
-					$('#command_list').append('<li><hr /></li>');				
+					$('#command_list').append('<li><hr /></li>');
 					$('#command_list').append(tmpl.render(otherKeyBindings));
 				});
 
@@ -467,7 +470,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			/*
 			var resizable_handle = $('#side_panel > .ui-resizable-w');
 			resizable_handle.hide(); // we have to remove the resizable handle, or else it adds to scrollHeight
-			resizable_handle.height( $('#side_panel')[0].scrollHeight ); 
+			resizable_handle.height( $('#side_panel')[0].scrollHeight );
 			resizable_handle.show();
 			
 			var subeditor;
