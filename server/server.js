@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 var express = require('express');
+var pathResolve = require('path').resolve;
 
 function start(route, handle) {
 	function onRequest(req, res, next) {
@@ -38,7 +39,7 @@ function start(route, handle) {
 	app.configure(function() {
 		app.use(app.router);
 		app.use(onRequest); // bridge to 'servlets', we should remove over time
-		app.use(express['static'](process.env.PWD + '/../client'), { maxAge: 6e5 });
+		app.use(express['static'](pathResolve(__dirname, '../client')), { maxAge: 6e5 });
 		app.use(express.errorHandler({
 			dumpExceptions: true,
 			showStack: true

@@ -100,7 +100,7 @@
 */
 {
 	"jslint" : {
-		"global" : ["console", "define", "exports", "module", "process",
+		"global" : ["console", "define", "exports", "module", "process", "__dirname",
 					"require", "$", "window"]
 	},
 
