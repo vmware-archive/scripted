@@ -11,11 +11,22 @@
  *     Kris De Volder
  ******************************************************************************/
 
-define([], function () {
+////////////////////////////////////////////////////////////////////////////////
+// This module is responsible for mapping keycodes from javascript events
+// into/from user-friendly names such 'TAB', 'Enter' etc.
+//
+// Info for this mapping came from here:
+// http://www.webonweboff.com/tips/js/event_key_codes.aspx
+//
+// All keycode names are case insensitive and should not contain
+// ' ' or '+' characters since these characters will have special
+// meaning in denining keystrokes.
+//
+// This module only deals with names of *individual* keys not combinations
+// of presing multiple keys at once like.
+////////////////////////////////////////////////////////////////////////////////
 
-//
-// All the code related to keycode names belongs in here.
-//
+define([], function () {
 
 /**
  * maps keycode to user-friendly names for the key codes.

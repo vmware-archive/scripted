@@ -11,49 +11,24 @@
  *     Kris De Volder
  ******************************************************************************/
 
-define(["orion/textview/keyBinding", './keynames'], function (mKeyBinding, mKeynames) {
 
-var name2code = mKeynames.name2code;
-var code2name = mKeynames.code2name;
+//////////////////////////////////////////////////////////////////////////////////
+// This module provides some API to manage keybindings in a scripted editor.
+//
+// Stuff like retrieve the 'current keybindings' from a live scripted editor.
+// Change the keybindings etc.
+//////////////////////////////////////////////////////////////////////////////////
 
-var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+define(['./keystroke'], function (mKeystroke) {
 
-var KeyBinding = mKeyBinding.KeyBinding;
-
-var mod1str = isMac ? "cmd" : "ctrl";
-var mod2str = "shift";
-var mod3str = "alt";
-var mod4str = isMac ? "ctrl" : "meta";
-
-// Keycodes info:
-// http://www.webonweboff.com/tips/js/event_key_codes.aspx
-
-
-////////// intialize the maps /////////////////////////////////////////////////
-
-// Info for these stuff is from here:
-// http://www.webonweboff.com/tips/js/event_key_codes.aspx
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-function keybindingString(kb) {
-	var pieces = [];
-	if (kb.mod1) { pieces.push(mod1str); }
-	if (kb.mod2) { pieces.push(mod2str); }
-	if (kb.mod3) { pieces.push(mod3str); }
-	if (kb.mod4) { pieces.push(mod4str); }
-	pieces.push(code2name(kb.keyCode));
-	return pieces.join('+');
-}
+var keybinding2keystroke = mKeystroke.fromKeyBinding;
 
 function toJSON(kbs) {
 	var json = {};
 	for (var i = 0; i < kbs.length; i++) {
 		var keyBinding = kbs[i];
 		if (keyBinding.name) {
-			json[keybindingString(keyBinding.keyBinding)] = keyBinding.name;
+			json[keybinding2keystroke(keyBinding.keyBinding)] = keyBinding.name;
 		}
 	}
 	return json;
@@ -80,4 +55,4 @@ return {
 	dumpCurrentKeyBindings: dumpCurrentKeyBindings
 };
 
-});//end amd define
+}); //end AMD define
