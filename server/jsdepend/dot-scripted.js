@@ -132,7 +132,7 @@ function configure(filesystem) {
 			var configFile = pathResolve(home, ".scriptedrc");
 			return isDirectory(configFile, function (isDir) {
 				if (isDir) {
-					configFile = pathResolve(configFile, "config.json");
+					configFile = pathResolve(configFile, 'scripted.json');
 				}
 				return parseJsonFile(configFile, callback);
 			});
@@ -177,7 +177,7 @@ function configure(filesystem) {
 		}
 		return d;
 	}
-	
+		
 	return {
 		getConfiguration: getConfiguration,
 		getScriptedRcFile: getScriptedRcFile
