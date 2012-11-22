@@ -17,6 +17,8 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+var testCase = require('./dot-scripted-test')
+	.getScriptedRcFile;
 
 //var testCase = require('./module-types-test.js').bigFile;
 var testCase = require('./amd-resolver-test')

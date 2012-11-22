@@ -61,7 +61,7 @@ function withBaseDir(baseDir) {
 	function getUserHome() {
 		if (baseDir) {
 			//We are testing with a 'mini test file system' can't use the
-			// regular user home dir here. So use a special "HOME" dir under the
+			// regular user home dir here. So use a special "user.home" dir under the
 			// baseDir
 			return "user.home";
 		} else {

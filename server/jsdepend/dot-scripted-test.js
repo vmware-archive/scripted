@@ -109,3 +109,49 @@ exports.combineScriptedRcAndDotScripted = function (test) {
 		test.done();
 	});
 };
+
+exports.scriptedRcDir = function (test) {
+	var api = makeApi('with-scriptedrc-dir');
+	api.getConfiguration('bork/foo.js', function (conf) {
+		test.equals(
+			toCompareString({
+				"lint" : { exclude_dirs : 'node_modules' },
+			    "ui": {
+					"font_size": 99
+				},
+				"fsroot" : "bork"
+			}),
+			toCompareString(conf)
+		);
+		test.done();
+	});
+};
+
+exports.getScriptedRcFile = function (test) {
+	var api = makeApi('with-scriptedrc-dir');
+	api.getScriptedRcFile('foo').then(function (conf) {
+		test.equals(
+			toCompareString({
+				'hello' : 'from foo'
+			}),
+			toCompareString(conf)
+		);
+	}).then(function () {
+		return api.getScriptedRcFile('bar').then(function (conf) {
+			test.equals(
+				toCompareString({
+					'hello' : 'from bar'
+				}),
+				toCompareString(conf)
+			);
+		});
+	}).then(function () {
+		return api.getScriptedRcFile('no-exist').then(function (conf) {
+			test.equals(
+				toCompareString({}),
+				toCompareString(conf)
+			);
+			test.done();
+		});
+	});
+};

@@ -18,6 +18,7 @@ var orMap = require('./utils').orMap;
 var pathResolve = require('./utils').pathResolve;
 var jsonMerge = require('./json-merge');
 var defaults = require('./dot-scripted-defaults');
+var when = require('when');
 
 var JSON5 = require('json5');
 
@@ -26,6 +27,8 @@ function configure(filesystem) {
 	var listFiles = filesystem.listFiles;
 	var getContents = filesystem.getContents;
 	var getUserHome = filesystem.getUserHome;
+	var isFile = filesystem.isFile;
+	var isDirectory = filesystem.isDirectory;
 
 	// For a given file handle the '.scripted' configuration info is found and composed as follows:
 	
@@ -114,6 +117,7 @@ function configure(filesystem) {
 				return callback({});
 			} else {
 				var dotScriptedFile = pathResolve(root, '.scripted');
+				
 				parseJsonFile(dotScriptedFile, function (dotScripted) {
 					dotScripted.fsroot = root;
 					callback(dotScripted);
@@ -126,7 +130,12 @@ function configure(filesystem) {
 		var home = getUserHome();
 		if (home) {
 			var configFile = pathResolve(home, ".scriptedrc");
-			return parseJsonFile(configFile, callback);
+			return isDirectory(configFile, function (isDir) {
+				if (isDir) {
+					configFile = pathResolve(configFile, "config.json");
+				}
+				return parseJsonFile(configFile, callback);
+			});
 		} else {
 			return callback({});
 		}
@@ -150,9 +159,28 @@ function configure(filesystem) {
 			});
 		});
 	}
-
+	
+	/**
+	 * Gets a given config file from the .scriptedrc folder in the user.home directort
+	 * @return {Promise}
+	 */
+	function getScriptedRcFile(name) {
+		var d = when.defer();
+		var home = getUserHome();
+		if (home) {
+			var configFile = pathResolve(home, '.scriptedrc/'+name+'.json');
+			parseJsonFile(configFile, function (jsonData) {
+				d.resolve(jsonData);
+			});
+		} else {
+			d.resolve({});
+		}
+		return d;
+	}
+	
 	return {
-		getConfiguration: getConfiguration
+		getConfiguration: getConfiguration,
+		getScriptedRcFile: getScriptedRcFile
 	};
 
 }
