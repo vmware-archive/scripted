@@ -25,7 +25,8 @@
 			jsrender: 'lib/jsrender',
 			jquery: 'lib/jquery-1.7.2.min',
 			sockjs:'lib/sockjs-592774a-0.3.1.min',
-			fileapi: 'scripted/fileapi'
+			fileapi: 'scripted/fileapi',
+			when: 'lib/when-aaa0898-1.6.1'
 		}
 	});
 
@@ -52,21 +53,13 @@
 		// first ensure that the url is correct
 		window.setTimeout(function() {
 			fixUrl();		
-			require(["scripted/utils/pageState", "js-tests/navHistory/navHistoryTests"],
-				function(pageState, navHistoryTests) {
+			require(["js-tests/navHistory/navHistoryTests", "js-tests/templates/templatesTest", "scripted/utils/pageState", "js-tests/common/testutils"],
+				function(navHistoryTests, templatesTest, pageState, testutils) {
 					pageState._setEditorPrefix(window.location.pathname + '?');
-					function testShim(tests) {
-						for (var t in tests) {
-							if (tests.hasOwnProperty(t)) {
-								if (t.indexOf('test') === 0) {
-									test(t, tests[t]);
-								} else if (t.indexOf('asyncTest') === 0) {
-									asyncTest(t, tests[t]);
-								}
-							}
-						}
-					}
-					testShim(navHistoryTests);
+					module('Templates tests');
+					testutils.runTests(templatesTest);
+					module('Nav History tests');
+					testutils.runTests(navHistoryTests);
 			});
 		});
 	});

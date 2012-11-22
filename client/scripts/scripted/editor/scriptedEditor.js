@@ -13,7 +13,7 @@
  *     Kris De Volder
  *     Andrew Eisenberg
  *******************************************************************************/
-/*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage $*/
+/*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage scripted $*/
 /*jslint browser:true devel:true*/
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
@@ -21,12 +21,13 @@ define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orio
 "plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
 "plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint"],
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", 
+"scripted/exec/exec-after-save", "jshint"],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
-mJsContentAssist, mTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
+mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
 mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify, mTextModel, mProjectionModel,
-mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
+mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
@@ -134,9 +135,17 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 
 		var fileName = filePath.split('/');
 		fileName = fileName[fileName.length - 1];
-		var isJSON = (fileName.indexOf('.json') + '.json'.length === fileName.length);
-		var isJS = (fileName.indexOf('.js') + '.js'.length === fileName.length) || isJSON;
-		var isHTML = fileName.indexOf('.html') + '.html'.length === fileName.length;
+		var dotIdx = fileName.lastIndexOf('.');
+		var extension;
+		if (dotIdx >= 0) {
+			extension = fileName.substring(dotIdx+1, fileName.length);
+		} else {
+			extension = "";
+		}
+		var isJSON = extension === "json";
+		var isJS = !isJSON && extension === "js";
+		var isHTML = !isJS && extension === "html";
+		var isCSS = !isHTML && extension === "css";
 		
 		if (editorType === 'main'){
 			//TODO: should use setEditorTitle here. But no editor is available yet.
@@ -161,9 +170,10 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jslint);
-		var templateContentAssistant = new mTemplateContentAssist.JSTemplateContentAssistProvider();
+		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
 		var htmlContentAssistant = new mHtmlContentAssist.HTMLContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
+		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 		
 		var postSave = function (text) {
 			var problems;
@@ -234,12 +244,14 @@ mHtmlContentAssist, mCssContentAssist, mMarkoccurrences) {
 			var providers = [];
 			if (isJS) {
 				providers.push(jsContentAssistant);
-				providers.push(templateContentAssistant);
-			} else if (fileName.indexOf('.html') + '.html'.length === fileName.length) {
+				providers.push(jsTemplateContentAssistant);
+			} else if (isHTML) {
 				providers.push(htmlContentAssistant);
-			} else if (fileName.indexOf('.css') + '.css'.length === fileName.length) {
+			} else if (isCSS) {
 				providers.push(cssContentAssistant);
 			}
+			templateContentAssistant.install(extension);
+			providers.push(templateContentAssistant);
 			contentAssist.setProviders(providers);
 			return contentAssist;
 		};

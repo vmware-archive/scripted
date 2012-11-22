@@ -16,9 +16,10 @@
  
 /*global console require exports process*/
 var querystring = require("querystring"); 
-var fs = require("fs");
+var fs = require("fs"); 
 var formidable = require("formidable");
 var url = require('url');
+var templates = require('./templates/template-provider');
 
 // TODO handle binary files
 /*
@@ -166,6 +167,32 @@ function get2(response, request) {
   });
 }
 
+function handleTemplates(response, request) {
+	var params = url.parse(request.url,true).query;
+	var scope = params.scope;
+	var root = params.root;
+	if (!scope) {
+		response.writeHead(400, {'content-type': 'application/json'});
+		response.write('{"error" : "no scope provided" }');
+		response.end();
+		return;
+	}
+	console.log('Client requested content assist templates. Looking for scope "' + scope + '" with root: ' + root);
+	templates.process(root).then(
+		function(res) {
+			response.writeHead(200, {'content-type': 'application/json'});
+			response.write(JSON.stringify(templates.allCompletions[scope]));	
+			response.end();
+			console.log('Client requested content assist templates complete');
+		},
+		function(err) {
+			response.writeHead(500, {'content-type': 'application/json'});
+			response.write('{"error" : true, "val" : "' + err + '"}');
+			response.end();
+		}
+	);
+}
+
 
 
 /*
@@ -307,7 +334,7 @@ function put(response, request) {
       // fields.text is the data to save
 //      console.log("Text to be written is of length: "+text.length);
 	  var dataToSave = fields.data;
-      if (dataToSave.length != fields.length) {
+      if (dataToSave.length != fields.length) { // DO NOT change to !== because fields.length is a string
         // return an error, it failed to save!
         response.writeHead(500, {'content-type': 'text/plain'});
         response.write('problem with save: received data length: '+dataToSave.length+' does not match transmitted length '+fields.length);
@@ -333,4 +360,5 @@ exports.get = get;
 exports.get2 = get2;
 exports.put = put;
 exports.fs_list = fs_list;
+exports.templates = handleTemplates;
 

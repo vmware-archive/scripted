@@ -39,7 +39,7 @@ function route(handle, pathname, response, request, next) {
     if (typeof handle(pathname) === 'function') {
         handle(pathname)(response, request);
     } else {
-        if (pathname === '/' || pathname === '/eeditor.html') {
+        if (pathname === '/' || pathname === '/editor.html') {
             // for a '/' reference, give them the editor
             file.serveFile('/editor.html', 200, {
                 'content-type': 'text/html'
@@ -87,11 +87,11 @@ function route(handle, pathname, response, request, next) {
                 'content-type': 'text/javascript'
             }, request, response);
         } else if (pathname === '/test-api/server-root') {
-            // This is used during testing to find the root of the play-arÅea, where test resources are stored
+            // This is used during testing to find the root of where test resources are stored
             response.writeHead(200, {
                 "Content-Type": "text/plain"
             });
-            response.write(path.resolve('../play-area/'));
+            response.write(path.resolve('../client/scripts/js-tests/test-resources/'));
             response.end();
         } else {
             next();

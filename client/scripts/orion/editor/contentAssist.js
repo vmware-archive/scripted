@@ -184,10 +184,15 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.cancel();
 
 			var offset = this.textView.getCaretOffset();
+			var start = offset;
+			var end = offset;
+			if( proposal.replace ) {
+			   start = this.getPrefixStart(offset);
+			}
 			var data = {
 				proposal: proposal,
-				start: offset,
-				end: offset
+				start: start,
+				end: end
 			};
 			this.dispatchEvent({type: "accept", data: data });
 			return true;

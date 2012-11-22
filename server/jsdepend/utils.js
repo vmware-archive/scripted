@@ -12,10 +12,10 @@
  ******************************************************************************/
 
 /*global require define console module*/
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
-define(function(require, exports, module) {
+//if (typeof define !== 'function') {
+//    var define = require('amdefine')(module);
+//}
+//define(function(require, exports, module) {
 ///////////////////////////////////////////
 // utils
 //////////////////////////////////////////
@@ -316,4 +316,4 @@ exports.deref = deref;
 exports.startsWith = startsWith;
 
 //////////////////////////////////////////
-});
+//});

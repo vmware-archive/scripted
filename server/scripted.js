@@ -38,6 +38,6 @@ servlets.register("/get2", requestHandlers.get2);
 servlets.register("/put", requestHandlers.put);
 // Request information about a file/directory
 servlets.register("/fs_list", requestHandlers.fs_list);
-
+servlets.register("/templates", requestHandlers.templates);
 
 server.start(router.route, servlets.lookup);

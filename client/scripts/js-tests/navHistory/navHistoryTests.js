@@ -15,33 +15,13 @@
 /*jslint browser:true */
 /*global $ define module localStorage window console */
 
-define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'setup', 'jquery'], function(assert, mNavHistory, mPageState) {
+define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'js-tests/common/testutils', 'setup', 'jquery'], 
+function(assert, mNavHistory, mPageState, mTestutils) {
 	
-	var xhrobj = new XMLHttpRequest();
-	xhrobj.open("GET", '/test-api/server-root', false);
-	xhrobj.send();  // synchronous xhr request
-	var testResourcesRoot = xhrobj.responseText;
-	var testResourcesRootNoSlash;
-	if (testResourcesRoot.charAt(testResourcesRoot.length-1) !== '/') {
-		testResourcesRootNoSlash = testResourcesRoot;
-		testResourcesRoot += '/';
-	} else {
-		testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
-	}
-
+	var testResourcesRoot = mTestutils.discoverTestRoot();
+	var testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
 	
-	function getFileContents(fname, callback) {
-		var xhrobj = new XMLHttpRequest();
-		var url = 'http://localhost:7261/get?file=' + testResourcesRoot + fname;
-		xhrobj.open("GET",url,true);
-		xhrobj.onreadystatechange= function() {
-	        if (xhrobj.readyState === 4) {
-				callback(xhrobj.responseText);
-	        }
-	    };
-	    xhrobj.send();
-	}
-	
+	var getFileContents = mTestutils.getFileContents;
 	
 	function setup() {
 		window.fsroot = testResourcesRootNoSlash;
@@ -65,11 +45,11 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		setTimeout(function() {
 			assert.ok(window.editor);
 			
-			getFileContents("foo.js",
+			getFileContents(testResourcesRoot, "foo.js",
 				function(contents) {
 					assert.equal(window.editor.getText(), contents);
 					
-					getFileContents("bar.js", function(contents) {
+					getFileContents(testResourcesRoot, "bar.js", function(contents) {
 						window.editor = mNavHistory._loadEditor(testResourcesRoot + "bar.js");
 						assert.equal(window.editor.getText(), contents);
 						assert.start();
@@ -235,20 +215,29 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
 		var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
+		var menuUrl = historyMenu.children()[0].children[0].attributes[0].value;
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
+		} else if (menuUrl.indexOf('#6,7') > 0) {
+			// handle situation where scroll hasn't occurred
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
 		} else {
-			assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
 		}
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
 		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
+
+		menuUrl = historyMenu.children()[2].children[0].attributes[0].value;
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
+		} else if (menuUrl.indexOf('#15,25') > 0) {
+			// handle situation where scroll hasn't occurred
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
 		} else {
-			assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
 		}
 	};
 	
@@ -261,12 +250,12 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 			mNavHistory.toggleSidePanel();
 			assert.ok(window.subeditors[0]);
 			
-			getFileContents("foo.js",
+			getFileContents(testResourcesRoot, "foo.js",
 				function(contents) {
 					window.subeditors[0] = mNavHistory._loadEditor(testResourcesRoot + "foo.js",  $('.subeditor')[0], "sub");
 					assert.equal(window.subeditors[0].getText(), contents);
 					
-					getFileContents("bar.js", function(contents) {
+					getFileContents(testResourcesRoot, "bar.js", function(contents) {
 						window.subeditors[0] = mNavHistory._loadEditor(testResourcesRoot + "bar.js",  $('.subeditor')[0], "sub");
 						assert.equal(window.subeditors[0].getText(), contents);
 						assert.start();
@@ -482,7 +471,7 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 	// tests a single page only
 	function oddUrlTest(fname, urlSuffix, selection) {
 		setup();
-		getFileContents(fname,
+		getFileContents(testResourcesRoot, fname,
 			function(contents) {
 				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html" + urlSuffix }, 
 					window.editor);

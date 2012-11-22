@@ -1,0 +1,14 @@
+{
+        "scope": "source.json - source - meta.tag, punctuation.definition.tag.begin",
+
+        "completions":
+        [
+                { "trigger": "acronym8", "contents": "<acronym>${1:foo}</acronym>" },
+                { "trigger": "acronym9", "contents": "${1:foo}<acronym></acronym>" },
+                { "trigger": "acronym10", "contents": "<acronym></acronym>${1:foo}" },
+                { "trigger": "acronym11", "contents": "<acronym>${1:foo}${2:bar}$0</acronym>" },
+                { "trigger": "acronym12", "contents": "${2:bar}<acronym>$0</acronym>${1:foo}$3" },
+                { "trigger": "acronym13", "contents": "${bar}" },
+                { "trigger": "acronym14", "contents": "$bar" }
+        ]
+}

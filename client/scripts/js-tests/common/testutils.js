@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 /*jslint browser:true */
+/*global test asyncTest */
 
 define(["jquery"], function() {
 
@@ -73,7 +74,7 @@ define(["jquery"], function() {
 	function runTests(tests) {
 		for (var t in tests) {
 			if (tests.hasOwnProperty(t)) {
-			console.log("running "+t);
+				console.log("running "+t);
 				if (t.indexOf('test') === 0) {
 					test(t, tests[t]);
 				} else if (t.indexOf('asyncTest') === 0) {
@@ -87,7 +88,8 @@ define(["jquery"], function() {
 		discoverTestRoot: discoverTestRoot,
 		fixUrlForTests: fixUrlForTests,
 		insertEditor: insertEditor,
-		runTests: runTests
+		runTests: runTests,
+		getFileContents: getFileContents
 	};
 	
 });
