@@ -44,7 +44,7 @@ function fromConfig(conf, name, type) {
  */
 function logBack(msg, callback) {
 	return function (result) {
-		console.log(msg); 
+		console.log(msg);
 		console.log(JSON.stringify(result, null, "  "));
 		callback(result);
 	};
@@ -64,7 +64,7 @@ function configure(config) {
 //	console.log('jsdepend/api is using encoding: '+encoding);
 	
 	function getReferences(handle, callback) {
-		getContents(handle, 
+		getContents(handle,
 			function (contents) {
 				var tree = parser.parse(contents);
 				findReferences(tree, callback);
@@ -86,7 +86,7 @@ function configure(config) {
 	}
 
     /**
-	 * Create a 'store' to record the result of getDGraph function. 
+	 * Create a 'store' to record the result of getDGraph function.
 	 */
 	function makeGraphStore() {
 		var graph = {};
@@ -154,6 +154,7 @@ function configure(config) {
 	}
 	
 	function getDGraph(handle, callback) {
+		//callback = logBack('getDGraph '+handle+ ' => ', callback);
 		var store = makeGraphStore();
 		buildGraph(handle, store, function () {
 			callback(store.getGraph());

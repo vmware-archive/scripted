@@ -308,7 +308,7 @@ exports.findAmdConfIn511Project = findAmdConfigIn511Project('goats');
 exports.findAmdConfIn511ProjectWithRequireJs = findAmdConfigIn511Project('goats-with-requirejs');
 
 exports.findIndirectAmdConfigInHtmlFileWithThreeScriptTags = function (test) {
-	var api = makeApi('simple-web-with-shared-configjs'); 
+	var api = makeApi('simple-web-with-shared-configjs');
 	api.getAmdConfig("client/main", function (amdConf) {
 		test.equals(toCompareString(amdConf),
 			toCompareString({
@@ -317,6 +317,19 @@ exports.findIndirectAmdConfigInHtmlFileWithThreeScriptTags = function (test) {
 					'utils' : 'lib/utils'
 				},
 				baseDir: 'client'
+			})
+		);
+		test.done();
+	});
+};
+
+exports.simpleRequireJsProject = function (test) {
+	var api = makeApi('requirejs-sample');
+	api.getAmdConfig("p/js/app.js", function (amdConf) {
+		test.equals(toCompareString(amdConf),
+			toCompareString({
+			  "baseUrl": "js/lib",
+			  "baseDir": "p/js/lib"
 			})
 		);
 		test.done();

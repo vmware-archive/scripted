@@ -28,7 +28,7 @@ var conf = configuration.withBaseDir(null);
 conf.sloppy = false;
 var api = apiMaker.configure(conf);
 
-var basePath = "/jsdepend"; 
+var basePath = "/jsdepend";
    //where to serve all this api's functions. Each function will be served at
    // basePath + '/' + functionName
 

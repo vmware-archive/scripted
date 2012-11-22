@@ -1,0 +1,8 @@
+{
+   "jslint": {
+       "options": {
+           "browser": true
+       },
+       "global": [ "require", "console", "window", "_" ]
+   }
+}

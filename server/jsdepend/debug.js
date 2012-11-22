@@ -19,15 +19,16 @@
 
 
 //var testCase = require('./module-types-test.js').bigFile;
-//var testCase = require('./amd-resolver-test')
+var testCase = require('./amd-resolver-test')
 //	.findIndirectAmdConfigInHtmlFileWithThreeScriptTags;
 //	.likeScripted;
 //	.findAmdConfigIn511Project;
 //	.findAmdConfIn511ProjectWithRequireJs;
 //	.getAmdConfig2;
+	.simpleRequireJsProject;
 
-var testCase = require('./resolver-test')
-	.requireCallWithBaseDir;
+//var testCase = require('./resolver-test')
+//	.requireCallWithBaseDir;
 //	.useTextPlugin;
 //	.resolveInScriptsFolder;
 //	.pathAwarenessSimple;

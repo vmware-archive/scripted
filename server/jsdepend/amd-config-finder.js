@@ -342,7 +342,7 @@ function configure(filesystem) {
 				var jsFile = pathResolve(getDirectory(htmlFile), datamain);
 				getContents(jsFile, function (jsCode) {
 					conf = getAmdConfigFromCode(jsCode) || conf;
-					conf.baseDir = conf.baseDir || baseDir; //ensure we always have a baseDir set.
+					conf.baseDir = conf.baseDir || conf.baseUrl || baseDir; //ensure we always have a baseDir set.
 					//console.log("conf.baseDir = "+baseDir);
 					callback(conf);
 				});
