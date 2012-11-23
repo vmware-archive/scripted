@@ -25,7 +25,8 @@ require.config({
         fileapi: 'scripted/fileapi',
         jsrender: 'lib/jsrender',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine'
+		'doctrine/doctrine' : 'lib/doctrine/doctrine',
+        when: 'lib/when-aaa0898-1.6.1'
     }
 });
 
