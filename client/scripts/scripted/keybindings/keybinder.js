@@ -11,7 +11,6 @@
  *     Kris De Volder
  ******************************************************************************/
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // This module provides some API to manage keybindings in a scripted editor.
 //
@@ -19,9 +18,10 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-define(['./keystroke'], function (mKeystroke) {
+define(['./keystroke', 'scripted/utils/os', 'servlets/config-client'], function (mKeystroke, OS, mConfig) {
 
 var keybinding2keystroke = mKeystroke.fromKeyBinding;
+var getScriptedRcFile = mConfig.getScriptedRcFile;
 
 function toJSON(kbs) {
 	var json = {};
@@ -51,8 +51,26 @@ function dumpCurrentKeyBindings(editor) {
 	dump(toJSON(getCurrentKeyBindingsConfig(editor)));
 }
 
+/**
+ * Retrieve the user's custom keybindings and apply them to the given editor.
+ */
+function installOn(editor) {
+	var configName = 'keymap-'+OS.name;
+	return getScriptedRcFile(configName).then(
+		function (conf) {
+			console.log('Got config for '+configName);
+			console.log(conf);
+		},
+		function (err) {
+			console.error(err);
+		}
+	);
+}
+
 return {
-	dumpCurrentKeyBindings: dumpCurrentKeyBindings
+//	dumpActionNames: dumpActionNames,
+	dumpCurrentKeyBindings: dumpCurrentKeyBindings,
+	installOn: installOn
 };
 
 }); //end AMD define

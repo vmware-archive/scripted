@@ -12,7 +12,7 @@
  ******************************************************************************/
  
 /*global define console XMLHttpRequest*/
-define([], function() {
+define(['when'], function(when) {
 
 	/**
 	 * Wrap a callback function to make it 'single fire'. This means that if
@@ -39,6 +39,38 @@ define([], function() {
 	var oneArgSigNoErrback = JSON.stringify(['JSON', 'callback']); //Idiom where callback doubles also as errback (commonly used in nodejs lib code).
 	var twoArgSigNoErrback = JSON.stringify(['JSON', 'JSON', 'callback']); //Idiom where callback doubles also as errback (commonly used in nodejs lib code).
 	var threeArgSigNoErrback = JSON.stringify(['JSON', 'JSON', 'JSON', 'callback']);
+
+	function makePromisedServletStub(path) {
+		return function(/* args... */) {
+			var deferred = when.defer();
+			var args = JSON.stringify(Array.prototype.slice.apply(arguments));
+			var callback = singleFire(function (result) {
+				deferred.resolve(result);
+			});
+			var errback = singleFire(function (err) {
+				deferred.reject(err);
+			});
+			var xhrobj = new XMLHttpRequest();
+			try {
+				var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+				// console.log("url is "+url);
+				xhrobj.onreadystatechange= function() {
+			        if(xhrobj.readyState === 4) { // 4 means content has finished loading
+						if (xhrobj.status===200) {
+							callback(JSON.parse(xhrobj.responseText));
+						} else if (xhrobj.status===500) {
+							errback("Error: xhr request status = "+xhrobj.responseText);
+						}
+					}
+				};
+				xhrobj.open("GET",url,true);
+				xhrobj.send();
+			} catch (err) {
+				errback(err);
+			}
+			return deferred;
+		};
+	}
 
 	function makeServletStub(path, sig) {
 		sig = JSON.stringify(sig);
@@ -176,7 +208,8 @@ define([], function() {
 	}
 	
 	return {
-		makeServletStub: makeServletStub
+		makeServletStub: makeServletStub,
+		makePromisedServletStub: makePromisedServletStub
 	};
 });
 	

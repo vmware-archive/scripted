@@ -232,7 +232,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 	
 	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
-		scriptedLogger.info("fetched dot-scripted conf from server");
+//		scriptedLogger.info("fetched dot-scripted conf from server");
 //		scriptedLogger.info(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
@@ -261,7 +261,8 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		mNavHistory.setupPage(pageState, false);
 		
 		//At this point all key bindings should be initialized.
-		mKeybinder.dumpCurrentKeyBindings(window.editor);
+		//mKeybinder.dumpCurrentKeyBindings(window.editor);
+		mKeybinder.installOn(window.editor); //TODO: sub-editors?
 
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
@@ -408,7 +409,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 				window.editor._textView._updatePage();
 			});
-		});	
+		});
 
 		/*Command help panel*/
 		var help_close, help_open;

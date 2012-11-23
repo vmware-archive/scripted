@@ -13,6 +13,31 @@
  
 /*global console require exports */
 var url = require('url');
+var when = require('when');
+
+function makePromisedRequestHandler(fun) {
+	return function (response, request) {
+		var args = JSON.parse(url.parse(request.url,true).query.args);
+		//Note: the code here assumes the following of the wrapped function:
+		//  - all arguments passed to it can be turned to json
+		when(fun.apply(null, args),
+			function (result) {
+				response.writeHead(200, {
+					"Content-Type": "text/json",
+					"Cache-Control": "no-store"
+				});
+				response.write(JSON.stringify(result)); //TODO: This breaks if 'result' is undefined
+				response.end();
+			},
+			function (err) {
+				console.error("Error in request for '%s': %s", request.url, err);
+				response.writeHead(500, {"Content-Type": "text/plain"});
+				response.write(err + "\n");
+				response.end();
+			}
+		);
+	};
+}
 
 function makeRequestHandler(fun) {
 	var sig = fun.remoteType && JSON.stringify(fun.remoteType);
@@ -21,7 +46,7 @@ function makeRequestHandler(fun) {
 			var args = JSON.parse(url.parse(request.url,true).query.args);
 			//Note: the code here is rather specific and expects a certain function signature
 			// of the functions in the api that is being exposed through this servlet
-			fun(args[0], 
+			fun(args[0],
 				function (result) {
 					response.writeHead(200, {
 						"Content-Type": "text/json",
@@ -109,8 +134,9 @@ function makeRequestHandler(fun) {
             );
         };
 	} else {
-		throw "Don't know how to make handler for: "+fun; 
+		throw "Don't know how to make handler for: "+fun;
 	}
 }
 
 exports.makeRequestHandler = makeRequestHandler;
+exports.makePromisedRequestHandler = makePromisedRequestHandler;

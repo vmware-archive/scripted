@@ -29,6 +29,7 @@ var requestHandlers = require("./requestHandlers");
 require("./servlets/listFiles");
 require("./servlets/jsdepend-servlet");
 require("./servlets/exec-servlet");
+require("./servlets/config-servlet");
 require("./servlets/kill");
 
 // Request to read a file (returns contents)

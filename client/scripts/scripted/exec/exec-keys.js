@@ -14,53 +14,17 @@
 /*global require define console window */
 /*jslint browser:true devel:true*/
 
-define(["require", "orion/textview/keyBinding", "scripted/exec/exec-shared", 
-    'scripted/exec/param-resolver'], function (require, mKeyBinding, mShared) {
+define(["require", "orion/textview/keyBinding",
+	"scripted/keybindings/keystroke", "scripted/exec/exec-shared",
+    'scripted/exec/param-resolver'], function (require, mKeyBinding, mKeystroke, mShared) {
 
 	var MAX_NAME_LEN = 20; //use the first X chars of a cmdString to create the name of a command.
 	
 	var getConfig = mShared.getConfig;
 	var makeExecFunction = mShared.makeExecFunction;
 
-	var modifiers = {
-		"ctrl": "mod1",
-		"cmd": "mod1",
+	var keystroke2keybinding = mKeystroke.toKeyBinding;
 
-		"shift": "mod2",
-		"alt": "mod3",
-		
-		"mod1": "mod1",
-		"mod2": "mod2",
-		"mod3": "mod3",
-		"mod4": "mod4"
-	};
-	
-	function parseKeySpec(specString) {
-		var pieces = specString.split("+");
-		var parsed = {};
-		for (var i = 0; i < pieces.length; i++) {
-			var piece = pieces[i];
-			if (piece.length===1) {
-				//Assume that 'piece' represents a 'regular' key
-				if (parsed.key) {
-					throw 'Invalid key spec: '+specString;
-				} else {
-					parsed.key = piece;
-				}
-			} else {
-				//Assume that 'piece' represents a 'modifier' key.
-				piece = piece.toLowerCase(); //So people can use variations like CTRL, Ctrl etc.
-				var modifier = modifiers[piece];
-				if (modifier) {
-					parsed[modifier] = true;
-				} else {
-					throw 'Invalid key spec: '+specString+' unknown modifier key: '+piece;
-				}
-			}
-		}
-		return parsed;
-	}
-	
 	function installOn(editor) {
 
 		var replaceParams = require('scripted/exec/param-resolver').forEditor(editor);
@@ -86,16 +50,14 @@ define(["require", "orion/textview/keyBinding", "scripted/exec/exec-shared",
 			return "Exec: "+name;
 		}
 		
-		function defineExecKeyBinding(editor, keySpec /*parsed*/, cmdSpec) {
+		function defineExecKeyBinding(editor, keySpec, cmdSpec) {
 			var tv = editor.getTextView();
 		
 			var commandName = createCommandName(cmdSpec);
 			var cmdExec = makeExecFunction(cmdSpec);
 			
 			tv.setKeyBinding(
-				new mKeyBinding.KeyBinding(
-					keySpec.key, !!keySpec.mod1, !!keySpec.mod2, !!keySpec.mod3, !!keySpec.mod4
-				),
+				keystroke2keybinding(keySpec),
 				commandName
 			);
 			tv.setAction(commandName, function() {
@@ -111,7 +73,7 @@ define(["require", "orion/textview/keyBinding", "scripted/exec/exec-shared",
 				if (execKeyConfig.hasOwnProperty(key)) {
 					try {
 						defineExecKeyBinding(editor,
-							parseKeySpec(key),
+							key,
 							execKeyConfig[key]
 						);
 					} catch (e) {

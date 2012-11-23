@@ -129,7 +129,7 @@ function withBaseDir(baseDir) {
 			if (contents) {
 				return callback(contents);
 			}
-		} 
+		}
 		fs.readFile(handle2file(handle), encoding, function(err, data) {
 			if (err) {
 				if (typeof(errback) === 'function') {
@@ -161,7 +161,7 @@ function withBaseDir(baseDir) {
 	
 	return {
 		getUserHome:  getUserHome,
-		baseDir:      baseDir, 
+		baseDir:      baseDir,
 		handle2file:  handle2file,
 		file2handle:  file2handle,
 		getContents:  getContents,

@@ -165,10 +165,12 @@ function configure(filesystem) {
 	 * @return {Promise}
 	 */
 	function getScriptedRcFile(name) {
+		console.log('scriptedrc file requested: '+name);
 		var d = when.defer();
 		var home = getUserHome();
 		if (home) {
 			var configFile = pathResolve(home, '.scriptedrc/'+name+'.json');
+			console.log('scriptedrc file path = '+configFile);
 			parseJsonFile(configFile, function (jsonData) {
 				d.resolve(jsonData);
 			});
