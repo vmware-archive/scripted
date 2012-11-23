@@ -100,11 +100,14 @@ requirejs.config({
 	}
 });
 
-require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient",
+require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
+		 "scripted/keybindings/keystroke", "orion/searchClient",
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
 		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"],
 		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
+	function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
+		mKeystroke, mSearchClient, mOpenResourceDialog, mJquery,
+		mNavHistory, mPageState, mJsdepend, mOsUtils,
 		mExecConsole, mExecOnLoad, mWhen) {
 			
 	if (!window.scripted) {
@@ -310,120 +313,13 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 //				sidePanel.width(storedWidth);
 //				sidePanel.resize();
 //			}
-
-
-			/* Load keyboard shortcuts*/
-			require(['jsrender'], function(mJsRender){
-				var keyCodes = {};
-				$.each($.ui.keyCode, function(key, value){
-					keyCodes[value] = key;
-				});
-				
-				var xhrobj = new XMLHttpRequest();
-				var url = '/resources/shortcut.json';
-				xhrobj.open("GET", url, false); // TODO naughty? synchronous xhr
-				xhrobj.send();
-				var names = JSON.parse(xhrobj.responseText).names;
-				
-				$.views.converters({
-					toChar: function(val) {
-						// non-standard keys add more as required
-						switch (val) {
-							case 191:
-								return '/';
-							case 220:
-								return '\\';
-							case 119:
-								return 'F8';
-						}
-						if (keyCodes[val]) {
-							return keyCodes[val];
-						} else {
-							return String.fromCharCode(val);
-						}
-					},
-					toShortcutName: function(name){
-						if (names[name]) { return names[name]; }
-						else { return name; }
-					}
-				});
-
-				$.views.helpers({
-					isMac: function(){
-						return (window.navigator.platform.indexOf("Mac") !== -1);
-					}
-				});
-
-				var command_file = "/resources/_command.tmpl.html";
-				// use a copy so we can sort
-				var keyBindings = window.editor.getTextView()._keyBindings.slice(0);
-				
-				// not perfect since not all names are correct here, but pretty close
-				keyBindings.sort(function(l,r) {
-					var lname = names[l.name] ? names[l.name] : l.name;
-					var rname = names[r.name] ? names[r.name] : r.name;
-					if (lname) {
-						lname = lname.toLowerCase();
-					}
-					if (rname) {
-						rname = rname.toLowerCase();
-					}
-					if (lname < rname) {
-						return -1;
-					} else if (rname < lname) {
-						return 1;
-					} else {
-						return 0;
-					}
-				});
-				
-				var lastShortcut = "";
-				for (var i = 0; i < keyBindings.length; i++){
-					if (keyBindings[i].name === lastShortcut) { keyBindings.splice(i,1); }
-					lastShortcut=keyBindings[i].name;
-				}
-				
-				var importantKeyBindings = [];
-				var otherKeyBindings = [];
-				
-				for (i = 0; i < keyBindings.length; i++){
-					if (!keyBindings[i].obvious) {
-						if (keyBindings[i].predefined){
-							otherKeyBindings.push(keyBindings[i]);
-						} else {
-							importantKeyBindings.push(keyBindings[i]);
-						}
-					}
-				}
-
-				$.get(command_file, null, function(template){
-					var tmpl = $.templates(template);
-					$('#command_list').append(tmpl.render(importantKeyBindings));
-					$('#command_list').append('<li><hr /></li>');
-					$('#command_list').append(tmpl.render(otherKeyBindings));
-				});
-
-				window.editor._textView._updatePage();
-			});
 		});
 
-		/*Command help panel*/
-		var help_close, help_open;
-
-		help_open = function(){
-			$('#help_panel').show();
-			$('#help_open').off('click');
-			$('#help_open').on('click', help_close);
-		};
-
-		help_close = function(){
-			$('#help_panel').hide();
-			$('#help_open').off('click');
-			$('#help_open').on('click', help_open);
-		};
-		
-		$('#help_open').on('click', help_open);
-		
+		//Make sure the keyhelp UI is setup. We do this asynchronously since its initially
+		//invisible and its not necessary to hold up the editor for this.
+		require(['scripted/keybindings/keyhelp'], function (mKeyHelp) {
+			console.log('Keybindings help-panel is ready');
+		});
 		
 		/*Side panel open/close*/
 		

@@ -70,6 +70,10 @@ function dumpCurrentKeyBindings(editor) {
  * Retrieve the user's custom keybindings and apply them to the given editor.
  */
 function installOn(editor) {
+	//Before modifying any key bindings dump out the current state as the defaults:
+	console.log('default keybindings are: ');
+	dumpCurrentKeyBindings(editor);
+
 	var configName = 'keymap-'+OS.name;
 	return getScriptedRcFile(configName).then(
 		function (conf) {
