@@ -102,10 +102,10 @@ requirejs.config({
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding", "orion/searchClient",
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/keybindings/keybinder"],
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding, mSearchClient, mOpenResourceDialog, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
-		mExecConsole, mExecOnLoad, mWhen, mKeybinder) {
+		mExecConsole, mExecOnLoad, mWhen) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -260,10 +260,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		window.subeditors = [];
 		mNavHistory.setupPage(pageState, false);
 		
-		//At this point all key bindings should be initialized.
-		//mKeybinder.dumpCurrentKeyBindings(window.editor);
-		mKeybinder.installOn(window.editor); //TODO: sub-editors?
-
 		require(['jquery_ui'], function(mJqueryUI){
 			/*Resizable navigator*/
 			var nav = $('#navigator-wrapper');
@@ -299,7 +295,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				sidePanel.css('left', '');
 				
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
-				sidePanel.css('width', side_percent + "%");	
+				sidePanel.css('width', side_percent + "%");
 				
 				window.editor._textView._updatePage();
 				for (var i = 0; i < window.subeditors.length; i++){
@@ -340,10 +336,10 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 							case 119:
 								return 'F8';
 						}
-						if (keyCodes[val]) { 
-							return keyCodes[val]; 
-						} else { 
-							return String.fromCharCode(val); 
+						if (keyCodes[val]) {
+							return keyCodes[val];
+						} else {
+							return String.fromCharCode(val);
 						}
 					},
 					toShortcutName: function(name){
@@ -360,7 +356,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 
 				var command_file = "/resources/_command.tmpl.html";
 				// use a copy so we can sort
-				var keyBindings = window.editor.getTextView()._keyBindings.slice(0); 
+				var keyBindings = window.editor.getTextView()._keyBindings.slice(0);
 				
 				// not perfect since not all names are correct here, but pretty close
 				keyBindings.sort(function(l,r) {
@@ -506,7 +502,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 			}, 1);
 		});
 		
-		//Report any errors getting the dotScripte configuration. This must be done near the end of setup 
+		//Report any errors getting the dotScripte configuration. This must be done near the end of setup
 		//so we are sure that the various ui widgetry is already there.
 		if (dotScripted.error) {
 			mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
@@ -526,7 +522,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		// FIREFOX section
 		
 		// Fix disappearing caret
-		// if we ever add an anchor tag anywhere, we can use that instead of this fix.  
+		// if we ever add an anchor tag anywhere, we can use that instead of this fix.
 		window.editor.cursorFix( $('#editor') );
 		
 	});

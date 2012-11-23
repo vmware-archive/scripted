@@ -21,7 +21,23 @@
 define(['./keystroke', 'scripted/utils/os', 'servlets/config-client'], function (mKeystroke, OS, mConfig) {
 
 var keybinding2keystroke = mKeystroke.fromKeyBinding;
+var keystroke2keybinding = mKeystroke.toKeyBinding;
 var getScriptedRcFile = mConfig.getScriptedRcFile;
+
+/**
+ * Set (or unset) a keybinding on a specific editor.
+ * A keybinding maps a keystroke to specific editor action.
+ * @param editor Reference to a scripted editor.
+ * @param {String} A Scripted keystroke string
+ * @param {String|null} Name of an action to bind keystroke to an action or null to unbind.
+ */
+function setKeyBinding(editor, keySpec, actionName) {
+	var tv = editor.getTextView();
+	tv.setKeyBinding(
+		keystroke2keybinding(keySpec),
+		actionName
+	);
+}
 
 function toJSON(kbs) {
 	var json = {};
@@ -34,12 +50,11 @@ function toJSON(kbs) {
 	return json;
 }
 
-function getCurrentKeyBindingsConfig(editor) {
-	return editor.getTextView()._keyBindings.slice(0);
-}
-
-function dump(json) {
-	console.log(JSON.stringify(json, null, "  "));
+/**
+ * Retrieve an editor's current keybindings as JSON-able object in scripted format.
+ */
+function getEditorKeyBindingsConfig(editor) {
+	return toJSON(editor.getTextView()._keyBindings.slice(0));
 }
 
 /**
@@ -48,7 +63,7 @@ function dump(json) {
  * can copy paste into a config file.
  */
 function dumpCurrentKeyBindings(editor) {
-	dump(toJSON(getCurrentKeyBindingsConfig(editor)));
+	console.log(JSON.stringify(getEditorKeyBindingsConfig(editor), null, '  '));
 }
 
 /**
@@ -58,8 +73,14 @@ function installOn(editor) {
 	var configName = 'keymap-'+OS.name;
 	return getScriptedRcFile(configName).then(
 		function (conf) {
-			console.log('Got config for '+configName);
-			console.log(conf);
+			console.log('Retrieved config: '+configName);
+			console.log(JSON.stringify(conf, null, '  '));
+			//conf is a map from keystroke strings to editor action names
+			for (var k in conf) {
+				if (conf.hasOwnProperty(k)) {
+					setKeyBinding(editor, k, conf[k]);
+				}
+			}
 		},
 		function (err) {
 			console.error(err);
@@ -67,8 +88,11 @@ function installOn(editor) {
 	);
 }
 
+
+
 return {
 //	dumpActionNames: dumpActionNames,
+	getEditorKeyBindingsConfig: getEditorKeyBindingsConfig,
 	dumpCurrentKeyBindings: dumpCurrentKeyBindings,
 	installOn: installOn
 };

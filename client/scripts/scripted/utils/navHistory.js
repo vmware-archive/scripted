@@ -18,9 +18,9 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
+define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
 "scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5'], 
-function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
+function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
 	mFileSearchClient, mSearchDialog, mOsUtils) {
 	
 	var EDITOR_TARGET = {
@@ -152,7 +152,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 					}
 				}
 			}
-			navigate({path:path, range:range, scroll:scroll}, target, true);	
+			navigate({path:path, range:range, scroll:scroll}, target, true);
 		} else {
 			// not a valid url
 		}
@@ -602,7 +602,7 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		editor.getTextView().setAction("Switch Subeditor and Main Editor", switchEditors);
 		
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("e", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Toggle Subeditor");
-		editor.getTextView().setAction("Toggle Subeditor", toggleSidePanel);		
+		editor.getTextView().setAction("Toggle Subeditor", toggleSidePanel);
 	};
 	
 	/**
@@ -651,6 +651,8 @@ function(mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, m
 		attachDefinitionNavigation(editor);
 		attachFileSearchClient(editor);
 		attachEditorSwitch(editor);
+		mKeybinder.installOn(editor); //Important: keybinder should be installed after all other things
+		                              //that register keybindings to the editor.
 		editor.cursorFix();
 		
 		if (type === 'main') {
