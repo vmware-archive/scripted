@@ -47,6 +47,8 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 		// use a copy so we can sort
 		var keyBindings = window.editor.getTextView()._keyBindings.slice(0);
 		
+		var actionNames = {}; // the keys of this map are valid action names.
+		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
 			var lname = names[l.name] ? names[l.name] : l.name;
@@ -84,12 +86,20 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 				}
 			}
 		}
-
+		
 		$.get(command_file, null, function(template){
 			var tmpl = $.templates(template);
 			$('#command_list').append(tmpl.render(importantKeyBindings));
 			$('#command_list').append('<li><hr /></li>');
 			$('#command_list').append(tmpl.render(otherKeyBindings));
+			$('#command_list').append('<li><hr /></li>');
+			$('#command_list').append(tmpl.render(
+				mKeybinder.getUnboundActionNames(window.editor).map(function (name) {
+					return {
+						name: name
+					};
+				})
+			));
 		});
 
 		window.editor._textView._updatePage();

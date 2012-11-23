@@ -92,11 +92,31 @@ function installOn(editor) {
 	);
 }
 
-
+/**
+ * Fetch a list of valid action names whether or not they are currently bound to
+ * a key shortcut.
+ */
+function getUnboundActionNames(editor) {
+	//There's no easy/quick way to find whether there's a keybinding for a given action name
+	//So we build a set of bound names first.
+	var kbs = getEditorKeyBindingsConfig(editor);
+	var boundNamesMap = {};
+	for (var k in kbs) {
+		var boundName = kbs[k];
+		if (boundName) {
+			boundNamesMap[boundName] = true;
+		}
+	}
+	return editor.getTextView().getActions(true)
+	.filter(function (name) {
+		return !boundNamesMap[name];
+	});
+}
 
 return {
 //	dumpActionNames: dumpActionNames,
 	getEditorKeyBindingsConfig: getEditorKeyBindingsConfig,
+	getUnboundActionNames: getUnboundActionNames,
 	dumpCurrentKeyBindings: dumpCurrentKeyBindings,
 	installOn: installOn
 };
