@@ -24,6 +24,7 @@
 var fs = require('fs');
 var JSON5 = require('json5');
 var when = require('when');
+var path = require('path');
 
 var EXTENSION = ".scripted-completions";
 var EXTENSION_LEN = EXTENSION.length;
@@ -38,13 +39,16 @@ exports.extractScope = function(rawScope) {
 	return rawScope.split(/\s+/)[0].split('.')[1];
 };
 
-exports.completionsFolder = process.env.HOME + '/' + EXTENSION;
+exports.completionsFolders = [
+	process.env.HOME + '/' + EXTENSION,
+	path.resolve('../../completions')
+];
 
 // exported for testing only
 exports.setCompletionsFolder = function(folder) {
-	if (exports.completionsFolder !== folder) {
+	if (exports.completionsFolders[0] !== folder) {
 		console.log("Resetting templates root");
-		exports.completionsFolder = folder;
+		exports.completionsFolders[0] = folder;
 		return true;
 	}
 	return false;
@@ -57,23 +61,37 @@ exports.findCompletionsFiles = function(cb) {
 	if (!process.env.HOME) {
 		cb(null);
 	} else {
-		fs.readdir(exports.completionsFolder,
-			function(err, files) {
+		var realFiles = []; 
+		
+		var deferreds = [];
+		var processDir = function(deferred, folder) {
+			return function(err, files) {
 				if (err) {
-					console.log(JSON5.stringify(err));
-					cb(null);
+					if (err.errno === 34 /* dir not found */) {
+						console.log ("Directory " + err.path + " not found");
+						deferred.resolve(realFiles);
+					} else {
+						console.log(JSON5.stringify(err));
+						deferred.reject(err);
+					}
 					return;
 				}
 				// only return files we care about
-				var realFiles = [];
 				for (var i = 0; i < files.length; i++) {
 					if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-						realFiles.push(files[i]);
+						realFiles.push(folder + files[i]);
 					}
 				}
 				
-				cb(realFiles);
-			});
+				deferred.resolve(realFiles);
+			};
+		};
+		
+		for (var i = 0; i < exports.completionsFolders.length; i++) {
+			deferreds.push(when.defer());	
+			fs.readdir(exports.completionsFolders[i], processDir(deferreds[i], exports.completionsFolders[i]));
+		}
+		when.all(deferreds).then(function() { cb(realFiles); });
 	}
 };
 

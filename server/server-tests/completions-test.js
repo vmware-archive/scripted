@@ -41,10 +41,15 @@ exports.findCompletionsFiles = function(test) {
 	completionsModule.findCompletionsFiles(
 		function(files) {
 			test.equals(files.length, 3, "Should have found 3 files");
-			test.equals(files[0], "test1.scripted-completions");
-			test.equals(files[1], "test2.scripted-completions");
-			test.equals(files[2], "test3.scripted-completions");
+			test.equals(files[0], testResourcesFolder + "test1.scripted-completions");
+			test.equals(files[1], testResourcesFolder + "test2.scripted-completions");
+			test.equals(files[2], testResourcesFolder + "test3.scripted-completions");
 			
+			test.done();
+		},
+		function(err) {
+			console.trace('here');
+			test.fail(err);
 			test.done();
 		}
 	);
