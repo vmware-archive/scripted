@@ -59,7 +59,7 @@ exports.process = function(root) {
 			var deferreds = [];
 			for (var i = 0; i < files.length; i++) {
 				console.log("Starting to find completions in " + files[i]);
-				deferreds.push(completions.findCompletions(completions.completionsFolder + "/" + files[i]));
+				deferreds.push(completions.findCompletions(files[i]));
 				console.log("Finished finding completions in " + files[i]);
 			}
 			
