@@ -32,7 +32,7 @@ define(['scripted/exec/param-resolver', 'scripted/exec/exec-shared'], function (
 	
 	/**
 	 * Convert a pattern using '**' and '*' into a equivalent RegExp
-	 * "**" surrounded by '/' will match any sequence of 'path segments', 
+	 * "**" surrounded by '/' will match any sequence of 'path segments',
 	 * including a sequence of length 0. Using ** without surrounding '/'
 	 * is not legal and results in an error.
 	 * "*" will match any sequence of chars excluding '/'
@@ -57,15 +57,15 @@ define(['scripted/exec/param-resolver', 'scripted/exec/exec-shared'], function (
 				if (c==='*') {
 					re += "[^/]*"; //Sequence of chars not including a '/'
 				} else if (mustEscape(c)) {
-					re += "\\"+c; 
+					re += "\\"+c;
 				} else {
 					re += c;
 				}
 			}
 		}
 		re += "$";
-		return new RegExp(re); 
-	} 
+		return new RegExp(re);
+	}
 	
 	function installOn(editor) {
 
@@ -80,7 +80,7 @@ define(['scripted/exec/param-resolver', 'scripted/exec/exec-shared'], function (
 			});
 		}
 		
-		//BEGIN installOn function body		
+		//BEGIN installOn function body
 		var afterSaveConf = getConfig("afterSave");
 		if (afterSaveConf) {
 			var empty = true;
