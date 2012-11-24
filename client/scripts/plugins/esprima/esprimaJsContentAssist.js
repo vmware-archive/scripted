@@ -261,16 +261,26 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				throw(done);
 			}
 		}
-
+		
+		// determine if we need to defer infering the enclosing function block
+		var toDefer;
 		if (parents && parents.length) {
 			var parent = parents.pop();
+			for (var i = 0; i < parents.length; i++) {
+				if (parents[i].type === "FunctionDeclaration" || parents[i].type === "FunctionExpression") {
+					toDefer = parents[i];
+					break;
+				}
+				
+			}
+			
 			if (parent.type === "MemberExpression") {
 				if (parent.property && inRange(offset-1, parent.property.range)) {
 					// on the right hand side of a property, eg: foo.b^
-					return "member";
+					return { kind : "member", toDefer : toDefer };
 				} else if (inRange(offset-1, parent.range) && afterDot(offset, parent, contents)) {
 					// on the right hand side of a dot with no text after, eg: foo.^
-					return "member";
+					return { kind : "member", toDefer : toDefer };
 				}
 			} else if (parent.type === "Program" || parent.type === "BlockStatement") {
 				// completion at a new expression
@@ -285,7 +295,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				return false;
 			}
 		}
-		return "top";
+		return { kind : "top", toDefer : toDefer };
 	}	
 	
 	/**
@@ -756,15 +766,19 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * @param env the context for the visitor.  See computeProposals below for full description of contents
 	 */
 	function inferencer(node, env) {
-		var type = node.type, oftype, name, i, property, params, newTypeName, jsdocResult, jsdocType;
+		var type = node.type, name, i, property, params, newTypeName, jsdocResult, jsdocType;
 		
 		// extras prop is where we stuff everything that we have added
 		if (!node.extras) {
 			node.extras = {};
 		}
 
-		// fail fast if part of an unineresting place in a VariableDeclaraion
-		if (type === "VariableDeclaration" && isBefore(env.offset, node.range)) {
+		// defer the inferencing of the function containing the offset.
+		if (node === env.defer) {
+			
+			node.extras.inferredType = "Object"; // will be filled in later
+			// need to remember the scope to place this function in for later
+			node.extras.scope = env.scope(node.extras.target);
 			return false;
 		}
 		
@@ -1053,16 +1067,27 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		
 		switch(type) {
 		case "Program":
-			// if we've gotten here and we are still in range, then 
-			// we are completing as a top-level entity with no prefix
-			env.shortcutVisit();
-			break;
+			if (env.defer) {
+				// finally, we can infer the deferred target function
+				var defer = env.defer;
+				env.defer = null;
+				env.targetType = null;
+				env.pushScope(defer.extras.scope);
+				mVisitor.visit(defer, env, inferencer, inferencerPostOp);
+				env.popScope();
+			}
+			
+			// in case we haven't stored target yet, do so now.
+			env.storeTarget();
+			
+			// TODO FIXADE for historical reasons we end visit by throwing exception.  Should chamge
+			throw env.targetType;
 		case "BlockStatement":
 		case "CatchClause":
 			if (inRange(env.offset, node.range)) {
 				// if we've gotten here and we are still in range, then 
 				// we are completing as a top-level entity with no prefix
-				env.shortcutVisit();
+				env.storeTarget();
 			}
 		
 			env.popScope();
@@ -1070,7 +1095,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "MemberExpression":
 			if (afterDot(env.offset, node, env.contents)) {
 				// completion after a dot with no prefix
-				env.shortcutVisit(env.scope(node.object));
+				env.storeTarget(env.scope(node.object));
 			}
 			// inferred type is the type of the property expression
 			// node.propery will be null for mal-formed asts
@@ -1249,9 +1274,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				env.addVariable(node.id.name, node.extras.target, inferredType, node.id.range);
 			}
 			if (inRange(env.offset-1, node.id.range)) {
-				// we are finished.  didn't shortcut the visit in earlier
-				// since we need to wait for the type to be applied to the rightMost
-				env.shortcutVisit(env.scope(node.id.extras.target));
+				// We found it! rmember for later, but continue to the end of file anyway
+				env.storeTarget(env.scope(node.id.extras.target));
 			}
 			env.popName();
 			break;
@@ -1274,9 +1298,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				rightMost.extras.inferredType = inferredType;
 				env.addOrSetVariable(rightMost.name, rightMost.extras.target, inferredType, rightMost.range);				
 				if (inRange(env.offset-1, rightMost.range)) {
-					// we are finished.  didn't shortcut the visit in earlier
-					// since we need to wait for the type to be applied to the rightMost
-					env.shortcutVisit(env.scope(rightMost.extras.target));
+					// We found it! rmember for later, but continue to the end of file anyway
+					env.storeTarget(env.scope(rightMost.extras.target));
 				}
 			}
 			env.popName();
@@ -1295,22 +1318,23 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// will be added to global scope
 				// Also, only add the variable if offset is after node range
 				// we don't want variables used after the fact appearing in content assist
-//				if (!env.lookupName(name)) {
-					// name doesn't exist, add to global
-					node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
-//				}
+				node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
 			}
 			
 			// if this node is an LHS of an assignment, shortcut the visit here.
 			// We must apply the type of the RHS first.  This happens
 			// in the enclosing assignment or variable declarator expressions
 			if (!node.extras.isLHSAssign && inRange(env.offset-1, node.range)) {
-				// We're finished compute all the proposals
-				env.shortcutVisit(env.scope(node.extras.target));
+				// We found it! rmember for later, but continue to the end of file anyway
+				env.storeTarget(env.scope(node.extras.target));
 			}
 			break;
 		case "ThisExpression":
 			node.extras.inferredType = env.lookupName("this");
+			if (inRange(env.offset-1, node.range)) {
+				// We found it! rmember for later, but continue to the end of file anyway
+				env.storeTarget(env.scope());
+			}
 			break;
 		case "ReturnStatement":
 			if (node.argument) {
@@ -1618,6 +1642,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				return newScopeName;
 			},
 			
+			pushScope : function(scopeName) {
+				this._scopeStack.push(scopeName);
+			},
+			
 			pushName : function(name) {
 				this._nameStack.push(name);
 			},
@@ -1665,8 +1693,6 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			/** removes the current scope */
 			popScope: function() {
 				// Can't delete old scope since it may have been assigned somewhere
-				// but must remove "this" when outside of the scope
-				this.removeVariable("this");
 				var oldScope = this._scopeStack.pop();
 				return oldScope;
 			},
@@ -1913,14 +1939,17 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			},
 			
 			/**
-			 * call this function to end the visit
-			 * all visits end with calling this method
+			 * This function stores the target type
+			 * so it can be used as the result of this inferencing operation
 			 */
-			shortcutVisit : function(targetType) {
-				if (!targetType) {
-					targetType = this.scope();
+			storeTarget : function(targetType) {
+				if (!this.targetType) {
+					if (!targetType) {
+						targetType = this.scope();
+					}
+					this.targetType = targetType;
+					this.targetFound = true;
 				}
-				throw targetType;
 			}
 		};
 	}
@@ -2267,9 +2296,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				var completionKind = shouldVisit(root, offset, context.prefix, buffer);
 				if (completionKind) {
 					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
+					// must defer inferring the containing function block until the end
+					environment.defer = completionKind.toDefer;
 					var target = this._doVisit(root, environment);
 					var proposalsObj = { };
-					createInferredProposals(target, environment, completionKind, context.prefix, offset - context.prefix.length, proposalsObj);
+					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
 					if (!context.inferredOnly) {
 						// include the entire universe as potential proposals
 						createNoninferredProposals(environment, context.prefix, offset - context.prefix.length, proposalsObj);
@@ -2296,6 +2327,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// assume a bad parse
 				return null;
 			}
+			var funcList = [];
 			var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 			var findIdentifier = function(node) {
 				if ((node.type === "Identifier" || node.type === "ThisExpression") && inRange(offset, node.range, true)) {
@@ -2317,11 +2349,20 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					// not at a valid hover location
 					throw "no hover";
 				}
+				
+				// the last function pushed on is the one that we need to defer
+				if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
+					funcList.push(node);
+				}
 				return true;
 			};
 			
 			try {
-				mVisitor.visit(root, {}, findIdentifier);
+				mVisitor.visit(root, {}, findIdentifier, function(node) { 
+					if (node === funcList[funcList.length-1]) {
+						funcList.pop(); 
+					} 
+				});
 			} catch (e) {
 				if (e === "no hover") {
 					// not at a valid hover location
@@ -2337,10 +2378,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// no hover target found
 				return null;
 			}
+			// must defer inferring the containing function block until the end
+			environment.defer = funcList.pop();
 			
-			this._doVisit(root, environment);
+
+			var target = this._doVisit(root, environment);
 			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';
-			var maybeType = environment.lookupName(lookupName, toLookFor.extras.target, false, true);
+			var maybeType = environment.lookupName(lookupName, toLookFor.extras.target ? toLookFor.extras.target : target, false, true);
 			if (maybeType) {
 				var hover = lookupName + " :: " + createReadableType(maybeType.typeName, environment, true);
 				if (findName) {

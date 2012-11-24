@@ -524,9 +524,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 5"] = function() {
-		// should not see 'aaa' since that is declared later
 		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na/**/\nvar aaa}", "a");
 		testProposals("a", results, [
+			["aaa", "aaa : Object"],
 			["abb", "abb : Object"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
@@ -535,12 +535,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 6"] = function() {
-		// should not see 'aaa' since that is declared later
 		var results = computeContentAssist(
 		"function fun(a, b, c) {\n" +
 		"function other(aa, ab, c) {\n"+
 		"var abb;\na/**/\nvar aaa\n}\n}", "a");
 		testProposals("a", results, [
+			["aaa", "aaa : Object"],
 			["abb", "abb : Object"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
@@ -734,9 +734,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test Object Literal inside"] = function() {
 		var results = computeContentAssist("var x = { the : 1, far : this.th/**/ };", "th");
 		testProposals("th", results, [
-			// type is 'Object' here, not number, since inside the object literal, we don't 
-			// know the types of literal fields
-			["the", "the : Object"]
+			["the", "the : Number"]
 		]);
 	};
 	tests["test Object Literal outside"] = function() {
@@ -1369,8 +1367,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test broken after dot 3"] = function() {
 		var results = computeContentAssist("var ttt = { ooo:this.};", "", "var ttt = { ooo:this.".length);
 		testProposals("", results, [
-			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
-			["ooo", "ooo : Object"],
+			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1385,8 +1382,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test broken after dot 3a"] = function() {
 		var results = computeContentAssist("var ttt = { ooo:this./**/};", "");
 		testProposals("", results, [
-			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
-			["ooo", "ooo : Object"],
+			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -3338,6 +3334,432 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
 			["prototype", "prototype : Object"]
+		]);
+	};
+	
+	
+	/////////////////////////////////////
+	// full file inferencing
+	/////////////////////////////////////
+	tests["test full file inferecing 1"] = function() {
+		var results = computeContentAssist(
+			"x/**/;\n" +
+			"var x = 0;", "x");
+		testProposals("x", results, [
+			["x", "x : Number"]
+		]);
+	};
+	tests["test full file inferecing 2"] = function() {
+		var results = computeContentAssist(
+			"function a() { x/**/; }\n" +
+			"var x = 0;", "x");
+		testProposals("x", results, [
+			["x", "x : Number"]
+		]);
+	};
+	tests["test full file inferecing 3"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x; y/**/}\n" +
+			"var x = 0;", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 4"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x.fff; y/**/}\n" +
+			"var x = { fff : 0 };", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 5"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x.fff; y/**/}\n" +
+			"var x = {  };\n" +
+			"x.fff = 8;", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 6"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = x.fff; y/**/}\n" +
+			"var x = {  };\n" +
+			"x.fff = 8;", "y");
+		testProposals("y", results, [
+			["y", "y : String"]
+		]);
+	};
+	tests["test full file inferecing 7"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = x(); y/**/}\n" +
+			"var x = function() { return 8; }", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 8"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = z(); y/**/}\n" +
+			"var x = function() { return 8; }, z = x", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	
+	tests["test full file inferecing 9"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	tests["test full file inferecing 10"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 11a"] = function() {
+		var results = computeContentAssist(
+			"var x = {};\n" + 
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 11"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 12"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 13"] = function() {
+		var results = computeContentAssist(
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// not finding because property add is lexically after the content assist
+	tests["test full file inferecing 14"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+		]);
+	};
+
+	tests["test full file inferecing 15"] = function() {
+		var results = computeContentAssist(
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// we don't find the fff property here since it
+	// is defined after and in another funxtion
+	tests["test full file inferecing 16"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+		]);
+	};
+	tests["test full file inferecing 17"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 18"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.fff = '';\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 19"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// don't find anything because assignment is in same scope, but after
+	tests["test full file inferecing 20"] = function() {
+		var results = computeContentAssist(
+			"x./**/\n" +
+			"var x = {};\n" +
+			"x.fff = '';", "f");
+		testProposals("f", results, [
+		]);
+	};
+
+	tests["test full file inferecing 21"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"x.fff = '';\n" +
+			"}\n" +
+			"x./**/\n" +
+			"var x = {}; ", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 22"] = function() {
+		var results = computeContentAssist(
+			"x./**/\n" +
+			"function a() {\n" +
+			"x.fff = '';\n" +
+			"}\n" +
+			"var x = {}; ", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 23"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 24"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var y = x;\n" +
+			"    y.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 25"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  var y = x;\n" +
+			"  y.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+
+	tests["test full file inferecing 26"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var fff = x();\n" +
+			"    f/**/;\n" +
+			"  }\n" +
+			"}\n" +
+			"function x() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// Not inferencing String because function decl comes after reference in same scope
+	tests["test full file inferecing 27"] = function() {
+		var results = computeContentAssist(
+			"var fff = x();\n" +
+			"f/**/;\n" +
+			"function x() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : {  }"]
+		]);
+	};
+	
+	// Not gonna work because of recursive
+	tests["test full file inferecing 28"] = function() {
+		var results = computeContentAssist(
+			"function x() {\n" +
+			"  var fff = x();\n" +
+			"  f/**/;\n" +
+			"  return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : undefined"]
+		]);
+	};
+
+	tests["test full file inferecing 29"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var fff = x();\n" +
+			"    f/**/;\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = function() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// Not working because function decl comes after reference in same scope
+	tests["test full file inferecing 30"] = function() {
+		var results = computeContentAssist(
+			"var fff = x();\n" +
+			"f/**/;\n" +
+			"var x = function() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : {  }"]
+		]);
+	};
+	
+	// Not gonna work because of recursive
+	tests["test full file inferecing 31"] = function() {
+		var results = computeContentAssist(
+			"var x = function() { var fff = x();\nf/**/;return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : undefined"]
+		]);
+	};
+	
+	tests["test full file inferecing 32"] = function() {
+		var results = computeContentAssist(
+			"x/**/\n" +
+			"function x() { return ''; }", "x");
+		testProposals("x", results, [
+			["x()", "x() : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 33"] = function() {
+		var results = computeContentAssist(
+			"var xxx = {\n" +
+			"	aaa: '',\n" +
+			"	bbb: this.a/**/\n" +
+			"};", "a");
+		testProposals("a", results, [
+			["aaa", "aaa : String"]
+		]);
+	};
+
+	tests["test full file inferecing 34"] = function() {
+		var results = computeContentAssist(
+			"var xxx = {\n" +
+			"	bbb: this.a/**/,\n" +
+			"	aaa: ''\n" +
+			"};", "a");
+		testProposals("a", results, [
+			["aaa", "aaa : String"]
 		]);
 	};
 	

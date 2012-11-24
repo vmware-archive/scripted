@@ -180,7 +180,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	
 	tests.testThis4 = function() {
 		doSameFileTest("var Foo = function() {};\nFoo.prototype = { a : this }", 
-			'this', "Global", 'this :: Global', -1);
+			'this', "gen~local~4", 'this :: { a : { a : {...} } }', '{ a : this }');
 	};
 	
 	//////////////////////////////////////////////////////////
@@ -307,6 +307,62 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"foo[x]", "x", "Number", "x :: Number", 1);
 	};
 	
+	
+	//////////////////////////////////////////////////////////
+	// full file inferencing
+	//////////////////////////////////////////////////////////
+	tests.testFullFile1 = function() {
+		doSameFileTest("x;\n" +
+			"var x = 9;", "x", "Number", "x :: Number", 2);
+	};
+	// not doing this one correctly can't find contents of 'y'
+	tests.testFullFile2 = function() {
+		doSameFileTest("var x = y;\n" +
+			"x;\n" +
+			"var y = { fff : 0 };", "x", "gen~local~0", "x :: {  }", 1);
+	};
+	
+	
+	// arrrrgh need to fix this one so that the test chooses the first fff, not the last
+//	tests.testFullFile4 = function() {
+//		doSameFileTest("function a()  { var x = y;\n" +
+//			"x.fff; }\n" +
+//			"var y = { fff : 0 };", "fff", "Number", "fff :: Number", 1);
+//	};
+	tests.testFullFile5 = function() {
+		doSameFileTest("function a()  { var x = y.fff;\n" +
+			"x; }\n" +
+			"var y = { fff : 0 };", "x", "Number", "x :: Number", 1);
+	};
+	
+	tests.testFullFile6 = function() {
+		doSameFileTest("function v() {\n" +
+			"	function aa() {	}\n" +
+			"	function a() {\n" +
+			"		aa();\n" +
+			"	}\n" +
+			"}", "aa", "?undefined:", "aa :: () -> undefined", 1);
+	};
+	
+	tests.testFullFile7 = function() {
+		doSameFileTest("function v() {\n" +
+			"	function a() {\n" +
+			"		aa();\n" +
+			"	}\n" +
+			"	function aa() {	}\n" +
+			"}", "aa", "?undefined:", "aa :: () -> undefined", 2);
+	};
+	
+	tests.testFullFile8 = function() {
+		doSameFileTest(
+			"var aa = 9;\n" +
+			"function v() {\n" +
+			"	function aa() {	}\n" +
+			"}\n" +
+			"function a() {\n" +
+			"	aa();\n" +
+			"}", "aa", "Number", "aa :: Number", 2);
+	};
 	
 	return tests;
 });
