@@ -26,7 +26,7 @@ var JSON5 = require('json5');
 var when = require('when');
 var path = require('path');
 
-var EXTENSION = ".scripted-completions";
+var EXTENSION = ".scriptedrc";
 var EXTENSION_LEN = EXTENSION.length;
 
 exports.extractScope = function(rawScope) {
