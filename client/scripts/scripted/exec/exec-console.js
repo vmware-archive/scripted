@@ -11,12 +11,14 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
+/*global $*/
+
 ///////////////////////////////////////////////////////////////////////////////////
 // This module is supposed to provide a console-like api for displaying messages.
 // as well as some basic operations to reveal/hide the console.
 
 //TODO: We are now also using this console to display error messages. For example
-// when problems parsing .scripted file. 
+// when problems parsing .scripted file.
 
 //So 'exec-console' is not a good name for this module.
 
@@ -26,12 +28,12 @@ define(["jquery", "jquery_ui"], function () {
 	 * Maximum number of log entries in the console. If more entries are
 	 * added then the oldest entries are automatically deleted.
 	 */
-	var MAX_ENTRIES = 10; 
+	var MAX_ENTRIES = 10;
 
 	/**
 	 * The id of the dom element to which we append console output.
 	 */
-	var CONSOLE_DISPLAY = "#console_display"; 
+	var CONSOLE_DISPLAY = "#console_display";
 	
 	/**
 	 * The id of the dom element that represents the entire console UI.
@@ -52,7 +54,7 @@ define(["jquery", "jquery_ui"], function () {
 		return elem;
 	}
 	
-	///// Managing the entries in the log (so we can limiy their number) //////////////
+	///// Managing the entries in the log (so we can limit their number) //////////////
 	
 	var entries = []; //Array with at most MAX_ENTRIES entries.
 	var newEntryPos = 0; // next place to put an element, cycles around if running past the end.
@@ -69,8 +71,8 @@ define(["jquery", "jquery_ui"], function () {
 	//////////////////// Public API ///////////////////////////////////////////////////
 
 	/**
-	 * Change the width and vertical position of the console UI to line up properly with 
-	 * the editor. 
+	 * Change the width and vertical position of the console UI to line up properly with
+	 * the editor.
 	 */
 	function updateWidth() {
 		var c = $(CONSOLE_WRAPPER);
@@ -90,7 +92,7 @@ define(["jquery", "jquery_ui"], function () {
 	 */
 	function initialize() {
 		if (!initialized) {
-			initialized = true; 
+			initialized = true;
 			$(CONSOLE_WRAPPER).resizable({
 				handles: "n"
 			});
@@ -111,7 +113,7 @@ define(["jquery", "jquery_ui"], function () {
 	
 	function isVisible() {
 		return $(CONSOLE_WRAPPER).css('display')!=='none';
-	}	
+	}
 	
 	function show() {
 		initialize();
@@ -134,7 +136,7 @@ define(["jquery", "jquery_ui"], function () {
 			});
 
 			window.editor._textView._updatePage();
-			updateWidth();			
+			updateWidth();
 		}
 	}
 	
@@ -147,7 +149,7 @@ define(["jquery", "jquery_ui"], function () {
 			c.resizable({
 				disabled: true
 			});
-			e.height(e.height()+console_height);		
+			e.height(e.height()+console_height);
 			window.editor._textView._updatePage();
 		}
 	}
@@ -171,7 +173,7 @@ define(["jquery", "jquery_ui"], function () {
 	
 	/**
 	 * Append a message to the console.
-	 * An optional cssClass parameter allows tagging the 
+	 * An optional cssClass parameter allows tagging the
 	 * element in the view with a specific cssClass. (so that it's
 	 * look can be customized via css).
 	 *
@@ -182,7 +184,7 @@ define(["jquery", "jquery_ui"], function () {
 		cssClass = cssClass || 'log';
 		show();
 		var e = render(msg, cssClass);
-		$(CONSOLE_DISPLAY).append(e); 
+		$(CONSOLE_DISPLAY).append(e);
 		addEntry(e);
 		scrollToBottom();
 	}

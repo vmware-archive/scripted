@@ -85,7 +85,7 @@ defCode(46, "Del", "Delete");
 
 // Add numeric keys '0'...'9'
 for (var i=0; i<=9; i++) {
-	name = ''+i;
+	var name = ''+i;
 	defCode(48+i, name);
 }
 

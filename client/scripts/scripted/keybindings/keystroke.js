@@ -10,7 +10,6 @@
  * Contributors:
  *     Kris De Volder
  ******************************************************************************/
-
 define(["orion/textview/keyBinding", './keynames'], function (mKeyBinding, mKeynames) {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,95 +25,110 @@ define(["orion/textview/keyBinding", './keynames'], function (mKeyBinding, mKeyn
 // because of the special handling orion does for CTRL and CMD keys.
 ////////////////////////////////////////////////////////////////////////////////
 
-var name2code = mKeynames.name2code;
-var code2name = mKeynames.code2name;
+function configure(isMac) {
 
-var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+	//TODO: this 'configuration' thing doesn't really work because we
+	// have a dependency on orion/keyBinding which is platform dependent
+	// but doesn't provide a way to configure platform 'from the outside'.
 
-var KeyBinding = mKeyBinding.KeyBinding;
+	var name2code = mKeynames.name2code;
+	var code2name = mKeynames.code2name;
 
-///////////// Conversion from orion KeyBinding to scripted keystroke string.
+	var KeyBinding = mKeyBinding.KeyBinding;
 
-//Maps user-friendly modifier names to orion equivalent 'mod1', 'mod2' ...
-var mod2orion = {
-	//IMPORTANT: Keys in this map must be all lower case!!!
+	///////////// Conversion from orion KeyBinding to scripted keystroke string.
 
-	"ctrl": isMac ? "mod4" : "mod1",
-	"cmd": isMac ? "mod1" : "mod4", //actually should be undefined on non-mac, but map it to something anyway.
+	//Maps user-friendly modifier names to orion equivalent 'mod1', 'mod2' ...
+	var mod2orion = {
+		//IMPORTANT: Keys in this map must be all lower case!!!
 
-	"shift": "mod2",
-	"alt": "mod3",
-	"meta": "mod4",
+		"ctrl": isMac ? "mod4" : "mod1",
+		//"cmd": isMac ? "mod1" : "mod4", //actually should be undefined on non-mac.
 
-	//Allow using mod1...mod4 directly for more platform independent keybindings
-	"mod1": "mod1",
-	"mod2": "mod2",
-	"mod3": "mod3",
-	"mod4": "mod4"
-};
+		"cmd/ctrl": "mod1",
+		"ctrl/cmd": "mod1",
+		"shift": "mod2",
+		"alt": "mod3",
+		"meta": "mod4",
 
-/**
- * Convert a Scripted keystroke spec String into an equivalent Orion KeyBinding object.
- */
-function toKeyBinding(specString) {
-	//TODO: This is incomplete... it doesn't support the full syntax yet. Only single character
-	// keys. Intead it should use keynames module to map keynames to keycodes.
-	var pieces = specString.split("+");
-	var parsed = {};
-	for (var i = 0; i < pieces.length; i++) {
-		var piece = pieces[i];
-		if (piece.length===1) {
-			//Assume that 'piece' represents a 'regular' key
-			if (parsed.key) {
-				throw 'Invalid key spec: '+specString;
-			} else {
-				parsed.key = piece;
-			}
-		} else {
-			//Assume that 'piece' represents a 'modifier' key.
-			piece = piece.toLowerCase(); //So people can use variations like CTRL, Ctrl etc.
+		//Allow using mod1...mod4 directly for more platform independent keybindings
+		"mod1": "mod1",
+		"mod2": "mod2",
+		"mod3": "mod3",
+		"mod4": "mod4"
+	};
+
+	/**
+	 * Convert a Scripted keystroke spec String into an equivalent Orion KeyBinding object.
+	 * May throw exceptions if the specString is malformed.
+	 */
+	function toKeyBinding(specString) {
+		var pieces = specString.split("+");
+		var parsed = {};
+		for (var i = 0; i < pieces.length; i++) {
+			var piece = pieces[i].toLowerCase();
 			var modifier = mod2orion[piece];
 			if (modifier) {
+				//piece represents a modifier key like shift, ctrl etc.
 				parsed[modifier] = true;
 			} else {
-				throw 'Invalid key spec: '+specString+' unknown modifier key: '+piece;
+				//Assume that 'piece' represents a 'regular' key
+				var oldKey = parsed.key;
+				parsed.key = name2code(piece); //May throw exception for unknown key names.
+				if (oldKey) {
+					throw "Illegal Keystroke '"+specString+"': contains more than one regular key";
+				}
 			}
 		}
+		if (!parsed.key) {
+			throw "Illegal Keystroke '"+specString+"': must contain a regular key";
+		}
+		return new mKeyBinding.KeyBinding(
+			parsed.key, !!parsed.mod1, !!parsed.mod2, !!parsed.mod3, !!parsed.mod4
+		);
 	}
-	return new mKeyBinding.KeyBinding(
-		parsed.key, !!parsed.mod1, !!parsed.mod2, !!parsed.mod3, !!parsed.mod4
-	);
+
+	////////////// Conversion from scripted keystroke string into Orion keybinding object
+
+	//The names Scripted uses for Orion's 'mod1', 'mod2' etc. modifier keys.
+	//These names are platform dependent!
+	var mod1str = isMac ? "Cmd" : "Ctrl";
+	var mod2str = "Shift";
+	var mod3str = "Alt";
+	var mod4str = isMac ? "Ctrl" : "Meta";
+
+	/**
+	 * Convert a Orion KeyBinding object into Scripted keystroke spec
+	 * String.
+	 *
+	 * @param {String}
+	 * @reture {KeyBinding}
+	 */
+	function fromKeyBinding(kb) {
+		var pieces = [];
+		if (kb.mod1) { pieces.push(mod1str); }
+		if (kb.mod2) { pieces.push(mod2str); }
+		if (kb.mod3) { pieces.push(mod3str); }
+		if (kb.mod4) { pieces.push(mod4str); }
+		pieces.push(code2name(kb.keyCode));
+		return pieces.join('+');
+	}
+
+	return {
+		isMac: isMac, //mostly for testing. So we can tell how this module was configured.
+		toKeyBinding: toKeyBinding,
+		fromKeyBinding: fromKeyBinding
+	};
 }
 
-////////////// Conversion from scripted keystroke string into Orion keybinding object
+var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+var exports = configure(isMac); //export an api that is correctly configured for
+                                //the detected platform.
+exports.configure = configure;  //Also provide a configure method to allow
+							    //'testy' clients to create alternatively configured
+							    //apis. So we can test 'mac' functionality on non-mac
+							    //platforms and vice versa.
 
-//The names Scripted uses for Orion's 'mod1', 'mod2' etc. modifier keys.
-//These names are platform dependent!
-var mod1str = isMac ? "Cmd" : "Ctrl";
-var mod2str = "Shift";
-var mod3str = "Alt";
-var mod4str = isMac ? "Ctrl" : "Meta";
-
-/**
- * Convert a Orion KeyBinding object into Scripted keystroke spec
- * String.
- *
- * @param {String}
- * @reture {KeyBinding}
- */
-function fromKeyBinding(kb) {
-	var pieces = [];
-	if (kb.mod1) { pieces.push(mod1str); }
-	if (kb.mod2) { pieces.push(mod2str); }
-	if (kb.mod3) { pieces.push(mod3str); }
-	if (kb.mod4) { pieces.push(mod4str); }
-	pieces.push(code2name(kb.keyCode));
-	return pieces.join('+');
-}
-
-return {
-	toKeyBinding: toKeyBinding,
-	fromKeyBinding: fromKeyBinding
-};
+return exports;
 
 });//end amd define

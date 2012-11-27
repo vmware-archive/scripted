@@ -25,6 +25,7 @@
 			jquery: 'lib/jquery-1.7.2.min',
 			sockjs:'lib/sockjs-592774a-0.3.1.min',
 			fileapi: 'scripted/fileapi',
+			when: 'lib/when-aaa0898-1.6.1',
 			
 			// stub out the jsdepend server calls
 			'servlets/jsdepend-client' : 'js-tests/indexer/stub-jsdepend'
@@ -32,14 +33,17 @@
 	});
 	
 	window.onload = function() {
-		require(["scripted/utils/pageState",
+		require(["js-tests/nodeunit-shim", 
+		         "scripted/utils/pageState",
 				 "js-tests/esprima/esprimaJsContentAssistTests",
 				 "js-tests/esprima/navigationTests", 
 				 "js-tests/esprima/summaryBuildingTests", 
 				 "js-tests/esprima/contentAssistDependencyTests",
 				 "js-tests/markoccurrences/markOccurrencesTests",
-				 "js-tests/indexer/indexerTests"], 
-			function(pageState, jsTests, navTests, summaryTests, dependencyTests, markOccurrencesTests, indexerTests) {
+				 "js-tests/indexer/indexerTests",
+				 "js-tests/keybindings/keystroke-tests"],
+			function(nodeunitShim, pageState, jsTests, navTests, summaryTests, dependencyTests,
+				markOccurrencesTests, indexerTests, keystroke) {
 				pageState._setEditorPrefix(window.location.pathname + '?');
 				function testShim(tests) {
 					for (var t in tests) {
@@ -52,6 +56,8 @@
 						}
 					}
 				}
+				module("keystroke-test");
+				nodeunitShim(keystroke);
 				module("Esprima JS Content Assist tests");
 				testShim(jsTests);
 				module("Navigation tests");

@@ -47,8 +47,6 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 		// use a copy so we can sort
 		var keyBindings = window.editor.getTextView()._keyBindings.slice(0);
 		
-		var actionNames = {}; // the keys of this map are valid action names.
-		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
 			var lname = names[l.name] ? names[l.name] : l.name;
@@ -89,11 +87,13 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 		
 		$.get(command_file, null, function(template){
 			var tmpl = $.templates(template);
-			$('#command_list').append(tmpl.render(importantKeyBindings));
-			$('#command_list').append('<li><hr /></li>');
-			$('#command_list').append(tmpl.render(otherKeyBindings));
-			$('#command_list').append('<li><hr /></li>');
-			$('#command_list').append(tmpl.render(
+			var cl = $('#command_list');
+			cl.empty();
+			cl.append(tmpl.render(importantKeyBindings));
+			cl.append('<li><hr /></li>');
+			cl.append(tmpl.render(otherKeyBindings));
+			cl.append('<li><hr /></li>');
+			cl.append(tmpl.render(
 				mKeybinder.getUnboundActionNames(window.editor).map(function (name) {
 					return {
 						name: name
@@ -109,6 +109,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 	var help_close, help_open;
 
 	help_open = function (){
+		renderKeyHelp();
 		$('#help_panel').show();
 		$('#help_open').off('click');
 		$('#help_open').on('click', help_close);
@@ -121,9 +122,6 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke) {
 	};
 	
 	$('#help_open').on('click', help_open);
-		
-	//First time render. But should be able to re-render if keybindings changed by user.
-	$(document).ready(renderKeyHelp);
 	
 });
 		

@@ -14,8 +14,8 @@
 /*global window define */
 
 define("orion/textview/keyBinding", [], function() {
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
+function configure(isMac) {
 	/**
 	 * Constructs a new key binding with the given key code and modifiers.
 	 * 
@@ -82,4 +82,14 @@ define("orion/textview/keyBinding", [], function() {
 		} 
 	};
 	return {KeyBinding: KeyBinding};
-});
+}
+
+var exports = configure(
+	window.navigator.platform.indexOf("Mac") !== -1
+);
+
+exports.configure = configure;
+
+return exports;
+
+}); //end AMD define
