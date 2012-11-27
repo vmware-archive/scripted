@@ -159,7 +159,7 @@ function name2code(keyName) {
 	if (code) {
 		return code;
 	}
-	throw "Unknown key name: "+keyName;
+	throw new Error("Unknown key name: "+keyName);
 }
 
 

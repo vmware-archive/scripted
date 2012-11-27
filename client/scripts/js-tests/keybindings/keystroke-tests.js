@@ -20,29 +20,30 @@ function makeTests(isMac) {
 	var mKeystroke = _unconfigured.configure(isMac);
 
 	function makeToKeybindingsModifierKeysTest(isCmd, isCtrl, isShift, isAlt) {
-		if (isMac || !isCmd) { //cmd key is only valid on mac platforms, skip cmd key tests on non-mac
-			tests[(isMac ? 'mac' : '') +
-				'ToKeyBindingModifierKeys' +
-				(isCmd   ? 'Cmd'   : '') +
-				(isCtrl  ? 'Ctrl'  : '') +
-				(isShift ? 'Shift' : '') +
-				(isAlt   ? 'Alt'   : '')
-			] = function (test) {
-				var kb = mKeystroke.toKeyBinding(
-					(isCmd   ? 'CMD+'   : '') +
-					(isCtrl  ? 'CTRL+'  : '') +
-					(isShift ? 'SHIFT+' : '') +
-					(isAlt   ? 'ALT+'   : '') +
-					"DELETE"
-				);
-				test.equals(46, kb.keyCode); //DELETE
-				test.equals(isCtrl, isMac ? kb.mod4 : kb.mod1); //CTRL
-				test.equals(isShift, kb.mod2); //SHIFT
-				test.equals(isAlt, kb.mod3); //ALT
-				test.equals(isCmd, isMac ? kb.mod1 : kb.mod4); //CMD
-				test.done();
-			};
-		}
+		//We can run tests with 'cmd' key on non-mac PF because we just pretend is
+		//is another name for 'meta' or 'mod4' on non-mac platforms.
+	
+		tests[(isMac ? 'mac' : '') +
+			'ToKeyBindingModifierKeys' +
+			(isCmd   ? 'Cmd'   : '') +
+			(isCtrl  ? 'Ctrl'  : '') +
+			(isShift ? 'Shift' : '') +
+			(isAlt   ? 'Alt'   : '')
+		] = function (test) {
+			var kb = mKeystroke.toKeyBinding(
+				(isCmd   ? 'CMD+'   : '') +
+				(isCtrl  ? 'CTRL+'  : '') +
+				(isShift ? 'SHIFT+' : '') +
+				(isAlt   ? 'ALT+'   : '') +
+				"DELETE"
+			);
+			test.equals(46, kb.keyCode); //DELETE
+			test.equals(isCtrl, isMac ? kb.mod4 : kb.mod1); //CTRL
+			test.equals(isShift, kb.mod2); //SHIFT
+			test.equals(isAlt, kb.mod3); //ALT
+			test.equals(isCmd, isMac ? kb.mod1 : kb.mod4); //CMD
+			test.done();
+		};
 	}
 	
 	makeToKeybindingsModifierKeysTest(true, true, true, true);
@@ -57,8 +58,8 @@ function makeTests(isMac) {
 	makeToKeybindingsModifierKeysTest(false, false, false, true);
 }
 
-makeTests(os.isMac);  //this platform tests
-//makeTests(!os.isMac); //other platform tests
+makeTests(true);  //mac platform tests
+makeTests(false); //non-mac platform tests
 
 return tests;
 

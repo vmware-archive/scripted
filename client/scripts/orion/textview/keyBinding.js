@@ -1,12 +1,12 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2011 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
@@ -18,16 +18,16 @@ define("orion/textview/keyBinding", [], function() {
 function configure(isMac) {
 	/**
 	 * Constructs a new key binding with the given key code and modifiers.
-	 * 
+	 *
 	 * @param {String|Number} keyCode the key code.
 	 * @param {Boolean} mod1 the primary modifier (usually Command on Mac and Control on other platforms).
 	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
 	 * @param {Boolean} mod3 the third modifier (usually Alt).
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
-	 * 
+	 *
 	 * @class A KeyBinding represents of a key code and a modifier state that can be triggered by the user using the keyboard.
 	 * @name orion.textview.KeyBinding
-	 * 
+	 *
 	 * @property {String|Number} keyCode The key code.
 	 * @property {Boolean} mod1 The primary modifier (usually Command on Mac and Control on other platforms).
 	 * @property {Boolean} mod2 The secondary modifier (usually Shift).
@@ -50,7 +50,7 @@ function configure(isMac) {
 	KeyBinding.prototype = /** @lends orion.textview.KeyBinding.prototype */ {
 		/**
 		 * Returns whether this key binding matches the given key event.
-		 * 
+		 *
 		 * @param e the key event.
 		 * @returns {Boolean} <code>true</code> whether the key binding matches the key event.
 		 */
@@ -67,7 +67,7 @@ function configure(isMac) {
 		},
 		/**
 		 * Returns whether this key binding is the same as the given parameter.
-		 * 
+		 *
 		 * @param {orion.textview.KeyBinding} kb the key binding to compare with.
 		 * @returns {Boolean} whether or not the parameter and the receiver describe the same key binding.
 		 */
@@ -79,17 +79,22 @@ function configure(isMac) {
 			if (this.mod3 !== kb.mod3) { return false; }
 			if (this.mod4 !== kb.mod4) { return false; }
 			return true;
-		} 
+		}
 	};
 	return {KeyBinding: KeyBinding};
 }
 
-var exports = configure(
-	window.navigator.platform.indexOf("Mac") !== -1
-);
+var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
-exports.configure = configure;
+var exports = configure(isMac);
 
+exports.configure = function (im) {
+    if (isMac===im) {
+        return exports; //avoid creating multiple instances of this in non-testing environments.
+    } else {
+        return configure(im);
+    }
+}
 return exports;
 
 }); //end AMD define

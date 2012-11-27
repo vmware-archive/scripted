@@ -25,17 +25,17 @@ var keystroke2keybinding = mKeystroke.toKeyBinding;
 var getScriptedRcFile = mConfig.getScriptedRcFile;
 
 /**
- * Information about the default keybindings. These are not statically known. They 
+ * Information about the default keybindings. These are not statically known. They
  * are whatever keybindings are registered in the editor by the time 'keybinder' gets
- * a crack at changing them. 
- * 
+ * a crack at changing them.
+ *
  * These defaults may depend on things such as the current browser and operating system.
  * Keybindings from 'exec-keys' in .scripted also end up in the defaults. Maybe that
  * is undesirable, but for now this is how things work.
  */
 var defaults = {
- 	keybindings: null,
- 	unboundNames: null
+	keybindings: null,
+	unboundNames: null
 };
 
 /**
@@ -132,7 +132,7 @@ function getActionNames(editor) {
 function getUnboundActionNames(editor) {
 	//There's no easy/quick way to find whether there's a keybinding for a given action name
 	//So we build a set of bound names first.
-	var kbs = getEditorKeyBindingsConfig(editor);
+	var kbs = getKeyBindings(editor);
 	var boundNamesMap = {};
 	for (var k in kbs) {
 		var boundName = kbs[k];

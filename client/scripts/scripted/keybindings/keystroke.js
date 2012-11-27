@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder
  ******************************************************************************/
-define(["orion/textview/keyBinding", './keynames'], function (mKeyBinding, mKeynames) {
+define(["orion/textview/keyBinding", './keynames'], function (_mKeyBinding, mKeynames) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // This module is responible for converting between scripted 'keystroke' spec
@@ -21,15 +21,13 @@ define(["orion/textview/keyBinding", './keynames'], function (mKeyBinding, mKeyn
 // represents a combination of pressing one regular key in combination with
 // zero or more modifier keys. E.g. 'CTRL+ALT+ENTER', 'CTRL-J', ...
 //
-// Note that the between KeyBinding and keystroke strings is platform dependent
-// because of the special handling orion does for CTRL and CMD keys.
+// Note that conversion the between KeyBinding and keystroke strings is platform dependent
+// because of the special handling orion does for CTRL and CMD keys on mac os.
 ////////////////////////////////////////////////////////////////////////////////
 
 function configure(isMac) {
 
-	//TODO: this 'configuration' thing doesn't really work because we
-	// have a dependency on orion/keyBinding which is platform dependent
-	// but doesn't provide a way to configure platform 'from the outside'.
+	var mKeyBinding = _mKeyBinding.configure(isMac);
 
 	var name2code = mKeynames.name2code;
 	var code2name = mKeynames.code2name;
@@ -43,8 +41,8 @@ function configure(isMac) {
 		//IMPORTANT: Keys in this map must be all lower case!!!
 
 		"ctrl": isMac ? "mod4" : "mod1",
-		//"cmd": isMac ? "mod1" : "mod4", //actually should be undefined on non-mac.
-
+		"cmd": isMac ? "mod1" : "mod4", //We pretend 'cmd' is 'meta' on non-mac. No harm in that, but
+		                                 //few, if any, browsers support 'meta' modifier key on non-mac platforms.
 		"cmd/ctrl": "mod1",
 		"ctrl/cmd": "mod1",
 		"shift": "mod2",
@@ -76,12 +74,12 @@ function configure(isMac) {
 				var oldKey = parsed.key;
 				parsed.key = name2code(piece); //May throw exception for unknown key names.
 				if (oldKey) {
-					throw "Illegal Keystroke '"+specString+"': contains more than one regular key";
+					throw new Error("Illegal Keystroke '"+specString+"': contains more than one regular key");
 				}
 			}
 		}
 		if (!parsed.key) {
-			throw "Illegal Keystroke '"+specString+"': must contain a regular key";
+			throw new Error("Illegal Keystroke '"+specString+"': must contain a regular key");
 		}
 		return new mKeyBinding.KeyBinding(
 			parsed.key, !!parsed.mod1, !!parsed.mod2, !!parsed.mod3, !!parsed.mod4
@@ -124,10 +122,8 @@ function configure(isMac) {
 var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 var exports = configure(isMac); //export an api that is correctly configured for
                                 //the detected platform.
-exports.configure = configure;  //Also provide a configure method to allow
-							    //'testy' clients to create alternatively configured
-							    //apis. So we can test 'mac' functionality on non-mac
-							    //platforms and vice versa.
+exports.configure = configure;  //Allow test code to create instances of this api for
+                                //other platforms.
 
 return exports;
 
