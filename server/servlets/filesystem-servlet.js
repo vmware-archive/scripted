@@ -17,8 +17,7 @@ var servlets = require('../servlets');
 var rename = require('../jsdepend/filesystem').rename;
 var deleteResource = require('../jsdepend/filesystem').deleteResource;
 
-var makePromisedRequestHandlerRename = require('./servlet-utils').makePromisedRequestHandler;
-var makePromisedRequestHandlerDelete = require('./servlet-utils').makePromisedRequestHandler;
+var makeRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
 
-servlets.register('/filesystem/rename', makePromisedRequestHandlerRename(rename));
-servlets.register('/filesystem/deleteResource', makePromisedRequestHandlerRename(deleteResource));
+servlets.register('/filesystem/rename', makeRequestHandler(rename));
+servlets.register('/filesystem/deleteResource', makeRequestHandler(deleteResource));
