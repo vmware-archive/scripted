@@ -44,6 +44,24 @@ function ignore(name) {
 	return result;
 }
 
+function rename(original, newname) {
+	console.log("Requesting resource rename for: " + original + " into " + newname);
+	if (original && newname) {
+		var fs = require('fs');
+		fs.rename(original, newname, function() { });
+		return newname;
+	}
+	return original;
+}
+
+function deleteResource(resourcePath) {
+	console.log("Requesting resource delete for: " + resourcePath);
+	if (resourcePath) {
+		var fs = require('fs');
+		fs.unlink(resourcePath, function() {});
+	}
+}
+
 function withBaseDir(baseDir) {
 	var fs = require('fs');
 	var path = require('path');
@@ -173,3 +191,5 @@ function withBaseDir(baseDir) {
 
 exports.withBaseDir = withBaseDir;
 exports.ignore = ignore;
+exports.rename = rename;
+exports.deleteResource = deleteResource; 

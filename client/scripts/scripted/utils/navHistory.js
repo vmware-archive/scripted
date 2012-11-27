@@ -824,10 +824,18 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		return false;
 	};
 	
+		var navigateToURL = function(url) {
+			navigate({
+				path: url
+			}, EDITOR_TARGET.main, true);
+		};
+	
 	return {
 		// private functions that are only exported to help with testing
 		_loadEditor: loadEditor,
 		_setNavigationConfirmer : _setNavigationConfirmer,
+		
+		navigateToURL: navigateToURL,
 		
 //		highlightSelection: highlightSelection,  don't think we need this
 		openOnRange: openOnRange,

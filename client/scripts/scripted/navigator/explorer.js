@@ -14,7 +14,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable'], function(require, dojo, mTreeTable){
+define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], function(require, dojo, mTreeTable, mContextMenu){
 
 var exports = {};
 
@@ -79,7 +79,21 @@ exports.Explorer = (function() {
 				return dojo.byId(rowId);
 			}
 		},
+/*		FIXNS: for context menu selections to avoid server requests when determining if dir or file
+		isDirectory: function(resourcePath) {
+			var row = this.getRow(resourcePath);
+			if (!row || !row._isDirectory || row._isDirectory === false) {
+				return false;
+			} else {
+				return true;
+			}
+		},
 		
+		getParent: function(resourcePath) {
+		
+		
+		}
+*/		
 		/**
 		 * Displays tree table containing filled with data provided by given model
 		 * 
@@ -620,6 +634,9 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
+		
+		// Attach context menus to tree elements
+		mContextMenu.initContextMenus(tableRow);
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {

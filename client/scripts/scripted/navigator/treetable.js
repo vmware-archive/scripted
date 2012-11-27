@@ -121,6 +121,10 @@ define(['dojo'], function(dojo) {
 				// a javascript object.  (Whereas above we are using simple numbers/strings). 
 				// We should consider an item map.
 				row._item = children[i];
+				
+				// FIXNS: For context menus to determine if dir or file
+//				row._isDirectory = children[i].Directory ? true : false;
+				
 				this._renderer.render(children[i], row);
 				// generate an indent
 				var indent = this._indent * indentLevel;
