@@ -93,7 +93,7 @@ function installOn(editor) {
 		//are not the same for all editor instances.
 		console.log('default keybindings are: ');
 		defaults.keybindings = getKeyBindings(editor);
-		console.log(defaults.keybindings, null, '  ');
+		console.log(JSON.stringify(defaults.keybindings, null, '  '));
 		defaults.unboundNames = getUnboundActionNames(editor);
 		console.log('default unbound action names are: ');
 		console.log(JSON.stringify(defaults.unboundNames));
