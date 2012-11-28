@@ -1310,15 +1310,20 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			if (newTypeName) {
 				// name already exists
 				node.extras.inferredType = newTypeName;
-			} else if (!node.extras.target && !node.extras.isLHS && isAfter(env.offset, node.range)) {
-				// If name doesn't already exist, then create a new object for it
-				// and use that as the inferred type 
-				// only want to do this when accessing an unknown identifier.
-				// Should not be LHS of an assisgnment or variable declarator
-				// will be added to global scope
-				// Also, only add the variable if offset is after node range
-				// we don't want variables used after the fact appearing in content assist
-				node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
+			} else if (!node.extras.isLHS && isAfter(env.offset, node.range)) {
+			
+				if (node.extras.target) {
+					env.addVariable(name, node.extras.target, env.newFleetingObject(), node.range);
+				} else {
+					// If name doesn't already exist, then create a new object for it
+					// and use that as the inferred type 
+					// only want to do this when accessing an unknown identifier.
+					// Should not be LHS of an assisgnment or variable declarator
+					// will be added to global scope
+					// Also, only add the variable if offset is after node range
+					// we don't want variables used after the fact appearing in content assist
+					node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
+				}
 			}
 			
 			// if this node is an LHS of an assignment, shortcut the visit here.

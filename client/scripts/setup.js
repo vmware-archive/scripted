@@ -277,7 +277,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				localStorage.setItem("scripted.navigatorWidth", width);
 			});
 			
-			if (window.scripted.navigator === true) {
+			if (window.navigator) {
 				// use last size if known
 				var storedWidth = localStorage.getItem("scripted.navigatorWidth");
 				if (storedWidth) {

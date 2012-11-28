@@ -535,10 +535,10 @@ footer{
 #dialog_mask {
   width:100%;
   height:100%;
-  filter:alpha(opacity=50%)
-  -moz-opacity:0.5;
-  -khtml-opacity:0.5;
-  opacity:0.5;
+  filter:alpha(opacity=35%)
+  -moz-opacity:0.35;
+  -khtml-opacity:0.35;
+  opacity:0.35;
   background:#000;
   position:absolute;
   top:0;
@@ -627,11 +627,7 @@ a.dialog_button:hover {
     color:#666; 
 }
 
-#dialog_goto_line .dialog_content  {
-    text-align:left; 
-}
-
-.dynamic_dialog_content  {
+#dialog_goto_line .dialog_content .dynamic_dialog_content {
     text-align:center; 
 }
 
@@ -684,7 +680,7 @@ a.dialog_button:hover {
     background-color:white; 
       
     /* currently a fixed width: */ 
-    width:100px; 
+    width:160px; 
 }
 
 .context_menu_item {
@@ -694,7 +690,7 @@ a.dialog_button:hover {
 				
 	padding-top: 5px;
 	padding-bottom: 5px;
-	padding-left: 10px;
+	padding-left: 20%;
 
     font-weight: normal;		
 				

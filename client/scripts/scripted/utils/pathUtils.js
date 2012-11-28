@@ -51,8 +51,22 @@ define([], function() {
 		}
 	}
 	
+	function getLastSegmentFromPath(handle) {
+		if (typeof handle === 'string') {
+
+			var lastIndexPath = handle.lastIndexOf('/');
+
+			if (lastIndexPath >= 0 && lastIndexPath < handle.length - 1) {
+				var file = handle.substr(lastIndexPath + 1, handle.length);
+				return file;
+			}
+		}
+		return null;
+	}
+	
 	return {
-		getDirectory: getDirectory
+		getDirectory: getDirectory,
+		getLastSegmentFromPath: getLastSegmentFromPath
 	};
 
 });

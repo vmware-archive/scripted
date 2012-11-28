@@ -60,18 +60,18 @@ function(contextMenuProvider) {
 
 		};
 
-	var getPosition = function(clickX, clickY, context, contexMenu) {
+
+
+	var getPosition = function(clickX, clickY, relativeToContextID) {
 			var x = clickX;
 			var y = clickY;
-			// var h = $(contexMenu).height();
-			// var w = $(contexMenu).width();
-			var contextOffset = $(context).offset();
 
-			if (contextOffset) {
-				// Position to the right of the current context and click position
-				x -= contextOffset.left;
-				// Position below the current context and click position
-				y = contextOffset.top;
+			if (relativeToContextID && $(relativeToContextID).size() > 0) {
+				var contextOffset = $(relativeToContextID).offset();
+				// Take into account the context and position to the right of the mouse click
+				x += contextOffset.left;
+
+				y -= contextOffset.top;
 			}
 			return {
 				'x': x,
@@ -96,12 +96,13 @@ function(contextMenuProvider) {
 			var eventx = eventContext.pageX;
 			var eventy = eventContext.pageY;
 
-			var position = getPosition(eventx, eventy, context, contextMenu);
+			// Hardcode navigator wrapper as the context for now. Refactor when context menus should be more general
+			var position = getPosition(eventx, eventy, "#navigator-wrapper");
 
 			// reposition context menu based on mouse click
 			contextMenu.css({
 				top: position.y + "px",
-				left: position.x + "px",
+				left: position.x + "px"
 			});
 
 			$(document).one('click', null, function() {
