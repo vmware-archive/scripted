@@ -103,12 +103,12 @@ requirejs.config({
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "orion/searchClient",
 		 "scripted/widgets/OpenResourceDialog", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when"],
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		mKeystroke, mSearchClient, mOpenResourceDialog, mJquery,
 		mNavHistory, mPageState, mJsdepend, mOsUtils,
-		mExecConsole, mExecOnLoad, mWhen) {
+		mExecConsole, mExecOnLoad, mWhen, mJshintDriver) {
 			
 	if (!window.scripted) {
 		window.scripted = {};
@@ -218,10 +218,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					scriptedLogger.error(jshintrc.error);
 				} else {
 //					scriptedLogger.info(JSON.stringify(jshintrc,null," "));
-					window.scripted.config.jshint = jshintrc;
+					mJshintDriver.resolveConfiguration(jshintrc);
+//					window.scripted.config.jshint = jshintrc;
 				}
 			} else {
 				scriptedLogger.info("No .jshintrc found");
+				mJshintDriver.resolveConfiguration({});
 			}
 			deferred.resolve();
 		});

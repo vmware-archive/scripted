@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     Derivative of jslintdriver
+ *     Derivative of Orions jslintdriver
  *     Andy Clement - changed to invoke jshint
  *******************************************************************************/
  
@@ -15,30 +15,44 @@
 /*global JSHINT define window */
 define(["jshint"], function () {
 
-	function jshint(contents) {
-		require();
-		var options = {};
+	/**
+	 * Merge the jshintrc file into any values loaded from .scripted, together with the defaults we want for jshint.
+	 */
+	function resolveConfiguration(jshintrc) {
+		// defaults, these will be ON unless turned off in .scripted or .jshintrc
+		//   undef: true, // Require all non-global variables be declared before they are used.
+		//   newcap: true // Require capitalization of all constructor functions
+		//   smarttabs: true // Suppresses warnings about mixed tabs and spaces when the latter are used for alignment only
+		
 		// These were the default for jslint:
 		//		{white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false,
 		//		bitwise: false, regexp: true, newcap: true, immed: true, strict: false, indent: 1};
-		if (window.scripted && window.scripted.config && window.scripted.config.jshint) {
-			if (window.scripted.config.jshint) {
-				options = window.scripted.config.jshint;
-				// For jslint we copied the keys over, this seems unnecessary when the jshint options are
-				// set perfectly for passing straight into jshint
-//				var configOptions = window.scripted.config.jshint;
-//				for (var key in configOptions) {
-//					console.log("key/value:  "+key+" = "+configOptions[key]);
-//					options[key] = configOptions[key];
-//				}
+		var options;
+		if (window.scripted.config.jshint) {
+			options = window.scripted.config.jshint;
+			for (var key in jshintrc) {
+				options[key] = jshintrc[key];
 			}
-			if (window.scripted.config.jshint.global) {
-				// TODO should merge - although really should remove this variant and use
-				// the jshint style of lint and hint
-				options.predef = window.scripted.config.jshint.global;
+		} else {
+			window.scripted.config.jshint = jshintrc;
+		}
+		if (window.scripted.config.jshint.global) {
+		  // TODO should switch to using predef rather than global
+		  window.scripted.config.jshint.predef = window.scripted.config.jshint.global;
+		}
+		// Here we have merged the jshintrc with anything loaded from .scripted. Now set our
+		// defaults if values haven't already been set for these config options.
+		var defaults = [ "undef", "newcap", "smarttabs" ];
+		options = window.scripted.config.jshint;
+		for (var d=0;d<defaults.length;d++) {
+			if (!options.hasOwnProperty(defaults[d])) {
+				options[defaults[d]]=true;
 			}
 		}
-		JSHINT(contents, options);
+	}
+	
+	function jshint(contents) {
+		JSHINT(contents, window.scripted.config.jshint);
 		return JSHINT.data();
 	}
 
@@ -120,8 +134,8 @@ define(["jshint"], function () {
 						if (!tabpositions) {
 							var evidence = error.evidence;
 							tabpositions = [];
-							var len = evidence.length; 
-							for (var index=0;index<len;index++) { 
+							var len = evidence.length;
+							for (var index=0;index<len;index++) {
 								if (evidence[index]==='\t') {
 									tabpositions.push(index+1); // First col is 1 (not 0) to match error positions
 								}
@@ -138,7 +152,7 @@ define(["jshint"], function () {
 //							console.log("Line:"+error.line+": position adjusted, was "+error.character+" now "+
 //										pos+"   message:"+error.reason);
 							error.character = pos;
-						}	
+						}
 					}
 
 
@@ -196,7 +210,8 @@ define(["jshint"], function () {
 	}
  
 	return {
-		checkSyntax: checkSyntax
+		checkSyntax: checkSyntax,
+		resolveConfiguration: resolveConfiguration
 	};
 });
 

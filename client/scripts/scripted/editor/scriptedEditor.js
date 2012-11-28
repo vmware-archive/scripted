@@ -14,7 +14,7 @@
  *     Andrew Eisenberg
  *******************************************************************************/
 /*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage scripted $*/
-/*jslint browser:true devel:true*/
+/*jslint browser:true devel:true */
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
 "orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
@@ -29,6 +29,7 @@ mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTe
 mHtmlGrammar, mModuleVerifier, mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences) {
 	var determineIndentLevel = function(editor, startPos, options){
+		window.foo = 1;
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
 		var previousLine = model.getLine( previousLineIndex );
@@ -174,7 +175,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 		
 		var postSave = function (text) {
-			var problems;
+			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
 				window.scripted.promises.loadJshintrc.then(function completed() {
 					if (!(isHTML || isJSON)) {
@@ -188,6 +189,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				editor.problems = problems;
 			}
 
+			// TODO [bug] the jshint deferred invocation above may run after this next chunk of code and damage the problems
 			if (isJS) {
 				// if webworkers exist in this browser, it will be called as a webworker
 				indexer.performIndex(filePath, function() {
