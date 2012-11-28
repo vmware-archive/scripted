@@ -114,15 +114,16 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 			}
 		};
 
-	var modifyResourceDialogue = function(dialogueElementName, dialogue, onClose) {
+	var modifyResourceDialogue = function(dialogueElementName, dialogue, onClose, initialValue) {
 
 			var onOK = function() {
-
 					return $("#dialogue_file_name").val();
-
 				};
 
 			var onOpen = function() {
+					if (initialValue) {
+						$('#dialogue_file_name').val(initialValue);
+					}
 					$('#dialogue_file_name').focus();
 					$('#dialogue_file_name').select();
 				};
@@ -137,26 +138,36 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 		};
 
 
-	var addResource = function(onClose) {
-			modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose);
-		};
 
-	var renameResource = function(onClose) {
-			modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose);
-		};
 
-	var deleteResource = function(onClose) {
+	var createDialogue = function(initialValue) {
 
-			var operations = {
-				onClose: onClose
+			var addResource = function(onClose) {
+					modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
+				};
+
+			var renameResource = function(onClose) {
+					modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose, initialValue);
+				};
+
+			var deleteResource = function(onClose) {
+
+					var operations = {
+						onClose: onClose
+					};
+
+					openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
+				};
+
+			return {
+				addResource: addResource,
+				renameResource: renameResource,
+				deleteResource: deleteResource
 			};
 
-			openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
 		};
 
 	return {
-		addResource: addResource,
-		renameResource: renameResource,
-		deleteResource: deleteResource
+		createDialogue: createDialogue
 	};
 });
