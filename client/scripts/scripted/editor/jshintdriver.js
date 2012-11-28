@@ -11,11 +11,12 @@
  *     Andy Clement - changed to invoke jshint
  *******************************************************************************/
  
-/*jslint browser:true*/
+/*jshint browser:true*/
 /*global JSHINT define window */
 define(["jshint"], function () {
 
 	function jshint(contents) {
+		require();
 		var options = {};
 		// These were the default for jslint:
 		//		{white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false,

@@ -18,15 +18,15 @@
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
 "orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
-"plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
+"plugins/esprima/indexerService",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
-"plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
+"plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 "orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", 
 "scripted/exec/exec-after-save", "jshint"],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
-mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
-mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify, mTextModel, mProjectionModel,
+mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTextSearcher, mSelection, mCommands, mParameterCollectors,
+mHtmlGrammar, mModuleVerifier, mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -65,14 +65,14 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				if (revisedEndPosition > startPosition) {
 					selection = editor.getText(startPosition, revisedEndPosition);
 					endPosition = revisedEndPosition;
-				} 
+				}
 			}
 		}
 		
 		var checkedResult = {
 				toFormat: selection,
 				start: startPosition,
-				end: endPosition	
+				end: endPosition
 		};
 		
 		return checkedResult;
@@ -156,9 +156,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 		
 		var indexer = new mIndexerService.Indexer();
 		if (window.scripted && window.scripted.config) {
-			if (window.scripted.config.jslint) {
-				indexer.lintConfig = window.scripted.config.jslint;
-			} else if (window.scripted.config.jshint) {
+			if (window.scripted.config.jshint) {
 				indexer.lintConfig = window.scripted.config.jshint;
 			}
 		}
@@ -169,7 +167,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 		});
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
-		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jslint);
+		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
 		var htmlContentAssistant = new mHtmlContentAssist.HTMLContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
@@ -179,12 +177,8 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 			var problems;
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
 				window.scripted.promises.loadJshintrc.then(function completed() {
-					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter === 'jshint') {
-						if (!(isHTML || isJSON)) {
-							problems = mJshintDriver.checkSyntax('', text).problems;
-						}
-					} else {
-						problems = mJslintDriver.checkSyntax('', text).problems;
+					if (!(isHTML || isJSON)) {
+						problems = mJshintDriver.checkSyntax('', text).problems;
 					}
 					editor.showProblems(problems);
 					editor.problems = problems;

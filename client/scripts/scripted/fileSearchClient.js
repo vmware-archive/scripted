@@ -1,12 +1,12 @@
 /*******************************************************************************
 
  * @license
- * Copyright (c) 2010, 2012 IBM Corporation and others 
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * Copyright (c) 2010, 2012 IBM Corporation and others
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors:
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,11 +15,11 @@
 /*jslint devel:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/searchUtils', "scripted/utils/pageState", 'servlets/jsdepend-client',
-	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-file-search-client' ], 
+	'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'servlets/incremental-file-search-client' ],
 	
 	function(require, dojo, dijit, mUtil, mSearchUtils, mPageState, jsdepend) {
 
-//	var findFileNamesContaining = jsdepend.findFileNamesContaining; 
+//	var findFileNamesContaining = jsdepend.findFileNamesContaining;
 	var isearch = require('servlets/incremental-file-search-client');
 
 	function removePrefix(str, pre) {
@@ -370,7 +370,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/searchUtils', "scripted
 								}
 							}
 						}
-					} 
+					}
 				};
 			}
 		

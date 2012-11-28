@@ -42,14 +42,14 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 			throw err;
 		};
 		//TODO: XMLHttpRequest may not be defined in all environments.
-		var xhrobj = new XMLHttpRequest();
+	var xhrobj = new XMLHttpRequest();
 		try {
 			var url = 'http://localhost:7261/get?file='+handle;
 			// console.log("url is "+url);
 			xhrobj.open("GET",url,true);
 			xhrobj.send();
 			xhrobj.onreadystatechange= function() {
-		        if(xhrobj.readyState === 4) { // 4 means content has finished loading		
+		        if(xhrobj.readyState === 4) { // 4 means content has finished loading
 					if (xhrobj.status===200) {
 						callback(xhrobj.responseText);
 					} else {
@@ -92,7 +92,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 			xhrobj.open("GET",url,true);
 			xhrobj.send();
 			xhrobj.onreadystatechange= function() {
-		        if(xhrobj.readyState === 4) { // 4 means content has finished loading		
+		        if(xhrobj.readyState === 4) { // 4 means content has finished loading
 					if (xhrobj.status===200) {
 						callback(JSON.parse(xhrobj.responseText));
 					} else {

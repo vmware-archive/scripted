@@ -219,11 +219,6 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				} else {
 //					scriptedLogger.info(JSON.stringify(jshintrc,null," "));
 					window.scripted.config.jshint = jshintrc;
-					if (!window.scripted.config.editor) {
-						window.scripted.config.editor = { "linter": "jshint" };
-					} else {
-						window.scripted.config.editor.linter = "jshint";
-					}
 				}
 			} else {
 				scriptedLogger.info("No .jshintrc found");

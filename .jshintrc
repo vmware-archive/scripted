@@ -7,7 +7,7 @@
     // Predefined globals whom JSHint will ignore.
     "browser"       : true,   // Standard browser globals e.g. `window`, `document`.
 
-    "node"          : true,
+    "node"          : false,
     "rhino"         : false,
     "couch"         : false,
     "wsh"           : false,   // Windows Scripting Host.
@@ -69,5 +69,5 @@
     "trailing"      : true,   // Prohibit trailing whitespaces.
     "indent"        : 4,      // Specify indentation spacing
     "white"         : false,  // Check against strict whitespace and indentation rules.
-    "smarttabs"     : true    // Suppresses warnings about mixed tabs and spaces when the latter are used for alignmnent only
+    "smarttabs"     : true    // Suppresses warnings about mixed tabs and spaces when the latter are used for alignment only
 }
