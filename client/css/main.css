@@ -227,7 +227,7 @@ footer{
 .shortcut_name{
 	float:left;
 }	
-.shortcut_command{
+.shortcut_keystroke {
 	float:right;
 }
 
