@@ -15,7 +15,7 @@ define(
 function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 
-	var getResource = function(location,isDirectory) {
+	var getResource = function(location, isDirectory) {
 
 			return {
 				isDirectory: isDirectory,
@@ -33,7 +33,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 					var resource = $(target).attr('id');
 					var type = $(target).attr('type');
 					var isDir = type && type === "dir";
-					return getResource(resource,isDir);
+					return getResource(resource, isDir);
 				}
 			}
 		};
@@ -43,19 +43,12 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 				name: "New File...",
 				handler: function(selectionContext) {
 					var resource = getResourceFromContextSelection(selectionContext);
-					resourcesDialogue.createDialogue(resource.location).addResource(function(
+					var fileCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
+					resourcesDialogue.createDialogue(fileCreationPath).addResource(function(
 					resourceName) {
-						var urlNewResource;
-						if (!resource.isDirectory) {
-							urlNewResource = resource.location.substring(0,resource.location.lastIndexOf('/'));
-							urlNewResource = urlNewResource + (resourceName ? '/' + resourceName : "/untitled");
-						} else {
-							urlNewResource = resource.location + (resourceName ? '/' + resourceName : "/untitled");
-						}
-
+						var urlNewResource = fileCreationPath + (resourceName ? '/' + resourceName : "/untitled");
 						navHistory.navigateToURL(urlNewResource);
 						window.explorer.highlight(urlNewResource);
-						alert("Resource created:" + urlNewResource);
 					});
 				}
 			};
@@ -76,7 +69,6 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 									fileOperationsClient.rename(
 									resourceLocation.location,
 									parentPath + '/' + renamedResource);
-									alert("Resource renamed:" + renamedResource);
 								}
 							});
 						}
