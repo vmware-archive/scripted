@@ -120,7 +120,9 @@ function withBaseDir(baseDir) {
 		});
 	}
 	
-	function rename(original, newname) {
+	function rename(handleOriginal, handleRename) {
+		var original = handle2file(handleOriginal);
+		var newname = handle2file(handleRename);
 		console.log("Requesting resource rename for: " + original + " into " + newname);
 		var deferred = when.defer();
 		if (original && newname) {
