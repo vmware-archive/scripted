@@ -14,8 +14,8 @@
 /*global console require*/
 
 var servlets = require('../servlets');
-var rename = require('../jsdepend/filesystem').rename;
-var deleteResource = require('../jsdepend/filesystem').deleteResource;
+var rename = require('../jsdepend/filesystem').withBaseDir(null).rename;
+var deleteResource = require('../jsdepend/filesystem').withBaseDir(null).deleteResource;
 
 var makeRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
 

@@ -44,24 +44,6 @@ function ignore(name) {
 	return result;
 }
 
-function rename(original, newname) {
-	console.log("Requesting resource rename for: " + original + " into " + newname);
-	if (original && newname) {
-		var fs = require('fs');
-		fs.rename(original, newname, function() { });
-		return newname;
-	}
-	return original;
-}
-
-function deleteResource(resourcePath) {
-	console.log("Requesting resource delete for: " + resourcePath);
-	if (resourcePath) {
-		var fs = require('fs');
-		fs.unlink(resourcePath, function() {});
-	}
-}
-
 function withBaseDir(baseDir) {
 	var fs = require('fs');
 	var path = require('path');
@@ -137,6 +119,47 @@ function withBaseDir(baseDir) {
 		});
 	}
 	
+	function rename(original, newname) {
+		console.log("Requesting resource rename for: " + original + " into " + newname);
+		var when = require('when');
+		var deferred = when.defer();
+		if (original && newname) {
+			var fs = require('fs');
+			fs.rename(original, newname, function(err) {
+				if (err) {
+					deferred.reject(err);
+				} else {
+					deferred.resolve();
+				}
+			});
+
+		} else {
+			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
+			deferred.reject(message);
+		}
+		return deferred;
+	}
+
+	function deleteResource(resourcePath) {
+		console.log("Requesting resource delete for: " + resourcePath);
+		var when = require('when');
+		var deferred = when.defer();
+		if (resourcePath) {
+			var fs = require('fs');
+			fs.unlink(resourcePath, function(err) {
+				if (err) {
+					deferred.reject(err);
+				} else {
+					deferred.resolve();
+				}
+			});
+		} else {
+			var message = "No resource specified to delete";
+			deferred.reject(message);
+		}
+		return deferred;
+	}
+	
 	function getContents(handle, callback, errback) {
 		errback = errback || function (err) {
 			console.error(err);
@@ -185,11 +208,12 @@ function withBaseDir(baseDir) {
 		getContents:  getContents,
 		listFiles:	  listFiles,
 		isDirectory:  isDirectory,
-		isFile:		  isFile
+		isFile:		  isFile,
+		rename:       rename,
+		deleteResource: deleteResource
 	};
 }
 
 exports.withBaseDir = withBaseDir;
 exports.ignore = ignore;
-exports.rename = rename;
-exports.deleteResource = deleteResource; 
+
