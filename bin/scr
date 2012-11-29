@@ -2,15 +2,31 @@
 # Launch script for Scripted 
  
 # Does the following:
-# 1. locate any existing running node 
-# 2. kills server
-# 3. call 'launchnode' to start a new node
+# 1. Provide help if requested
+# 2. Chase down any links through which this script is being referenced 
+# 3. Start the server if it isn't running (or restart it if requested)
 # 4. Opens a URL that loads the editor - the url encodes the file we want to edit
 
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]
+then
+  echo "usage: scr [-hr] [file/directory]"
+  echo "The scr/scripted command launches the Scripted code editor in a web browser."
+  echo "If nothing is specified it will open the current directory, equivalent to 'scr .'"
+  echo "Options:"
+  echo "  -h/--help    : show the command help"
+  echo "  -r/--restart : restart the server, this does not open Scripted"
+  exit 0
+fi
 
 # Discover pid for server process
 pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
 # echo "server pid = " $pid
+
+# If it is not running, remember we need to start it
+if [ -z "$pid" ]
+then
+  startserver=true
+fi
 
 # Here is the linux equivalent of the code block below *sigh*
 #DIRNAME=`dirname $(readlink -f "$0")`
@@ -18,6 +34,7 @@ pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
 # Assume the path 
 realScriptLocation=$0
 
+option=$1
 file=$1
 
 # If $0 is really a link, chase it down to the real location
@@ -63,8 +80,7 @@ do
 done;
 
 # Now realScriptLocation points at the real scripted executable.
-# The other support scripts can be referenced relative to this
-# known location
+# The other support scripts can be referenced relative to this known location
 # echo $realScriptLocation
 
 DIRNAME=`dirname $realScriptLocation`
@@ -72,35 +88,49 @@ DIRNAME=`dirname $realScriptLocation`
 
 LOGDIR="/tmp"
 
-# kill the server process
-if [ ! -z "$pid" ]
+# If restart requested, kill any existing server
+if [ "$option" == "-r" ] || [ "$option" == "--restart" ]
 then
-#  echo "killing node"
-  kill -9 $pid
+	# kill the server process if it is running
+	if [ ! -z "$pid" ]
+	then
+		# echo "killing node"
+		kill -9 $pid
+	fi
+    startserver=true
 fi
 
-# Log truncation - if > 2Meg then delete it
-LOG_TOO_LONG=`find ${LOGDIR}/* -name "scripted.log" -size +2000000c 2>/dev/null`
-if [ ! -z "$LOG_TOO_LONG" ]
+if [ "$startserver" == "true" ]
 then
-  echo "${LOGDIR}/scripted.log is too large, emptying it..."
-  rm $LOG_TOO_LONG
+	# Log truncation - if > 2Meg then delete it
+	LOG_TOO_LONG=`find ${LOGDIR}/* -name "scripted.log" -size +2000000c 2>/dev/null`
+	if [ ! -z "$LOG_TOO_LONG" ]
+	then
+	  echo "${LOGDIR}/scripted.log is too large, emptying it..."
+	  rm $LOG_TOO_LONG
+	fi
+
+	echo "===" >> $LOGDIR/scripted.log
+	echo "launching node again: `date`" >> $LOGDIR/scripted.log
+	# echo $DIRNAME/launchnode
+
+	$DIRNAME/launchnode >> $LOGDIR/scripted.log 2>&1 &
 fi
-
-echo "===" >> $LOGDIR/scripted.log
-echo "launching node again: `date`" >> $LOGDIR/scripted.log
-# echo $DIRNAME/launchnode
-
-$DIRNAME/launchnode >> $LOGDIR/scripted.log 2>&1 &
 
 dir=`pwd`
 
-# if nothing specified, just exit (server will have restarted)
+if [ "$file" == "--restart" ] || [ "$file" == "-r" ]
+then
+  echo "Server has been restarted."
+  exit 0
+fi
+
+# 'scr' is equivalent to 'scr .'
 if [ -z "$file" ]
 then
-	echo "Not opening an editor, no file specified. Server has been restarted."
-	exit 0
+  file="."
 fi
+
 
 if [ "$file" == "." ]
 then
@@ -116,7 +146,11 @@ else
 fi
 
 
-sleep 0.20
+if [ "$startserver" == "true" ]
+then
+	# No need to wait if server hasn't been started
+	sleep 0.20
+fi
 
 # some code to add an extra wait if the server hasn't started yet, work in progress
 #serverUp=`curl http://localhost:7261/helo 2>&1`
