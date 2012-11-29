@@ -55,7 +55,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	}
 	
 	function testProposals(prefix, actualProposals, expectedProposals) {
-		assert.equal(actualProposals.length, expectedProposals.length, 
+		assert.equal(actualProposals.length, expectedProposals.length,
 			"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals, prefix));
 			
 		for (var i = 0; i < actualProposals.length; i++) {
@@ -236,7 +236,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["zzz", "zzz : Object"],
+			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -273,9 +273,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["xxx", "xxx : Object"],
-			["yyy", "yyy : Object"],
-			["zzz", "zzz : Object"],
+			["xxx", "xxx : {  }"],
+			["yyy", "yyy : {  }"],
+			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -289,8 +289,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test multi var content assist 2"] = function() {
 		var results = computeContentAssist("var zzz;\nvar zxxx, xxx, yyy;\nz","z");
 		testProposals("z", results, [
-			["zxxx", "zxxx : Object"],
-			["zzz", "zzz : Object"]
+			["zxxx", "zxxx : {  }"],
+			["zzz", "zzz : {  }"]
 		]);
 	};
 	tests["test single function content assist"] = function() {
@@ -406,7 +406,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist(
 				"var foo;\nfunction other(a, b, c) {\nfunction inner() { var foo2; }\nf/**/}", "f");
 		testProposals("f", results, [
-			["foo", "foo : Object"]
+			["foo", "foo : {  }"]
 		]);
 	};
 	tests["test scopes 2"] = function() {
@@ -497,6 +497,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
+			["nuthin", "nuthin : {  }"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
@@ -526,8 +527,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test in function 5"] = function() {
 		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na/**/\nvar aaa}", "a");
 		testProposals("a", results, [
-			["aaa", "aaa : Object"],
-			["abb", "abb : Object"],
+			["aaa", "aaa : {  }"],
+			["abb", "abb : {  }"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
@@ -540,8 +541,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"function other(aa, ab, c) {\n"+
 		"var abb;\na/**/\nvar aaa\n}\n}", "a");
 		testProposals("a", results, [
-			["aaa", "aaa : Object"],
-			["abb", "abb : Object"],
+			["aaa", "aaa : {  }"],
+			["abb", "abb : {  }"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
@@ -551,14 +552,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 7"] = function() {
-		// should not see 'aaa' since that is declared later
+		// should not see 'aaa' or 'abb' since declared in another function
 		var results = computeContentAssist(
 		"function fun(a, b, c) {/**/\n" +
 		"function other(aa, ab, ac) {\n"+
 		"var abb;\na\nvar aaa\n}\n}");
 		testProposals("", results, [
-			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
-			["", "---------------------------------"],
 			["a", "a : {  }"],
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
@@ -580,6 +579,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
 			["Infinity", "Infinity : Number"],
@@ -769,7 +769,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test this reference 1"] = function() {
 		var results = computeContentAssist("var xxxx;\nthis.x", "x");
 		testProposals("x", results, [
-			["xxxx", "xxxx : Object"]
+			["xxxx", "xxxx : {  }"]
 		]);
 	};
 	tests["test binary expression 1"] = function() {
@@ -813,19 +813,19 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test while loop 1"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(ii/**/ === null) {\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test while loop 2"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(this.ii/**/ === null) {\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test while loop 3"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(iii === null) {this.ii/**/\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test catch clause 1"] = function() {
@@ -930,7 +930,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test constructor 2"] = function() {
 		var results = computeContentAssist(
 		"function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
-		"var y = new Fun();\n" +	
+		"var y = new Fun();\n" +
 		"y.x", "x");
 		testProposals("x", results, [
 			["xxx", "xxx : Number"]
@@ -1053,9 +1053,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1092,9 +1092,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1131,9 +1131,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1669,7 +1669,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
-	// not sure I like this.  returning an object literal wrapped in a funtion looks no different from 
+	// not sure I like this.  returning an object literal wrapped in a funtion looks no different from
 	// returning an object literal
 	tests["test function return type obj literal 2"] = function() {
 		var results = computeContentAssist(
@@ -1763,11 +1763,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
-	// should not see an implicit if it comes after the invocation location
+	// should see an implicit even if it comes after the invocation location
 	tests["test implicit7"] = function() {
 		var results = computeContentAssist(
 			"xx/**/\nxxx", "xx");
 		testProposals("xx", results, [
+			["xxx", "xxx : {  }"]
 		]);
 	};
 
@@ -2729,7 +2730,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @param {String} xx1\n@param {Number} xx2 */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx1", "xx1 : String"],
@@ -2740,7 +2741,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @param {Number} xx2\n@param {String} xx1\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx1", "xx1 : String"],
@@ -2751,7 +2752,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(String,Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(String, Number)", "xx2(String, Number) : Number"],
@@ -2762,7 +2763,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(a, Number)", "xx2(a, Number) : Number"],
@@ -2773,7 +2774,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,?Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(a, Number)", "xx2(a, Number) : Number"],
@@ -2785,7 +2786,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test return jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @return {function(a:String,?Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { }\nflar", 
+				"var flart = function(xx1,xx2) { }\nflar",
 				"flar");
 			// hmmmm... functions returning functions not really showing up
 			testProposals("flar", results, [
@@ -2894,7 +2895,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	
 	/////////////////////////////////////
 	// various tests for reassignment
-	// reassignments are only performed 
+	// reassignments are only performed
 	// if the new type is not less general
 	// than the old type
 	/////////////////////////////////////
@@ -3438,7 +3439,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	
 	tests["test full file inferecing 11a"] = function() {
 		var results = computeContentAssist(
-			"var x = {};\n" + 
+			"var x = {};\n" +
 			"function a() {\n" +
 			"  var y = x;\n" +
 			"  y.f/**/\n" +
@@ -3494,7 +3495,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
-	// not finding because property add is lexically after the content assist
 	tests["test full file inferecing 14"] = function() {
 		var results = computeContentAssist(
 			"function a() {\n" +
@@ -3506,6 +3506,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"}\n" +
 			"var x = {};", "f");
 		testProposals("f", results, [
+			["fff", "fff : String"]
 		]);
 	};
 
@@ -3523,7 +3524,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
-	// we don't find the fff property here since it
+	// should still find the fff property here evem though it
 	// is defined after and in another funxtion
 	tests["test full file inferecing 16"] = function() {
 		var results = computeContentAssist(
@@ -3535,6 +3536,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"}\n" +
 			"var x = {};", "f");
 		testProposals("f", results, [
+			["fff", "fff : String"]
 		]);
 	};
 	tests["test full file inferecing 17"] = function() {
@@ -3760,6 +3762,49 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"};", "a");
 		testProposals("a", results, [
 			["aaa", "aaa : String"]
+		]);
+	};
+	
+	/////////////////////////////////////
+	// property read inferencing
+	//
+	// tests for property reads
+	/////////////////////////////////////
+	tests["test property read before"] = function() {
+		var results = computeContentAssist(
+			"var xxx;\n" +
+			"xxx.lll++;\n" +
+			"xxx.ll", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read after"] = function() {
+		var results = computeContentAssist(
+			"var xxx;\n" +
+			"xxx.ll/**/;\n" +
+			"xxx.lll++;", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read global before"] = function() {
+		var results = computeContentAssist(
+			"lll++;\n" +
+			"ll", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read global after"] = function() {
+		var results = computeContentAssist(
+			"ll/**/;\n" +
+			"lll++;", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
 		]);
 	};
 	

@@ -99,11 +99,11 @@ function(mIndexer, jsdependsStub, assert) {
 					"range": [
 					25,
 					29],
-					"typeName": "gen~sub/other.js~2"
+					"typeName": "gen~sub/other.js~4"
 				}
 			},
 			"types": {
-				"gen~sub/other.js~2": {
+				"gen~sub/other.js~4": {
 					"$$proto": {
 						"path": "utils.js",
 						"typeName": "Object"
