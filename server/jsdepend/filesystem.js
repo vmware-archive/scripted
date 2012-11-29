@@ -26,6 +26,7 @@
 ///////////////////////////////////////////
 
 var nodeNatives = require('./node-natives');
+var when = require('when');
 
 function ignore(name) {
 	var result = false;
@@ -42,24 +43,6 @@ function ignore(name) {
 	}
 	// console.log('ignore? '+name+' => '+result);
 	return result;
-}
-
-function rename(original, newname) {
-	console.log("Requesting resource rename for: " + original + " into " + newname);
-	if (original && newname) {
-		var fs = require('fs');
-		fs.rename(original, newname, function() { });
-		return newname;
-	}
-	return original;
-}
-
-function deleteResource(resourcePath) {
-	console.log("Requesting resource delete for: " + resourcePath);
-	if (resourcePath) {
-		var fs = require('fs');
-		fs.unlink(resourcePath, function() {});
-	}
 }
 
 function withBaseDir(baseDir) {
@@ -137,6 +120,46 @@ function withBaseDir(baseDir) {
 		});
 	}
 	
+	function rename(original, newname) {
+		console.log("Requesting resource rename for: " + original + " into " + newname);
+		var deferred = when.defer();
+		if (original && newname) {
+			var fs = require('fs');
+			fs.rename(original, newname, function(err) {
+				if (err) {
+					deferred.reject(err);
+				} else {
+					deferred.resolve();
+				}
+			});
+
+		} else {
+			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
+			deferred.reject(message);
+		}
+		return deferred;
+	}
+
+	function deleteResource(handle) {
+		var resourcePath = handle2file(handle);
+		console.log("Requesting resource delete for: " + resourcePath);
+		var deferred = when.defer();
+		if (resourcePath) {
+			var fs = require('fs');
+			fs.unlink(resourcePath, function(err) {
+				if (err) {
+					deferred.reject(err);
+				} else {
+					deferred.resolve();
+				}
+			});
+		} else {
+			var message = "No resource specified to delete";
+			deferred.reject(message);
+		}
+		return deferred;
+	}
+	
 	function getContents(handle, callback, errback) {
 		errback = errback || function (err) {
 			console.error(err);
@@ -176,6 +199,22 @@ function withBaseDir(baseDir) {
 			}
 		});
 	}
+
+	/**
+	 * @return Promise
+	 */
+	function putContents(handle, contents) {
+		var d = when.defer();
+		var file = handle2file(handle);
+		fs.writeFile(file, contents, function (err) {
+			if (err) {
+				d.reject(err);
+			} else {
+				d.resolve();
+			}
+		});
+		return d;
+	}
 	
 	return {
 		getUserHome:  getUserHome,
@@ -183,13 +222,14 @@ function withBaseDir(baseDir) {
 		handle2file:  handle2file,
 		file2handle:  file2handle,
 		getContents:  getContents,
+		putContents:  putContents,
 		listFiles:	  listFiles,
 		isDirectory:  isDirectory,
-		isFile:		  isFile
+		isFile:		  isFile,
+		rename:       rename,
+		deleteResource: deleteResource
 	};
 }
 
 exports.withBaseDir = withBaseDir;
 exports.ignore = ignore;
-exports.rename = rename;
-exports.deleteResource = deleteResource;

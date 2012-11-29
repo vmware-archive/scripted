@@ -120,7 +120,7 @@ function configure(filesystem) {
 	 * Ideally anybody interested in the '.scripted' configuration data
 	 * should be using this method and this method alone to retrieve the config info.
 	 * This to ensure that all share the same logic of retrieving this data.
-	 * This will make it easier in the future to change how and where this data is 
+	 * This will make it easier in the future to change how and where this data is
 	 * loaded.
 	 *
 	 * The returned config object may contain an 'error' property if there was a

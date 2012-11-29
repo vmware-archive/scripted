@@ -637,6 +637,10 @@ exports.SelectionRenderer = (function(){
 		
 		// Attach context menus to tree elements
 		mContextMenu.initContextMenus(tableRow);
+		// Mark it as type directory
+		if (item.directory) {
+			$(tableRow).attr("type","dir");
+		}
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {

@@ -14,8 +14,8 @@
 /*global define window uri scriptedLogger alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "orion/editor/jslintdriver", "jquery", "scripted/utils/pageState", "scripted/utils/navHistory"], 
-	function(require, dojo, mExplorer, mJslintDriver, mJquery, mPageState, mNavHistory) {
+define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory"], 
+	function(require, dojo, mExplorer, mJquery, mPageState, mNavHistory) {
 
 	/**
 	 * Tree model used by the FileExplorer

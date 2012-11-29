@@ -19,7 +19,8 @@
 
     "predef"        : [  // Custom globals.
         "define",
-        "module"
+        "module",
+		"$"
     ],
 
 
@@ -69,5 +70,5 @@
     "trailing"      : true,   // Prohibit trailing whitespaces.
     "indent"        : 4,      // Specify indentation spacing
     "white"         : false,  // Check against strict whitespace and indentation rules.
-    "smarttabs"     : true    // Suppresses warnings about mixed tabs and spaces when the latter are used for alignmnent only
+    "smarttabs"     : true    // Suppresses warnings about mixed tabs and spaces when the latter are used for alignment only
 }

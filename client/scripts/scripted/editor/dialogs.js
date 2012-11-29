@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 - 2012 VMware and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     Andy Clement
@@ -22,13 +22,13 @@ define([],function() {
 	 * such that the mask fills the screen.
 	 */
 	var popupOrResizeMaskAndDialog = function(dialogId) {
-		// get the screen height and width  
-	    var maskHeight = $(document).height();  
+		// get the screen height and width
+	    var maskHeight = $(document).height();
 	    var maskWidth = $(document).width();
 	     
 	    // calculate the values for center alignment
-	    var dialogTop =  (maskHeight/3) - ($(dialogId).height());  
-	    var dialogLeft = (maskWidth/2) - ($(dialogId).width()/2); 
+	    var dialogTop =  (maskHeight/3) - ($(dialogId).height());
+	    var dialogLeft = (maskWidth/2) - ($(dialogId).width()/2);
 	     
 	    // assign values to the overlay and dialog box
 	    $('#dialog_mask').css({height:maskHeight, width:maskWidth}).show();
@@ -91,7 +91,7 @@ define([],function() {
 	    $('#goto_line_number').val(line);
 	    $('#goto_line_number').focus();
 	    $('#goto_line_number').select();
-	};	
+	};
 
 	return {
 		openDialog_gotoLine: openDialog_gotoLine

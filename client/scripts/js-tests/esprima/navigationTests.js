@@ -361,7 +361,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"}\n" +
 			"function a() {\n" +
 			"	aa();\n" +
-			"}", "aa", "Number", "aa :: Number", 2);
+			"}", "aa", "Number", "aa :: Number", 1);
 	};
 	
 	return tests;

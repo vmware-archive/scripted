@@ -99,10 +99,12 @@
   } 
 */
 {
-	"jslint" : {
+/*
+	"jshint" : {
 		"global" : ["console", "define", "exports", "module", "process", "__dirname",
 					"require", "$", "window"]
 	},
+*/
 
 	/* Configuring the mark occurrences behavior */
 	mark_occurrences : {

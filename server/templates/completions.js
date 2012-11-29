@@ -41,7 +41,7 @@ exports.extractScope = function(rawScope) {
 
 exports.completionsFolders = [
 	process.env.HOME + '/' + EXTENSION,
-	path.resolve('../../completions')
+	path.resolve('../completions')
 ];
 
 // exported for testing only

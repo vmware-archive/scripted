@@ -1473,6 +1473,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			pixel = Math.min(Math.max(0, pixel), lineHeight * lineCount - clientHeight);
 			this._scrollView(0, pixel - this._getScroll().y);
 		},
+		setReadonly: function(isReadonly) {
+			this._readonly = isReadonly;
+		},
+		isReadonly: function() {
+			return this._readonly;
+		},
 		/**
 		 * Scrolls the selection into view if needed.
 		 *

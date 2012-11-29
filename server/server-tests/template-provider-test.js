@@ -21,7 +21,7 @@ var testResourcesFolder = __dirname + "/test-resources/";
 completionsModule.setCompletionsFolder(testResourcesFolder);
 
 exports.providerTest = function(test) {
-	provider.process().then(function(allCompletions) {
+	provider.processTemplates().then(function(allCompletions) {
 		test.ok(allCompletions.html);
 		test.ok(allCompletions.js);
 		test.ok(allCompletions.json);

@@ -19,7 +19,7 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 	 
 	var testroot = testutils.discoverTestRoot();
 	
-	function setup() { 
+	function setup() {
 		window.fsroot = testroot.slice(0,-1);
 		localStorage.removeItem("scripted.recentFileHistory");
 		$('.subeditor_wrapper').remove();
@@ -90,7 +90,7 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 	 * "{start_offset}>{end_offset}: {description}"
 	 */
 	function stringifyProblem(problem) {
-		// example: 
+		// example:
 		//		character: 12
 		//		description: "Missing semicolon."
 		//		end: 12

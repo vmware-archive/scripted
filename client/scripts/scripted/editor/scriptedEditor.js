@@ -14,21 +14,22 @@
  *     Andrew Eisenberg
  *******************************************************************************/
 /*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage scripted $*/
-/*jslint browser:true devel:true*/
+/*jslint browser:true devel:true */
 
 define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
 "orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
-"plugins/esprima/indexerService", "orion/editor/jslintdriver", "scripted/editor/jshintdriver",
+"plugins/esprima/indexerService",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
-"plugins/esprima/moduleVerifier", "orion/editor/jslintworker", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", 
-"scripted/exec/exec-after-save", "jshint"],
+"plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys", 
+"scripted/exec/exec-after-save", "jshint" ],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
-mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mJslintDriver, mJshintDriver, mTextSearcher, mSelection, mCommands, mParameterCollectors,
-mHtmlGrammar, mModuleVerifier, mJsLintWorker, mJsBeautify, mTextModel, mProjectionModel,
-mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences) {
+mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTextSearcher, mSelection, mCommands, mParameterCollectors,
+mHtmlGrammar, mModuleVerifier, mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
+mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences, tHelptext) {
 	var determineIndentLevel = function(editor, startPos, options){
+		window.foo = 1;
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
 		var previousLine = model.getLine( previousLineIndex );
@@ -65,14 +66,14 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				if (revisedEndPosition > startPosition) {
 					selection = editor.getText(startPosition, revisedEndPosition);
 					endPosition = revisedEndPosition;
-				} 
+				}
 			}
 		}
 		
 		var checkedResult = {
 				toFormat: selection,
 				start: startPosition,
-				end: endPosition	
+				end: endPosition
 		};
 		
 		return checkedResult;
@@ -156,9 +157,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 		
 		var indexer = new mIndexerService.Indexer();
 		if (window.scripted && window.scripted.config) {
-			if (window.scripted.config.jslint) {
-				indexer.lintConfig = window.scripted.config.jslint;
-			} else if (window.scripted.config.jshint) {
+			if (window.scripted.config.jshint) {
 				indexer.lintConfig = window.scripted.config.jshint;
 			}
 		}
@@ -169,22 +168,18 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 		});
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
-		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jslint);
+		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
 		var htmlContentAssistant = new mHtmlContentAssist.HTMLContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 		
 		var postSave = function (text) {
-			var problems;
+			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
 				window.scripted.promises.loadJshintrc.then(function completed() {
-					if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.linter && window.scripted.config.editor.linter === 'jshint') {
-						if (!(isHTML || isJSON)) {
-							problems = mJshintDriver.checkSyntax('', text).problems;
-						}
-					} else {
-						problems = mJslintDriver.checkSyntax('', text).problems;
+					if (!(isHTML || isJSON)) {
+						problems = mJshintDriver.checkSyntax('', text).problems;
 					}
 					editor.showProblems(problems);
 					editor.problems = problems;
@@ -194,6 +189,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				editor.problems = problems;
 			}
 
+			// TODO [bug] the jshint deferred invocation above may run after this next chunk of code and damage the problems
 			if (isJS) {
 				// if webworkers exist in this browser, it will be called as a webworker
 				indexer.performIndex(filePath, function() {
@@ -381,6 +377,9 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
 				var text = editor.getTextView().getText();
+				if (editor.getTextView().isReadonly()) {
+					return true;
+				}
 				var xhr = new XMLHttpRequest();
 				try {
 					// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
@@ -507,7 +506,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				return null;
 			}
 		});
-		editor.setInput("Content", null, "Inishul contentz.");
+		editor.setInput("Content", null, "No contents");
 		
 		/*function that fixes Firefox cursor problem*/
 		editor.cursorFix = function(focusTarget){
@@ -584,7 +583,10 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 						// force caret location if required
 						//window.onpopstate();
 					} else if (xhrobj.status === 500 && xhrobj.responseText === 'File is a directory') {
-						$('#editor').css('display','none');
+//						$('#editor').css('display','none');
+						// Set the editor to show some help, a la vim
+						editor.setInput("Content", null, tHelptext);
+						editor.getTextView().setReadonly(true);
 					} else if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
 						alert('cannot open a binary file');
 						//ret = false;

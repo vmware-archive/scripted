@@ -588,28 +588,36 @@ a.dialog_button:hover {
 	background-color: #4f4f4f;
 }
 
-#dialog_goto_line .dialog_content .dynamic_dialog_popup  {
+
+
+#dialog_goto_line .dialog_content  {
     font-family:arial;
     font-size:13px; 
+    text-align:center;
     margin:13px;
     padding:10px; 
     color:#666; 
 }
 
-#dialog_goto_line .dialog_content .dynamic_dialog_content {
-    text-align:center; 
+.dynamic_dialog_content {
+    font-family:arial;
+    font-size:13px; 
+    text-align:center;
+    margin:13px;
+    padding:10px; 
+    color:#666; 
 }
 
 .dialogue_text {
    width:200px; 
 }
 
-#dialog_goto_line .dynamic_dialog_popup .dialog_content p  {
+#dialog_goto_line .dynamic_dialog_popup  p  {
     font-weight:600; 
     margin:0;
 }
  
-#dialog_goto_line .dynamic_dialog_popup .dialog_content ul  {
+#dialog_goto_line .dynamic_dialog_popup  ul  {
     margin:10px 0 10px 20px; 
     padding:0; 
     height:50px;

@@ -567,6 +567,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Look in files");
 		editor.getTextView().setAction("Look in files",function() {
 			openFileSearchDialog(editor);
+			return true;
 		});
 	};
 	
