@@ -5,7 +5,7 @@
  *          CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT. You can obtain a
  *          current copy of the Eclipse Public License from
  *          http://www.opensource.org/licenses/eclipse-1.0.php
- * 
+ *
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
 
@@ -15,9 +15,7 @@ define(
 function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 
-	var getResource = function(location) {
-
-			var isDirectory = null;
+	var getResource = function(location,isDirectory) {
 
 			return {
 				isDirectory: isDirectory,
@@ -33,7 +31,9 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 				if (target && $(target).size()) {
 					var resource = $(target).attr('id');
-					return getResource(resource);
+					var type = $(target).attr('type');
+					var isDir = type && type === "dir";
+					return getResource(resource,isDir);
 				}
 			}
 		};
@@ -42,10 +42,16 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 			var add = {
 				name: "New File...",
 				handler: function(selectionContext) {
-					var resourceLocation = getResourceFromContextSelection(selectionContext);
-					resourcesDialogue.createDialogue(resourceLocation.location).addResource(function(
+					var resource = getResourceFromContextSelection(selectionContext);
+					resourcesDialogue.createDialogue(resource.location).addResource(function(
 					resourceName) {
-						var urlNewResource = resourceLocation.location + (resourceName ? '/' + resourceName : "/untitled");
+						var urlNewResource;
+						if (!resource.isDirectory) {
+							urlNewResource = resource.location.substring(0,resource.location.lastIndexOf('/'));
+							urlNewResource = urlNewResource + (resourceName ? '/' + resourceName : "/untitled");
+						} else {
+							urlNewResource = resource.location + (resourceName ? '/' + resourceName : "/untitled");
+						}
 
 						navHistory.navigateToURL(urlNewResource);
 						window.explorer.highlight(urlNewResource);
