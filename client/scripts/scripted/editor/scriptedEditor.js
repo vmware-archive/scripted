@@ -21,13 +21,13 @@ define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orio
 "plugins/esprima/indexerService",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
 "plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences", "scripted/exec/exec-keys", 
-"scripted/exec/exec-after-save", "jshint"],
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys", 
+"scripted/exec/exec-after-save", "jshint" ],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
 mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTextSearcher, mSelection, mCommands, mParameterCollectors,
 mHtmlGrammar, mModuleVerifier, mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences) {
+mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences, tHelptext) {
 	var determineIndentLevel = function(editor, startPos, options){
 		window.foo = 1;
 		var model = editor.getTextView().getModel();
@@ -377,6 +377,9 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
 				var text = editor.getTextView().getText();
+				if (editor.getTextView().isReadonly()) {
+					return true;
+				}
 				var xhr = new XMLHttpRequest();
 				try {
 					// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
@@ -503,7 +506,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 				return null;
 			}
 		});
-		editor.setInput("Content", null, "Inishul contentz.");
+		editor.setInput("Content", null, "No contents");
 		
 		/*function that fixes Firefox cursor problem*/
 		editor.cursorFix = function(focusTarget){
@@ -580,7 +583,10 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences)
 						// force caret location if required
 						//window.onpopstate();
 					} else if (xhrobj.status === 500 && xhrobj.responseText === 'File is a directory') {
-						$('#editor').css('display','none');
+//						$('#editor').css('display','none');
+						// Set the editor to show some help, a la vim
+						editor.setInput("Content", null, tHelptext);
+						editor.getTextView().setReadonly(true);
 					} else if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
 						alert('cannot open a binary file');
 						//ret = false;

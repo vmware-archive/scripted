@@ -1,0 +1,34 @@
+                 _  _  _       _                                      
+                | || || |     | |                            _        
+                | || || |_____| | ____ ___  ____  _____    _| |_ ___  
+                | || || | ___ | |/ ___) _ \|    \| ___ |  (_   _) _ \ 
+                | || || | ____| ( (__| |_| | | | | ____|    | || |_| |
+                 \_____/|_____)\_)____)___/|_|_|_|_____)     \__)___/ 
+                                                              
+                      ______             _                      _ 
+                     / _____)           (_)       _            | |
+                    ( (____   ____  ____ _ ____ _| |_ _____  __| |
+                     \____ \ / ___)/ ___) |  _ (_   _) ___ |/ _  |
+                     _____) | (___| |   | | |_| || |_| ____( (_| |
+                    (______/ \____)_|   |_|  __/  \__)_____)\____|
+                                          |_|                     
+
+		  Some basic instructions for getting started with Scripted:
+
+		  Use the navigator on the left to select a file for editing, or
+		  use the context menus within it to create new files/folders.
+
+		  Help on all supported key bindings is available by clicking the
+		  '?' icon in the top right, or simply pressing 'Cmd/Ctrl+h'
+
+		  To search your project for a file to open by name, press 'Cmd/Ctrl+Shift+F'
+		  to show the 'Open File' dialog.
+
+		  To search for a file based simply on a string within it, press 
+		  'Cmd/Ctrl+Shift+L' to open the 'Look in files' dialog.
+
+		  The 'bars' icon next to the help icon opens the side panel which can
+		  host a second editor, pressing 'Shift' when opening any link or navigable
+		  JavaScript reference in Scripted will open the target in the side panel.
+		  The side panel can also be opened/closed with 'Cmd/Ctrl+Shift+E'.
+
