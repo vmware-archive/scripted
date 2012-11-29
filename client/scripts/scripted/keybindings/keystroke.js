@@ -86,6 +86,35 @@ function configure(isMac) {
 		);
 	}
 
+	////////////// Conversion from a captured key event to a keystroke string //////////
+
+	var modKeys = { //Map to be able to determine is some keycode is a modifier key.
+        '16': 'shift',
+        '17': 'ctrl',
+        '18': 'alt',
+        '91': 'cmd'
+    };
+
+	function fromKeyDownEvent(evt) {
+		var pieces = [];
+		if (evt.metaKey) {
+			pieces.push('Cmd');
+		}
+		if (evt.ctrlKey) {
+			pieces.push('Ctrl');
+		}
+		if (evt.shiftKey) {
+			pieces.push('Shift');
+		}
+		if (evt.altKey) {
+			pieces.push('Alt');
+		}
+		if (!modKeys[evt.keyCode]) {
+			pieces.push(code2name(evt.keyCode));
+		}
+		return pieces.join('+');
+	}
+
 	////////////// Conversion from scripted keystroke string into Orion keybinding object
 
 	//The names Scripted uses for Orion's 'mod1', 'mod2' etc. modifier keys.
@@ -103,19 +132,22 @@ function configure(isMac) {
 	 * @reture {KeyBinding}
 	 */
 	function fromKeyBinding(kb) {
-		var pieces = [];
-		if (kb.mod1) { pieces.push(mod1str); }
-		if (kb.mod2) { pieces.push(mod2str); }
-		if (kb.mod3) { pieces.push(mod3str); }
-		if (kb.mod4) { pieces.push(mod4str); }
-		pieces.push(code2name(kb.keyCode));
-		return pieces.join('+');
+		if (kb) {
+			var pieces = [];
+			if (kb.mod1) { pieces.push(mod1str); }
+			if (kb.mod2) { pieces.push(mod2str); }
+			if (kb.mod3) { pieces.push(mod3str); }
+			if (kb.mod4) { pieces.push(mod4str); }
+			pieces.push(code2name(kb.keyCode));
+			return pieces.join('+');
+		}
 	}
 
 	return {
 		isMac: isMac, //mostly for testing. So we can tell how this module was configured.
 		toKeyBinding: toKeyBinding,
-		fromKeyBinding: fromKeyBinding
+		fromKeyBinding: fromKeyBinding,
+		fromKeyDownEvent: fromKeyDownEvent
 	};
 }
 

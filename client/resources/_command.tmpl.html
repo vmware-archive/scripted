@@ -1,12 +1,14 @@
 {{if name}}
-<li>
-	<span class="shortcut_name">{{toShortcutName:name}}</span>
-	<span class="shortcut_keystroke">
-		{{if keyBinding}}
-			{{toKeystroke:keyBinding}}
-		{{else}}
-			UNBOUND
-		{{/if}}
-	</span>
+<li class="shortcut_line">
+	<div class="shortcut_header">
+		<div class="shortcut_name">{{toShortcutName:name}}</div>
+		<div class="shortcut_keystroke">
+			{{if keyBinding}}
+				{{toKeystroke:keyBinding}}
+			{{else}}
+				UNBOUND
+			{{/if}}
+		</div>
+	</div>
 </li>
 {{/if}}

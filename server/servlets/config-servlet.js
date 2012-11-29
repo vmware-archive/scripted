@@ -15,7 +15,12 @@
 
 var servlets = require('../servlets');
 var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
-var getScriptedRcFile = require('../jsdepend/dot-scripted').configure(filesystem).getScriptedRcFile;
+var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
+var getScriptedRcFile = dotscripted.getScriptedRcFile;
+var putScriptedRcFile = dotscripted.putScriptedRcFile;
 var makePromisedRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
 
-servlets.register('/conf/scriptedrc', makePromisedRequestHandler(getScriptedRcFile));
+var basePath = '/conf/';
+
+servlets.register(basePath + 'get/scriptedrc', makePromisedRequestHandler(getScriptedRcFile));
+servlets.register(basePath + 'put/scriptedrc', makePromisedRequestHandler(putScriptedRcFile));

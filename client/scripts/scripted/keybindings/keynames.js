@@ -95,7 +95,7 @@ defCode(61, "=", "Plus");
 // Add all alpha chars to the name maps.
 for (i=65 ; i <=90; i++) {
 	var char = String.fromCharCode(i);
-	defCode(i, char.toLowerCase());
+	defCode(i, char.toUpperCase());
 }
 
 defCode(91, "Windows");

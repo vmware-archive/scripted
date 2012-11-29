@@ -16,8 +16,9 @@ if (typeof define !== 'function') {
 define(function(require, exports, module) {
 
 	var makePromisedServletStub = require('./stub-maker').makePromisedServletStub;
-	var servletPath = '/conf/scriptedrc';
+	var basePath = '/conf/';
 
-	exports.getScriptedRcFile = makePromisedServletStub(servletPath);
+	exports.getScriptedRcFile = makePromisedServletStub(basePath + 'get/scriptedrc');
+	exports.putScriptedRcFile = makePromisedServletStub(basePath + 'put/scriptedrc');
 	
 });

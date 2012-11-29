@@ -1189,7 +1189,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @param {orion.textview.KeyBinding} keyBinding the key binding
 		 * @param {String} name the action
 		 */
-		setKeyBinding: function(keyBinding, name) {
+		setKeyBinding: function(keyBinding, name, keepUnusedActions) {
 			var keyBindings = this._keyBindings;
 			for (var i = 0; i < keyBindings.length; i++) {
 				var kb = keyBindings[i]; 
@@ -1202,22 +1202,24 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						} else {
 							var oldName = kb.name; 
 							keyBindings.splice(i, 1);
-							var index = 0;
-							while (index < keyBindings.length && oldName !== keyBindings[index].name) {
-								index++;
-							}
-							if (index === keyBindings.length) {
-								/* <p>
-								 * Removing all the key bindings associated to an user action will cause
-								 * the user action to be removed. TextView predefined actions are never
-								 * removed (so they can be reinstalled in the future). 
-								 * </p>
-								 */
-								var actions = this._actions;
-								for (var j = 0; j < actions.length; j++) {
-									if (actions[j].name === oldName) {
-										if (!actions[j].defaultHandler) {
-											actions.splice(j, 1);
+							if (!keepUnusedActions) {
+								var index = 0;
+								while (index < keyBindings.length && oldName !== keyBindings[index].name) {
+									index++;
+								}
+								if (index === keyBindings.length) {
+									/* <p>
+									 * Removing all the key bindings associated to an user action will cause
+									 * the user action to be removed. TextView predefined actions are never
+									 * removed (so they can be reinstalled in the future). 
+									 * </p>
+									 */
+									var actions = this._actions;
+									for (var j = 0; j < actions.length; j++) {
+										if (actions[j].name === oldName) {
+											if (!actions[j].defaultHandler) {
+												actions.splice(j, 1);
+											}
 										}
 									}
 								}

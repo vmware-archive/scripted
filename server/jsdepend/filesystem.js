@@ -192,4 +192,4 @@ function withBaseDir(baseDir) {
 exports.withBaseDir = withBaseDir;
 exports.ignore = ignore;
 exports.rename = rename;
-exports.deleteResource = deleteResource; 
+exports.deleteResource = deleteResource;

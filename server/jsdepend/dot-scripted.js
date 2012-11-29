@@ -24,6 +24,8 @@ var JSON5 = require('json5');
 
 function configure(filesystem) {
 
+	var MAIN_SCRIPTED_RC_FILE = 'scripted.json';
+
 	var listFiles = filesystem.listFiles;
 	var getContents = filesystem.getContents;
 	var getUserHome = filesystem.getUserHome;
@@ -132,7 +134,7 @@ function configure(filesystem) {
 			var configFile = pathResolve(home, ".scriptedrc");
 			return isDirectory(configFile, function (isDir) {
 				if (isDir) {
-					configFile = pathResolve(configFile, 'scripted.json');
+					configFile = pathResolve(configFile, MAIN_SCRIPTED_RC_FILE);
 				}
 				return parseJsonFile(configFile, callback);
 			});
@@ -159,6 +161,25 @@ function configure(filesystem) {
 			});
 		});
 	}
+
+	function getScriptedRcDirLocation() {
+		var home = getUserHome();
+		if (home) {
+			var configFile = pathResolve(home, '.scriptedrc');
+			return configFile;
+		}
+		//return undefined;
+	}
+
+
+	function getScriptedRcFileLocation(name) {
+		var configDir = getScriptedRcDirLocation();
+		if (configDir) {
+			var configFile = pathResolve(configDir, name+'.json');
+			return configFile;
+		}
+		//return undefined;
+	}
 	
 	/**
 	 * Gets a given config file from the .scriptedrc folder in the user.home directort
@@ -167,10 +188,9 @@ function configure(filesystem) {
 	function getScriptedRcFile(name) {
 		console.log('scriptedrc file requested: '+name);
 		var d = when.defer();
-		var home = getUserHome();
-		if (home) {
-			var configFile = pathResolve(home, '.scriptedrc/'+name+'.json');
-			console.log('scriptedrc file path = '+configFile);
+		var configFile = getScriptedRcFileLocation(name);
+		console.log('scriptedrc file path = '+configFile);
+		if (configFile) {
 			parseJsonFile(configFile, function (jsonData) {
 				d.resolve(jsonData);
 			});
@@ -179,10 +199,26 @@ function configure(filesystem) {
 		}
 		return d;
 	}
+
+	/**
+	 * Ensures that .scriptedrc is in directory format. If it isn't yet...
+	 * then migrate it.
+	 */
+	function ensureDirectoryForm() {
+		//TODO: Not implemented yet... operation will fail if not in dir format.
+	}
+	
+	function putScriptedRcFile(name, contents) {
+		ensureDirectoryForm();
+		//TODO: implement for real
+		console.log('putScriptedRcFile: '+ name);
+		console.log(JSON.stringify(contents, null, '  '));
+	}
 		
 	return {
 		getConfiguration: getConfiguration,
-		getScriptedRcFile: getScriptedRcFile
+		getScriptedRcFile: getScriptedRcFile,
+		putScriptedRcFile: putScriptedRcFile
 	};
 
 }
