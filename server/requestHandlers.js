@@ -177,15 +177,25 @@ function handleTemplates(response, request) {
 		response.end();
 		return;
 	}
-	console.log('Client requested content assist templates. Looking for scope "' + scope + '" with root: ' + root);
-	templates.process(root).then(
+	console.log('Client requested content assist templates. Looking for scope "' + scope + '"' + (root ? ' with root: ' + root : ''));
+	templates.processTemplates(root).then(
 		function(res) {
-			response.writeHead(200, {'content-type': 'application/json'});
-			response.write(JSON.stringify(templates.allCompletions[scope]));	
+			try {
+				response.writeHead(200, {'content-type': 'application/json'});
+				response.write(
+				templates.allCompletions[scope] ? 
+					JSON.stringify(templates.allCompletions[scope]) :
+					'[]');
+					
+			} catch (e) {
+				console.error("Error sending templates to client.");
+				console.error(e.stack);
+			}
 			response.end();
 			console.log('Client requested content assist templates complete');
 		},
 		function(err) {
+			console.log("Templates received errback");
 			response.writeHead(500, {'content-type': 'application/json'});
 			response.write('{"error" : true, "val" : "' + err + '"}');
 			response.end();
