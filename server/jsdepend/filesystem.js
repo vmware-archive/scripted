@@ -122,10 +122,6 @@ function withBaseDir(baseDir) {
 	
 	function rename(original, newname) {
 		console.log("Requesting resource rename for: " + original + " into " + newname);
-<<<<<<< HEAD
-=======
-		var when = require('when');
->>>>>>> 7ae1184df8f8c77c720b3f37df926e4bd2ff6cfc
 		var deferred = when.defer();
 		if (original && newname) {
 			var fs = require('fs');
@@ -144,15 +140,9 @@ function withBaseDir(baseDir) {
 		return deferred;
 	}
 
-<<<<<<< HEAD
 	function deleteResource(handle) {
 		var resourcePath = handle2file(handle);
 		console.log("Requesting resource delete for: " + resourcePath);
-=======
-	function deleteResource(resourcePath) {
-		console.log("Requesting resource delete for: " + resourcePath);
-		var when = require('when');
->>>>>>> 7ae1184df8f8c77c720b3f37df926e4bd2ff6cfc
 		var deferred = when.defer();
 		if (resourcePath) {
 			var fs = require('fs');
