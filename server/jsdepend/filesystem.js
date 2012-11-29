@@ -13,15 +13,12 @@
  
 /*global require exports console module process */
 
-//TODO: a better name for this module. It's really an abstraction of the file system. 
-//      so the name ought to reflect that.
-
 //////////////////////////////////////
 // Configuration
 //
 //   A configuration object provides a number of functions and pieces of info that
 //   the api implementation depends on. The implementation of these functions
-//   may differ depending on where we are using the API (e.g. file access is different 
+//   may differ depending on where we are using the API (e.g. file access is different
 //   in server or browser environments).
 ///////////////////////////////////////////
 
@@ -66,7 +63,7 @@ function withBaseDir(baseDir) {
 			// baseDir
 			return "user.home";
 		} else {
-			//Note: this code from here 
+			//Note: this code from here
 			// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
 			return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
 		}
@@ -204,10 +201,12 @@ function withBaseDir(baseDir) {
 	 * @return Promise
 	 */
 	function putContents(handle, contents) {
+		console.log('putContents: '+handle);
 		var d = when.defer();
 		var file = handle2file(handle);
 		fs.writeFile(file, contents, function (err) {
 			if (err) {
+				console.error(err);
 				d.reject(err);
 			} else {
 				d.resolve();

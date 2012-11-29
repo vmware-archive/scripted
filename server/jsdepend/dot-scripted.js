@@ -31,6 +31,7 @@ function configure(filesystem) {
 	var getUserHome = filesystem.getUserHome;
 	var isFile = filesystem.isFile;
 	var isDirectory = filesystem.isDirectory;
+	var putContents = filesystem.putContents;
 
 	// For a given file handle the '.scripted' configuration info is found and composed as follows:
 	
@@ -209,10 +210,13 @@ function configure(filesystem) {
 	}
 	
 	function putScriptedRcFile(name, contents) {
-		ensureDirectoryForm();
-		//TODO: implement for real
-		console.log('putScriptedRcFile: '+ name);
-		console.log(JSON.stringify(contents, null, '  '));
+		return when(ensureDirectoryForm(), function () {
+			//TODO: implement for real
+			console.log('putScriptedRcFile: '+ name);
+			console.log(JSON.stringify(contents, null, '  '));
+			var loc = getScriptedRcFileLocation(name);
+			return putContents(loc, JSON.stringify(contents, null, '  '));
+		});
 	}
 		
 	return {
