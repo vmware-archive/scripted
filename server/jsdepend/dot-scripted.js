@@ -19,8 +19,13 @@ var pathResolve = require('./utils').pathResolve;
 var jsonMerge = require('./json-merge');
 var defaults = require('./dot-scripted-defaults');
 var when = require('when');
+var pipeline = require('when/pipeline');
 
 var JSON5 = require('json5');
+
+function debug_log(msg) {
+	console.log(msg);
+}
 
 function configure(filesystem) {
 
@@ -32,6 +37,10 @@ function configure(filesystem) {
 	var isFile = filesystem.isFile;
 	var isDirectory = filesystem.isDirectory;
 	var putContents = filesystem.putContents;
+	var handle2file = filesystem.handle2file;
+	var stat = filesystem.stat;
+	var mkdir = filesystem.mkdir;
+	var deleteResource = filesystem.deleteResource;
 
 	// For a given file handle the '.scripted' configuration info is found and composed as follows:
 	
@@ -103,7 +112,7 @@ function configure(filesystem) {
 				return callback(data);
 			},
 			function (err) {
-				console.log(err);
+				debug_log(err);
 				callback({
 					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc
 					//so this error is expected.
@@ -187,10 +196,10 @@ function configure(filesystem) {
 	 * @return {Promise}
 	 */
 	function getScriptedRcFile(name) {
-		console.log('scriptedrc file requested: '+name);
+		debug_log('scriptedrc file requested: '+name);
 		var d = when.defer();
 		var configFile = getScriptedRcFileLocation(name);
-		console.log('scriptedrc file path = '+configFile);
+		debug_log('scriptedrc file path = '+configFile);
 		if (configFile) {
 			parseJsonFile(configFile, function (jsonData) {
 				d.resolve(jsonData);
@@ -201,19 +210,62 @@ function configure(filesystem) {
 		return d;
 	}
 
+	function convertRcFileToDir(loc) {
+		return getContents(loc).then(function (contents) {
+			debug_log('got contents of ' + loc );
+			debug_log(contents);
+			return pipeline([
+				function () {
+					debug_log('Deleting ...');
+					return deleteResource(loc).then(function () {
+						debug_log('Deleting OK');
+					});
+				},
+				function () {
+					debug_log('Mkdir '+loc+' ...');
+					return mkdir(loc).then(function () {
+						debug_log('Mkdir OK');
+					});
+				},
+				function () {
+					var putLoc = pathResolve(loc, MAIN_SCRIPTED_RC_FILE);
+					debug_log('putting contents to '+putLoc+' ...');
+					return putContents(putLoc, contents).then(function () {
+						debug_log('putting OK');
+					});
+				}
+			]);
+		});
+	}
+
 	/**
 	 * Ensures that .scriptedrc is in directory format. If it isn't yet...
 	 * then migrate it.
 	 */
 	function ensureDirectoryForm() {
-		//TODO: Not implemented yet... operation will fail if not in dir format.
+		debug_log('ensure directory form');
+		var loc = getScriptedRcDirLocation();
+		return stat(loc).then(
+			function (s) {
+				if (s.isDirectory) {
+					debug_log('Already a dir => DONE');
+					//okay!
+				} else if (s.isFile) {
+					debug_log('It is a file');
+					return convertRcFileToDir(loc);
+				}
+			},
+			function (err) {
+				//probably means file/dir doesn't exist. So create it.
+				return mkdir(loc);
+			}
+		);
 	}
 	
 	function putScriptedRcFile(name, contents) {
 		return when(ensureDirectoryForm(), function () {
-			//TODO: implement for real
-			console.log('putScriptedRcFile: '+ name);
-			console.log(JSON.stringify(contents, null, '  '));
+			debug_log('putScriptedRcFile: '+ name);
+			debug_log(JSON.stringify(contents, null, '  '));
 			var loc = getScriptedRcFileLocation(name);
 			return putContents(loc, JSON.stringify(contents, null, '  '));
 		});

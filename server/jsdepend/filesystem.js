@@ -106,6 +106,13 @@ function withBaseDir(baseDir) {
 		}
 	}
 
+	/**
+	 * Now useable both in callback or promise form... if no callback is
+	 * passed then a promise is returned. Eventually the callack form
+	 * should go away... but we will need to update all uses of this method
+	 * first.
+	 * @return {Promise.boolean}
+	 */
 	function isDirectory(handle, callback) {
 		fs.stat(handle2file(handle), function (err, stats) {
 			if (err) {
@@ -158,6 +165,15 @@ function withBaseDir(baseDir) {
 	}
 	
 	function getContents(handle, callback, errback) {
+		var d = when.defer();
+		if (!callback) {
+			callback = function (v) {
+				d.resolve(v);
+			};
+			errback = function (err) {
+				d.reject(err);
+			};
+		}
 		errback = errback || function (err) {
 			console.error(err);
 			callback(null, err);
@@ -180,6 +196,7 @@ function withBaseDir(baseDir) {
 				callback(data);
 			}
 		});
+		return d;
 	}
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	
@@ -214,6 +231,46 @@ function withBaseDir(baseDir) {
 		});
 		return d;
 	}
+
+	/**
+	 * @return Promise
+	 */
+	function mkdir(handle) {
+		var d = when.defer();
+		fs.mkdir(handle2file(handle), function (err) {
+			if (err) {
+				d.reject(err);
+			} else {
+				d.resolve();
+			}
+		});
+		return d;
+	}
+
+	/**
+	 * simplified version of nodejs fs.stat. Only returns a data object with two flags
+	 * isDirectory and isFile.
+	 *
+	 * We don't return the 'naked' result from fs.stat here because it can't easily be
+	 * JSON.stringified and sent over to the client.
+	 *
+	 * @return Promise
+	 */
+	function stat(handle) {
+		console.log('statting: '+handle);
+		var d = when.defer();
+		fs.stat(file2handle(handle), function (err, statObj) {
+			if (err) {
+				d.reject(err);
+			} else {
+				d.resolve({
+					isDirectory: statObj.isDirectory(),
+					isFile: statObj.isFile()
+				});
+			}
+		});
+		return d;
+	}
 	
 	return {
 		getUserHome:  getUserHome,
@@ -226,6 +283,8 @@ function withBaseDir(baseDir) {
 		isDirectory:  isDirectory,
 		isFile:		  isFile,
 		rename:       rename,
+		stat:         stat,
+		mkdir:        mkdir,
 		deleteResource: deleteResource
 	};
 }
