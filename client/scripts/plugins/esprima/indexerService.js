@@ -81,7 +81,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	// what the dependencies look like
 	
 	// The dependencies is an associative array where each key is a path to a transitive dependency
-	// the values contain the module kind, and an associative array of references.  
+	// the values contain the module kind, and an associative array of references.
 	// Each reference has a kind, name, and path
 	// dependencies : { path : { kind, refs : { name { kind, name, path } } }
 
@@ -96,19 +96,19 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	function getDependencies(fileName, statusFn, callback) {
 		// ask server for dependencies, but for now, just hard code
 		// dependency = { path { path to file }, name { module name }, kind : { global, AMD, commonjs } }
-		jsdepend.getDGraph(fileName, callback, 
+		jsdepend.getDGraph(fileName, callback,
 			function (error) {
 				statusFn(error);
 				callback([]);
 			}
 		);
-	}	
+	}
 
 	/**
 	 * Asks server for text of specified dependency.  Then calls the inferencer to summarize the file.
-	 * 
+	 *
 	 * @param {{path:String}} dependency a url of the file to summarize
-	 * @param {Indexer} indexer 
+	 * @param {Indexer} indexer
 	 * @param {Function} persistFn function to call for persisting to local storage
 	 * @param {Function} statusFn function to call for messages
 	 * @param {Function} k the continuation
@@ -169,7 +169,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 			if (deps.hasOwnProperty(prop)) {
 				var tsCache = retrieveFn(prop + "-summary-ts");
 				var tsDep = deps[prop].timestamp;
-				// only update the local cache if it 
+				// only update the local cache if it
 				// older than what the server has
 				if (!tsCache || !tsDep || tsCache < tsDep) {
 					deps[prop].path = prop;
@@ -182,7 +182,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	
 	
 	
-	// anything over 2 days old is considered stale	
+	// anything over 2 days old is considered stale
 	var twoDays = 1000 * 60 * 60 * 24 * 2;
 	function isStale(val, currentTime) {
 		var ts = parseInt(val, 10);
@@ -225,8 +225,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	 * Creates a new indexer.
 	 * Since the indexer can be called as part of a webworker, we cannot access local storage directly
 	 * The webworker must use a callback to access the console or local storage. Hence the following parameters:
-	 * 
-	 * @param persistFn is a function that takes a key and a value as arguments 
+	 *
+	 * @param persistFn is a function that takes a key and a value as arguments
 	 * and persists them.
 	 * @param retreiveFn is a function that takes a key and returns a value from storage
 	 * @param statusFn is a function that accepts status messages
@@ -247,8 +247,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 		// private instance variable
 		var indexTargetFile;
 
-		// private helper method		
-		function getDeps(name) {		
+		// private helper method
+		function getDeps(name) {
 			if (!indexTargetFile || !name) {
 				return null;
 			}
@@ -358,9 +358,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 		 * Two kinds of objects are worked with here:
 		 *    dependency = { path : { path to file }, name { module name }, kind : { global, AMD }, timestamp : long }
 		 *    summary = { provided : { name -> typeName }, types : { typeName -> { name -> typeName }, timestamp : long }
-		 * 
+		 *
 		 * Performs the index asynchronously
-		 * 
+		 *
 		 * optional callback is called after dependencies are retrieved
 		 */
 		this.performIndex = function(fileName, callback) {
@@ -389,8 +389,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 				};
 			} else {
 				var that = this;
-				setTimeout(function() {	
-					that._internalPerformIndex(fileName, callback); 
+				setTimeout(function() {
+					that._internalPerformIndex(fileName, callback);
 					purgeStaleStorage(statusFn);
 				}, 100);
 			}
@@ -407,7 +407,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 			indexTargetFile = fileName;
 			var indexer = this;
 			// asynchronously ask server for dependencies of fileName
-			getDependencies(fileName, statusFn, function(deps) { 
+			getDependencies(fileName, statusFn, function(deps) {
 				// cache these dependencies
 				cacheDeps(fileName, deps, persistFn);
 		
@@ -416,7 +416,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 				
 				// ask server for contents of each stale dependency
 				// ensure that this happens in order
-				eachk(needsUpdating, 
+				eachk(needsUpdating,
 					// function to call
 					function(itemToUpdate, k) {
 						createSummary(itemToUpdate, indexer, persistFn, statusFn, k);

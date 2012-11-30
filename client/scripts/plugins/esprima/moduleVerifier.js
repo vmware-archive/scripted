@@ -126,7 +126,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 	/**
 	 * returns true iff start and end are inside of the range
 	 */
-	function coveredNyRange(start, end, range) {
+	function coveredByRange(start, end, range) {
 		return range[0] <= start && range[1] >= end;
 	}
 	function findModulePath(buffer, indexer, start, end) {
@@ -148,7 +148,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 			if (arrayElts) {
 				// check each array element to see if it matches the 
 				for (var i = 0; i < arrayElts.length; i++) {
-					if (coveredNyRange(start, end, arrayElts[i].range)) {
+					if (coveredByRange(start, end, arrayElts[i].range)) {
 						throw arrayElts[i].value;
 					}
 				}
