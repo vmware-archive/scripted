@@ -162,8 +162,9 @@ var installKeyEventTrap = (function () {
 	}
 
 	return function /*installKeyEventTrap*/(editor) {
-		boundKeys = getKeyBindings(editor);
-		installListener();
+// Disable this for now... to much trouble ensues when we trap all these events.
+//		boundKeys = getKeyBindings(editor);
+//		installListener();
 	};
 
 }()); //end installKeyEventTrap
