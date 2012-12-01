@@ -92,7 +92,8 @@ function configure(isMac) {
         '16': 'shift',
         '17': 'ctrl',
         '18': 'alt',
-        '91': 'cmd'
+        '91': 'cmd',
+        '224': 'cmd'
     };
 
 	function fromKeyDownEvent(evt) {
