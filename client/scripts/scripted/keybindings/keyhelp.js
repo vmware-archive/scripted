@@ -12,7 +12,6 @@
  *     Andrew Clement
  *     Kris De Volder
  *     Christopher Johnson
- *     Kris De Volder
  ******************************************************************************/
 /*global $*/
 
@@ -21,19 +20,11 @@
 // When loaded it sets itself up without requiring any further help
 // from the main app.
 
-define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit'],
-function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit) {
+define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit', 'text!./_keybinding.tmpl.html', './action-info'],
+function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, commandTemplate, mActionInfo) {
 
 	var attachKeyEditor = mKeyedit.attachKeyEditor;
-
-	var names = (function () {
-		/* Load keyboard shortcuts*/
-		var xhrobj = new XMLHttpRequest();
-		var url = '/resources/shortcut.json';
-		xhrobj.open("GET", url, false); // TODO naughty? synchronous xhr
-		xhrobj.send();
-		return JSON.parse(xhrobj.responseText).names;
-	}());
+	var getActionDescription = mActionInfo.getActionDescription;
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
@@ -41,8 +32,8 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit) {
 		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
-			var lname = names[l.name] ? names[l.name] : l.name;
-			var rname = names[r.name] ? names[r.name] : r.name;
+			var lname = getActionDescription(l.name);
+			var rname =getActionDescription(r.name);
 			if (lname) {
 				lname = lname.toLowerCase();
 			}
@@ -78,14 +69,9 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit) {
 	
 		$.views.converters({
 			toKeystroke: mKeystroke.fromKeyBinding,
-			toShortcutName: function(name){
-				if (names[name]) { return names[name]; }
-				else { return name; }
-			}
+			toShortcutName: getActionDescription
 		});
 
-		var command_file = "/resources/_command.tmpl.html";
-		
 		var keyBindings = getSortedKeybindings();
 		
 		var importantKeyBindings = [];
@@ -101,39 +87,35 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit) {
 			}
 		}
 		
-		$.get(command_file, null, function(template){
+		var tmpl = $.templates(commandTemplate);
 		
-			var tmpl = $.templates(template);
-			
-			function render(it, into) {
-				if (Array.isArray(it)) {
-					for (var i = 0; i < it.length; i++) {
-						render(it[i], into);
-					}
-				} else {
-				    var element = $(tmpl.render(it));
-				    attachKeyEditor(element, it.name, mKeystroke.fromKeyBinding(it.keyBinding));
-					into.append(element);
+		function render(it, into) {
+			if (Array.isArray(it)) {
+				for (var i = 0; i < it.length; i++) {
+					render(it[i], into);
 				}
+			} else {
+			    var element = $(tmpl.render(it));
+			    attachKeyEditor(element, it.name, mKeystroke.fromKeyBinding(it.keyBinding));
+				into.append(element);
 			}
+		}
+	
+		var cl = $('#command_list');
 		
-			var cl = $('#command_list');
-			
-			cl.empty();
-			render(importantKeyBindings, cl);
-			cl.append('<li><hr /></li>');
-			render(otherKeyBindings, cl);
-			cl.append('<li><hr /></li>');
-			render(
-				mKeybinder.getUnboundActionNames(window.editor).map(function (name) {
-					return {
-						name: name
-					};
-				}),
-				cl
-			);
-			
-		});
+		cl.empty();
+		render(importantKeyBindings, cl);
+		cl.append('<li><hr /></li>');
+		render(otherKeyBindings, cl);
+		cl.append('<li><hr /></li>');
+		render(
+			mKeybinder.getUnboundActionNames(window.editor).map(function (name) {
+				return {
+					name: name
+				};
+			}),
+			cl
+		);
 
 		window.editor._textView._updatePage();
 	}

@@ -18,10 +18,8 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-/*global $*/
-
-define(['./keystroke', 'scripted/utils/os', 'servlets/config-client', 'jquery'
-], function (mKeystroke, OS, mConfig) {
+define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client'
+], function (mActionInfo, mKeystroke, OS, mConfig) {
 
 function debug_log(msg) {
 	console.log(msg);
@@ -34,6 +32,8 @@ var keystroke2keybinding = mKeystroke.toKeyBinding;
 var getScriptedRcFile = mConfig.getScriptedRcFile;
 var putScriptedRcFile = mConfig.putScriptedRcFile;
 var event2keystroke = mKeystroke.fromKeyDownEvent;
+
+var isGlobalAction = mActionInfo.isGlobalAction;
 
 /**
  * Information about the default keybindings. These are not statically known. They
@@ -132,6 +132,14 @@ var installKeyEventTrap = (function () {
 	                      // Thus the keys of this map are the events that we should trap.
 
 	/**
+	 * @return the corresponding global action or something falsy if there is no such action.
+	 */
+	function getGlobalAction(keystroke) {
+		var action = boundKeys[keystroke];
+		return action && isGlobalAction(action) && action;
+	}
+
+	/**
 	 * Make sure a listener is attached to trap relevant key events at the document
 	 * root.
 	 */
@@ -147,24 +155,25 @@ var installKeyEventTrap = (function () {
 					//listening for keypress events rather than keydown events these events
 					//fire after keydown. If we trap the keydown events, it prevents the
 					//keypress events.
-					if (boundKeys[keystroke]) {
+					var globalAction = getGlobalAction(keystroke);
+					if (globalAction) {
 						debug_log('Gotcha: '+keystroke);
-						window.editor.getTextView().invokeAction(boundKeys[keystroke]);
-						return false;
+						window.editor.getTextView().invokeAction(globalAction);
+						e.preventDefault(); // This is for when using just dom listener
+						e.stopPropagation(); // This is for when using just dom listener
+						return false; // This is when used as jquery listener.
 					} else {
 						debug_log('Ignore: '+keystroke);
 					}
 				}
 			};
-			$(document).keydown(listener);
-			$(document.body).keydown(listener);
+			document.body.addEventListener('keydown', listener);
 		}
 	}
 
 	return function /*installKeyEventTrap*/(editor) {
-// Disable this for now... to much trouble ensues when we trap all these events.
-//		boundKeys = getKeyBindings(editor);
-//		installListener();
+		boundKeys = getKeyBindings(editor);
+		installListener();
 	};
 
 }()); //end installKeyEventTrap
@@ -212,12 +221,16 @@ function getUnboundActionNames(editor) {
 	//So we build a set of bound names first.
 	var kbs = getKeyBindings(editor);
 	var boundNamesMap = {};
+	//var dump = "";
 	for (var k in kbs) {
 		var boundName = kbs[k];
 		if (boundName) {
+			//dump += "'"+boundName+"',\n";
 			boundNamesMap[boundName] = true;
 		}
 	}
+	//debug_log('>>>>  All bound actions:');
+	//debug_log(dump);
 	return getActionNames(editor)
 	.filter(function (name) {
 		return !boundNamesMap[name];
