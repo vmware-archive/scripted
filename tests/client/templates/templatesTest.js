@@ -13,7 +13,7 @@
 
 // Tests for scripted-completions files
 
-define(['orion/assert', 'scripted/editor/templateContentAssist', 'js-tests/common/testutils', 'jquery'], 
+define(['orion/assert', 'scripted/editor/templateContentAssist', 'tests/client/common/testutils', 'jquery'], 
 function(assert, mTemplates, mTestutils) {
 	var testResourcesRoot = mTestutils.discoverTestRoot() + "completions/";
 	

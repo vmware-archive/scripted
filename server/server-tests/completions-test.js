@@ -19,26 +19,27 @@
 //1) install nodeunit:
 // 'cd ~'
 // 'npm install nodeunit'
-//2) run the tests 
-// 'cd <this-directory>' 
+//2) run the tests
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 var completionsModule = require("../templates/completions");
-
+//var testResourcesFolder = process.cwd() + "/test-resources/";
 var testResourcesFolder = __dirname + "/test-resources/";
 
 exports.extractScope = function(test) {
-	test.equals("html", completionsModule.extractScope("text.html - source - meta.tag, punctuation.definition.tag.begin"));
-	test.equals("js", completionsModule.extractScope("source.js - source - meta.tag, punctuation.definition.tag.begin"));
-	test.equals(null, completionsModule.extractScope("- source - meta.tag, punctuation.definition.tag.begin"));
-	test.equals(null, completionsModule.extractScope(null));
+	var completionsProcessor = new completionsModule.CompletionsProcessor();
+	test.equals("html", completionsProcessor.extractScope("text.html - source - meta.tag, punctuation.definition.tag.begin"));
+	test.equals("js", completionsProcessor.extractScope("source.js - source - meta.tag, punctuation.definition.tag.begin"));
+	test.equals(null, completionsProcessor.extractScope("- source - meta.tag, punctuation.definition.tag.begin"));
+	test.equals(null, completionsProcessor.extractScope(null));
 	test.done();
 };
 
 // no test is too silly!
 exports.findCompletionsFiles = function(test) {
-	completionsModule.setCompletionsFolder(testResourcesFolder);
-	completionsModule.findCompletionsFiles(
+	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
+	completionsProcessor.findCompletionsFiles(
 		function(files) {
 			test.equals(files.length, 3, "Should have found 3 files");
 			test.equals(files[0], testResourcesFolder + "test1.scripted-completions");
@@ -65,7 +66,8 @@ exports.findCompletions = function(test) {
 		test.done();
 	};
 
-	completionsModule.findCompletions(
+	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
+	completionsProcessor.findCompletions(
 		testResourcesFolder + "test1.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
@@ -108,7 +110,7 @@ exports.findCompletions = function(test) {
 			
 		}, errback);
 		
-	completionsModule.findCompletions(
+	completionsProcessor.findCompletions(
 		testResourcesFolder + "test2.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
@@ -134,9 +136,9 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].proposal, completion);
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
-			test.deepEqual(completions[i].positions, [ 
+			test.deepEqual(completions[i].positions, [
 				{offset:completion.indexOf("arg1"), length:"arg1".length},
-				{offset:completion.indexOf("arg2"), length:"arg2".length} 
+				{offset:completion.indexOf("arg2"), length:"arg2".length}
 			]);
 			test.equals(completions[i].escapePosition, completion.indexOf("</acronym>"));
 			i++;
@@ -145,7 +147,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].proposal, completion);
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
-			test.deepEqual(completions[i].positions, [ 
+			test.deepEqual(completions[i].positions, [
 				{offset:completion.indexOf("arg1"), length:"arg1".length},
 				{offset:completion.indexOf("arg2"), length:"arg2".length}
 			]);
@@ -154,7 +156,7 @@ exports.findCompletions = function(test) {
 			
 		}, errback);
 		
-	completionsModule.findCompletions(
+	completionsProcessor.findCompletions(
 		testResourcesFolder + "test3.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;

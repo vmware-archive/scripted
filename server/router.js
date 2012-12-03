@@ -91,7 +91,7 @@ function route(handle, pathname, response, request, next) {
             response.writeHead(200, {
                 "Content-Type": "text/plain"
             });
-            response.write(path.resolve('../client/scripts/js-tests/test-resources/'));
+            response.write(path.resolve('../tests/client/test-resources/'));
             response.end();
         } else {
             next();

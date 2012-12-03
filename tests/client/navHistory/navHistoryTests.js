@@ -15,11 +15,12 @@
 /*jslint browser:true */
 /*global $ define module localStorage window console */
 
-define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'js-tests/common/testutils', 'setup', 'jquery'], 
+define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'tests/client/common/testutils', 'setup', 'jquery'], 
 function(assert, mNavHistory, mPageState, mTestutils) {
 	
 	var testResourcesRoot = mTestutils.discoverTestRoot();
 	var testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
+	var urlPathPrefix = "/clientServerTests?" + testResourcesRoot;
 	
 	var getFileContents = mTestutils.getFileContents;
 	
@@ -104,7 +105,7 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb1a = function() {
@@ -119,7 +120,7 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		
 		assert.equal(historyMenu.children().length, 1);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb2 = function() {
@@ -134,9 +135,9 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#0,0");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#0,0");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#0,0");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#0,0");
 	};
 	
 	tests.testHistorycrumb3 = function() {
@@ -153,9 +154,9 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		
 		assert.equal(historyMenu.children().length, 2);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#10,20");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#10,20");
 	};
 	
 	tests.testHistorycrumb4 = function() {
@@ -179,11 +180,11 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+		assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#6,7");
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+		assert.equal(historyMenu.children()[2].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
 	};
 	
 	// test subeditor navigation applies to history
@@ -218,26 +219,26 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		var menuUrl = historyMenu.children()[0].children[0].attributes[0].value;
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
+			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
 		} else if (menuUrl.indexOf('#6,7') > 0) {
 			// handle situation where scroll hasn't occurred
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#6,7");
+			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#6,7");
 		} else {
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
 		}
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "baz.js" + "#5,10");
+		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
 
 		menuUrl = historyMenu.children()[2].children[0].attributes[0].value;
 		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
+			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
 		} else if (menuUrl.indexOf('#15,25') > 0) {
 			// handle situation where scroll hasn't occurred
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#15,25");
+			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#15,25");
 		} else {
-			assert.equal(menuUrl, "/scripts/js-tests/scriptedClientServerTests.html?" + testResourcesRoot + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
 		}
 	};
 	
@@ -328,19 +329,19 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		setup();
 		
 		// initial selection should be 0
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// explicit set of selection through url
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 		
-		// go to a new file 
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });		
+		// go to a new file
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// back to original file and ensure selection is grabbed from history
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });		
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 	};
 	
@@ -473,11 +474,11 @@ function(assert, mNavHistory, mPageState, mTestutils) {
 		setup();
 		getFileContents(testResourcesRoot, fname,
 			function(contents) {
-				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/scripts/js-tests/scriptedClientServerTests.html" + urlSuffix }, 
+				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/clientServerTests" + urlSuffix },
 					window.editor);
 				assert.equal(window.editor.getText(), contents);
 				assert.deepEqual(window.editor.getSelection(), {start:selection[0],end:selection[1]});
-				assert.start();				
+				assert.start();
 			});
 	}
 	

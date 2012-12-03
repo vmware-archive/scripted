@@ -20,46 +20,43 @@
  */
  
 var completions = require("./completions");
-var eachk = require("../jsdepend/utils").eachk;
 var when = require('when');
 
-exports.allCompletions = {};
 exports.completed = false;
+
+var defaultCompletionsProcessor = new completions.CompletionsProcessor();
 
 var t;
 exports.processTemplates = function(root) {
 	var deferred = when.defer();
-
+	var thisCompletionsProcessor;
 	if (root) {
-		if (completions.setCompletionsFolder(root)) {
-			exports.allCompletions = {};
-			exports.completed = false;
-			console.log("Templates root reset");
-		}
+		thisCompletionsProcessor = new completions.CompletionsProcessor(root);
+	} else {
+		thisCompletionsProcessor = defaultCompletionsProcessor;
 	}
-
-	if (exports.completed) {
+	if (thisCompletionsProcessor.allCompletions) {
 		// don't redo the work
-		deferred.resolve(exports.allCompletions);
+		deferred.resolve(thisCompletionsProcessor.allCompletions);
 		return deferred.promise;
 	}
+
+	thisCompletionsProcessor.allCompletions = {};
 		
 	console.log("Processing templates");
 	// can be called synchronously
 	clearTimeout(t);
 	/** @param {Array} files */
-	completions.findCompletionsFiles(function(files) {
+	thisCompletionsProcessor.findCompletionsFiles(function(files) {
 		console.log("found template files: " + files);
 		if (!files) {
-			exports.completed = true;
 			console.warn("Error finding the completions directory.");
 			deferred.reject("Error finding the completions directory.");
 		} else {
-			exports.completed = true;
 			var deferreds = [];
 			for (var i = 0; i < files.length; i++) {
 				console.log("Starting to find completions in " + files[i]);
-				deferreds.push(completions.findCompletions(files[i]));
+				deferreds.push(thisCompletionsProcessor.findCompletions(files[i]));
 				console.log("Queued finding completions in " + files[i]);
 			}
 			
@@ -69,14 +66,14 @@ exports.processTemplates = function(root) {
 					function(completionsArr) {
 						for (var i = 0; i < completionsArr.length; i++) {
 							var res = completionsArr[i];
-							if (!exports.allCompletions[res.scope]) {
-								exports.allCompletions[res.scope] = res.completions;
+							if (!thisCompletionsProcessor.allCompletions[res.scope]) {
+								thisCompletionsProcessor.allCompletions[res.scope] = res.completions;
 							} else {
-								exports.allCompletions[res.scope] = 
-									exports.allCompletions[res.scope].concat(res.completions);
+								thisCompletionsProcessor.allCompletions[res.scope] =
+									thisCompletionsProcessor.allCompletions[res.scope].concat(res.completions);
 							}
 						}
-						deferred.resolve(exports.allCompletions);
+						deferred.resolve(thisCompletionsProcessor.allCompletions);
 					},
 					function(err) {
 						console.warn("Error processing completions: " + err);
@@ -86,7 +83,7 @@ exports.processTemplates = function(root) {
 				);
 			} else {
 				console.log("No completions file. Nothing to do.");
-				deferred.resolve(exports.allCompletions);
+				deferred.resolve(thisCompletionsProcessor.allCompletions);
 			}
 		}
 	});
