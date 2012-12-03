@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 /*global require exports process*/
-var api = require('./node-natives');
+var api = require('../../server/jsdepend/node-natives');
 
 var getCode = api.getCode;
 

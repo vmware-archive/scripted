@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 // tree-matcher.js
 // 
 
-var abortableWalk = require('./tree-walker').abortableWalk;
+var abortableWalk = require('../../../server/jsdepend/tree-walker').abortableWalk;
 
 // Tree = <tree from esprima>
 // Pattern = Tree -> Matcher
@@ -421,7 +421,7 @@ function containsPat(childPattern) {
 //create a pattern that matches if a tree contains a given 'targetPat'
 //in an area of the tree that is *not* nested within a match of 'avoidPat'
 function notWithinPat(avoidPat, targetPat) {
-	var walk = require('./tree-walker').walk;
+	var walk = require('../../../server/jsdepend/tree-walker').walk;
 	return function(tree) {
 		return function(success, fail) {
 			var found = null;

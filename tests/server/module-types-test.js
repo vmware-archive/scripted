@@ -29,12 +29,12 @@
 // A way to run in debug mode (not tried yet)?
 // node --debug `which nodeunit` test/run.js
 
-var toCompareString = require('./utils').toCompareString;
-var getModuleType = require("./module-types").getModuleType;
-var esprima = require('./parser');
-var configuration = require('./filesystem');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var getModuleType = require("../../server/jsdepend/module-types").getModuleType;
+var esprima = require('../../server/jsdepend/parser');
+var configuration = require('../../server/jsdepend/filesystem');
 
-var walk = require('./tree-walker').walk;
+var walk = require('../../server/jsdepend/tree-walker').walk;
 
 function dumpTree(parseTree) {
 	console.log(JSON.stringify(parseTree, null, "  "));
@@ -44,7 +44,7 @@ function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var conf = configuration.withBaseDir(baseDir);
 	conf.sloppy = false;
-	var api = require("./api").configure(conf);
+	var api = require("../../server/jsdepend/api").configure(conf);
 	return api;
 }
 

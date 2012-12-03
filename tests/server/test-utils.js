@@ -8,24 +8,22 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Andrew Eisenberg - initial API and implementation
+ *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
-/*jslint node:true */
-/*global __dirname console */
-
-var provider = require('../templates/template-provider');
-
-exports.providerTest = function(test) {
-	provider.processTemplates(__dirname + "/test-resources/").then(function(allCompletions) {
-		test.ok(allCompletions.html);
-		test.ok(allCompletions.js);
-		test.ok(allCompletions.json);
-		
+/*global exports*/
+function assertContains(test, snippet, string) {
+	if (arguments.length === 1) {
+		// being called as a unit test
 		test.done();
-	},
-	function(err) {
-		test.fail(err);
-		test.done();
-	});
-};
+		return;
+	}
+	
+	
+	test.ok(string.indexOf(snippet)!==-1,
+		"Expected snippet: '"+snippet+"' not found in '"+string+"'"
+	);
+
+}
+
+exports.assertContains = assertContains;

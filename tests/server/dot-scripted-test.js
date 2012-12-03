@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -34,15 +34,15 @@
 //console.log = console.trace;
 //This hack seriously messes up the log output. don't keep it on all the time!
 
-var toCompareString = require('./utils').toCompareString;
-var map = require('./utils').map;
-var mapk = require('./utils').mapk;
-var filesystem = require('./filesystem');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var map = require('../../server/jsdepend/utils').map;
+var mapk = require('../../server/jsdepend/utils').mapk;
+var filesystem = require('../../server/jsdepend/filesystem');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var testfs = filesystem.withBaseDir(baseDir);
-	var api = require('./dot-scripted').configure(testfs);
+	var api = require('../../server/jsdepend/dot-scripted').configure(testfs);
 	//We are in test mode so the 'private' apis are ok to use:
 	for (var p in api.forTesting) {
 		if (api.forTesting.hasOwnProperty(p)) {

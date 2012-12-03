@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -29,14 +29,14 @@
 // A way to run in debug mode (not tried yet)?
 // node --debug `which nodeunit` test/run.js
 
-var toCompareString = require('./utils').toCompareString;
-var nodeNatives = require('./node-natives');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var nodeNatives = require('../../server/jsdepend/node-natives');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('./filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/jsdepend/filesystem').withBaseDir(baseDir);
 	conf.sloppy = false;
-	var api = require("./api").configure(conf);
+	var api = require("../../server/jsdepend/api").configure(conf);
 	return api;
 }
 

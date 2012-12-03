@@ -12,20 +12,20 @@
  ******************************************************************************/
  
 /*global require exports __dirname console */
-var toCompareString = require('./utils').toCompareString;
-var stf = require('./script-tag-finder');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var stf = require('../../server/jsdepend/script-tag-finder');
 var getScriptTags = stf.getScriptTags;
 var getScriptCode = stf.getScriptCode;
 var assertContains = require('./test-utils').assertContains;
 
 function makeApi(relativeBaseDir, reducedConfig) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('./filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/jsdepend/filesystem').withBaseDir(baseDir);
 	if (reducedConfig) {
 		conf.listFiles = undefined;
 	}
 	conf.sloppy = false;
-	var api = require("./api").configure(conf);
+	var api = require("../../server/jsdepend/api").configure(conf);
 	return api;
 }
 

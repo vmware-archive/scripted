@@ -23,7 +23,7 @@
 // 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
-var completionsModule = require("../templates/completions");
+var completionsModule = require("../../server/templates/completions");
 //var testResourcesFolder = process.cwd() + "/test-resources/";
 var testResourcesFolder = __dirname + "/test-resources/";
 

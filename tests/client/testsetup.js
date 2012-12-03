@@ -29,6 +29,6 @@ var config = {
 		fileapi: 'scripted/fileapi',
 		when: 'lib/when-aaa0898-1.6.1',
 		
-		tests: '../tests',
+		tests: '../tests'
 	}
 };

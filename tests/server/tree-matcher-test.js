@@ -12,9 +12,9 @@
  ******************************************************************************/
 
 /*global console __dirname exports require*/
-var tm = require('./tree-matcher.js');
-var esprima = require('./parser');
-var configuration = require('./filesystem');
+var tm = require('../../server/jsdepend/tree-matcher.js');
+var esprima = require('../../server/jsdepend/parser');
+var configuration = require('../../server/jsdepend/filesystem');
 
 var andPat = tm.andPat;
 var arrayElementPat = tm.arrayElementPat;
@@ -32,7 +32,7 @@ var orMatcher = tm.orMatcher;
 var orPat = tm.orPat;
 var successMatcher = tm.successMatcher;
 var successPat = tm.successPat;
-var toCompareString = require('./utils').toCompareString;
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var typePat = tm.typePat;
 
 function dumpTree(parseTree) {
@@ -42,7 +42,7 @@ function dumpTree(parseTree) {
 function makeApi(relpath) {
 	var conf = configuration.withBaseDir(__dirname+'/test-resources/'+relpath);
 	conf.sloppy = false;
-	return require("./api").configure(conf);
+	return require("../../server/jsdepend/api").configure(conf);
 }
 
 exports.failPatTest = function (test) {

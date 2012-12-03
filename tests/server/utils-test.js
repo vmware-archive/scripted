@@ -12,7 +12,7 @@
  ******************************************************************************/
  
 /*global require exports */
-var utils = require('./utils');
+var utils = require('../../server/jsdepend/utils');
 var toCompareString = toCompareString;
 var orMap = utils.orMap;
 
@@ -58,7 +58,7 @@ exports.orMapKempty = function (test) {
 };
 
 exports.pathNormalize = function (test) {
-	var normalize = require('./utils').pathNormalize;
+	var normalize = require('../../server/jsdepend/utils').pathNormalize;
 	test.equals('a/b/c', normalize('a/b/c'));
 	test.equals('.', normalize('.'));
 	test.equals('a/d', normalize('a/b/c/../../d'));
@@ -70,7 +70,7 @@ exports.pathNormalize = function (test) {
 };
 
 exports.getFileName = function (test) {
-	var f = require('./utils').getFileName;
+	var f = require('../../server/jsdepend/utils').getFileName;
 	test.equals(f("foo.txt"), "foo.txt");
 	test.equals(f("/ho/ha/hi/foo.txt"), "foo.txt");
 	test.done();

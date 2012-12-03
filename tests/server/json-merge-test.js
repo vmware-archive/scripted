@@ -34,8 +34,8 @@
 //console.log = console.trace;
 //This hack seriously messes up the log output. don't keep it on all the time!
 
-var toCompareString = require('./utils').toCompareString;
-var _jsonMerge = require('./json-merge');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var _jsonMerge = require('../../server/jsdepend/json-merge');
 
 function jsonMerge() {
 	var m = _jsonMerge.apply(this, arguments);

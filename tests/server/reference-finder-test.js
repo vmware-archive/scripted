@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -29,10 +29,10 @@
 // A way to run in debug mode (not tried yet)?
 // node --debug `which nodeunit` test/run.js
 
-var toCompareString = require('./utils').toCompareString;
-var findReferences = require("./reference-finder").findReferences;
-var esprima = require('./parser');
-var configuration = require('./filesystem');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var findReferences = require("../../server/jsdepend/reference-finder").findReferences;
+var esprima = require('../../server/jsdepend/parser');
+var configuration = require('../../server/jsdepend/filesystem');
 
 function dumpTree(parseTree) {
 	console.log(JSON.stringify(parseTree, null, "  "));
@@ -42,7 +42,7 @@ function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var conf = configuration.withBaseDir(baseDir);
 	conf.sloppy = false;
-	var api = require("./api").configure(conf);
+	var api = require("../../server/jsdepend/api").configure(conf);
 	return api;
 }
 

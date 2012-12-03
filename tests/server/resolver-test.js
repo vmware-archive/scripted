@@ -34,17 +34,17 @@
 //console.log = console.trace;
 //This hack seriously messes up the log output. don't keep it on all the time!
 
-var toCompareString = require('./utils').toCompareString;
-var map = require('./utils').map;
-var mapk = require('./utils').mapk;
-var configuration = require('./filesystem');
-var nodeNatives = require('./node-natives');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var map = require('../../server/jsdepend/utils').map;
+var mapk = require('../../server/jsdepend/utils').mapk;
+var configuration = require('../../server/jsdepend/filesystem');
+var nodeNatives = require('../../server/jsdepend/node-natives');
 
 function makeApi(relativeBaseDir, sloppy) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var conf = configuration.withBaseDir(baseDir);
 	conf.sloppy = sloppy || false;
-	var api = require('./resolver').configure(conf);
+	var api = require('../../server/jsdepend/resolver').configure(conf);
 	//We are in test mode so the 'private' apis are ok to use:
 	for (var p in api.forTesting) {
 		if (api.forTesting.hasOwnProperty(p)) {
@@ -53,7 +53,7 @@ function makeApi(relativeBaseDir, sloppy) {
 	}
 	
 	api.getContents = conf.getContents;	
-	api.findReferences = require('./reference-finder').findReferences;
+	api.findReferences = require('../../server/jsdepend/reference-finder').findReferences;
 	return api;
 }
 
@@ -581,7 +581,7 @@ exports.commonsJsWrappedModuleInAmdEnabledContext = function (test) {
 	var api = makeApi('511');
 	var file = "goats/client/app/game/cola-user.js";
 	api.getContents(file, function (code) {
-		var tree = require('./parser').parse(code);
+		var tree = require('../../server/jsdepend/parser').parse(code);
 		api.findReferences(tree, function (refs) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
 				toCompareString(["cola"])
@@ -617,7 +617,7 @@ exports.usePlugins = function (test) {
 	var file = "p1/bork.js";
 	var sanitize = makeObjectSanitizer(['name', 'path', 'ignore']);
 	api.getContents(file, function (code) {
-		var tree = require('./parser').parse(code);
+		var tree = require('../../server/jsdepend/parser').parse(code);
 		api.findReferences(tree, function (refs) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
 				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip",

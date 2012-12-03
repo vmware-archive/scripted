@@ -29,13 +29,13 @@
 // A way to run in debug mode (not tried yet)?
 // node --debug `which nodeunit` test/run.js
 
-var toCompareString = require('./utils').toCompareString;
-var configuration = require('./filesystem');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var configuration = require('../../server/jsdepend/filesystem');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var conf = configuration.withBaseDir(baseDir);
-	var api = require('./file-indexer').configure(conf);
+	var api = require('../../server/jsdepend/file-indexer').configure(conf);
 	return api;
 }
 
