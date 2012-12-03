@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- these tests require a server to run -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Linter tests</title>
+  <!-- pull in qunit -->
+  <link rel="stylesheet" href="scripts/lib/qunit/qunit-1.10.0.css" />
+  
+  <script src="scripts/lib/requirejs/require.js"></script>
+  <script src="tests/client/testsetup.js"></script>
+
+  <script type="text/javascript">
+	require(["jquery","qunit"],function() {
+		$('document').ready(function() {
+			require(["testutils","js-tests/linter/linterTests"], 
+				function(testutils, linterTests) {
+				console.log("running tests");
+					testutils.fixUrlForTests();
+					testutils.insertEditor();
+					testutils.runTests(linterTests);
+				});
+		});
+	});
+  </script> 
+
+</head>
+<body>
+	<div id="qunit"></div>
+	<hr>
+	<div id="editorHook"></div>
+</body>
+</html>

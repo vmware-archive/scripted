@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- these tests REQUIRE a server in order to pass -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Client tests that require a server</title>
+  <link rel="stylesheet" href="scripts/lib/qunit/qunit-1.10.0.css" />
+  <script src="scripts/lib/requirejs/require.js"></script>
+  <script src="tests/client/testsetup.js"></script>
+  <script type="text/javascript">
+	function fixUrl() {
+		var xhrobj = new XMLHttpRequest();
+		xhrobj.open("GET", '/test-api/server-root', false);
+		xhrobj.send();  // synchronous xhr request
+		var testResourcesRoot = xhrobj.responseText;
+		if (testResourcesRoot.charAt(testResourcesRoot.length-1) !== '/') {
+			testResourcesRoot += '/';
+		}
+		
+		var popper = function() { 
+			$(window).unbind('popstate', popper);
+			return false; 
+		};
+		
+		if (window.location.search !== "?" + testResourcesRoot + 'foo.js') {
+			history.pushState(null, "Starting", "?" + testResourcesRoot + 'foo.js');
+		}
+	}
+	
+	require(config);
+	require(["jquery","qunit"],function() {
+		$('document').ready(function() {
+			// first ensure that the url is correct
+			window.setTimeout(function() {
+				fixUrl();		
+				require([
+					"tests/client/navHistory/navHistoryTests", 
+					"tests/client/templates/templatesTest", 
+					"scripted/utils/pageState", 
+					"tests/client/common/testutils"],
+					
+					function(navHistoryTests, templatesTest, pageState, testutils) {
+						pageState._setEditorPrefix(window.location.pathname + '?');
+						module('Templates tests');
+						testutils.runTests(templatesTest);
+						module('Nav History tests');
+						testutils.runTests(navHistoryTests);
+				});
+			});
+		});
+	});
+  </script>
+</head>
+<body>
+	<div id="qunit"></div>
+	<!-- the following markup is used to create the test page.  This markup should be similar to what is in editor.html -->
+	
+	<!--
+	<iframe id="testEditorFrame" src="../../editor.html?/Users/andrew/Eclipse/git-repos/scripted/play-area/foo.js">
+		
+	</iframe>
+	-->
+	<div id="main">
+		<div id="navigator-wrapper">
+			<div id="navigator-container">
+				<div id="explorer-tree">
+				</div>
+			</div>
+		</div>
+
+		<ul id="breadcrumb">
+		</ul>
+
+		<div id="editor_wrapper">
+			<div id="editor" class="scriptededitor"></div>
+			<div id="exec-console"></div>
+		</div>
+		
+		<div id="side_panel">
+		</div>
+		
+		<div id="help_panel">
+			<ul id="command_list">
+			</ul>
+		</div>
+	</div>
+	
+	<footer class="main_gradient">
+		<div id="status"></div>
+	</footer>
+
+	<div id="contentassist" class="contentassist"></div> 
+</body>
+</html>

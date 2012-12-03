@@ -15,8 +15,8 @@
  ******************************************************************************/
  
 /*global console require exports process*/
-var querystring = require("querystring"); 
-var fs = require("fs"); 
+var querystring = require("querystring");
+var fs = require("fs");
 var formidable = require("formidable");
 var url = require('url');
 var templates = require('./templates/template-provider');
@@ -24,7 +24,7 @@ var templates = require('./templates/template-provider');
 // TODO handle binary files
 /*
  * Retrieve a specified field, request format: http://localhost:7261/get?file=XXX
- * Possible outcomes: 
+ * Possible outcomes:
  * 200 response with the file contents in the response
  * 500 response with 'File not found' in response text (enoent)
  * 500 response with 'Error: '+error_text in response text
@@ -183,8 +183,8 @@ function handleTemplates(response, request) {
 			try {
 				response.writeHead(200, {'content-type': 'application/json'});
 				response.write(
-				templates.allCompletions[scope] ? 
-					JSON.stringify(templates.allCompletions[scope]) :
+				res[scope] ?
+					JSON.stringify(res[scope]) :
 					'[]');
 					
 			} catch (e) {
@@ -207,7 +207,7 @@ function handleTemplates(response, request) {
 
 /*
  * Filesystem list operations, returns dojo.data.Item objects (as JSON).
- * 
+ *
  * Structure of a return Item is, for a directory:
  * {
 	name:filename,

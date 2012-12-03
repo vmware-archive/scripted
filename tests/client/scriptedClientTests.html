@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- these tests DO NOT REQUIRE a server in order to pass -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Client tests that do not require a server</title>
+  <link rel="stylesheet" href="scripts/lib/qunit/qunit-1.10.0.css" />
+  <script src="scripts/lib/requirejs/require.js"></script>
+  <script src="tests/client/testsetup.js"></script>
+  <script type="text/javascript">
+	config.paths['servlets/jsdepend-client'] = '../tests/client/indexer/stub-jsdepend';
+	require(config);
+	require(["jquery","qunit"],function() {
+		$('document').ready(function() {
+			// stub out the jsdepend server calls
+			require(["tests/client/nodeunit-shim", 
+			         "scripted/utils/pageState",
+					 "tests/client/esprima/esprimaJsContentAssistTests",
+					 "tests/client/esprima/navigationTests", 
+					 "tests/client/esprima/summaryBuildingTests", 
+					 "tests/client/esprima/contentAssistDependencyTests",
+					 "tests/client/markoccurrences/markOccurrencesTests",
+					 "tests/client/indexer/indexerTests",
+					 "tests/client/keybindings/keystroke-tests"],
+				function(nodeunitShim, pageState, contentAssistTests, navTests, summaryTests, dependencyTests,
+					markOccurrencesTests, indexerTests, keystroke) {
+					pageState._setEditorPrefix(window.location.pathname + '?');
+					function testShim(tests) {
+						for (var t in tests) {
+							if (tests.hasOwnProperty(t)) {
+								if (t.indexOf('test') === 0) {
+									test(t, tests[t]);
+								} else if (t.indexOf('asyncTest') === 0) {
+									asyncTest(t, tests[t]);
+								}
+							}
+						}
+					}
+					module("keystroke-test");
+					nodeunitShim(keystroke);
+					module("Esprima JS Content Assist tests");
+					testShim(contentAssistTests);
+					module("Navigation tests");
+					testShim(navTests);
+					module("Summary tests");
+					testShim(summaryTests);
+					module("Dependency tests");
+					testShim(dependencyTests);
+					module("Indexer tests");
+					testShim(indexerTests);
+					module("Mark occurrences tests");
+					testShim(markOccurrencesTests);
+			});
+		});
+	});
+  </script>
+</head>
+<body>
+	<div id="qunit"></div>
+</body>
+</html>

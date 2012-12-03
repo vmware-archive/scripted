@@ -167,6 +167,8 @@ function configure(filesystem) {
 	function getConfiguration(handle, callback) {
 		findAndParseDotScripted(handle, function (dotScripted) {
 			findAndParseScriptedRc(function (scriptedRc) {
+				console.log(JSON.stringify(scriptedRc));
+				console.log(JSON.stringify(dotScripted));
 				callback(jsonMerge(defaults, scriptedRc, dotScripted));
 			});
 		});
