@@ -17,19 +17,20 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
-var testCase = require('./dot-scripted-test')
-	.getScriptedRcFile;
+//var testCase = require('./dot-scripted-test')
+//	.getScriptedRcFile;
 
 //var testCase = require('./module-types-test.js').bigFile;
-var testCase = require('./amd-resolver-test')
+//var testCase = require('./amd-resolver-test')
 //	.findIndirectAmdConfigInHtmlFileWithThreeScriptTags;
 //	.likeScripted;
 //	.findAmdConfigIn511Project;
 //	.findAmdConfIn511ProjectWithRequireJs;
 //	.getAmdConfig2;
-	.simpleRequireJsProject;
+//	.simpleRequireJsProject;
 
-//var testCase = require('./resolver-test')
+var testCase = require('./resolver-test')
+	.usePlugins;
 //	.requireCallWithBaseDir;
 //	.useTextPlugin;
 //	.resolveInScriptsFolder;
@@ -46,14 +47,12 @@ testCase({
 	equals: function (a, b) {
 		console.log('equals? '+ a + ' === '+ b);
 	},
-	
 	ok: function (bool, msg) {
 		console.log('ok? '+bool);
 		if (!bool) {
 			console.error(msg);
 		}
 	},
-	
 	done: function () {
 		console.log('done');
 	}
