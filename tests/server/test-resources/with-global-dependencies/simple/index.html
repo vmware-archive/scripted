@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+	<title>Simple Project with Global Dependencies</title>
+</head>
+<body spellcheck="false" class="nihilo">
+<h1>Simple Global Dependencies Sample</h1>
+
+<p>The project has an html file that loads a bunch of js files directly via script tags, 
+without using a module system. This creates implicit global dependencies between these
+files.</p>
+
+<p>It is up to jsdepend to discover these implicit dependencies for modules that look
+like they may not be using a module system.</p>
+
+<script src="scripts/foo.js"></script>
+<script src="scripts/bar.js"></script>
+<script src="scripts/main.js"></script>
+
+</body>
+</html>
