@@ -835,7 +835,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						property.key.extras = {};
 					}
 					// remember that this is the LHS so that we don't add the identifier to global scope
-					property.key.extras.isLHS = true;
+					property.key.extras.isLHS = property.key.extras.isDecl = true;
 					
 					if (property.value.type === "FunctionExpression" || property.value.type === "ObjectExpression") {
 						if (!property.value.extras) {
@@ -967,7 +967,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				if (!node.id.extras) {
 					node.id.extras = {};
 				}
-				node.id.extras.isLHS = node.id.extras.isLHSAssign = true;
+				node.id.extras.isLHS = node.id.extras.isDecl = true;
 				if (node.init && !node.init.extras) {
 					node.init.extras = {};
 				}
@@ -996,7 +996,6 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				if (!rightMost.extras) {
 					rightMost.extras = {};
 				}
-				rightMost.extras.isLHSAssign = true;
 				if (node.right.type === "FunctionExpression") {
 					// RHS is a function, remember the name in case it is a constructor
 					if (!node.right.extras) {
@@ -1095,7 +1094,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "BlockStatement":
 		case "CatchClause":
 			if (inRange(env.offset, node.range)) {
-				// if we've gotten here and we are still in range, then 
+				// if we've gotten here and we are still in range, then
 				// we are completing as a top-level entity with no prefix
 				env.storeTarget();
 			}
@@ -1155,8 +1154,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						}
 						
 						inferredType = kvps[i].value.extras.inferredType;
-						kvps[i].key.extras.inferredType = inferredType;
 						env.addVariable(name, node, inferredType, range);
+						if (inRange(env.offset-1, kvps[i].key.range)) {
+							// We found it! rmember for later, but continue to the end of file anyway
+							env.storeTarget(env.scope(node));
+						}
 					}
 				}
 			}
@@ -1289,6 +1291,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			env.popName();
 			break;
+			
+		case "Property":
+			node.extras.inferredType = node.key.extras.inferredType = node.value.extras.inferredType;
+			break;
+			
 		case "AssignmentExpression":
 			if (node.operator === '=') {
 				// standard assignment
@@ -1317,8 +1324,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case 'Identifier':
 			name = node.name;
 			newTypeName = env.lookupName(name, node.extras.target);
-			if (newTypeName) {
-				// name already exists
+			if (newTypeName && !node.extras.isDecl) {
+				// name already exists but we are redeclaring it and so not being overridden
 				node.extras.inferredType = newTypeName;
 				if (inRange(env.offset, node.range, true)) {
 					// We found it! rmember for later, but continue to the end of file anyway

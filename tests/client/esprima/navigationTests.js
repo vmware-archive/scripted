@@ -364,5 +364,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"}", "aa", "Number", "aa :: Number", 1);
 	};
 	
+	// SCRIPTED-69
+	test.testObjLiteralLHS = function() {
+		doSameFileTest(
+			"var other = function() { }\n;" +
+			"var obj2 = {\n" +
+			"	other : 1\n" +
+			"};", "other", "Number", "other :: Number", 2)
+	};
+	
 	return tests;
 });
