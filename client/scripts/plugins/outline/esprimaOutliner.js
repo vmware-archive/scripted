@@ -53,6 +53,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 						range : node.id.range,
 						children : []
 					};
+					node.init.handled = true;
 				}
 				break;
 			case "Property":
@@ -62,8 +63,21 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 						range : node.key.range,
 						children : []
 					};
+					
+					node.value.handled = true;
 				}
 				break;
+				
+			case "FunctionExpression":
+				if (!node.handled) {
+					entry = {
+						label : "function" + toParamString(node.params),
+						range : [node.range[0], node.range[0] + "function".length ],
+						children : []
+					};
+				}
+				break;
+			
 			default:
 		}
 		
@@ -88,6 +102,11 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 				break;
 			case "Property":
 				if (node.value.type === 'FunctionExpression') {
+					context.pop();
+				}
+				break;
+			case "FunctionExpression":
+				if (!node.handled) {
 					context.pop();
 				}
 				break;
