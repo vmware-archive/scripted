@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010 - 2012 VMware, IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * This outline dialog is based on the open resource dialog code
  * that came from originally from Orion.
  *
@@ -15,13 +15,13 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit scripted*/
 
-define(['require', 'dojo', 'dijit', 'plugins/outline/esprimaOutlinerPlugin','dijit/Dialog', 'dijit/form/TextBox', 
-		'scripted/widgets/_OrionDialogMixin', 'text!scripted/widgets/templates/OpenOutlineDialog.html'], 
+define(['require', 'dojo', 'dijit', 'plugins/outline/esprimaOutliner','dijit/Dialog', 'dijit/form/TextBox', 
+		'scripted/widgets/_OrionDialogMixin', 'text!scripted/widgets/templates/OpenOutlineDialog.html'],
 		function(require, dojo, dijit, mOutliner) {
 
 /**
  * Usage: <code>new widgets.OpenOutlineDialog(options).show();</code>
- * 
+ *
  * @name scripted.widgets.OpenOutlineDialog
  * @class A dialog that shows the outline (functions) of a file and the list of functions can be filtered using a simple textbox.
  */
@@ -60,9 +60,9 @@ var OpenOutlineDialog = dojo.declare("scripted.widgets.OpenOutlineDialog", [diji
 				if (evt.keyCode === dojo.keys.ENTER && that.results) {
 					var links = dojo.query("tr", that.results);
 					var selected = that.selected;
-				    var line = links[(selected===-1)?0:selected].gotoline;
-				    if (line) {
-						that.editor.onGotoLine(line-1,0);
+				    var range = links[(selected===-1)?0:selected].range;
+				    if (range) {
+						that.editor.setSelection(range[0], range[1], true);
 					}
 					that.hide();
 					dojo.stopEvent(evt);
@@ -73,7 +73,7 @@ var OpenOutlineDialog = dojo.declare("scripted.widgets.OpenOutlineDialog", [diji
 		
 		/* Allow up/down keyboard navigation */
 		dojo.connect(this,"onKeyPress",this,function(evt) {
-			var links, nextSelected;	
+			var links, nextSelected;
 			if (!evt.shiftKey && (evt.keyCode === dojo.keys.DOWN_ARROW || evt.keyCode === dojo.keys.UP_ARROW)) {
 				links = dojo.query("tr", this.results);
 				if (evt.keyCode === dojo.keys.DOWN_ARROW) {
@@ -136,12 +136,12 @@ var OpenOutlineDialog = dojo.declare("scripted.widgets.OpenOutlineDialog", [diji
 				}
 				var textnode = document.createTextNode(prefix+entry.label);
 				col.appendChild(textnode);
-				row.gotoline = entry.line;
+				row.range = entry.range;
 				dojo.connect(row, 'onclick', (function(that) {
-					return function(evt){
-						var line = evt.currentTarget.gotoline;
-						if (line) {
-							that.editor.onGotoLine(line,0);
+					return function(evt) {
+						var range = evt.currentTarget.range;
+						if (range) {
+							that.editor.setSelection(range[0], range[1], true);
 							that.hide();
 						}
 					};
@@ -182,7 +182,7 @@ var OpenOutlineDialog = dojo.declare("scripted.widgets.OpenOutlineDialog", [diji
 	/**
 	 * Check if string 'label' contains all the characters (in the right order
 	 * but not necessarily adjacent) from charseq.
-	 * 
+	 *
 	 * @param {String} label the text to check
 	 * @param {String} charseq the sequence of chars to check for
 	 * @type {Boolean} true if matches
