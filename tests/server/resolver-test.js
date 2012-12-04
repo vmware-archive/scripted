@@ -622,7 +622,7 @@ exports.usePlugins = function (test) {
 			test.equals(toCompareString(map(refs, function(ref) { return ref.name; })),
 				toCompareString(["foo", "text!template.html", "text!to-strip.html!strip",
 					 "i18n!stuff/nls/messages",
-					"domReady!"])
+					"domReady!", "dunno!booger"])
 			);
 			api.resolve(file, refs, function (resolveds) {
 				test.equals(toCompareString(map(resolveds, sanitize)),
@@ -640,6 +640,10 @@ exports.usePlugins = function (test) {
 						"path": "p1/stuff/nls/messages.js"
 					}, {
 						name: 'domReady!',
+						path: undefined,
+						ignore: true
+					}, {
+						name: 'dunno!booger',
 						path: undefined,
 						ignore: true
 					}])
