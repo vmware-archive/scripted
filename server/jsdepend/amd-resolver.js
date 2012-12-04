@@ -22,6 +22,21 @@ define(function(require, exports, module) {
 //
 //   Support for resolving amd references.
 /////////////////////////////////////////
+ 
+/**
+ * Currently we provide support for any plugin names listed below.
+ * References with these plugins are handled by adding an extension to
+ * the resource path and resolving that using the same logic as
+ * other references.
+ *
+ * Plugins not listed in here are not currently supported and references
+ * containing them will be marked as 'ignored' which suppresses any
+ * errors indicating resolution problems.
+ */
+var PLUGIN_EXTENSIONS = {
+	'text' : '',
+	'i18n' : '.js'
+};
 
 var mPathMapper = require('./amd-path-mapper');
 var startsWith = require('./utils').startsWith;
@@ -65,23 +80,35 @@ function configure(conf) {
 		//code simpler / more uniform, but can save some space if we don't.
 	}
 
-	//dep must be parsed before calling this!	
+	function getPluginName(dep) {
+		if (dep.plugin) {
+			var pieces = dep.plugin.split('/');
+			return pieces[pieces.length-1];
+		}
+	}
+
+	//dep must be parsed before calling this!
 	function getResource(dep) {
 		return dep.hasOwnProperty('plugin') ? dep.resource : dep.name;
 	}
 	
+	/**
+	 * Get the file extension to be added after resolving a reference to a path.
+	 * If the reference is based on an unsupported plugin this will return 'null'.
+	 *
+	 * Note that the extension may be the empty string so be careul when testing the
+	 * result since empty strings are 'falsy' in javascript.
+	 */
 	function getExtension(dep) {
-		if (dep.plugin) {
-			if (dep.plugin==='text' || endsWith(dep.plugin, '/text')) {
-				return "";
+		var pluginName = getPluginName(dep);
+		if (pluginName) {
+			if (PLUGIN_EXTENSIONS.hasOwnProperty(pluginName)) {
+				return PLUGIN_EXTENSIONS[pluginName];
+			} else {
+				return null; //Makes the reference be ignored (rather reported as 'missing').
 			}
-			return ".js"; //TODO: This is a flaky assumption. It really depends on the plugin how
-						// resolution works. But lacking an implementation of a resolve
-						// for every possible plugin, we'll assume it just resolves 
-						// with the same rules as a javascript file.
-		} else {
-			return ".js"; //We'll be trying to load a js file.
 		}
+		return '.js'; //Default extension added by typical amd loader.
 	}
 	
 	function amdResolver(context, dep, callback) {
@@ -90,10 +117,10 @@ function configure(conf) {
 		// treated specially in requirejs.
 		var resource = getResource(dep);
 		var ext = getExtension(dep);
-		if (!resource) {
-			//This is a case like 'domReady!'
+		if (!resource || ext===null) {
+			//This is a case like 'domReady!' or an unsupported plugin
 			//There's nothing to resolve. Let client know not to report this as an error.
-			dep.ignore = true; 
+			dep.ignore = true;
 			return callback(dep);
 		} else if (isRelative(resource)) {
 			//Relative resolution doesn't require the resolverConf so avoid fetching it
