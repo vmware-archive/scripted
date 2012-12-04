@@ -18,11 +18,11 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client'
-], function (mActionInfo, mKeystroke, OS, mConfig) {
+define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/editor/current-editor'
+], function (mActionInfo, mKeystroke, OS, mConfig, getCurrentEditor) {
 
 function debug_log(msg) {
-	console.log(msg);
+	//console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
@@ -48,6 +48,30 @@ var defaults = {
 	keybindings: null,
 	unboundNames: null
 };
+
+/**
+ * Do something with each editor (the main editor and all subeditors).
+ * The 'iteration' can be aborted prematurely by return a true value
+ * from the doFun. If so, then the true value will be returned as
+ * a result of the iteration as well.
+ *
+ * TODO: it would be good to place this somewhere else (where others
+ * can use it to iterate editors. Maybe should be grouped with
+ * other high-level-ish functions to obtain editor instances.
+ */
+function eachEditor(doFun) {
+	var abort = doFun(window.editor);
+	if (abort) {
+		return abort;
+	}
+	var subeditors = window.subeditors;
+	for (var i = 0; i < subeditors.length; i++) {
+		abort = doFun(subeditors[i]);
+		if (abort) {
+			return abort;
+		}
+	}
+}
 
 /**
  * Set (or unset) a keybinding on a specific editor.
@@ -158,7 +182,10 @@ var installKeyEventTrap = (function () {
 					var globalAction = getGlobalAction(keystroke);
 					if (globalAction) {
 						debug_log('Gotcha: '+keystroke);
-						window.editor.getTextView().invokeAction(globalAction);
+						var editor = getCurrentEditor();
+						if (editor) {
+							editor.getTextView().invokeAction(globalAction);
+						}
 						e.preventDefault(); // This is for when using just dom listener
 						e.stopPropagation(); // This is for when using just dom listener
 						return false; // This is when used as jquery listener.
@@ -295,14 +322,13 @@ function persistKeyBindings() {
  * editors as well as update the config file in the user's home
  * directory to persist this keybinding.
  *
- * @return Promise that resolves when the
+ * @return Promise that resolves when the keybindings have been
+ *         have been persisted.
  */
 function setKeyBinding(keystroke, actionName) {
-	var subeditors = window.subeditors;
-	setEditorKeyBinding(window.editor, keystroke, actionName);
-	for (var i = 0; i < subeditors.length; i++) {
-		setEditorKeyBinding(subeditors[i], keystroke, actionName);
-	}
+	eachEditor(function (editor) {
+		setEditorKeyBinding(editor, keystroke, actionName);
+	});
 	$('#help_panel').trigger('refresh'); //TODO: correct way to do this would
 	                                     // be to publish an event that means keybindings have changed
 	                                     // not prod every UI element that might be interested.

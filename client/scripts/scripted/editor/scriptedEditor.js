@@ -22,7 +22,7 @@ define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orio
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
 "plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 "orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys", 
-"scripted/exec/exec-after-save", "jshint" ],
+"scripted/exec/exec-after-save", "jshint", "jquery" ],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
 mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTextSearcher, mSelection, mCommands, mParameterCollectors,
@@ -232,7 +232,11 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 				  options.tabSize = window.scripted.config.editor.tabsize;
 				}
 			}
-			return new mTextView.TextView(options);
+			var tv = new mTextView.TextView(options);
+			tv.addEventListener('Focus', function () {
+				$(document).trigger('editorFocus', [editor]);
+			});
+			return tv;
 		};
 
 		var contentAssistFactory = function(editor) {
