@@ -124,7 +124,7 @@ function configure(conf) {
 		 * Searches for given pattern, return the results incrementally.
 		 * Each time we find a match, the add function is called with the matching file path as an argument.
 		 * When the search finished the done function is called.
-		 * 
+		 *
 		 * The add function may be called any number of times.
 		 * The done function is guaranteed to be called exactly once (even when a search is canceled, the done
 		 * function will be called when processing stops).
