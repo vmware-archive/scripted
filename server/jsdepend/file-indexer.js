@@ -139,9 +139,9 @@ function configure(conf) {
 		function incrementalSearch(pat, requestor) {
 			var isCanceled = requestor.isCanceled;
 			var count = 0;
-			console.log("requestor.maxResults = "+requestor.maxResults);
+			//console.log("requestor.maxResults = "+requestor.maxResults);
 			var maxResults = requestor.maxResults || MAX_RESULTS;
-			console.log("maxResults = "+maxResults);
+			//console.log("maxResults = "+maxResults);
 			walk(
 				/*called on each file*/
 				function(file) {
