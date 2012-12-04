@@ -65,7 +65,7 @@ exports.CompletionsProcessor.prototype = {
 			var deferreds = [];
 			var processDir = function(deferred, folder) {
 				return function(err, files) {
-					console.log("Processing " + folder + ". found " + files.length + " files");
+					//console.log("Processing " + folder + ". found " + files.length + " files");
 					if (err) {
 						if (err.errno === 34 /* dir not found */) {
 							console.log ("Directory " + err.path + " not found");
@@ -78,7 +78,7 @@ exports.CompletionsProcessor.prototype = {
 					}
 					// only return files we care about
 					for (var i = 0; i < files.length; i++) {
-						console.log("Found file " + files[i]);
+						//console.log("Found file " + files[i]);
 						if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
 							realFiles.push(folder + files[i]);
 						}
