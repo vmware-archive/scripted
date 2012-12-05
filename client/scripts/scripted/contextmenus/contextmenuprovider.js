@@ -39,7 +39,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 		};
 
 	var getNavigatorContextMenus = function(resource) {
-			var add = {
+			var addFile = {
 				name: "New File...",
 				handler: function(selectionContext) {
 					var resource = getResourceFromContextSelection(selectionContext);
@@ -49,6 +49,19 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 						var urlNewResource = fileCreationPath + (resourceName ? '/' + resourceName : "/untitled");
 						navHistory.navigateToURL(urlNewResource);
 						window.explorer.highlight(urlNewResource);
+					});
+				}
+			};
+
+			var addFolder = {
+				name: "New Folder...",
+				handler: function(selectionContext) {
+					var resource = getResourceFromContextSelection(selectionContext);
+					var folderCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
+					resourcesDialogue.createDialogue(folderCreationPath).addResource(function(
+					resourceName) {
+						var urlNewResource = folderCreationPath + (resourceName ? '/' + resourceName : "/untitledFolder");
+						fileOperationsClient.mkdir(urlNewResource);
 					});
 				}
 			};
@@ -89,7 +102,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 				}
 			};
 
-			return [add, rename, del];
+			return [addFile, addFolder, rename, del];
 
 		};
 

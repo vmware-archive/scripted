@@ -16,8 +16,10 @@ define(function(require, exports, module) {
 	var makePromisedServletStub = require('./stub-maker').makePromisedServletStub;
 	var servletPathRename = '/filesystem/rename';
 	var servletPathDeleteResource = '/filesystem/deleteResource';
+	var servletPathmkdir = '/filesystem/mkdir';
 	
 	exports.rename = makePromisedServletStub(servletPathRename);
 	exports.deleteResource = makePromisedServletStub(servletPathDeleteResource);
+	exports.mkdir = makePromisedServletStub(servletPathmkdir);
 
 });
