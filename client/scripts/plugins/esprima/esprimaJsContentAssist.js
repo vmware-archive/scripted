@@ -62,7 +62,18 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		} else if (node.type === "Identifier") {
 			return node;
 		} else if (node.type === "MemberExpression") {
-			return findRightMost(node.property);
+			if (node.computed) {
+				if (node.property.type === "Literal" && typeof node.property.value === "string") {
+					return node.property;
+				} else {
+					// an array access
+					return node;
+				}
+			} else {
+				return findRightMost(node.property);
+			}
+		} else if (node.type === "ArrayExpression") {
+			return node;
 		} else {
 			return null;
 		}
@@ -588,6 +599,28 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		return paramTypes;
 	}
 	
+	function isArrayType(typeName) {
+		return typeName.indexOf("Array") === 0;
+	}
+	/**
+	 * returns a parameterized array type with the given type parameter
+	 */
+	function parameterizeArray(parameterType) {
+		return "Array.<" + parameterType + ">";
+	}
+	
+	/**
+	 * If this is a parameterized array type, then extracts the type,
+	 * Otherwise object
+	 */
+	function extractArrayParameterType(arrayType) {
+		if (arrayType.indexOf("Array.<") === 0 && arrayType.substr(-1, 1) === ">") {
+			return arrayType.substring("Array.<".length, arrayType.length -1);
+		} else {
+			return "Object";
+		}
+	}
+	
 	/**
 	 * Finds the closest doc comment to this node
 	 * @param {} node
@@ -691,8 +724,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				return "Object";
 				
 			case 'RestType':
+				return "Array.<" + convertJsDocType(jsdocType.expression, env) + ">";
 			case 'ArrayType':
-				// TODO should be parameterizing the array type
+				if (jsdocType.elements && jsdocType.elements.length > 0) {
+					// assume array type is type of first element, not correct, but close enough
+					return "Array.<" + convertJsDocType(jsdocType.elements[0], env) + ">";
+				}
 				return "Array";
 
 			case 'FunctionType':
@@ -729,7 +766,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				return funcConstr + ret + ":" + params.join(',');
 
 			case 'TypeApplication':
-				// TODO ignoring the type parameter for now.  just using the raw type
+				var expr = convertJsDocType(jsdocType.expression, env);
+				if (expr === "Array" && jsdocType.applications && jsdocType.applications.length > 0) {
+					// only parameterize arrays not handling objects yet
+					return "Array.<" + convertJsDocType(jsdocType.applications[0], env) + ">";
+				}
+				return expr;
 			case 'ParameterType':
 			case 'NonNullableType':
 			case 'OptionalType':
@@ -897,7 +939,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					newTypeName = jsdocReturn;
 					node.extras.inferredType = jsdocReturn;
 				} else {
-					// temporarily use "undefined" as type, but this may change once we 
+					// temporarily use "undefined" as type, but this may change once we
 					// walk through to get to a return statement
 					newTypeName = "undefined";
 				}
@@ -992,7 +1034,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		case "AssignmentExpression":
 			var rightMost = findRightMost(node.left);
 			var qualName = env.getQualifiedName() + findDottedName(node.left);
-			if (rightMost && rightMost.type === "Identifier") {
+			if (rightMost && rightMost.type === "Identifier" || rightMost.type === "Literal") {
 				if (!rightMost.extras) {
 					rightMost.extras = {};
 				}
@@ -1035,15 +1077,21 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						node.property.extras = {};
 					}
 					node.property.extras.target = node.object;
-				} else if (node.computed && node.property.type === "Literal" && typeof node.property.value === "number") {  // like this: foo[9]
-					// TODO: handle parameterized array access
-					if (!node.property.extras) {
-						node.property.extras = {};
-					}
-					node.property.extras.target = node.object;
+//				} else if (node.computed && node.property.type === "Literal" && typeof node.property.value === "number") {  // like this: foo[9]
+//					if (!node.property.extras) {
+//						node.property.extras = {};
+//					}
+//					node.property.extras.target = node.object;
+//
+//					// then be ready to propagate
+//					// on post-op, be more specific about the type
+//					// also set the variable
+//					// on post op of the assignment, do a check as well
+//					// post op of array expression, augment type
+//
 				
-				} else { // like this: foo[at]
-					// TODO handle parameterized object types
+				} else { // like this: foo[at] or foo[0]
+					// handle parameterized objects and arrays
 				}
 			}
 			break;
@@ -1106,9 +1154,20 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// completion after a dot with no prefix
 				env.storeTarget(env.scope(node.object));
 			}
-			// inferred type is the type of the property expression
-			// node.propery will be null for mal-formed asts
-			node.extras.inferredType = node.property ? node.property.extras.inferredType : node.object.extras.inferredType;
+
+			// for arrays, inferred type is the dereferncing of the array type
+			// for non-arrays inferred type is the type of the property expression
+			if (isArrayType(node.object.extras.inferredType) && node.computed) {
+				// inferred type of expression is the type of the dereferenced array
+				node.extras.inferredType = extractArrayParameterType(node.object.extras.inferredType);
+			} else if (node.computed && node.property && node.property.type !== "Literal") {
+				// we don't infer parameterized objects, but we have something like this: 'foo[at]'  just assume type is object
+				node.extras.inferredType = "Object";
+			} else {
+				// a regular member expression: foo.bar or foo['bar']
+				// node.propery will be null for mal-formed asts
+				node.extras.inferredType = node.property ? node.property.extras.inferredType : node.object.extras.inferredType;
+			}
 			break;
 		case "CallExpression":
 			// first check to see if this is a require call
@@ -1308,15 +1367,30 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					inferredType = "Number";
 				}
 			}
+			
 			node.extras.inferredType = inferredType;
 			// when we have 'this.that.theOther.f' need to find the right-most identifier
 			rightMost = findRightMost(node.left);
-			if (rightMost) {
+			if (rightMost && (rightMost.type === "Identifier" || rightMost.type === "Literal")) {
+				name = rightMost.name ? rightMost.name : rightMost.value;
 				rightMost.extras.inferredType = inferredType;
-				env.addOrSetVariable(rightMost.name, rightMost.extras.target, inferredType, rightMost.range);
+				env.addOrSetVariable(name, rightMost.extras.target, inferredType, rightMost.range);
 				if (inRange(env.offset-1, rightMost.range)) {
-					// We found it! rmember for later, but continue to the end of file anyway
+					// We found it! remember for later, but continue to the end of file anyway
 					env.storeTarget(env.scope(rightMost.extras.target));
+				}
+			} else {
+				// might be an assignment to an array, like:
+				//   foo[at] = bar;
+				if (node.left.computed) {
+					rightMost = findRightMost(node.left.object);
+					if (rightMost) {
+						// yep...now go and update the type of the array
+						var arrayType = parameterizeArray(inferredType);
+						node.left.extras.inferredType = inferredType;
+						node.left.object.extras.inferredType = arrayType;
+						env.addOrSetVariable(rightMost.name, rightMost.extras.target, arrayType, rightMost.range);
+					}
 				}
 			}
 			env.popName();
@@ -1367,15 +1441,14 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			
 		case "Literal":
 			if (node.extras.target && typeof node.value === "string") {
-				// inside of a member expression, like this foo["at"]
-				// this is not exactly right, since the inferred type of the literal is not "string", but the type of the property
+				// we are inside a computed member expression.
+				// find the type of the property referred to if exists
 				name = node.value;
 				newTypeName = env.lookupName(name, node.extras.target);
 				node.extras.inferredType = newTypeName;
 			} else if (node.extras.target && typeof node.value === "number") {
-				// TODO handle arrays like this foo[8]
-				// this is not exactly right, since the inferred type of the literal is not "string", but the type of the property
-				node.extras.inferredType = "Object";
+				// inside of an array access
+				node.extras.inferredType = "Number";
 			} else {
 				var oftype = (typeof node.value);
 				node.extras.inferredType = oftype[0].toUpperCase() + oftype.substring(1, oftype.length);
@@ -1388,6 +1461,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				node.extras.inferredType = target.extras.inferredType;
 			}
 			break;
+		
+		case "ArrayExpression":
+			// parameterize this array by its first argument type
+			if (node.elements && node.elements.length > 0) {
+				node.extras.inferredType = parameterizeArray(node.elements[0].extras.inferredType);
+			}
 		}
 		
 		if (!node.extras.inferredType) {
@@ -1503,6 +1582,14 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				}
 			}
 			return res + " }";
+		} else if (isArrayType(typeName)) {
+			var typeParameter = extractArrayParameterType(typeName);
+			if (typeParameter !== "Object") {
+				typeName = "Array[" + createReadableType(typeParameter, env, true, 1) + "]";
+			} else {
+				typeName = "Array";
+			}
+			return typeName;
 		} else {
 			return typeName;
 		}
@@ -1742,6 +1829,9 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						} else {
 							return "Function";
 						}
+					} else if (isArrayType(inferredType)) {
+						// TODO FIXADE we are losing parameterization here
+						return "Array";
 					} else {
 						return inferredType;
 					}
@@ -1944,6 +2034,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			},
 			
 			findType : function(typeName) {
+				if (isArrayType(typeName)) {
+					// TODO is there anything we need to do here?
+					// parameterized array
+					typeName = "Array";
+				}
+				
 				// trim arguments if a constructor, careful to avoid a constructor prototypes
 				if (typeName.charAt(0) === "?") {
 					typeName = typeName.substring(0, typeName.lastIndexOf(':')+1);
@@ -2120,12 +2216,16 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
 					var propType = currentType[prop].typeName;
-					while (isFunctionOrConstructor(propType)) {
+					while (isFunctionOrConstructor(propType) || isArrayType(propType)) {
 						if (!alreadySeen[propType]) {
 							alreadySeen[propType] = true;
 							findUnreachable(propType, allTypes, alreadySeen);
 						}
-						propType = extractReturnType(propType);
+						if (isFunctionOrConstructor(propType)) {
+							propType = extractReturnType(propType);
+						} else if (isArrayType(propType)) {
+							propType = extractArrayParameterType(propType);
+						}
 					}
 					if (!alreadySeen[propType]) {
 						alreadySeen[propType] = true;
@@ -2151,23 +2251,33 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
 		// if we have a function, then the function return type and its prototype are reachable
+		// also do same if parameterized array type
 		// in the module, so add them
-		if (isFunctionOrConstructor(moduleTypeName)) {
+		if (isFunctionOrConstructor(moduleTypeName) || isArrayType(moduleTypeName)) {
 			var retType = moduleTypeName;
-			while (isFunctionOrConstructor(retType)) {
-				retType = retType.substring(0,retType.lastIndexOf(':')+1);
-				reachable[retType] = true;
-				var constrType;
-				if (retType.charAt(0) === "?") {
-					// this is a function, not a constructor, but we also
-					// need to expose the constructor if one exists.
-					constrType = "*" + retType.substring(1);
-					reachable[constrType] = true;
-				} else {
-					constrType = retType;
+			while (isFunctionOrConstructor(retType) || isArrayType(retType)) {
+				if (isFunctionOrConstructor(retType)) {
+					retType = retType.substring(0,retType.lastIndexOf(':')+1);
+					reachable[retType] = true;
+					var constrType;
+					if (retType.charAt(0) === "?") {
+						// this is a function, not a constructor, but we also
+						// need to expose the constructor if one exists.
+						constrType = "*" + retType.substring(1);
+						reachable[constrType] = true;
+					} else {
+						constrType = retType;
+					}
+					reachable[constrType + "~proto"] = true;
+					retType = extractReturnType(retType);
+				} else if (isArrayType(retType)) {
+					retType = extractArrayParameterType(retType);
+					if (retType) {
+						reachable[retType] = true;
+					} else {
+						retType = "Object";
+					}
 				}
-				reachable[constrType + "~proto"] = true;
-				retType = extractReturnType(retType);
 			}
 			reachable[retType] = true;
 		}
