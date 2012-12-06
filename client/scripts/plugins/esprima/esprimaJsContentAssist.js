@@ -1561,8 +1561,13 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				// use the return type
 				return createReadableType(funType, env, useFunctionSig, 0);
 			}
-		} else if (typeName.indexOf("gen~") === 0) {
+		} else if (typeName.indexOf(GEN_NAME) === 0) {
 			// a generated object
+			if (depth > 1) {
+				// don't show inner types
+				return "{...}";
+			}
+			
 			// create a summary
 			var type = env.findType(typeName);
 			var res = "{ ";
@@ -1576,7 +1581,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					if (!depth) {
 						name = createReadableType(type[val].typeName, env, false, 1);
 					} else {
-						name = "{...}";
+						name = createReadableType(type[val].typeName, env, false, 2);
 					}
 					res += val + " : " + name;
 				}

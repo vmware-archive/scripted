@@ -1999,7 +1999,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2008,7 +2008,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
