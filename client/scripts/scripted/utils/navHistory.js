@@ -18,10 +18,10 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5'], 
+define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
+"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'], 
 function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
-	mFileSearchClient, mSearchDialog, mOsUtils) {
+	mFileSearchClient, mSearchDialog, mOsUtils,mDialogs,mOpenResourceDialog) {
 	
 	var EDITOR_TARGET = {
 		main : "main",
@@ -476,6 +476,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 			fileService: null
 		});
 
+/*
 		// from globalCommands.js
 		var openResourceDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenResourceDialog({
@@ -494,17 +495,27 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 				dialog.show();
 			}, 0);
 		};
+*/
 		
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-				openResourceDialog(searcher, null, editor);
+				mOpenResourceDialog.openDialog(searcher, editor, handleNavigationEvent);
+//				function(editor) {
+//					// TODO load the file
+//					editor.getTextView().focus(); // focus editor after dialog close
+//				},function(editor) {
+//					editor.getTextView().focus(); // focus editor after dialog close
+//				});
+//				openResourceDialog.open(searcher, editor);
+//				openResourceDialog(searcher, null, editor);
 				return true;
-			});		
+			});
 		} else {
+			// TODO what is this really doing - how does it relate to what Kris implemented?
 			$('body').on('keydown', function(evt) {
 				if (evt.shiftKey && evt.ctrlKey && evt.which === 70 /*F*/) {
-					openResourceDialog(searcher, null, null);
+					mOpenResourceDialog.openDialog(searcher, null, null);
 					return true;
 				}
 			});
