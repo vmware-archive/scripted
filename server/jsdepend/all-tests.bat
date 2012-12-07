@@ -1,1 +1,0 @@
-nodeunit ./resolver-test.js ./script-tag-finder-test.js ./api-test.js ./utils-test.js ./reference-finder-test.js ./module-types-test.js ./amd-resolver-test.js ./tree-matcher-test.js ./file-indexer-test.js ./filesystem-test.js

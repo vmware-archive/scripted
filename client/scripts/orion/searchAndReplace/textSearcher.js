@@ -197,8 +197,13 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyDown: function(evt, fromSearch){
-			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
-			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
+			// SCRIPTED begin change to allow Ctrl+Shift+F
+			var ctrlKey = this.isMac ? 'metaKey' : 'ctrlKey';
+			var otherKey = this.isMac ? 'ctrlKey' : 'metaKey';
+			if(evt[ctrlKey] && !evt[otherKey] && !evt.shiftKey && !evt.altKey && evt.keyCode === 70/*"f"*/ ) {
+//			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
+//			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
+			// SCRIPTED end
 				this._keyUpHandled = fromSearch;
 				if( evt.stopPropagation ) { 
 					evt.stopPropagation(); 

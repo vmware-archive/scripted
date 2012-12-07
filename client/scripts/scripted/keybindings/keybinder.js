@@ -18,10 +18,12 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-/*global $*/
+define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/editor/current-editor'
+], function (mActionInfo, mKeystroke, OS, mConfig, getCurrentEditor) {
 
-define(['./keystroke', 'scripted/utils/os', 'servlets/config-client', 'jquery'
-], function (mKeystroke, OS, mConfig) {
+function debug_log(msg) {
+	//console.log(msg);
+}
 
 var keyBindingConfigName = 'keymap-'+OS.name;
 
@@ -29,6 +31,9 @@ var keybinding2keystroke = mKeystroke.fromKeyBinding;
 var keystroke2keybinding = mKeystroke.toKeyBinding;
 var getScriptedRcFile = mConfig.getScriptedRcFile;
 var putScriptedRcFile = mConfig.putScriptedRcFile;
+var event2keystroke = mKeystroke.fromKeyDownEvent;
+
+var isGlobalAction = mActionInfo.isGlobalAction;
 
 /**
  * Information about the default keybindings. These are not statically known. They
@@ -43,6 +48,30 @@ var defaults = {
 	keybindings: null,
 	unboundNames: null
 };
+
+/**
+ * Do something with each editor (the main editor and all subeditors).
+ * The 'iteration' can be aborted prematurely by return a true value
+ * from the doFun. If so, then the true value will be returned as
+ * a result of the iteration as well.
+ *
+ * TODO: it would be good to place this somewhere else (where others
+ * can use it to iterate editors. Maybe should be grouped with
+ * other high-level-ish functions to obtain editor instances.
+ */
+function eachEditor(doFun) {
+	var abort = doFun(window.editor);
+	if (abort) {
+		return abort;
+	}
+	var subeditors = window.subeditors;
+	for (var i = 0; i < subeditors.length; i++) {
+		abort = doFun(subeditors[i]);
+		if (abort) {
+			return abort;
+		}
+	}
+}
 
 /**
  * Set (or unset) a keybinding on a specific editor.
@@ -91,36 +120,110 @@ function getKeyBindings(editor) {
  * can copy paste into a config file.
  */
 function dumpCurrentKeyBindings(editor) {
-	console.log(JSON.stringify(getKeyBindings(editor), null, '  '));
+	debug_log(JSON.stringify(getKeyBindings(editor), null, '  '));
 }
+
+function captureDefaults(editor) {
+	if (!defaults.keybindings) {
+		//note that defaults are only captured once even if we see multiple editor instances
+		//over the lifetime of the browser window. This could be problematic if the 'defaults'
+		//are not the same for all editor instances.
+		debug_log('default keybindings are: ');
+		defaults.keybindings = getKeyBindings(editor);
+		debug_log(JSON.stringify(defaults.keybindings, null, '  '));
+		defaults.unboundNames = getUnboundActionNames(editor);
+		debug_log('default unbound action names are: ');
+		debug_log(JSON.stringify(defaults.unboundNames));
+	}
+}
+
+/**
+ * Setup a mechanism to trap key events at the document root and discard or reroute them
+ * to the main editor.
+ *
+ * This function can/should be called multiple times. It should be called at least
+ * when the first editor is initialized and each time the editor keybindings change.
+ *
+ * The first time it is called this sets up the listener. Subsequent calls only
+ * update keybinding info that is used to make decisions on re-routing / dropping
+ * events.
+ */
+var installKeyEventTrap = (function () {
+
+	var listener; //set only on first call to installKeyEventTrap
+	var boundKeys = null; // set and updated on every call to installKeyEventTrap
+	                      // This is a map from keystroke strings to action names.
+	                      // Thus the keys of this map are the events that we should trap.
+
+	/**
+	 * @return the corresponding global action or something falsy if there is no such action.
+	 */
+	function getGlobalAction(keystroke) {
+		var action = boundKeys[keystroke];
+		return action && isGlobalAction(action) && action;
+	}
+
+	/**
+	 * Make sure a listener is attached to trap relevant key events at the document
+	 * root.
+	 */
+	function installListener() {
+		if (!listener) { //only install it once!
+			listener = function (e) {
+				var keystroke = event2keystroke(e);
+				debug_log('Seeing: '+keystroke);
+				if (e.ctrlKey || e.altKey || e.metaKey) {
+					//prefilter: only trap if some modifier key other than shift is pressed.
+					//This is to prevent trapping keys like enter, and arrow keys as
+					//it seems to break dialogs (presumably because the dialogs are
+					//listening for keypress events rather than keydown events these events
+					//fire after keydown. If we trap the keydown events, it prevents the
+					//keypress events.
+					var globalAction = getGlobalAction(keystroke);
+					if (globalAction) {
+						debug_log('Gotcha: '+keystroke);
+						var editor = getCurrentEditor();
+						if (editor) {
+							editor.getTextView().invokeAction(globalAction);
+						}
+						e.preventDefault(); // This is for when using just dom listener
+						e.stopPropagation(); // This is for when using just dom listener
+						return false; // This is when used as jquery listener.
+					} else {
+						debug_log('Ignore: '+keystroke);
+					}
+				}
+			};
+			document.body.addEventListener('keydown', listener);
+		}
+	}
+
+	return function /*installKeyEventTrap*/(editor) {
+		boundKeys = getKeyBindings(editor);
+		installListener();
+	};
+
+}()); //end installKeyEventTrap
 
 /**
  * Retrieve the user's custom keybindings and apply them to the given editor.
  */
 function installOn(editor) {
 	//Before modifying any key bindings capture current keybindings state as the defaults:
-	if (!defaults.keybindings) {
-		//note that defaults are only captured once even if we see multiple editor instances
-		//over the lifetime of the browser window. This could be problematic if the 'defaults'
-		//are not the same for all editor instances.
-		console.log('default keybindings are: ');
-		defaults.keybindings = getKeyBindings(editor);
-		console.log(JSON.stringify(defaults.keybindings, null, '  '));
-		defaults.unboundNames = getUnboundActionNames(editor);
-		console.log('default unbound action names are: ');
-		console.log(JSON.stringify(defaults.unboundNames));
-	}
+	captureDefaults(editor);
 	
 	return getScriptedRcFile(keyBindingConfigName).then(
 		function (conf) {
-			console.log('Retrieved config: '+keyBindingConfigName);
-			console.log(JSON.stringify(conf, null, '  '));
+			debug_log('Retrieved config: '+keyBindingConfigName);
+			debug_log(JSON.stringify(conf, null, '  '));
 			//conf is a map from keystroke strings to editor action names
 			for (var k in conf) {
 				if (conf.hasOwnProperty(k)) {
 					setEditorKeyBinding(editor, k, conf[k]);
 				}
 			}
+			
+			installKeyEventTrap(editor);
 		},
 		function (err) {
 			console.error(err);
@@ -138,19 +241,23 @@ function getActionNames(editor) {
 
 /**
  * Retrieve an array of all ubbound action names. I.e. valid action names that are not yet bound to
- * a keyboard shortcut.things that the editor can bind keys to.
+ * a keyboard shortcut.
  */
 function getUnboundActionNames(editor) {
 	//There's no easy/quick way to find whether there's a keybinding for a given action name
 	//So we build a set of bound names first.
 	var kbs = getKeyBindings(editor);
 	var boundNamesMap = {};
+	//var dump = "";
 	for (var k in kbs) {
 		var boundName = kbs[k];
 		if (boundName) {
+			//dump += "'"+boundName+"',\n";
 			boundNamesMap[boundName] = true;
 		}
 	}
+	//debug_log('>>>>  All bound actions:');
+	//debug_log(dump);
 	return getActionNames(editor)
 	.filter(function (name) {
 		return !boundNamesMap[name];
@@ -204,8 +311,8 @@ function persistKeyBindings() {
 	var defaultKeybindings = defaults.keybindings;
 	var currentKeybindings = getKeyBindings();
 	var diff = jsonDiff(defaultKeybindings, currentKeybindings);
-	console.log('Should persist these key bindings now: ');
-	console.log(JSON.stringify(diff, null, '  '));
+	debug_log('Should persist these key bindings now: ');
+	debug_log(JSON.stringify(diff, null, '  '));
 	return putScriptedRcFile(keyBindingConfigName, diff);
 }
 
@@ -215,14 +322,13 @@ function persistKeyBindings() {
  * editors as well as update the config file in the user's home
  * directory to persist this keybinding.
  *
- * @return Promise that resolves when the
+ * @return Promise that resolves when the keybindings have been
+ *         have been persisted.
  */
 function setKeyBinding(keystroke, actionName) {
-	var subeditors = window.subeditors;
-	setEditorKeyBinding(window.editor, keystroke, actionName);
-	for (var i = 0; i < subeditors.length; i++) {
-		setEditorKeyBinding(subeditors[i], keystroke, actionName);
-	}
+	eachEditor(function (editor) {
+		setEditorKeyBinding(editor, keystroke, actionName);
+	});
 	$('#help_panel').trigger('refresh'); //TODO: correct way to do this would
 	                                     // be to publish an event that means keybindings have changed
 	                                     // not prod every UI element that might be interested.
@@ -230,11 +336,9 @@ function setKeyBinding(keystroke, actionName) {
 }
 
 return {
-//	dumpActionNames: dumpActionNames,
 	setKeyBinding: setKeyBinding,
 	getKeyBindings: getKeyBindings,
 	getUnboundActionNames: getUnboundActionNames,
-//	dumpCurrentKeyBindings: dumpCurrentKeyBindings,
 	installOn: installOn
 };
 

@@ -16,8 +16,10 @@
 var servlets = require('../servlets');
 var rename = require('../jsdepend/filesystem').withBaseDir(null).rename;
 var deleteResource = require('../jsdepend/filesystem').withBaseDir(null).deleteResource;
+var mkDir = require('../jsdepend/filesystem').withBaseDir(null).mkdir;
 
 var makeRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
 
 servlets.register('/filesystem/rename', makeRequestHandler(rename));
 servlets.register('/filesystem/deleteResource', makeRequestHandler(deleteResource));
+servlets.register('/filesystem/mkdir', makeRequestHandler(mkDir));
