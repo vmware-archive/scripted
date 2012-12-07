@@ -410,5 +410,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"first[0] = [1];\n" +
 			"var other = first[0][0]", "other", "Number", "other :: Number", 1);
 	};
+	tests.testJSDoc1 = function() {
+		doSameFileTest(
+			"/**\n" +
+			" * @param {String} path \n" +
+			" * @return String\n" +
+			" */\n" +
+			"function parseFile(path) { }\n" +
+			"var x;", "parseFile", "?String:path", "parseFile :: (path) -> String", 1);
+	};
 	return tests;
 });

@@ -827,7 +827,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 
 		// defer the inferencing of the function containing the offset.
 		if (node === env.defer) {
-			
+			node.extras.associatedComment = findAssociatedCommentBlock(node, env.comments);
 			node.extras.inferredType = "Object"; // will be filled in later
 			// need to remember the scope to place this function in for later
 			node.extras.scope = env.scope(node.extras.target);
@@ -917,7 +917,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			if (node.extras.jsdocResult) {
 				jsdocResult = node.extras.jsdocResult;
 			} else {
-				jsdocResult = parseJSDocComment(findAssociatedCommentBlock(node, env.comments));
+				jsdocResult = parseJSDocComment(node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments));
 			}
 
 			// assume that function name that starts with capital is
@@ -1077,21 +1077,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						node.property.extras = {};
 					}
 					node.property.extras.target = node.object;
-//				} else if (node.computed && node.property.type === "Literal" && typeof node.property.value === "number") {  // like this: foo[9]
-//					if (!node.property.extras) {
-//						node.property.extras = {};
-//					}
-//					node.property.extras.target = node.object;
-//
-//					// then be ready to propagate
-//					// on post-op, be more specific about the type
-//					// also set the variable
-//					// on post op of the assignment, do a check as well
-//					// post op of array expression, augment type
-//
-				
 				} else { // like this: foo[at] or foo[0]
-					// handle parameterized objects and arrays
+					// do nothing
 				}
 			}
 			break;
