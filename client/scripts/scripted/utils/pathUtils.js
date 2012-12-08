@@ -19,7 +19,7 @@ define([], function() {
 	/////////////////////////////////////////////////////////////
 	//TODO: the getDirectory function below is copied from jsdepend/utils.js
 	//  Can we somehow share this code between client and server.
-	//  Also, there's probably other inlined bits of code on the client side 
+	//  Also, there's probably other inlined bits of code on the client side
 	//  that do the same thing.
 	
 	//Get the parent directory of a given handle (which could be a file or a dir name).

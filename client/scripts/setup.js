@@ -33,7 +33,8 @@ var scriptedLoggerCategories = {
 	INDEXER : false,
 	CONTENT_ASSIST : true,
 	EXPLORER_TABLE : true,
-	SETUP : true
+	SETUP : true,
+	PANE : true
 };
 
 var scriptedLogger = {

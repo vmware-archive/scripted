@@ -952,7 +952,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			var functionTypeName = (isConstuctor ? "*" : "?") + newTypeName + ":" + params;
 			if (isConstuctor) {
 				env.createConstructor(functionTypeName, newTypeName);
-				// TODO FIXADE assume that constructor will be available from global scope using qualified name
+				// assume that constructor will be available from global scope using qualified name
 				// this is not correct in all cases
 				env.addOrSetGlobalVariable(name, functionTypeName, nameRange);
 			}
