@@ -567,27 +567,38 @@ a.dialog_button {
      
 }
 
+.dialog_footer {
+	height: 5px;
+}
+
 a.dialog_button:hover {
 	background-color: #4f4f4f;
 }
 
 .dialog {
+/*
     -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+     */
      
+     -moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px#888;
+	box-shadow: 0 0 5px #888;
+
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
      
-    background:#eee;
+    background:#777;
 
     width:600px; 
 
     position:absolute; 
     z-index:5000; 
- 
+
     display:inline;
-	font-family: "Helvetica", sans-serif;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-weight: 300;
 }
 
 .dialog_narrow {
@@ -595,7 +606,7 @@ a.dialog_button:hover {
 }
 
 .dialog_heading {
-	color:#000000;
+	color:#eee;
 	text-align:left;
 	font-size:20px;
 	margin-left: 10px;
@@ -608,17 +619,25 @@ a.dialog_button:hover {
 }
 
 .dialog_body {
+/*
 	margin: 5px;
+	*/
+} 
+.dialog_input_field_border {
+  margin: 0px 5px 0px 5px;
 }
-
+  
 .dialog_input_field {
+	outline: 0px;
+	border-width:0px;
+/*	margin:5px;
+*/
 	width:100%;
-	border:0px;
+	margin-top:5px;
 	margin-bottom:5px;
     background-color:#eeeeee;
-	font-size:14px;
-	font-family:monaco, monospace;
-}
+	font-size:18px;
+} 
 
 .dialog .dialog_results_list {
   background-color:#eeeeee;
@@ -626,7 +645,6 @@ a.dialog_button:hover {
   font-size:14px;
   min-height: 0px;
   max-height: 500px;
-  font-family:monaco, monospace;
 }
 
 .dialog_outline_row {
@@ -636,7 +654,6 @@ a.dialog_button:hover {
 .dialog_results_list div {
   white-space:nowrap;
 }
-
 
 .dynamic_dialog_content {
     font-family:arial;
@@ -652,6 +669,12 @@ a.dialog_button:hover {
 }
 
 .dialog_results_row {
+	border-left-width: 3px;
+	border-left-style: solid;
+	border-left-color: #eeeeee;
+	border-bottom-style: solid;
+	border-bottom-color:#ddd;
+	border-bottom-width:1px;
 }
 
 #dialogue_ok_button {

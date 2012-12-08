@@ -345,7 +345,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				var r = $("#dialog_openfile_results");
 				var dialog_results =  $("#dialog_results",$(that.dialog));
 				var scrollPositionOfResults = r.scrollTop();
-				var linkHeight = $(links[0]).height();
+				var linkHeight = $(links[0]).outerHeight();
 				var scrollAreaHeight = dialog_results.height();
 				var viewHeight = $(r).height();
 				
