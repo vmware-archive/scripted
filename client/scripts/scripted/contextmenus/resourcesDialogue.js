@@ -45,15 +45,18 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 		};
 
 	var removeDialogue = function(dialogueID) {
+			$('#dialogs').empty();
+			/*
 			$('#dialog_mask').hide();
 			$(dialogueID).remove();
-
+			*/
 		};
 
 	var openDialogue = function(dialogueID, dialogue, operations) {
 
 			var activeElement = document.activeElement;
 
+			$("#dialogs").append('<div id="dialog_mask"></div>');
 			$("#dialogs").append(dialogue);
 
 			// Clicking the mask will close the dialogue (acts the same way as cancelling or escaping)
