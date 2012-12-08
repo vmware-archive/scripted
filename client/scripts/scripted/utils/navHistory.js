@@ -18,8 +18,8 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", 'lib/json5'],
-function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
+define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
+function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenResourceDialog) {
 	
 	var EDITOR_TARGET = {
 		main : "main",
@@ -201,6 +201,46 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 			navigate({path:filepath, range:defnrange}, target, true);
 		}
 	};
+
+	/**
+	 * This handles initial page load
+	 */
+	var loadEditor = function(filepath, domNode, type) {
+		if (!type) {
+			type = "main";
+		}
+		if (!domNode) {
+			domNode = $('#editor')[0];
+		}
+		$(domNode).show();
+		$('body').off('keydown');
+		var editor = mEditor.makeEditor(domNode, filepath, type);
+		if (editor.loadResponse === 'error') {
+			$(domNode).hide();
+			attachSearchClient(null);
+			closeSidePanel();
+			return editor;
+		}
+		
+		// TODO move to scriptedEditor.js
+		attachSearchClient(editor);
+		attachOutlineClient(editor);
+		attachDefinitionNavigation(editor);
+		attachFileSearchClient(editor);
+		attachEditorSwitch(editor);
+		mKeybinder.installOn(editor); //Important: keybinder should be installed after all other things
+		                              //that register keybindings to the editor.
+		editor.cursorFix();
+		
+		if (type === 'main') {
+			setTimeout(function() {
+				editor.getTextView().focus();
+			}, 5);
+		}
+		
+		installPageStateListener(editor);
+		return editor;
+	};
 	
 	var setupPage = function(state, doSaveState) {
 		var mainItem;
@@ -324,15 +364,10 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 					// ensure side panel exists
 					mSidePanelManager.showSidePanel();
 				}
-			}
-			targetPane = mPaneFactory.createPane("scripted.editor", target, {
-				filepath = editorDesc.path,
-				domNode = domNode
-			});
-
-			// TODO move this editorPane
-			if (!hasEditor || !isSame) {
-				targetEditor = loadEditor(filepath,  domNode[0], target);
+				targetPane = mPaneFactory.createPane("scripted.editor", target, {
+					filepath = editorDesc.path,
+					domNode = domNode
+				});
 			}
 
 			if (range) {

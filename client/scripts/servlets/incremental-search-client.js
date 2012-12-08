@@ -52,13 +52,13 @@ define(["./websockets-client"], function (multiplexer) {
 		}
 		
 		sock.onopen = function (conn) {
-			//console.log('['+id+'] opened');
+			// console.log('['+id+'] opened');
 			send({
 				query:[currentFile, query, options]
 			});
 		};
 		sock.onmessage = function (e) {
-			//console.log('['+id+'] recieved:'+ e.data);
+			//console.log('['+id+'] received:'+ e.data);
 			receive(JSON.parse(e.data));
 		};
 		sock.onclose = function () {
