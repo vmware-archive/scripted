@@ -349,7 +349,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 
 		if (target === EDITOR_TARGET.sub || target === EDITOR_TARGET.main) {
 			var targetPane = mPaneFactory.getPane("scripted.editor", target === EDITOR_TARGET.main);
-			var targetEditor = targetPane ? targetPane.editor;
 			var isSame = targetEditor && targetEditor.getFilePath() === filepath;
 			var domNode = target === EDITOR_TARGET.main ? $('#editor') : $('.subeditor');
 			if (!isSame && targetEditor && !confirmNavigation(targetEditor)) {
@@ -365,10 +364,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 					mSidePanelManager.showSidePanel();
 				}
 				targetPane = mPaneFactory.createPane("scripted.editor", target, {
-					filepath = editorDesc.path,
-					domNode = domNode
+					filepath : editorDesc.path,
+					domNode : domNode
 				});
 			}
+			var targetEditor = targetPane.editor;
 
 			if (range) {
 				if (isNaN(range[0]) || isNaN(range[1])) {
@@ -434,7 +434,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 		
 		navigateToURL: navigateToURL,
 		openOnRange: openOnRange,
-		initializeBreadcrumbs: initializeBreadcrumbs,
 		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
 		setupPage: setupPage

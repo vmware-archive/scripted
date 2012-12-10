@@ -105,7 +105,6 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], func
 		_setNavigationConfirmer : _setNavigationConfirmer,
 		isSidePanelOpen : isSidePanelOpen,
 		showSidePanel: showSidePanel,
-		toggleSidePanel: toggleSidePanel,
 		closeSidePanel: closeSidePanel,
 		confirmNavigation : confirmNavigation
 	};

@@ -100,12 +100,12 @@ define(['jquery'], function() {
 		 */
 		getPane : function(id, isMain) {
 			for (var i = 0; i < panes.length; i++) {
-				if (panes[i].paneId === id && (!isMain !== /*xor*/ !panes[i].isMain]])) {
+				if (panes[i].paneId === id && ((!isMain) !== (!panes[i].isMain))) {
 					return panes[i];
 				}
 			}
 			return null;
-		}
+		},
 		
 		destroyPane : function(pane) {
 			var found = false;

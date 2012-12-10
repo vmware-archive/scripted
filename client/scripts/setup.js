@@ -104,7 +104,7 @@ requirejs.config({
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "orion/searchClient",
 		 "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver"],
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/editor/editorPane"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		mKeystroke, mSearchClient, mJquery,
