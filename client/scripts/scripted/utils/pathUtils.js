@@ -64,9 +64,14 @@ define([], function() {
 		return null;
 	}
 	
+	function getPathSeparator() {
+	   return '/';
+	}
+	
 	return {
 		getDirectory: getDirectory,
-		getLastSegmentFromPath: getLastSegmentFromPath
+		getLastSegmentFromPath: getLastSegmentFromPath,
+		getPathSeparator: getPathSeparator
 	};
 
 });

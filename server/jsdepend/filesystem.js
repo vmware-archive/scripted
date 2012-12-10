@@ -130,7 +130,7 @@ function withBaseDir(baseDir) {
 		console.log("Requesting resource rename for: " + original + " into " + newname);
 		var deferred = when.defer();
 		if (original && newname) {
-			var fs = require('fs');
+
 			fs.rename(original, newname, function(err) {
 				if (err) {
 					deferred.reject(err);
@@ -143,15 +143,19 @@ function withBaseDir(baseDir) {
 			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
 			deferred.reject(message);
 		}
-		return deferred;
+		return deferred.promise;
 	}
 
+	/**
+	 * 
+	 * @param handle file or directory name and path
+	 * @returns promise
+	 */
 	function deleteResource(handle) {
 		var resourcePath = handle2file(handle);
 		console.log("Requesting resource delete for: " + resourcePath);
 		var deferred = when.defer();
 		if (resourcePath) {
-			var fs = require('fs');
 			fs.unlink(resourcePath, function(err) {
 				if (err) {
 					deferred.reject(err);
@@ -163,7 +167,7 @@ function withBaseDir(baseDir) {
 			var message = "No resource specified to delete";
 			deferred.reject(message);
 		}
-		return deferred;
+		return deferred.promise;
 	}
 	
 	function getContents(handle, callback, errback) {
