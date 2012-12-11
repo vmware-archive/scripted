@@ -140,10 +140,13 @@ var getNavigatorContextMenus = function(resource) {
 			var del = {
 				name: "Delete",
 				handler: function(selectionContext) {
-					var resource = getResourceFromContextSelection(selectionContext);
+					
+					var parent = pathUtils.getDirectory(resource.location);
+					
 					resourcesDialogue.createDialogue(resource.location).deleteResource(function(value) {
 						var promise = fileOperationsClient.deleteResource(resource.location);
-						performNavigatorRefreshOperation(promise, resource.location);
+						// Navigate to parent folder.
+						performNavigatorRefreshOperation(promise, parent);
 					});
 				}
 			};
