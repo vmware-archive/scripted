@@ -20,14 +20,15 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
       var pathSeparator = pathUtils.getPathSeparator();
 
       var doNavigatorRefresh = function(resourceToNavigate) {
-	    window.explorer.fullRefresh();	
-		if (resourceToNavigate) {
-			window.explorer.highlight(resourceToNavigate);
-			navHistory.navigateToURL(resourceToNavigate);
-		}
+		window.explorer.fullRefresh(function() {
+				if (resourceToNavigate) {
+					navHistory.navigateToURL(resourceToNavigate);
+					window.explorer.highlight(resourceToNavigate);
+			}
+		});
 
 	};
-	
+
 		var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
 //
 //				if (operationPromise && operationPromise.then && (typeof operationPromise.then == 'function')) {

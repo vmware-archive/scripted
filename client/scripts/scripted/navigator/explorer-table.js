@@ -699,12 +699,8 @@ if (mExtensionCommands) {
 		}
 	};
 	
-	FileExplorer.prototype.fullRefresh = function() {
-			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, function() {
-					//	mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
-					// highlight the row we are using
-				setTimeout(function() {explorer.highlight(pageState.main.path);},500);
-			});
+	FileExplorer.prototype.fullRefresh = function(postRefresh) {
+			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
 	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
