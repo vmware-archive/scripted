@@ -178,6 +178,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 			// first, open side panel
 			mSidePanelManager.showSidePanel();
 			
+			if (!window.editor.getFilePath) {
+				// no main editor, so nothing else to do
+				return;
+			}
+			
 			// now open file of main editor in side panel
 			var sel = window.editor.getSelection();
 			navigate({

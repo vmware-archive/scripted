@@ -180,6 +180,9 @@ define(['lib/json5'], function() {
 		 * generates an item to be stored in scripted.recentFileHistory as well as browser state
 		 */
 		generateHistoryItem : function(editor) {
+			if (!editor || !editor.getFilePath) {
+				return { path : "", range : [0,0] };
+			}
 			var path = editor.getFilePath();
 			var scrollPos = $(editor._domNode).find('.textview').scrollTop();
 			var selection = editor.getSelection();

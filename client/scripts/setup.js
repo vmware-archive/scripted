@@ -298,11 +298,13 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
 				sidePanel.css('width', side_percent + "%");
 				
-				window.editor._textView._updatePage();
-				for (var i = 0; i < window.subeditors.length; i++){
-					window.subeditors[i].getTextView().update();
+				if (window.editor._textView) {
+					window.editor._textView._updatePage();
+					for (var i = 0; i < window.subeditors.length; i++){
+						window.subeditors[i].getTextView().update();
+					}
+					localStorage.setItem("scripted.sideWidth", side_width);
 				}
-				localStorage.setItem("scripted.sideWidth", side_width);
 			});
 			
 //			// use last size if known
@@ -371,8 +373,9 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				window.subeditors[i].editor.getTextView().update();
 			}
 			*/
-			
-			window.editor._textView._updatePage();
+			if (window.editor._textView) {
+				window.editor._textView._updatePage();
+			}
 		});
 		
 		$(window).bind('beforeunload', function() {

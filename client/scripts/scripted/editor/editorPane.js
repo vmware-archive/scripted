@@ -281,6 +281,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 				clearTimeout(currentRequest);
 			}
 			currentRequest = setTimeout(function() {
+				if (!window.editor.getFilePath) {
+					return;
+				}
 				var mainItem = mPageState.generateHistoryItem(window.editor);
 				var subItem = window.subeditors && window.subeditors.length > 0 ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
 				mPageState.storeBrowserState(mainItem, subItem, true);

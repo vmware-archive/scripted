@@ -31,40 +31,54 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			mPaneFactory.destroyPane(panes[i]);
 		}
 		window.fsroot = testResourcesRootNoSlash;
-		localStorage.removeItem("scripted.recentFileHistory");
 		mSidePanelManager.closeSidePanel();
 		window.subeditors=[];
+		localStorage.removeItem("scripted.recentFileHistory");
 		createEditor(testResourcesRoot + "foo.js");
+		localStorage.removeItem("scripted.recentFileHistory");
+		refreshBreadcrumbAndHistory(testResourcesRoot + "bar.js");
 	}
 	
 	function createEditor(path, kind) {
-		if (!kind) {
-			kind == 'main';
-		}
-		var pane;
-		if (kind === 'main') {
-			pane = mPaneFactory.getMainPane();
-			if (pane) {
-				mPaneFactory.destroyPane(pane);
-			}
-		} else if (kind === 'sub') {
-			var panes = mPaneFactory.getSidePanes();
-			for (var i = 0; i < panes.length; i++) {
-				mPaneFactory.destroyPane(panes[i]);
-			}
-		}
-		pane = mPaneFactory.createPane("scripted.editor", kind, {
-			filepath : path
-		});
-		return pane.editor;
+		mNavHistory.handleNavigationEvent({testTarget : path, shiftKey : (kind === 'sub') });
+		
+//		if (!kind) {
+//			kind = 'main';
+//		}
+//		var pane;
+//		if (kind === 'main') {
+//			pane = mPaneFactory.getMainPane();
+//			if (pane) {
+//				mPaneFactory.destroyPane(pane);
+//			}
+//		} else if (kind === 'sub') {
+//			var panes = mPaneFactory.getSidePanes();
+//			for (var i = 0; i < panes.length; i++) {
+//				mPaneFactory.destroyPane(panes[i]);
+//			}
+//		}
+//		pane = mPaneFactory.createPane("scripted.editor", kind, {
+//			filepath : path
+//		});
+//		return pane.editor;
 	}
 	
 	function getMainEditorText() {
-		return mPaneFactory.getMainPane().editor.getText();
+		var pane = mPaneFactory.getMainPane();
+		if (pane) {
+			return pane.editor.getText();
+		} else {
+			return null;
+		}
 	}
 	
 	function getSubEditorText() {
-		return mPaneFactory.getPane("scripted.editor").editor.getText();
+		var pane = mPaneFactory.getPane("scripted.editor");
+		if (pane) {
+			return pane.editor.getText();
+		} else {
+			return null;
+		}
 	}
 	
 	function refreshBreadcrumbAndHistory(path) {
