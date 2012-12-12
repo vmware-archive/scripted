@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2009, 2011 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
@@ -33,7 +33,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 	 * <li>Rulers for displaying line numbers and annotations</li>
 	 * <li>Status reporting</li>
 	 * </ul>
-	 * 
+	 *
 	 * @description Creates a new Editor with the given options.
 	 * @param {Object} options Options controlling the features of this Editor.
 	 * @param {Object} options.annotationFactory

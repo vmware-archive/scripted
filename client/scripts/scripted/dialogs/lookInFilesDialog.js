@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Andy Clement
+ *     Kris De Volder
  *******************************************************************************/
 /*global define window $*/
 /*jslint browser:true*/
@@ -376,6 +377,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 			if (!activeFileSearch) {
 //				console.log("search: no active search, starting one");
 				var renderer = this.rendererFactory($('#dialog_lookinfiles_results'));
+				$('#dialog_indicator').addClass('inprogress_indicator');
 				this.activeFileSearch = this.startSearch(text,renderer);
 				$('#dialog_lookinfiles_results').scroll(function (evt) {
 					that.addMoreResultsNearScrollBottom();

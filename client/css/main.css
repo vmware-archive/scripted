@@ -683,6 +683,11 @@ a.dialog_button:hover {
 	max-height: 19px;
 }
 
+.dialog_outlinedialog_entry {
+	font-family: InconsolataEmbedded, monospace;
+	font-size: 12px;
+}
+
 /* In 'look in files' styling for results text column */
 .dialog_matchtextcontext {
 	display: inline-block;

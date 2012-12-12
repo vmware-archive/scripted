@@ -19,9 +19,9 @@
  * This module defines the navigation and history functionality of scripted.
  */
 define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState",
-	"scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
-	"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
-function(mKeybinder, mEditor, mKeyBinding, mPageState, mOpenResourceDialog, mOpenOutlineDialog,
+	"scripted/dialogs/openResourceDialog", "scripted/dialogs/outlineDialog", "scripted/dialogs/lookInFilesDialog",
+	"scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
+function(mKeybinder, mEditor, mKeyBinding, mPageState, mOpenResourceDialog, mOutlineDialog,
 	mLookInFilesDialog, mOsUtils,mDialogs) {
 	
 	var EDITOR_TARGET = {
@@ -488,29 +488,11 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mOpenResourceDialog, mOpe
 	};
 	
 	var attachOutlineClient = function(editor) {
-
-		// from globalCommands.js
-		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
-			var dialog = new scripted.widgets.OpenOutlineDialog({
-				// TODO FIXADE Do we need this?
-//				changeFile: handleNavigationEvent,
-				editor: editor
-			});
-			if (editor) {
-				dojo.connect(dialog, "onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
-				});
-			}
-			window.setTimeout(function() {
-				dialog.show();
-			}, 0);
-		};
-		
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Show Outline");
 		editor.getTextView().setAction("Show Outline", function() {
-			openOutlineDialog(null,/*searcher,*/ null, editor);
+			mOutlineDialog.openDialog(editor);
 			return true;
-		});		
+		});
 	};
 	
 
