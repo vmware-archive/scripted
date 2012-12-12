@@ -198,22 +198,25 @@ orion.TextSearcher = (function() {
 		
 		_handleKeyDown: function(evt, fromSearch){
 			// SCRIPTED begin change to allow Ctrl+Shift+F
-			var ctrlKey = this.isMac ? 'metaKey' : 'ctrlKey';
-			var otherKey = this.isMac ? 'ctrlKey' : 'metaKey';
-			if(evt[ctrlKey] && !evt[otherKey] && !evt.shiftKey && !evt.altKey && evt.keyCode === 70/*"f"*/ ) {
-//			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
+			var ctrlKeyName = this.isMac ? 'metaKey' : 'ctrlKey';
+			var otherKeyName = this.isMac ? 'ctrlKey' : 'metaKey';
+			var ctrlKey = evt[ctrlKeyName];
+			//TODO: this code is really wrong, it should consult keybindings to determine the key combo(s) that
+			// 'Find ...' action is actually bound to instead of assuming it is CTRL+F. It may not be if the user
+			// has rebound it.
+			if(ctrlKey && !evt[otherKeyName] && !evt.shiftKey && !evt.altKey && evt.keyCode === 70/*"f"*/ ) {
 //			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
 			// SCRIPTED end
 				this._keyUpHandled = fromSearch;
-				if( evt.stopPropagation ) { 
-					evt.stopPropagation(); 
+				if( evt.stopPropagation ) {
+					evt.stopPropagation();
 				}
 				evt.cancelBubble = true;
 				return false;
 			}
 			if((ctrlKey &&  evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
-				if( evt.stopPropagation ) { 
-					evt.stopPropagation(); 
+				if( evt.stopPropagation ) {
+					evt.stopPropagation();
 				}
 				evt.cancelBubble = true;
 				this.findNext(!evt.shiftKey);
@@ -221,8 +224,8 @@ orion.TextSearcher = (function() {
 				return false;
 			}
 			if( ctrlKey &&  evt.keyCode === 82 /*"r"*/){
-				if( evt.stopPropagation ) { 
-					evt.stopPropagation(); 
+				if( evt.stopPropagation ) {
+					evt.stopPropagation();
 				}
 				evt.cancelBubble = true;
 				if(!fromSearch) {

@@ -27,6 +27,9 @@ var completionsModule = require("../../server/templates/completions");
 //var testResourcesFolder = process.cwd() + "/test-resources/";
 var testResourcesFolder = __dirname + "/test-resources/";
 
+
+var assertEqualArrays = require('./test-utils').assertEqualArrays;
+
 exports.extractScope = function(test) {
 	var completionsProcessor = new completionsModule.CompletionsProcessor();
 	test.equals("html", completionsProcessor.extractScope("text.html - source - meta.tag, punctuation.definition.tag.begin"));
@@ -41,11 +44,10 @@ exports.findCompletionsFiles = function(test) {
 	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletionsFiles(
 		function(files) {
-			test.equals(files.length, 3, "Should have found 3 files");
-			test.equals(files[0], testResourcesFolder + "test1.scripted-completions");
-			test.equals(files[1], testResourcesFolder + "test2.scripted-completions");
-			test.equals(files[2], testResourcesFolder + "test3.scripted-completions");
-			
+			var expect = [1,2,3].map(function (i) {
+				return testResourcesFolder + "test"+i+".scripted-completions";
+			});
+			assertEqualArrays(test, expect, files);
 			test.done();
 		},
 		function(err) {

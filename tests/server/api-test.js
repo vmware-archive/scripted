@@ -322,3 +322,34 @@ exports.withParseErrors = function(test) {
         test.done();
     });
 };
+
+exports.globalDependenciesSimple1 = function(test) {
+	var api = makeApi('with-global-dependencies');
+	api.getDGraph('simple/scripts/main.js', function(deps) {
+		test.equals(toCompareString(deps), {
+			"simple/scripts/foo.js": {
+				"kind": "global",
+				"refs": {}
+			},
+			"simple/scripts/bar.js": {
+				"kind": "global",
+				"refs": {
+					"it": {
+						"kind": "global",
+						"path": "simple/scripts/foo.js"
+					}
+				}
+			},
+			"simple/scripts/main.js": {
+				"kind": "global",
+				"refs": {
+					"it": {
+						"kind": "global",
+						"path": "simple/scripts/bar.js"
+					}
+				}
+			}
+		});
+		test.done();
+	});
+};

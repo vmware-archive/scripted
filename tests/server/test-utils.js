@@ -26,4 +26,11 @@ function assertContains(test, snippet, string) {
 
 }
 
+function assertEqualArrays(test, _a1, _a2) {
+	var a1 = _a1.slice(); a1.sort();
+	var a2 = _a2.slice(); a2.sort();
+	test.equals(JSON.stringify(a1, null, '  '), JSON.stringify(a2, null, '  '));
+}
+
 exports.assertContains = assertContains;
+exports.assertEqualArrays = assertEqualArrays;
