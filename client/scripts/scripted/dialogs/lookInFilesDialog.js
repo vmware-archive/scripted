@@ -12,49 +12,78 @@
 /*global define window $*/
 /*jslint browser:true*/
 
+// TODO open file and search, skip dependencies in some way
+
 /**
  * The Open File dialog.
  */
-define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client", "text!scripted/dialogs/openResourceDialog.html"],
-	function(dialogUtils, pagestate, isearch, dialogText) {
+define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-file-search-client",
+		"text!scripted/dialogs/lookInFilesDialog.html"],
+function(dialogUtils, pagestate, isearch, dialogText) {
 	
+	var MINIMUM_LENGTH = 3; //Search Strings smaller than this are considered problematic and not executed.
+
 	/**
-	 * Convert from a path into an object containing the components of the path.
-	 * parseFile('a/b/c/D') returns {name:D, path:a/b/c/D, folderName:a/b/c, directory:a/b/c}'
-	 * @param {String} path fully qualified path
-	 * @return {{name:String,path:String,folderName:String,directory:String}}
+	 * Quick and dirty search history. It is not persisted and only retains a single search result.
 	 */
-	function parseFile(path) {
-		var segments = path.split('/');
+	var searchHistory = (function () {
+
+		var lastSearch = null;
+		
+		return {
+			get: function () {
+				return lastSearch;
+			},
+			put: function (search) {
+				if (typeof(search)==='string' && search.length>=MINIMUM_LENGTH) {
+					// Ignore trivial or empty searches. Probably more useful to keep the
+					// previous search instead.
+					lastSearch = search;
+				}
+			}
+		};
+
+	}());
+
+	function parseFile(searchresult) {
+		//TODO: can we get rid of this crappy 'transform the result into what we expect'
+		// function and simply have the searcher itself return objects in the
+		// expected format??
+	
+		var segments = searchresult.file.split('/');
 		var name = segments[segments.length-1];
 		segments.splice(-1,1);
 		var parent = segments.join('/');
-		return {
-			'name':name,
-			'path':path,
-			'folderName':parent,
-			'directory':parent
-		};
+		var parseResult = {};
+		for (var p in searchresult) {
+			if (searchresult.hasOwnProperty(p)) {
+				parseResult[p] = searchresult[p];
+			}
+		}
+		parseResult.name = name;
+		parseResult.folderName = parent;
+		parseResult.directory = parent;
+		parseResult.path = searchresult.file;
+		return parseResult;
 	}
-	
-	/**
-	 * Create a new search that will wire up results handling to the renderer and return it.
-	 * @public
-	 * @param {String} query URI of the query to run.
-	 * @param {Function(JSONObject)} Callback function that receives the results of the query.
-	 */
+
 	function startSearch(query, renderer) {
 		var searchRoot = window.fsroot;
 		renderer.start(query);
 		var activeSearch = isearch(searchRoot, query, {
-			//	maxResults: 30, (if not specified then a default value is chosen by the server)
-			add: function(path) {
+			add: function(searchresult) {
 				$('#dialog_indicator').addClass('inprogress_indicator');
-				renderer.add(parseFile(path));
+				// path will actually be an object:
+				// { file: "A/B/C/D.txt", line: NN, col: NN, context: "xxxx" }
+				renderer.add(parseFile(searchresult));
 			},
-			revoke: function (path) {
+			revoke: function (searchresult) {
 				$('#dialog_indicator').addClass('inprogress_indicator');
-				renderer.revoke(path);
+				renderer.revoke(searchresult);
+			},
+			update: function (r) {
+				$('#dialog_indicator').addClass('inprogress_indicator');
+				renderer.update(parseFile(r));
 			},
 			done: function() {
 				$('#dialog_indicator').removeClass('inprogress_indicator');
@@ -64,11 +93,12 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		return activeSearch;
 	}
 	
-	function makeIncrementalRenderer(resultsNode) {
+	function makeIncrementalRenderer (resultsNode, heading, onResultReady, decorator, changeFile, editor) {
+
 		var foundValidHit = false;
 		var queryName = null;
 		var table = null;
-		var that = this;
+		var that=this;
 	
 		//Helper function to append a path String to the end of a search result dom node
 		var appendPath = (function() {
@@ -84,47 +114,159 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					path = path.substring(window.fsroot.length);
 				}
 				domElement.appendChild(document.createTextNode(' - ' + path + ' '));
+				return resource.name;
 			}
 			
+			function toPath(resource) {
+				var path = resource.folderName ? resource.folderName : resource.path;
+				// trim off the leading inferred fs root
+				if (path.indexOf(window.fsroot)===0) {
+					path = path.substring(window.fsroot.length);
+				}
+				return path;
+			}
+			
+			/*
+			 * More complex than for 'open file' because we may have multiple matches within a single file.
+			 * If we do that doesn't mean the path needs appending. The path only needs appending if two files
+			 * from different places have matches.
+			 */
 			function appendPath(domElement, resource) {
 				var name = resource.name;
+				var thisPath = toPath(resource);
+				var key = name + '::' + thisPath;
+				var pathsNeeded = false;
+				var potentialWork = [];
+				
 				if (namesSeenMap.hasOwnProperty(name)) {
-					//Seen the name before
-					doAppend(domElement, resource);
-					var deferred = namesSeenMap[name];
-					if (typeof(deferred)==='function') {
-						//We have seen the name before, but prior element left some deferred processing
-						namesSeenMap[name] = null;
-						deferred();
+					// namesSeenMap = Map<String::name,List<Map<String::Path,Function::appendfn>>>
+					var matches = namesSeenMap[name];
+					for (var m=0;m<matches.length;m++) {
+						var candidate = matches[m];
+						if (candidate.path!==thisPath) {
+							pathsNeeded=true;
+						}
+						if (typeof(candidate.appendfn)==='function') {
+							potentialWork.push(candidate);
+						}
 					}
+					if (pathsNeeded) {
+						doAppend(domElement,resource);
+					}
+					namesSeenMap[name].push({ "path": toPath(resource), "appendfn": null});
 				} else {
 					//Not seen before, so, if we see it again in future we must append the path
-					namesSeenMap[name] = function() { doAppend(domElement, resource); };
+					namesSeenMap[name] = [];
+					namesSeenMap[name].push({ "path": toPath(resource), "appendfn": function() { doAppend(domElement, resource); }});
+				}
+				if (pathsNeeded) {
+					for (var i=0;i<potentialWork.length;i++) {
+						var workitem = potentialWork[i];
+						if (typeof(workitem.appendfn)==='function') {
+							workitem.appendfn();
+							workitem.appendfn = null;
+						}
+					}
 				}
 			}
 			return appendPath;
 		}());
+				
+		function populateRow(row, resource) {
+			// Attach all the useful data to the row, useful for later navigation
+			row.resultData = resource;
+						
+			$(row).addClass('dialog_results_row');
 
+			// Column: context for the match
+			var col = document.createElement('span');
+			$(row).append(col);
+			$(col).addClass('dialog_matchtextcontext');
+			var textnode = document.createTextNode(resource.context);
+			// lets try and create some sexy stuff
+			var beforeText = resource.context.substring(0,resource.col);
+			var afterText = resource.context.substring(resource.col+resource.text.length);
+			var maxWidthForMatch = 64;
+			if ((beforeText.length+resource.text.length+afterText.length) > maxWidthForMatch) {
+			  // need to trim leading and trailing text
+			  var trimLevel = (maxWidthForMatch - resource.text.length)/2;
+			  // TODO what to do if search term is too long!
+			  if (trimLevel>0) {
+			    if (beforeText.length>trimLevel) {
+					beforeText = beforeText.substring(beforeText.length-trimLevel);
+			    }
+			    if (afterText.length>trimLevel) {
+					afterText = afterText.substring(0, trimLevel);
+			    }
+			  }
+			  
+			}
+			textnode = document.createTextNode(beforeText);
+			col.appendChild(textnode);
+			textnode = document.createElement("span");
+			textnode.innerHTML=resource.text;
+			$(textnode).addClass('dialog_matchhighlight');
+			col.appendChild(textnode);
+			textnode = document.createTextNode(afterText);
+			col.appendChild(textnode);
+			
+			// Building a row, input data is:
+			//	'name':name,
+			//	'path':searchresult.file,
+			//	'folderName':parent,
+			//	'directory':parent,
+			//	'line':searchresult.pos,
+			//	'col':searchresult.col,
+			//	'context':searchresult.context
+			
+
+			// the filename and line number
+			col = document.createElement('span');
+			$(row).append(col);
+			
+			var resourceLink = document.createElement('span');
+			$(resourceLink).append(document.createTextNode(resource.name));
+			if (resource.line) {
+				// add 1 as returned line is based on 0
+				$(resourceLink).append(document.createTextNode('  (Line '+(resource.line+1)+')'));
+			}
+			var loc = resource.location;
+
+			col.appendChild(resourceLink);
+			
+			// If not unique, add a path
+			appendPath(col, resource);
+			
+			// On clicking the row, change the editor contents
+			$(row).each(function(resourceLink) {
+				$(this).off('click');
+				$(this).on('click.dialogs',function(evt) {
+					that.closeDialog();
+					var result = row.resultData;
+					that.openOnRange(evt, {
+						path: result.path,
+						range: [result.offset, result.offset+result.text.length]
+					}, that.editor);
+					return false;
+				});
+			} );
+			
+		}
+		
 		var results = {
 			//maps paths to dom elements showing them on screen. If a result is revoked this allows us to
 			//easily find and destroy it.
 		};
-
+		
 		return {
 			start: function (qry) {
 				queryName = qry;
 			},
-			revoke: function (path) {
+			revoke: function (id) {
 				var links;
-				var existing = results[path];
+				var existing = results[id];
 				if (existing) {
-					// results are changing, let's deselect the current selection
-					links = $(".dialog_results_row",$(that.dialog));
-					if (that.selected !== -1) {
-						$(links[0]).removeClass('dialog_outline_row');
-					}
-					delete results[path];
-					that.selected = 0;
+					delete results[id];
 					$(existing).remove();
 				}
 				// select the first result
@@ -132,61 +274,29 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				$(links[0]).addClass('dialog_outline_row');
 				that.selected = 0;
 			},
+			update: function (resource) {
+//				console.log("renderer: request to update result "+resource);
+				var existing = results[resource.id];
+				if (existing) {
+					$(existing).empty();
+					populateRow(existing, resource);
+				}
+			},
 			add: function (resource) {
-				var col;
-				var firstresult = false;
+//				console.log("renderer: adding result "+resource);
 				if (!foundValidHit) {
-					// This must be the first one!
+					//This must be the first one!
 					foundValidHit = true;
 					$(resultsNode).empty();
-					
 					table = document.createElement('div');
-					table.id = 'dialog_results';
+					table.id='dialog_results';
 					$(resultsNode).append(table);
-					firstresult=true;
 				}
-				
-				// If previously displaying the message about no results, remove it
-				var noresultsMessage = $(".dialog_noresults_row",$(that.dialog));
-				if (noresultsMessage) {
-					noresultsMessage.remove();
-				}
-			
 				var row = document.createElement('div');
-				$(row).addClass("dialog_results_row");
 				$(table).append(row);
-				if (resource.path) {
-					results[resource.path] = row;
-				}
-				var resourceLink = document.createElement('a');
-				$(resourceLink).append(document.createTextNode(resource.name));
-				if (firstresult) {
-					that.selected = 0;
-					$(row).addClass("dialog_outline_row");
-				}
-				var loc;
-				if (resource.isExternalResource) {
-					// should open link in new tab, but for now, follow the behavior of navoutliner.js
-					loc = resource.path;
-				} else {
-					loc = pagestate.generateUrl(resource.path);
-				}
-
-				resourceLink.setAttribute('href', loc);
-				$(resourceLink).css("verticalAlign","middle");
-
-				row.appendChild(resourceLink);
-				appendPath(row, resource);
+				results[resource.id] = row;
+				populateRow(row, resource);
 				
-				// On clicking the link in this row, change the editor contents
-				$("a",row).each(function(resourceLink) {
-					$(this).off('click');
-					$(this).on('click.dialogs',function(evt) {
-						that.closeDialog();
-						var ret = that.changeFile(evt,that.editor);
-						return false;
-					});
-				} );
 			    var linkSelected = $(".dialog_outline_row",$(that.dialog));
 				if (!linkSelected || linkSelected.length===0) {
 					var links = $(".dialog_results_row",$(that.dialog));
@@ -194,9 +304,10 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					that.selected = 0;
 				}
 			},
-			done: function () {
-				var links = $(".dialog_results_row",$(that.dialog));
-				if (links.length===0) {
+		done: function () {
+			if (!foundValidHit) {
+				// only display no matches found if we have a proper name
+				if (queryName) {
 					table = document.createElement('div');
 					table.id = 'dialog_results';
 					$(resultsNode).append(table);
@@ -204,17 +315,26 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					$(row).addClass("dialog_noresults_row");
 					$(table).append(row);
 					$(row).append(document.createTextNode("No matches found"));
+
+//					var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
+//					var b = dojo.create("b", null, div, "last");
+//					dojo.place(document.createTextNode(queryName), b, "only");
+//					if (typeof(onResultReady) === "function") {
+//						onResultReady(resultsNode); // TODO whats this do?
+//					}
 				}
 			}
-		};
+		}
+	};
 	}
 
 	function closeDialog() {
 		$('#dialog_mask').hide();
+		searchHistory.put($('#dialog_search_text').val());
 		$("#dialogs").empty();
-		if (this.activeSearch) {
-			this.activeSearch.close();
-			delete this.activeSearch;
+		if (this.activeFileSearch) {
+			this.activeFileSearch.close();
+			delete this.activeFileSearch;
 		}
 		$(this.activeElement).focus();
 	}
@@ -243,22 +363,28 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 	};
 	
 	var doSearch = function() {
-		var text = $('#dialog_filename').val();
-		if (this.currentQuery !== null && this.currentQuery === text) {
-			return;
-		}
-		var that = this;
-		var activeSearch = this.activeSearch;
-		this.currentQuery = text;
-		if (!activeSearch) {
-			var renderer = this.rendererFactory($('#dialog_openfile_results'));
-			this.activeSearch = this.startSearch(text,renderer);
-			$('#dialog_openfile_results').scroll(function(evt) {
-				that.addMoreResultsNearScrollBottom();
-				$('#dialog_filename').focus(); // refocus after scrolling
-			});
-		} else {
-			activeSearch.query(text);
+		var text = $('#dialog_search_text').val();
+
+		//Searching for a single character is not very useful and it creates problems,
+		//even with a 'suspendable' search, because the search cannot be suspended in the
+		//middle of a file (yet). With a big file to search the single char search can
+		//return a lot of results just in that one file... causing trouble.
+		if (text && text.length>=MINIMUM_LENGTH) {
+//			console.log("search: text changed '"+text+"'");
+			var that = this;
+			var activeFileSearch = that.activeFileSearch;
+			if (!activeFileSearch) {
+//				console.log("search: no active search, starting one");
+				var renderer = this.rendererFactory($('#dialog_lookinfiles_results'));
+				this.activeFileSearch = this.startSearch(text,renderer);
+				$('#dialog_lookinfiles_results').scroll(function (evt) {
+					that.addMoreResultsNearScrollBottom();
+					$('#dialog_search_text').focus(); // refocus after scrolling
+				});
+			} else {
+//				console.log("search: search active, updating it");
+				activeFileSearch.query(text);
+			}
 		}
 	};
 
@@ -266,9 +392,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 	 * If scrolling near the bottom of the results list and more seem to be available, request them.
 	 */
 	function addMoreResultsNearScrollBottom() {
-		var target = $("#dialog_openfile_results").get(0);
-		var activeSearch = this.activeSearch;
-		if (activeSearch && target) {
+		var target = $("#dialog_lookinfiles_results").get(0);
+		var activeFileSearch = this.activeFileSearch;
+		if (activeFileSearch && target) {
 			var scrollBottom = target.scrollTop+target.clientHeight;
 			var scrollHeight = target.scrollHeight;
 			if (scrollHeight) {
@@ -276,23 +402,32 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				if (leftOver<0.1) {
 					// Less than 10% of the elements displated below bottom of the
 					// visible scroll area.
-					this.activeSearch.more(); // ask for more results
+//					console.log("asking for more results");
+					this.activeFileSearch.more(); // ask for more results
 				}
 			}
 		}
 	}
 	
-	var openDialog = function(editor, changeFile, onCancel) {
+	function getSelectedText(editor) {
+		var range = editor && editor.getSelection();
+		if (range && range.start && range.end && range.end > range.start) {
+			return editor.getText(range.start, range.end);
+		}
+	}
+	
+	var openDialog = function(editor,openOnRange) {
+		this.openOnRange = openOnRange;
+		this.editor = editor;
 		this.startSearch = startSearch;
 		this.rendererFactory = makeIncrementalRenderer;
 		this.addMoreResultsNearScrollBottom = addMoreResultsNearScrollBottom;
-		this.changeFile = changeFile;
-		this.closeDialog = closeDialog;
-		this.activeElement = document.activeElement;
-		this.currentQuery = null;
-		this.dialog="#dialog_openfile";
 		this.selected = -1;
 		
+		this.closeDialog = closeDialog;
+
+		this.dialog="#dialog_lookinfiles";
+		this.activeElement = document.activeElement;
 		var that = this;
 		
 		$("#dialogs").append('<div id="dialog_mask"></div>');
@@ -343,10 +478,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				
 				// This code adjust the scroll bars to try and ensure the selection
 				// stays on screen
-				var r = $("#dialog_openfile_results");
+				var r = $("#dialog_lookinfiles_results");
 				var dialog_results =  $("#dialog_results",$(that.dialog));
 				var scrollPositionOfResults = r.scrollTop();
 				var linkHeight = $(links[0]).outerHeight();
+				console.log("linkHeight="+linkHeight);
 				var scrollAreaHeight = dialog_results.height();
 				var viewHeight = $(r).height();
 				
@@ -397,9 +533,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				return false;
 			} else if (e.keyCode === $.ui.keyCode.ENTER) {
 				// Pressing ENTER triggers the button click on the selection
-				var results = $("a",$(that.dialog));
-				if (results && results.length>0) {
-					var result = results[(that.selected===-1)?0:that.selected];
+				links = $(that.dialog).find(".dialog_results_row");
+				if (links && links.length>0) {
+					var result = links[(that.selected===-1)?0:that.selected];
 					$(result).trigger('click');
 				}
 				return false;
@@ -418,7 +554,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		
 		$(this.dialog).off('click.dialogs');
 		$(this.dialog).on('click.dialogs',function() {
-			    $('#dialog_filename').focus();
+			    $('#dialog_search_text').focus();
 		});
 
 		// Handle resize events - adjust size of mask and dialog
@@ -433,7 +569,12 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		
 		positionDialog(this.dialog);
 		
-	    $('#dialog_filename').focus();
+		var lastSearch = getSelectedText(this.editor) || searchHistory.get();
+		if (lastSearch) {
+			$('#dialog_search_text').val(lastSearch);
+		}
+		
+	    $('#dialog_search_text').focus();
     };
 
 	return {

@@ -18,10 +18,11 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'], 
-function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
-	mFileSearchClient, mSearchDialog, mOsUtils,mDialogs,mOpenResourceDialog) {
+define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState",
+	"scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
+	"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
+function(mKeybinder, mEditor, mKeyBinding, mPageState, mOpenResourceDialog, mOpenOutlineDialog,
+	mLookInFilesDialog, mOsUtils,mDialogs) {
 	
 	var EDITOR_TARGET = {
 		main : "main",
@@ -469,53 +470,17 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 	// Before : scriptedEditor.js -> searchClient.js -> navHistory.js -> scriptedEditor.js : BAD
 	
 	var attachSearchClient = function(editor) {
-	
-		var searcher = new mSearchClient.Searcher({
-			serviceRegistry: null,
-			commandService: null,
-			fileService: null
-		});
-
-/*
-		// from globalCommands.js
-		var openResourceDialog = function(searcher, serviceRegistry, editor) {
-			var dialog = new scripted.widgets.OpenResourceDialog({
-				searcher: searcher,
-				searchRenderer: searcher.defaultRenderer,
-				favoriteService: null,
-				changeFile: handleNavigationEvent,
-				editor: editor
-			});
-			if (editor) {
-				dojo.connect(dialog, "onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
-				});
-			}
-			window.setTimeout(function() {
-				dialog.show();
-			}, 0);
-		};
-*/
-		
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-				mOpenResourceDialog.openDialog(searcher, editor, handleNavigationEvent);
-//				function(editor) {
-//					// TODO load the file
-//					editor.getTextView().focus(); // focus editor after dialog close
-//				},function(editor) {
-//					editor.getTextView().focus(); // focus editor after dialog close
-//				});
-//				openResourceDialog.open(searcher, editor);
-//				openResourceDialog(searcher, null, editor);
+				mOpenResourceDialog.openDialog(editor, handleNavigationEvent);
 				return true;
 			});
 		} else {
 			// TODO what is this really doing - how does it relate to what Kris implemented?
 			$('body').on('keydown', function(evt) {
 				if (evt.shiftKey && evt.ctrlKey && evt.which === 70 /*F*/) {
-					mOpenResourceDialog.openDialog(searcher, null, null);
+					mOpenResourceDialog.openDialog(null, null);
 					return true;
 				}
 			});
@@ -551,33 +516,9 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 
 	// TODO move to scriptedEditor.js
 	var attachFileSearchClient = function(editor) {
-	
-		var fileSearcher = new mFileSearchClient.FileSearcher({
-		});
-	
-		var openFileSearchDialog = function(editor) {
-			var dialog = new scripted.widgets.SearchDialog({
-				editor: editor,
-				fileSearcher: fileSearcher,
-				fileSearchRenderer: fileSearcher.defaultRenderer,
-				style:"width:800px",
-				openOnRange: openOnRange
-			});
-			
-			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
-//			if (editor) {
-//				dojo.connect(dialog,"onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog closed
-//				});
-//			}
-			window.setTimeout(function() {
-				dialog.show();
-			},0);
-		};
-		
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Look in files");
 		editor.getTextView().setAction("Look in files",function() {
-			openFileSearchDialog(editor);
+			mLookInFilesDialog.openDialog(editor, openOnRange);
 			return true;
 		});
 	};
