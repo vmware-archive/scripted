@@ -18,8 +18,8 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
-function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mDialogs, mOpenResourceDialog) {
+define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", 'lib/json5'],
+function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 	
 	var EDITOR_TARGET = {
 		main : "main",

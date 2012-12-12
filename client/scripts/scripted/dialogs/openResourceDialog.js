@@ -291,6 +291,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		this.currentQuery = null;
 		this.dialog="#dialog_openfile";
 		this.selected = -1;
+		this.editor = editor;
 		
 		var that = this;
 		
