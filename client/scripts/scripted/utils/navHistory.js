@@ -324,10 +324,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 				// delete old editor if edists
 				if (targetPane) {
 					mPaneFactory.destroyPane(targetPane);
-//					if (target === EDITOR_TARGET.sub) {
-//						// ensure side panel exists
-//						mSidePanelManager.showSidePanel();
-//					}
 				}
 				targetPane = mPaneFactory.createPane("scripted.editor", target, {
 					filepath : editorDesc.path

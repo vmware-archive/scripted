@@ -62,9 +62,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		historyMenu.css('top', $('header').height() + $('#breadcrumb').height());
 		$('#main').append(historyMenu);
 
-
 		var history = mPageState.getHistory();
-
 		for (var i = history.length-1; i >= 0; i--) {
 			var newHistoryElem = $('<li></li>');
 			var newHistoryAnchor = $("<a href='" + mPageState.generateUrl(history[i]) + "'>" +
@@ -444,6 +442,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	
 	
 	return {
-		
+		// exposed for testing
+		_initializeBreadcrumbs : initializeBreadcrumbs	
 	};
 });

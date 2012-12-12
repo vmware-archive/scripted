@@ -43,6 +43,9 @@ define(['jquery'], function() {
 				throw new Error("Unknown pane kind: " + id);
 			}
 			try {
+				if (!kind) {
+					kind = "main";
+				}
 				if (!options) {
 					options = { kind : kind };
 				} else if (!options.kind) {
@@ -117,7 +120,7 @@ define(['jquery'], function() {
 				if (panes[i] === pane) {
 					found = true;
 					if (!confirm || this.confirmNavigation(pane)) {
-						panes = panes.slice(i, i);
+						panes.splice(i, 1);
 						if (typeof pane.destroy === 'function') {
 							pane.destroy();
 						}
