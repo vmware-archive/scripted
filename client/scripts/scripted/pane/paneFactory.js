@@ -23,12 +23,15 @@
 //    paneDestroyed
 
 /*jslint browser:true */
-/*global define scriptedLogger */
+/*global define scriptedLogger confirm */
 
 define(['jquery'], function() {
 	var paneRegistry = {};
 	
 	var panes = [];
+	
+	// sustom confirm navigation support.  Usable for testing to disable popups
+	var confirmer;
 	
 	return {
 		registerPane : function(id, callback) {
@@ -56,6 +59,7 @@ define(['jquery'], function() {
 				}
 				
 				$(document).trigger('paneCreated', pane);
+				return pane;
 			} catch (e) {
 				scriptedLogger.error(e.message, "PANE");
 				return null;
@@ -70,7 +74,7 @@ define(['jquery'], function() {
 			}
 		},
 		
-		getSubPanes : function() {
+		getSidePanes : function() {
 			var subPanes = [];
 			for (var i = 0; i < panes.length; i++) {
 				if (!panes[i].isMain) {
@@ -100,23 +104,25 @@ define(['jquery'], function() {
 		 */
 		getPane : function(id, isMain) {
 			for (var i = 0; i < panes.length; i++) {
-				if (panes[i].paneId === id && ((!isMain) !== (!panes[i].isMain))) {
+				if (panes[i].paneId === id && ((!isMain) === (!panes[i].isMain))) {
 					return panes[i];
 				}
 			}
 			return null;
 		},
 		
-		destroyPane : function(pane) {
+		destroyPane : function(pane, confirm) {
 			var found = false;
 			for (var i = 0; i < panes.length; i++) {
 				if (panes[i] === pane) {
-					panes.slice(i, 1);
-					if (typeof pane.destroy === 'function') {
-						pane.destroy();
-						found = true;
-						break;
+					found = true;
+					if (!confirm || this.confirmNavigation(pane)) {
+						panes = panes.slice(i, i);
+						if (typeof pane.destroy === 'function') {
+							pane.destroy();
+						}
 					}
+					break;
 				}
 			}
 			
@@ -124,6 +130,35 @@ define(['jquery'], function() {
 				$(document).trigger('paneDestroyed', pane);
 			} else {
 				throw new Error("Tried to remove a pane that doesn't exist");
+			}
+		},
+		
+		_setNavigationConfirmer : function(callback) {
+			confirmer = callback;
+		},
+
+		/**
+		 * If the pane is dirty, pop-up a message to confirm navigation away from the pane
+		 * @param {{contfirm:function():boolean}} pane the pane
+		 * @return boolean true iff navigation should occur
+		*/
+		confirmNavigation : function(pane) {
+			if (pane && typeof pane.isDirty === 'function' && pane.isDirty()) {
+				if (confirmer) {
+					// non-blocking mode for tests
+					confirmer(true);
+					return true;
+				} else {
+					// TODO don't use confirm.  use a custom dialog for this
+					return typeof pane.confirm === 'function' ?
+						pane.confirm() :
+						confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+				}
+			} else {
+				if (confirmer) {
+					confirmer(false);
+				}
+				return true;
 			}
 		}
 	};

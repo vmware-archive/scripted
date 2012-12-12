@@ -13,12 +13,20 @@
  ******************************************************************************/
 
 // implements the pane interface for editors
-
+/*global scripted JSON5 dojo confirm*/
 /*jslint browser:true */
-define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/widgets/OpenResourceDialog", "scripted/widgets/OpenOutlineDialog",
+define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
 "scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5', 'jquery'],
-function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
+function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
 	mFileSearchClient, mSearchDialog, mOsUtils) {
+
+	var FS_LIST_URL = "http://localhost:7261/fs_list/";
+	// FIXADE copied from navhistory
+	var EDITOR_TARGET = {
+		main : "main",
+		sub : "sub",
+		tab : "tab"
+	};
 
 	function openOnClick(event, editor) {
 		if (mOsUtils.isCtrlOrMeta(event)) {
@@ -26,7 +34,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 			var offset = editor.getTextView().getOffsetAtLocation(rect.x, rect.y);
 			var definition = editor.findDefinition(offset);
 			if (definition) {
-				openOnRange(event.shiftKey ? EDITOR_TARGET.sub : EDITOR_TARGET.main, definition, editor);
+				mNavHistory.openOnRange(event.shiftKey ? EDITOR_TARGET.sub : EDITOR_TARGET.main, definition, editor);
 			}
 		}
 	}
@@ -61,7 +69,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 			var newHistoryElem = $('<li></li>');
 			var newHistoryAnchor = $("<a href='" + mPageState.generateUrl(history[i]) + "'>" +
 				history[i].path.split('/').pop() + '</a>');
-			$(newHistoryAnchor).click(handleNavigationEvent);
+			$(newHistoryAnchor).click(mNavHistory.handleNavigationEvent);
 			newHistoryElem.append(newHistoryAnchor);
 			historyMenu.append(newHistoryElem);
 		}
@@ -107,7 +115,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 								newMenuItem.append(newMenuAnchor);
 								newMenu.prepend(newMenuItem);
 
-								$(newMenuAnchor).click(handleNavigationEvent);
+								$(newMenuAnchor).click(mNavHistory.handleNavigationEvent);
 							}
 						}
 					}
@@ -158,30 +166,10 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 			fileService: null
 		});
 
-/*
-		// from globalCommands.js
-		var openResourceDialog = function(searcher, serviceRegistry, editor) {
-			var dialog = new scripted.widgets.OpenResourceDialog({
-				searcher: searcher,
-				searchRenderer: searcher.defaultRenderer,
-				favoriteService: null,
-				changeFile: handleNavigationEvent,
-				editor: editor
-			});
-			if (editor) {
-				dojo.connect(dialog, "onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
-				});
-			}
-			window.setTimeout(function() {
-				dialog.show();
-			}, 0);
-		};
-*/
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-				mOpenResourceDialog.openDialog(searcher, editor, handleNavigationEvent);
+				mOpenResourceDialog.openDialog(searcher, editor, mNavHistory.handleNavigationEvent);
 				return true;
 			});
 		} else {
@@ -200,7 +188,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
 			var dialog = new scripted.widgets.OpenOutlineDialog({
 				// TODO FIXADE Do we need this?
-//				changeFile: handleNavigationEvent,
+//				changeFile: mNavHistory.handleNavigationEvent,
 				editor: editor
 			});
 			if (editor) {
@@ -231,7 +219,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 				fileSearcher: fileSearcher,
 				fileSearchRenderer: fileSearcher.defaultRenderer,
 				style:"width:800px",
-				openOnRange: openOnRange
+				openOnRange: mNavHistory.openOnRange
 			});
 
 			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
@@ -258,31 +246,31 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		editor.getTextView().setAction("Open declaration in same editor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.main, definition, editor);
+				mNavHistory.openOnRange(EDITOR_TARGET.main, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Open declaration in new tab");
 		editor.getTextView().setAction("Open declaration in new tab", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.tab, definition, editor);
+				mNavHistory.openOnRange(EDITOR_TARGET.tab, definition, editor);
 			}
 		});
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ true, /*alt*/ false), "Open declaration in other editor");
 		editor.getTextView().setAction("Open declaration in other editor", function() {
 			var definition = editor.findDefinition(editor.getTextView().getCaretOffset());
 			if (definition) {
-				openOnRange(EDITOR_TARGET.sub, definition, editor);
+				mNavHistory.openOnRange(EDITOR_TARGET.sub, definition, editor);
 			}
 		});
 	};
 
 	var attachEditorSwitch = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Switch Subeditor and Main Editor");
-		editor.getTextView().setAction("Switch Subeditor and Main Editor", switchEditors);
+		editor.getTextView().setAction("Switch Subeditor and Main Editor", mNavHistory.switchEditors);
 
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("e", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Toggle Subeditor");
-		editor.getTextView().setAction("Toggle Subeditor", toggleSidePanel);
+		editor.getTextView().setAction("Toggle Subeditor", mNavHistory.toggleSidePanel);
 	};
 
 	/**
@@ -303,23 +291,31 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		}
 		editor.getTextView().addEventListener("Selection", selListener);
 	};
-
-
 	
 	/**
 	 * Adds one-time configuration to the main editor
 	 */
-	var buildMaineditor = function() {
-		$('#editor').click(function(event) {
+	var buildMainEditor = function() {
+		var domNode = $('#editor');
+		domNode.click(function(event) {
 			openOnClick(event, window.editor);
 		});
+		$(document).on('sidePanelClosed.mainEditor', function(event) {
+			// ensure that the main editor goes back to full size
+			domNode.css('margin-right', '0');
+		});
+		$(document).on('sidePanelShown.mainEditor', function(event) {
+			// ensure that the main editor goes back to full size
+			domNode.css('margin-right', $('#side_panel').width());
+		});
+		domNode.css('display','block');
+		return domNode;
 	};
 
 	
-	var buildSubeditor = function(filepath) {
+	var buildSubEditor = function(filepath, evtName) {
 		var filename = filepath.split('/').pop();
-		
-		// TODO move this html snippet to separate file
+		// remove this html snippet to separate file
 		var subeditor =
 		$('<div class="subeditor_wrapper">'+
 			'<div class="subeditor_titlebar">'+
@@ -331,51 +327,49 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 			'</div>'+
 			'<div class="subeditor scriptededitor"></div>'+
 		'</div>');
+		
 		$('#side_panel').append(subeditor);
+		var domNode = $('.subeditor');
 		
 		var sideHeight = $('#side_panel').height();
 		var subeditorMargin = parseInt($('.subeditor_wrapper').css('margin-top'), 10);
 		
 		$('.subeditor_wrapper').height(sideHeight - (subeditorMargin*2));
-		$('.subeditor').height(
+		domNode.height(
 			$('.subeditor_wrapper').height() -
 			$('.subeditor_titlebar').height()
 		);
 		
 		// must reattach these handlers on every new subeditor open since we always delete the old editor
-		$('.subeditor_close').click(toggleSidePanel);
+		$('.subeditor_close').on('click.' + evtName, mNavHistory.toggleSidePanel);
+		$('.subeditor_switch').on('click.' + evtName, mNavHistory.switchEditors);
 		
-		$('.subeditor_switch').click(switchEditors);
-		
-		$('.subeditor').click(function(event) {
+		domNode.click(function(event) {
 			openOnClick(event, window.subeditors[0]);
 		});
-		return subeditor;
+		return domNode;
 	};
 
 	var EditorPane = function(options) {
-		var filepath = options.filepath, domNode = options.domNode, type = options.kind;
-		if (!type) {
-			type = "main";
+		var filepath = options.filepath, kind = options.kind;
+		if (!kind) {
+			kind = EDITOR_TARGET.main;
 		}
-		if (!domNode) {
-			domNode = $('#editor')[0];
-		}
-		$(domNode).show();
-		$('body').off('keydown');
-		var editor = mEditor.makeEditor(domNode, filepath, type);
-		if (editor.loadResponse === 'error') {
-			$(domNode).hide();
-			attachSearchClient(null);
-			closeSidePanel();
-			return editor;
+		this.evtName = Date.now();
+		var domNode;
+		if (kind === EDITOR_TARGET.main) {
+			domNode = buildMainEditor();
+		} else {
+			domNode = buildSubEditor(filepath, this.evtName);
 		}
 		
-		if (type === 'main') {
-			buildMainEditor();
-			domNode.css('display','block');
-		} else {
-			buildSubEditor();
+		domNode.show();
+		$('body').off('keydown');
+		var editor = mEditor.makeEditor(domNode[0], filepath, kind);
+		if (editor.loadResponse === 'error') {
+			domNode.hide();
+			attachSearchClient(null);
+			return editor;
 		}
 		
 		attachSearchClient(editor);
@@ -387,7 +381,7 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		                              //that register keybindings to the editor.
 		editor.cursorFix();
 		
-		if (type === 'main') {
+		if (kind === EDITOR_TARGET.main) {
 			setTimeout(function() {
 				editor.getTextView().focus();
 			}, 5);
@@ -395,26 +389,57 @@ function(mKeybinder, mEditor, mKeyBinding, mPageState, mSearchClient, mOpenResou
 		
 		installPageStateListener(editor);
 		this.editor = editor;
+		this.kind = kind;
 	};
 
 	EditorPane.prototype = {
+		/**
+		 * Pane API
+		 */
 		destroy : function() {
-			// anything to do?
+			if (this.isMain) {
+				$(document).off('sidePanelClosed.mainEditor');
+				$(document).off('sidePanelShown.mainEditor');
+				delete window.editor;
+			} else {
+				$('.subeditor_close').off('click.' + this.evtName, mNavHistory.toggleSidePanel);
+				$('.subeditor_switch').off('click.' + this.evtName, mNavHistory.switchEditors);
+				$('.subeditor_wrapper').remove();
+				window.subeditors = [];
+			}
 		},
+		/**
+		 * Pane API
+		 */
 		isDirty : function() {
 			return this.editor.isDirty();
 		},
 		
 		/**
+		 * Pane API
 		 * @return true iff pane can be navigated away from.  typically opens a dialog for user to click through.
 		 */
 		confirm : function() {
 			return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
+		},
+		
+		/**
+		 * Pane API
+		 */
+		updateContents : function(newContents) {
+			this.editor = newContents;
+			if (this.kind === EDITOR_TARGET.main) {
+				initializeBreadcrumbs(newContents.getFilePath());
+				window.editor = newContents;
+			} else {
+				window.subeditors[0] = newContents;
+				initializeHistoryMenu();
+			}
 		}
-	}
+	};
 
-	mPaneFactory.registerPane("scripted.editor", function() {
-		return new EditorPane(options)
+	mPaneFactory.registerPane("scripted.editor", function(options) {
+		return new EditorPane(options);
 	});
 	
 	

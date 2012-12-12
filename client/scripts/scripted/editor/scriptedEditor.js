@@ -21,7 +21,7 @@ define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orio
 "plugins/esprima/indexerService",
 "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
 "plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys", 
+"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 "scripted/exec/exec-after-save", "jshint", "jquery" ],
 
 function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
@@ -305,7 +305,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 				if (!options.indent_size && !options.indent_char) {
 					options.indent_size = 1;
 					options.indent_char = "\t";
-				} 
+				}
 				var toFormat, formatted;
 				if (!selectionEmpty) {
 					var checkedFormatSelection = checkFormatSelection(editor, start, end);
@@ -316,7 +316,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 					
 					options.indent_level = determineIndentLevel(editor, start, options);
 					formatted = js_beautify(toFormat, options);
-					if (formatted) { 
+					if (formatted) {
 //                        formatted = fixFirstLineFormatting(toFormat, formatted);
 						editor.setText(formatted, start, end);
 					}
@@ -414,7 +414,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 					//var params = "file="+filePath+"&"text=";
 					xhr.onreadystatechange = function() {
 						if (xhr.readyState === 4) {
-							if (xhr.status === 200) {  
+							if (xhr.status === 200) {
 								// console.log("Saved OK I think: "+xhr.status);
 								editor.setInput(null, null, null, true);
 								afterSaveSuccess(filePath);
@@ -620,7 +620,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 			}
 			if(window.scripted.config.ui && window.scripted.config.ui.font_size){
 				$('.textviewContainer').css('font-size', window.scripted.config.ui.font_size);
-				editorUpdateRequired = true; 
+				editorUpdateRequired = true;
 			}
 			if(window.scripted.config.ui && window.scripted.config.ui.content_assist_font_size){
 				$('#contentassist').css('font-size', window.scripted.config.ui.content_assist_font_size);

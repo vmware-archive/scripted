@@ -19,7 +19,7 @@
  * This module defines the navigation and history functionality of scripted.
  */
 define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/dialogs/dialogUtils", "scripted/dialogs/openResourceDialog", 'lib/json5'],
-function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenResourceDialog) {
+function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mDialogs, mOpenResourceDialog) {
 	
 	var EDITOR_TARGET = {
 		main : "main",
@@ -28,7 +28,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 	};
 	var LINE_SCROLL_OFFSET = 5;
 	var GET_URL = "http://localhost:7261/get?file=";
-	var FS_LIST_URL = "http://localhost:7261/fs_list/";
 	
 	// define as forward reference
 	var navigate;
@@ -168,6 +167,31 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 		}, 200);
 	};
 	
+	var toggleSidePanel = function() {
+		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
+		var mainItem = mPageState.generateHistoryItem(window.editor);
+		var subItem = sidePanelOpen ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
+		mPageState.storeBrowserState(mainItem, subItem, true);
+		if (sidePanelOpen) {
+			mSidePanelManager.closeSidePanel();
+		} else {
+			// first, open side panel
+			mSidePanelManager.showSidePanel();
+			
+			// now open file of main editor in side panel
+			var sel = window.editor.getSelection();
+			navigate({
+				path:window.editor.getFilePath(),
+				range:[sel.start, sel.end],
+				scroll: $(window.editor._domNode).find('.textview').scrollTop()
+			}, "sub");
+			window.subeditors[0].getTextView().focus();
+		}
+		mainItem = mPageState.generateHistoryItem(window.editor);
+		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(window.subeditors[0]);
+		mPageState.storeBrowserState(mainItem, subItem, false);
+	};
+	
 	/**
 	 * Opens the given editor on the given definition
 	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
@@ -202,45 +226,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 		}
 	};
 
-	/**
-	 * This handles initial page load
-	 */
-	var loadEditor = function(filepath, domNode, type) {
-		if (!type) {
-			type = "main";
-		}
-		if (!domNode) {
-			domNode = $('#editor')[0];
-		}
-		$(domNode).show();
-		$('body').off('keydown');
-		var editor = mEditor.makeEditor(domNode, filepath, type);
-		if (editor.loadResponse === 'error') {
-			$(domNode).hide();
-			attachSearchClient(null);
-			closeSidePanel();
-			return editor;
-		}
-		
-		// TODO move to scriptedEditor.js
-		attachSearchClient(editor);
-		attachOutlineClient(editor);
-		attachDefinitionNavigation(editor);
-		attachFileSearchClient(editor);
-		attachEditorSwitch(editor);
-		mKeybinder.installOn(editor); //Important: keybinder should be installed after all other things
-		                              //that register keybindings to the editor.
-		editor.cursorFix();
-		
-		if (type === 'main') {
-			setTimeout(function() {
-				editor.getTextView().focus();
-			}, 5);
-		}
-		
-		installPageStateListener(editor);
-		return editor;
-	};
 	
 	var setupPage = function(state, doSaveState) {
 		var mainItem;
@@ -259,7 +244,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 
 		if (!state.side) {
 			if ($('#side_panel').css('display') !== 'none') {
-				closeSidePanel();
+				mSidePanelManager.closeSidePanel();
 			}
 		}
 		
@@ -292,30 +277,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 			return true;
 		}
 	};
-	
-	var toggleSidePanel = function() {
-		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
-		var mainItem = mPageState.generateHistoryItem(window.editor);
-		var subItem = sidePanelOpen ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
-		mPageState.storeBrowserState(mainItem, subItem, true);
-		if (sidePanelOpen) {
-			closeSidePanel();
-		} else {
-			// first, open side panel
-			mSidePanelManager.showSidePanel();
-			
-			// now open file of main editor in side panel
-			var sel = window.editor.getSelection();
-			var range = [sel.start, sel.end];
-			navigate({path:window.editor.getFilePath(), range:range, 
-					scroll:$(window.editor._domNode).find('.textview').scrollTop()}, EDITOR_TARGET.sub);
-			window.subeditors[0].getTextView().focus();
-		}
-		mainItem = mPageState.generateHistoryItem(window.editor);
-		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(window.subeditors[0]);
-		mPageState.storeBrowserState(mainItem, subItem, false);
-	};
-
+		
 	/**
 	 * Navigates to a new editor
 	 * @param {{path:String,range:Array.<Number>,scroll:Number}} editorDesc A description of the editor to open, including file path, selected range and scroll position
@@ -349,23 +311,26 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 
 		if (target === EDITOR_TARGET.sub || target === EDITOR_TARGET.main) {
 			var targetPane = mPaneFactory.getPane("scripted.editor", target === EDITOR_TARGET.main);
-			var isSame = targetEditor && targetEditor.getFilePath() === filepath;
-			var domNode = target === EDITOR_TARGET.main ? $('#editor') : $('.subeditor');
-			if (!isSame && targetEditor && !confirmNavigation(targetEditor)) {
+			var isSame = targetPane && targetPane.editor.getFilePath() === filepath;
+			if (!isSame && targetPane && !mPaneFactory.confirmNavigation(targetPane)) {
 				// user chose not to move from existing editor
 				return false;
 			}
 			
-			if (!isSame && targetPane) {
-				// delete old editor
-				mPaneFactory.destroyPane(targetPane);
-				if (target === EDITOR_TARGET.sub) {
-					// ensure side panel exists
-					mSidePanelManager.showSidePanel();
+			if (target === EDITOR_TARGET.sub && !mSidePanelManager.isSidePanelOpen()) {
+				mSidePanelManager.showSidePanel();
+			}
+			if (!isSame) {
+				// delete old editor if edists
+				if (targetPane) {
+					mPaneFactory.destroyPane(targetPane);
+//					if (target === EDITOR_TARGET.sub) {
+//						// ensure side panel exists
+//						mSidePanelManager.showSidePanel();
+//					}
 				}
 				targetPane = mPaneFactory.createPane("scripted.editor", target, {
-					filepath : editorDesc.path,
-					domNode : domNode
+					filepath : editorDesc.path
 				});
 			}
 			var targetEditor = targetPane.editor;
@@ -395,16 +360,13 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 				// explicit check for false since navigator might be 'undefined' at this point
 				if (window.scripted.navigator !== false) {
 					// if model not yet available, highlighting is handled elsewhere.
+					// TODO Yikes!  Yet another global variable.  We should make explorer non-global
 					if (explorer.model) {
 						explorer.highlight(filepath);
 					}
 				}
-				initializeBreadcrumbs(filepath);
-				window.editor = targetEditor;
-			} else {
-				window.subeditors[0] = targetEditor;
-				initializeHistoryMenu();
 			}
+			targetPane.updateContents(targetEditor);
 			
 			// now add a history entry for the new page state
 			if (doSaveState) {
@@ -429,13 +391,12 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils,mDialogs,mOpenRes
 	};
 	
 	return {
-		// private function that is only exported to help with testing
-		_loadEditor: loadEditor,
-		
 		navigateToURL: navigateToURL,
-		openOnRange: openOnRange,
 		handleNavigationEvent: handleNavigationEvent,
 		popstateHandler: popstateHandler,
-		setupPage: setupPage
+		setupPage: setupPage,
+		switchEditors: switchEditors,
+		toggleSidePanel: toggleSidePanel,
+		openOnRange: openOnRange
 	};
 });

@@ -33,7 +33,7 @@ side : { // side panel can be specified as an array for multiple side panels
 	scroll : <scroll position>
 }
 
-</pre> 
+</pre>
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
 define(['lib/json5'], function() {
@@ -48,7 +48,7 @@ define(['lib/json5'], function() {
 		 * A function that extracts page layout from a hash and path
 		 * including all open editors, the currently selected text
 		 * and their scroll positions
-		 * 
+		 *
 		 * @param {String} hash the hash of the url to parse. The hash might just be a fully qualified path or it could be a full JSON object
 		 * @param {String} path the path of the url to parse
 		 * @return {{main:{path:String,range:Array,scroll:Number},side0:{path:String,range:Array,scroll:Number}}} an object describing the full page state
@@ -118,7 +118,7 @@ define(['lib/json5'], function() {
 		},
 	
 		extractPageStateFromUrl : function(url) {
-			if (url.substring(0,"http://".length) !== "http://") {
+			if (url.substring(0, "http://".length) !== "http://" && url.substring(0, editorPrefix.length) !== editorPrefix) {
 				// assume path, not a url
 				var splits = url.split("#");
 				var hash;

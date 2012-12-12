@@ -24,26 +24,18 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], func
 			return false;
 		}
 		sidePanel.hide();
-		$('#editor').css('margin-right', '0');
 		sidePanel.trigger('close');
 		
 		$(document).trigger('sidePanelClosed', sidePanel);
 		// here, go into the pane factory and destroy all panes
-		if (window.subeditors && window.subeditors[0] &&
-			confirmNavigation(window.subeditors[0])) {
-			$('.subeditor_wrapper').remove();
-			window.subeditors.pop();
-
-
-			// this part should happen in an event
-			// might be the dom element 'editor' or the actual editor so check for getTextview
-			var editor = window.editor;
-			if (editor && editor._textView) {
-				editor._textView._updatePage();
-				editor.getTextView().focus();
-			}
+		var sidePanes = mPaneFactory.getSidePanes();
+		var destroyed = true;
+		for (var i = 0; i < sidePanes.length; i++) {
+			destroyed = destroyed && mPaneFactory.destroyPane(sidePanes[i], true);
 		}
-		return true;
+		$(window).resize();
+		
+		return destroyed;
 	};
 
 	var showSidePanel = function() {
@@ -57,7 +49,6 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], func
 			sidePanel.width(storedWidth);
 			sidePanel.resize();
 		}
-		$('#editor').css('margin-right', sidePanel.width());
 		sidePanel.trigger('open');
 		$(document).trigger('sidePanelShown', sidePanel);
 		
@@ -65,47 +56,13 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], func
 	};
 	
 	var isSidePanelOpen = function() {
-		return sidePanel.css('display') === 'none';
-	}
-	
-	var confirmer;
-	var _setNavigationConfirmer = function(callback) {
-		confirmer = callback;
+		return sidePanel.css('display') !== 'none';
 	};
+	
 
-	/**
-	 * If the pane is dirty, pop-up a message to confirm navigation away from the pane
-	 * @param {{contfirm:function():boolean}} pane the pane
-	 * @return boolean true iff navigation should occur
-	*/
-	var confirmNavigation = function(pane) {
-		if (pane && typeof pane.isDirty === 'function' && pane.isDirty()) {
-			if (confirmer) {
-				// non-blocking mode for tests
-				confirmer(true);
-				return true;
-			} else {
-				// TODO don't use confirm.  use a custom dialog for this
-				return typeof pane.confirm === 'function' ?
-					pane.confirm() :
-					confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
-			}
-		} else {
-			if (confirmer) {
-				confirmer(false);
-			}
-			return true;
-		}
-	};
-	
-	
-	
 	return {
-		// private function that are only exported to help with testing
-		_setNavigationConfirmer : _setNavigationConfirmer,
 		isSidePanelOpen : isSidePanelOpen,
 		showSidePanel: showSidePanel,
-		closeSidePanel: closeSidePanel,
-		confirmNavigation : confirmNavigation
+		closeSidePanel: closeSidePanel
 	};
 });
