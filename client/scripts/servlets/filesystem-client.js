@@ -17,9 +17,11 @@ define(function(require, exports, module) {
 	var servletPathRename = '/filesystem/rename';
 	var servletPathDeleteResource = '/filesystem/deleteResource';
 	var servletPathmkdir = '/filesystem/mkdir';
+	var servletPathCreateFile = '/filesystem/createFile';
 	
 	exports.rename = makePromisedServletStub(servletPathRename);
 	exports.deleteResource = makePromisedServletStub(servletPathDeleteResource);
 	exports.mkdir = makePromisedServletStub(servletPathmkdir);
+	exports.createFile = makePromisedServletStub(servletPathCreateFile);
 
 });

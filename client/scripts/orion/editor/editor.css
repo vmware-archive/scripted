@@ -15,7 +15,10 @@
 
 .treetable {
 overflow: auto;
+/*
 font-family: sans-serif;
+*/
+font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 font-size: 12px;
 /*
 	border-spacing: 0;

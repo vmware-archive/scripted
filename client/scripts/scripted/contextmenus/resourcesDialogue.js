@@ -142,33 +142,37 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 
 
 
+var createDialogue = function(initialValue) {
 
-	var createDialogue = function(initialValue) {
-
-			var addResource = function(onClose) {
-					modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
-				};
-
-			var renameResource = function(onClose) {
-					modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose, initialValue);
-				};
-
-			var deleteResource = function(onClose) {
-
-					var operations = {
-						onClose: onClose
-					};
-
-					openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
-				};
-
-			return {
-				addResource: addResource,
-				renameResource: renameResource,
-				deleteResource: deleteResource
+		var addResource = function(onClose) {
+				modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
 			};
 
+		var renameResource = function(onClose) {
+				modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose, initialValue);
+			};
+
+		var deleteResource = function(onClose) {
+
+				var operations = {
+					onClose: onClose
+				};
+
+				openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
+
+				if (initialValue) {
+					$("#dialog_message_resource_to_delete").text(initialValue);
+				}
+
+			};
+
+		return {
+			addResource: addResource,
+			renameResource: renameResource,
+			deleteResource: deleteResource
 		};
+
+	};
 
 	return {
 		createDialogue: createDialogue

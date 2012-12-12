@@ -698,6 +698,10 @@ if (mExtensionCommands) {
 */
 		}
 	};
+	
+	FileExplorer.prototype.fullRefresh = function(postRefresh) {
+			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
+	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
 	 * @param {Object} item
