@@ -13,8 +13,8 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/textview/undoStack', 'orion/textview/keyBinding',
-	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex', 'orion/textview/util','scripted/editor/dialogs'],
-function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex, mUtil, mDialogs) {
+	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex', 'orion/textview/util','scripted/dialogs/gotoLineDialog'],
+function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex, mUtil, mGotoLineDialog) {
 
 	function UndoFactory() {
 	}
@@ -471,7 +471,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 				var editor = this.editor;
 				var model = editor.getModel();
 				var line = model.getLineAtOffset(editor.getCaretOffset());
-				mDialogs.openDialog_gotoLine(line+1,function(line) {
+				mGotoLineDialog.openDialog(line+1,function(line) {
 					editor.onGotoLine(line - 1, 0);
 				});
 				return true;

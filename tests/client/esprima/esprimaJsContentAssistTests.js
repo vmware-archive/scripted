@@ -1999,7 +1999,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2008,7 +2008,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2599,7 +2599,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			);
 			// currently, we just ignore parameterization
 			testProposals("x", results, [
-				["xx", "xx : Array"]
+				["xx", "xx : Array[String]"]
 			]);
 		};
 		
@@ -2889,6 +2889,71 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"/** @type obj.Fun */ var xxx;\nxxx.yy", "yy");
 			testProposals("yy", results, [
 				["yyy", "yyy : Number"]
+			]);
+		};
+		
+		// arrays and array types
+		tests["test array type1"] = function() {
+			var results = computeContentAssist(
+				"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type2"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type [Number,String] */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type3"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Number> */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type4"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<{foo:Number}> */ var xxx;\nxxx[0].foo.toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type5"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Array.<Number>> */ var xxx;\nxxx[0][0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type6"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Array.<Array.<Number>>> */ var xxx;\nxxx[0][0][bar].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type7"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type {...Number} */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type8"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type {...Array.<Number>} */ var xxx;\nxxx[0][0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
 			]);
 		};
 	}
@@ -3289,7 +3354,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test computed member expressions3"] = function() {
 		var results = computeContentAssist(
 			"var foo = { at: { bar: 0} };\n" +
-			"foo[9].toF", "toF");
+			"foo[9].at.bar.toF", "toF");
 		testProposals("toF", results, [
 		]);
 	};
@@ -3807,6 +3872,116 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["lll", "lll : {  }"]
 		]);
 	};
+	
+	/////////////////////////////////////
+	// Array parameterization
+	/////////////////////////////////////
+	tests["test array parameterization1"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x[foo].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization2"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization3"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x['foo'].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization4"] = function() {
+		var results = computeContentAssist(
+			"([1, 0])[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization5"] = function() {
+		var results = computeContentAssist(
+			"var x = [[1]];\n" +
+			"x[0][0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization6"] = function() {
+		var results = computeContentAssist(
+			"var x = [{}];x[0].a = 8;\n" +
+			"x[0].a.toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization7"] = function() {
+		var results = computeContentAssist(
+			"var a = {a : 8}; \n var x = [a];\n" +
+			"x[0].a.toFi", "toFi");
+			// may not work because a string
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization8"] = function() {
+		var results = computeContentAssist(
+			"var x = [[1]];\n" +
+			"x = x[0];\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization9"] = function() {
+		var results = computeContentAssist(
+			"var x = [];\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization10"] = function() {
+		var results = computeContentAssist(
+			"var x = [];\n" +
+			"x[9] = '';\nx[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization11"] = function() {
+		var results = computeContentAssist(
+			"var x = (function() { return [0]; })();\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization10"] = function() {
+		var results = computeContentAssist(
+			"var x = ['','',''];\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+
+
+	////// more tests
+	// array types 
+	// array literals
+	// array assignments
+	// multiple arrays
+	
+	// also need to test hovers/navigation
+	// summaries and multifile content assist (this is probably broken)
 	
 	return tests;
 });

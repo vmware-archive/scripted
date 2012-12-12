@@ -702,7 +702,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("toF", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
-		]);	
+		]);
 	};
 	tests.testAMDSyncRequire3 = function() {
 		var results = computeContentAssist(
@@ -811,6 +811,52 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		testProposals("p", results, [
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
+		]);
+	};
+	
+	tests.testArray1 = function() {
+		var results = computeContentAssist(
+			"define(['first'], function(mFirst) {\n"+
+			"  mFirst[0].toFi/**/});", "toFi", new MockIndexer(
+			[], {
+				first:  "define([], function() { return [1]; });"
+			}));
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	
+	tests.testArray2 = function() {
+		var results = computeContentAssist(
+			"define(['first'], function(mFirst) {\n"+
+			"  mFirst.a[0].toFi/**/});", "toFi", new MockIndexer(
+			[], {
+				first:  "define([], function() { return {a : [1]}; });"
+			}));
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests.testArray3 = function() {
+		var results = computeContentAssist(
+			"define(['first'], function(mFirst) {\n"+
+			"  mFirst[0].a.toFi/**/});", "toFi", new MockIndexer(
+			[], {
+				first:  "define([], function() { return [{a: 1}]; });"
+			}));
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests.testArray4 = function() {
+		var results = computeContentAssist(
+			"define(['first'], function(mFirst) {\n"+
+			"  mFirst.concat/**/});", "concat", new MockIndexer(
+			[], {
+				first:  "define([], function() { return [{a: 1}]; });"
+			}));
+		testProposals("concat", results, [
+			["concat(first, [rest...])", "concat(first, [rest...]) : Array"]
 		]);
 	};
 	return tests;

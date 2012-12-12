@@ -15,6 +15,42 @@ define(
 function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 
+      var loggingCategory = "CONTEXT_MENU";
+
+      var pathSeparator = pathUtils.getPathSeparator();
+
+      var doNavigatorRefresh = function(resourceToNavigate) {
+		window.explorer.fullRefresh(function() {
+				if (resourceToNavigate) {
+					navHistory.navigateToURL(resourceToNavigate);
+					window.explorer.highlight(resourceToNavigate);
+			}
+		});
+
+	};
+
+		var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
+//
+//				if (operationPromise && operationPromise.then && (typeof operationPromise.then == 'function')) {
+//
+//					// On a successful promise result, refresh navigator, and if specified, highlight and navigate
+//					// to a resource
+//					var resolveCallBack = function() {
+//						doNavigatorRefresh(resourceToSelect);
+//					};
+//
+//					var errorCallBack = function(err) {
+//						scriptedLogger.error(err, loggingCategory);
+//					};
+//
+//					operationPromise.then(resolveCallBack, errorCallBack);
+//				}
+//TODO: This is not the correct way to refresh. Should do it as part of resolving a promise. It works most of the time
+// But its not guaranteed to refresh the navigator after a resource has been modified.
+				doNavigatorRefresh(resourceToSelect);
+			};
+
+
 	var getResource = function(location, isDirectory) {
 
 			return {
@@ -38,60 +74,90 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 			}
 		};
 
-	var getNavigatorContextMenus = function(resource) {
-			var add = {
-				name: "New File...",
-				handler: function(selectionContext) {
-					var resource = getResourceFromContextSelection(selectionContext);
-					var fileCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
-					resourcesDialogue.createDialogue(fileCreationPath).addResource(function(
-					resourceName) {
-						var urlNewResource = fileCreationPath + (resourceName ? '/' + resourceName : "/untitled");
-						navHistory.navigateToURL(urlNewResource);
-						window.explorer.highlight(urlNewResource);
+/**
+ *
+ */
+var getNavigatorContextMenus = function(resource) {
+
+		var actions = [];
+
+		var addFile = {
+			name: "New File...",
+			handler: function(selectionContext) {
+
+				var fileCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
+				resourcesDialogue.createDialogue(fileCreationPath).addResource(function(
+				resourceName) {
+					var urlNewResource = fileCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
+					var promise = fileOperationsClient.createFile(urlNewResource);
+					performNavigatorRefreshOperation(promise, urlNewResource);
+
+				});
+			}
+		};
+		actions.push(addFile);
+
+		var addFolder = {
+			name: "New Folder...",
+			handler: function(selectionContext) {
+
+				var folderCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
+				resourcesDialogue.createDialogue(folderCreationPath).addResource(function(
+				resourceName) {
+					var urlNewResource = folderCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
+					var promise = fileOperationsClient.mkdir(urlNewResource);
+					performNavigatorRefreshOperation(promise, urlNewResource);
+				});
+			}
+		};
+		actions.push(addFolder);
+
+		var rename = {
+			name: "Rename...",
+			handler: function(selectionContext) {
+				var toRename = pathUtils.getLastSegmentFromPath(resource.location);
+
+				if (toRename) {
+					resourcesDialogue.createDialogue(toRename).renameResource(function(
+					renamedResource) {
+
+						var parentPath = pathUtils.getDirectory(resource.location);
+						if (parentPath) {
+							var urlNewResource = parentPath + pathSeparator + renamedResource;
+							var promise = fileOperationsClient.rename(
+							resource.location,
+							urlNewResource);
+							performNavigatorRefreshOperation(promise, urlNewResource);
+						}
 					});
 				}
-			};
+			}
 
-			var rename = {
-				name: "Rename...",
-				handler: function(selectionContext) {
-					var resourceLocation = getResourceFromContextSelection(selectionContext);
-					if (resourceLocation && resourceLocation.location) {
-						var toRename = pathUtils.getLastSegmentFromPath(resourceLocation.location);
-
-						if (toRename) {
-							resourcesDialogue.createDialogue(toRename).renameResource(function(
-							renamedResource) {
-
-								var parentPath = pathUtils.getDirectory(resourceLocation.location);
-								if (parentPath) {
-									fileOperationsClient.rename(
-									resourceLocation.location,
-									parentPath + '/' + renamedResource);
-								}
-							});
-						}
-					}
-				}
-
-			};
-
+		};
+		actions.push(rename);
+        
+        // For now only support deletion on files.
+		if (!resource.isDirectory) {
 			var del = {
 				name: "Delete",
 				handler: function(selectionContext) {
-					var resourceLocation = getResourceFromContextSelection(selectionContext);
-					if (resourceLocation && resourceLocation.location) {
-						resourcesDialogue.createDialogue(resourceLocation.location).deleteResource(function(value) {
-							fileOperationsClient.deleteResource(resourceLocation.location);
-						});
-					}
+					
+					var parent = pathUtils.getDirectory(resource.location);
+					
+					resourcesDialogue.createDialogue(resource.location).deleteResource(function(value) {
+						var promise = fileOperationsClient.deleteResource(resource.location);
+						// Navigate to parent folder.
+						performNavigatorRefreshOperation(promise, parent);
+					});
 				}
 			};
+			actions.push(del);
+		}
 
-			return [add, rename, del];
 
-		};
+		return actions;
+
+	};
 
 	var getContextMenusForSelection = function(context,
 		selectionContext) {

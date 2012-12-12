@@ -362,6 +362,45 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function foo() {}\n" +
 			"exports = foo;", "a");
 	};
-
+	
+	
+	tests["test array export1"] = function() {
+		assertCreateSummary('{"provided":"Array.<Number>","types":{},"kind":"commonjs"}',
+			"exports = [1];", "a");
+	};
+	tests["test array export2"] = function() {
+		assertCreateSummary('{"provided":"Number","types":{},"kind":"commonjs"}',
+			"exports = ([1])[0];", "a");
+	};
+	tests["test array export3"] = function() {
+		assertCreateSummary('{"provided":"Array.<Array.<Number>>","types":{},"kind":"commonjs"}',
+			"exports = [[1]];", "a");
+	};
+	tests["test array export4"] = function() {
+		assertCreateSummary('{"provided":"Array.<gen~a~2>","types":{"gen~a~2":{"$$proto":"Object","a":"Number"}},"kind":"commonjs"}',
+			"exports = [{a:1}];", "a");
+	};
+	tests["test array export5"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Array.<Number>"},"types":{},"kind":"commonjs"}',
+			"exports = {a:[1]};", "a");
+	};
+	tests["test array export6"] = function() {
+		assertCreateSummary('{"provided":"Array.<gen~a~2>","types":{"gen~a~2":{"$$proto":"Object","a":"Array.<Number>"}},"kind":"commonjs"}',
+			"exports = [{a:[1]}];", "a");
+	};
+	tests["test array export amd1"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Array.<Number>"},"types":{},"kind":"AMD"}',
+			"/*global define */\n" +
+			"define([], function() {\n" +
+			"	return { a : [9]};\n" +
+			"});", "a");
+	};
+	tests["test array export amd2"] = function() {
+		assertCreateSummary('{"provided":"Array.<gen~a~4>","types":{"gen~a~4":{"$$proto":"Object","a":"Number"}},"kind":"AMD"}',
+			"/*global define */\n" +
+			"define([], function() {\n" +
+			"	return [{ a : 9}];\n" +
+			"});", "a");
+	};
 	return tests;
 });
