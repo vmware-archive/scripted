@@ -572,6 +572,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 		var lastSearch = getSelectedText(this.editor) || searchHistory.get();
 		if (lastSearch) {
 			$('#dialog_search_text').val(lastSearch);
+			$('#dialog_search_text').select();
 		}
 		
 	    $('#dialog_search_text').focus();
