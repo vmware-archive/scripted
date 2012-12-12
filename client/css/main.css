@@ -1,6 +1,6 @@
 @import "../scripts/orion/editor/editor.css";
 @import "../scripts/scripted/exec/console.css";
-@import "../scripts/scripted/widgets/templates/SearchDialog.css";
+@import "fonts.css";
 
 ul{
 	display: block;
@@ -26,7 +26,7 @@ body{
 	background-color:#fff;
 	overflow:hidden;
 	font-size: 10px;
-	font-family: "Monaco","Ubuntu","Myriad","Helvetica","Tahoma","Arial","clean","sans-serif";
+	font-family: InconsolataEmbedded, "Monaco","Ubuntu","Myriad","Helvetica","Tahoma","Arial","clean","sans-serif";
 }
 
 header{
@@ -605,6 +605,10 @@ a.dialog_button:hover {
 	width: 300px;
 }
 
+.dialog_wide {
+	width: 800px;
+}
+
 .dialog_heading {
 	color:#eee;
 	text-align:left;
@@ -675,6 +679,20 @@ a.dialog_button:hover {
 	border-bottom-style: solid;
 	border-bottom-color:#ddd;
 	border-bottom-width:1px;
+	height: 19px;
+	max-height: 19px;
+}
+
+/* In 'look in files' styling for results text column */
+.dialog_matchtextcontext {
+	display: inline-block;
+	font-family: InconsolataEmbedded, monospace;
+	font-size: 12px;
+	min-width: 480px;
+}
+
+.dialog_matchhighlight {
+	background: yellow;
 }
 
 #dialogue_ok_button {
@@ -844,4 +862,12 @@ a.keybinding_button {
     border-bottom: 1px solid rgba(0,0,0,0.25);
     position: relative;
     cursor: pointer;
+}
+
+.inprogress_indicator {
+	float:right;
+	font-family:InconsolataEmbedded,monospace;
+	margin-right: 4px;
+	background: url(../images/pending-1.gif) no-repeat center;  
+	width: 16px; height: 16px;
 }

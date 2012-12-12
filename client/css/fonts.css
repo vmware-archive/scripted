@@ -1,0 +1,9 @@
+@font-face {
+	font-family: InconsolataEmbedded;
+	src: url("../fonts/Inconsolata-Regular.ttf") 
+}
+
+@font-face {
+	font-family: InconsolataBoldEmbedded;
+	src: url("../fonts/Inconsolata-Bold.ttf") 
+}
