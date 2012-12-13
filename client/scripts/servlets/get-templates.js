@@ -19,19 +19,24 @@
 // TODO should use stub-maker
 define(['when'], function(when) {
 	/**
-	 * keeps track of existing requests so that we don't ask for the same 
+	 * keeps track of existing requests so that we don't ask for the same
 	 * deferred multiple times.
-	 */ 
+	 */
 	var deferreds = {};
+	var empty = when.defer();
+	empty.resolve({});
 	
 	return { loadRawTemplates : function(scope, completionsRoot) {
+		if (!scope) {
+			return empty.promise;
+		}
 		if (deferreds[scope]) {
 			return deferreds[scope];
 		}
 		
 		var deferred = when.defer();
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/templates?scope=" + scope + 
+		xhr.open("GET", "/templates?scope=" + scope +
 			(completionsRoot ? "&root=" + completionsRoot : ""), true);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {

@@ -49,9 +49,9 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 
 		/**
 		 * Generic AST visitor.  Visits all children in source order, if they have a range property.
-		 * 
+		 *
 		 * @param node The AST node to visit
-		 * @param {rhsVisit:Boolean,...} context any extra data required to pass between operations.  Set rhsVisit to true if the rhs of 
+		 * @param {rhsVisit:Boolean,...} context any extra data required to pass between operations.  Set rhsVisit to true if the rhs of
 		 * assignments and variable declarators should be visited before the lhs
 		 * @param operation function(node, context, [isInitialOp]) an operation on the AST node and the data.  Return falsy if
 		 * the visit should no longer continue. Return truthy to continue.

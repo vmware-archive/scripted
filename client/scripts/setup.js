@@ -33,7 +33,8 @@ var scriptedLoggerCategories = {
 	INDEXER : false,
 	CONTENT_ASSIST : true,
 	EXPLORER_TABLE : true,
-	SETUP : true
+	SETUP : true,
+	PANE : true
 };
 
 var scriptedLogger = {
@@ -102,7 +103,9 @@ requirejs.config({
 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver"],
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver",
+		 // need to load this module in order to have it register with paneFactory
+		 "scripted/editor/editorPane"],
 		 
 	function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		mKeystroke, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
@@ -295,11 +298,13 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
 				sidePanel.css('width', side_percent + "%");
 				
-				window.editor._textView._updatePage();
-				for (var i = 0; i < window.subeditors.length; i++){
-					window.subeditors[i].getTextView().update();
+				if (window.editor._textView) {
+					window.editor._textView._updatePage();
+					for (var i = 0; i < window.subeditors.length; i++){
+						window.subeditors[i].getTextView().update();
+					}
+					localStorage.setItem("scripted.sideWidth", side_width);
 				}
-				localStorage.setItem("scripted.sideWidth", side_width);
 			});
 			
 //			// use last size if known
@@ -368,8 +373,9 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				window.subeditors[i].editor.getTextView().update();
 			}
 			*/
-			
-			window.editor._textView._updatePage();
+			if (window.editor._textView) {
+				window.editor._textView._updatePage();
+			}
 		});
 		
 		$(window).bind('beforeunload', function() {
