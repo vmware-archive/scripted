@@ -143,6 +143,11 @@ function withBaseDir(baseDir) {
 			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
 			deferred.reject(message);
 		}
+		deferred.promise.then(function() {
+			console.log("Successfully renamed: " + original + " into " + newname);
+		}, function(err) {
+			console.log("Failed to rename: " + original + " due to " + err);
+		});
 		return deferred.promise;
 	}
 

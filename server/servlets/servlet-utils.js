@@ -21,12 +21,13 @@ function makePromisedRequestHandler(fun) {
 		//Note: the code here assumes the following of the wrapped function:
 		//  - all arguments passed to it can be turned to json
 		when(fun.apply(null, args),
-			function (result) {
+			function () {
+				var args = Array.prototype.slice.call(arguments);
 				response.writeHead(200, {
 					"Content-Type": "text/json",
 					"Cache-Control": "no-store"
 				});
-				response.write(JSON.stringify(result)); //TODO: This breaks if 'result' is undefined
+				response.write(JSON.stringify(args));
 				response.end();
 			},
 			function (err) {

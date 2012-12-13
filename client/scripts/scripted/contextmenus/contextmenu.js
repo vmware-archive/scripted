@@ -105,7 +105,8 @@ function(contextMenuProvider) {
 				left: position.x + "px"
 			});
 
-			$(document).one('click', null, function() {
+            // be sure to attach a click listener to the window to have the context menu disappear
+			$(window).one('click', null, function() {
 				hideContextMenu(contextMenu);
 			});
 

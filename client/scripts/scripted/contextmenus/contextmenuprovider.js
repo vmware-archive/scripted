@@ -30,24 +30,21 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 	};
 
 		var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
-//
-//				if (operationPromise && operationPromise.then && (typeof operationPromise.then == 'function')) {
-//
-//					// On a successful promise result, refresh navigator, and if specified, highlight and navigate
-//					// to a resource
-//					var resolveCallBack = function() {
-//						doNavigatorRefresh(resourceToSelect);
-//					};
-//
-//					var errorCallBack = function(err) {
-//						scriptedLogger.error(err, loggingCategory);
-//					};
-//
-//					operationPromise.then(resolveCallBack, errorCallBack);
-//				}
-//TODO: This is not the correct way to refresh. Should do it as part of resolving a promise. It works most of the time
-// But its not guaranteed to refresh the navigator after a resource has been modified.
-				doNavigatorRefresh(resourceToSelect);
+
+				if (operationPromise) {
+
+					// On a successful promise result, refresh navigator, and if specified, highlight and navigate
+					// to a resource
+					var resolveCallBack = function() {
+						doNavigatorRefresh(resourceToSelect);
+					};
+
+					var errorCallBack = function(err) {
+						scriptedLogger.error(err, loggingCategory);
+					};
+
+					operationPromise.then(resolveCallBack, errorCallBack);
+				}
 			};
 
 

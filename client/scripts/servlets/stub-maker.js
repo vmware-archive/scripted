@@ -45,7 +45,7 @@ define(['when'], function(when) {
 			var deferred = when.defer();
 			var args = JSON.stringify(Array.prototype.slice.apply(arguments));
 			var callback = singleFire(function (result) {
-				deferred.resolve(result);
+				deferred.resolve.apply(deferred, result);
 			});
 			var errback = singleFire(function (err) {
 				deferred.reject(err);
