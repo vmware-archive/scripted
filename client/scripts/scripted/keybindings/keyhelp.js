@@ -104,7 +104,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, commandTemplate,
 		var cl = $('#command_list');
 		
 		cl.empty();
-		cl.append(document.createTextNode("Click any key binding value to configure it."));
+		cl.append("<b>Click any key binding value to configure it. Scroll down to see unbound actions.</b>");
 		cl.append('<li><hr /></li>');
 		render(importantKeyBindings, cl);
 		cl.append('<li><hr /></li>');
