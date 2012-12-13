@@ -230,6 +230,7 @@ function withBaseDir(baseDir) {
 				callback(files);
 			}
 		});
+		return d;
 	}
 
 	/**
