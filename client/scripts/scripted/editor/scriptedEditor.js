@@ -16,18 +16,28 @@
 /*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage scripted $*/
 /*jslint browser:true devel:true */
 
-define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures", "examples/textview/textStyler",
-"orion/editor/textMateStyler", "plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
-"plugins/esprima/indexerService",
-"orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands", "orion/parameterCollectors", "orion/editor/htmlGrammar",
-"plugins/esprima/moduleVerifier", "scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
-"scripted/exec/exec-after-save", "jshint", "jquery" ],
-
-function (require, mTextView, mKeyBinding, mEditor, mEditorFeatures, mTextStyler, mTextMateStyler,
-mJsContentAssist, mJSTemplateContentAssist, mContentAssist, mIndexerService, mTextSearcher, mSelection, mCommands, mParameterCollectors,
-mHtmlGrammar, mModuleVerifier, mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences, tHelptext) {
+define([
+	"require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
+	"scripted/keybindings/keystroke",
+	"orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
+	"plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
+	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
+	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
+	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
+	"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
+	"scripted/exec/exec-after-save", "jshint", "jquery"
+], function (
+	require, mTextView, mKeyBinding, mEditor,
+	mKeystroke,
+	mEditorFeatures, mTextStyler, mTextMateStyler,
+	mJsContentAssist, mJSTemplateContentAssist, mContentAssist,
+	mIndexerService, mTextSearcher, mSelection, mCommands,
+	mParameterCollectors, mHtmlGrammar, mModuleVerifier,  
+	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
+	mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist,
+	mMarkoccurrences, tHelptext
+) {
 	var determineIndentLevel = function(editor, startPos, options){
 		window.foo = 1;
 		var model = editor.getTextView().getModel();
@@ -287,7 +297,7 @@ mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
 
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", /*command/ctrl*/ true, /*shift*/ false, /*alt*/ false), "Command Help");
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "Command Help");
 			editor.getTextView().setAction("Command Help", function() {
 				$('#help_open').click();
 				return true;
