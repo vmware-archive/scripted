@@ -19,6 +19,10 @@ define(["./websockets-client"], function (multiplexer) {
 	var nextId = 0;
 
 	function incrementalSearch(currentFile, query, requestor) {
+	
+		var message_queue = []; //push messages in here while waiting for onopen event.
+		                        // once connection is opened this is set to null
+	
 		var options = {};
 		var id = nextId++;
 		var sock = multiplexer.channel('isearch');
@@ -35,7 +39,11 @@ define(["./websockets-client"], function (multiplexer) {
 		}
 		
 		function send(json) {
-			sock.send(JSON.stringify(json));
+			if (message_queue) {
+				message_queue.push(json);
+			} else if (sock) {
+				sock.send(JSON.stringify(json));
+			}
 		}
 		
 		function receive(json) {
@@ -53,9 +61,18 @@ define(["./websockets-client"], function (multiplexer) {
 		
 		sock.onopen = function (conn) {
 			// console.log('['+id+'] opened');
+			var pending = message_queue;
+			message_queue = null;
+			//Important: this message allways needs to be sent first.
 			send({
 				query:[currentFile, query, options]
 			});
+			//These may have been sent earlier... but logically they were intented to
+			//be sent after the onopen / init sequence has played out. So it should
+			//be sent *after* the initial query parameters.
+			for (var i = 0; i < pending.length; i++) {
+				send(pending[i]);
+			}
 		};
 		sock.onmessage = function (e) {
 			//console.log('['+id+'] received:'+ e.data);

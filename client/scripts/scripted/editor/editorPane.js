@@ -16,9 +16,9 @@
 /*global scripted JSON5 dojo confirm*/
 /*jslint browser:true */
 define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory",
-"orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
+"orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/dialogs/outlineDialog",
 "scripted/dialogs/lookInFilesDialog", "scripted/utils/os", 'lib/json5', 'jquery'],
-function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOpenOutlineDialog,
+function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOutlineDialog,
 	mLookInFilesDialog, mOsUtils) {
 
 	var FS_LIST_URL = "http://localhost:7261/fs_list/";
@@ -176,27 +176,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	};
 
 	var attachOutlineClient = function(editor) {
-
-		// from globalCommands.js
-		var openOutlineDialog = function(searcher, serviceRegistry, editor) {
-			var dialog = new scripted.widgets.OpenOutlineDialog({
-				// TODO FIXADE Do we need this?
-//				changeFile: mNavHistory.handleNavigationEvent,
-				editor: editor
-			});
-			if (editor) {
-				dojo.connect(dialog, "onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog close, dojo's doesnt work
-				});
-			}
-			window.setTimeout(function() {
-				dialog.show();
-			}, 0);
-		};
-
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Show Outline");
 		editor.getTextView().setAction("Show Outline", function() {
-			openOutlineDialog(null,/*searcher,*/ null, editor);
+			mOutlineDialog.openDialog(editor);
 			return true;
 		});
 	};
