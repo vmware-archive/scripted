@@ -212,6 +212,13 @@ function withBaseDir(baseDir) {
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	
 	function listFiles(handle, callback, errback) {
+		var d;
+		if (!callback) {
+			d = when.defer();
+			callback = function (files) {
+				when.resolve(files);
+			};
+		}
 		errback = errback || function (err) {
 			//console.log(err);
 			callback([]); //a reasonable substitute that most clients will be able to deal with.
