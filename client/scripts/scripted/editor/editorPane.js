@@ -15,10 +15,11 @@
 // implements the pane interface for editors
 /*global scripted JSON5 dojo confirm*/
 /*jslint browser:true */
-define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory", "orion/textview/keyBinding", "scripted/utils/pageState", "orion/searchClient", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
-"scripted/fileSearchClient", "scripted/widgets/SearchDialog", "scripted/utils/os", 'lib/json5', 'jquery'],
-function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mSearchClient, mOpenResourceDialog, mOpenOutlineDialog,
-	mFileSearchClient, mSearchDialog, mOsUtils) {
+define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory",
+"orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/widgets/OpenOutlineDialog",
+"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", 'lib/json5', 'jquery'],
+function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOpenOutlineDialog,
+	mLookInFilesDialog, mOsUtils) {
 
 	var FS_LIST_URL = "http://localhost:7261/fs_list/";
 	// FIXADE copied from navhistory
@@ -158,22 +159,16 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 
 	var attachSearchClient = function(editor) {
 
-		var searcher = new mSearchClient.Searcher({
-			serviceRegistry: null,
-			commandService: null,
-			fileService: null
-		});
-
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
-				mOpenResourceDialog.openDialog(searcher, editor, mNavHistory.handleNavigationEvent);
+				mOpenResourceDialog.openDialog(editor, mNavHistory.handleNavigationEvent);
 				return true;
 			});
 		} else {
 			$('body').on('keydown', function(evt) {
 				if (evt.shiftKey && evt.ctrlKey && evt.which === 70 /*F*/) {
-					mOpenResourceDialog.openDialog(searcher, null, null);
+					mOpenResourceDialog.openDialog(null, null);
 					return true;
 				}
 			});
@@ -206,38 +201,14 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		});
 	};
 
+	// TODO move to scriptedEditor.js
 	var attachFileSearchClient = function(editor) {
-
-		var fileSearcher = new mFileSearchClient.FileSearcher({
-		});
-
-		var openFileSearchDialog = function(editor) {
-			var dialog = new scripted.widgets.SearchDialog({
-				editor: editor,
-				fileSearcher: fileSearcher,
-				fileSearchRenderer: fileSearcher.defaultRenderer,
-				style:"width:800px",
-				openOnRange: mNavHistory.openOnRange
-			});
-
-			//TODO we should explicitly set focus to the previously active editor if the dialog has been canceled
-//			if (editor) {
-//				dojo.connect(dialog,"onHide", function() {
-//					editor.getTextView().focus(); // focus editor after dialog closed
-//				});
-//			}
-			window.setTimeout(function() {
-				dialog.show();
-			},0);
-		};
-
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Look in files");
 		editor.getTextView().setAction("Look in files",function() {
-			openFileSearchDialog(editor);
+			mLookInFilesDialog.openDialog(editor, mNavHistory.openOnRange);
 			return true;
 		});
 	};
-
 
 	var attachDefinitionNavigation = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(/*F8*/ 119, /*command/ctrl*/ false, /*shift*/ false, /*alt*/ false), "Open declaration in same editor");
