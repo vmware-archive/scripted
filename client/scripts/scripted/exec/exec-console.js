@@ -67,6 +67,16 @@ define(["jquery", "jquery_ui"], function () {
 		entries[newEntryPos] = e;
 		newEntryPos = (newEntryPos+1) % MAX_ENTRIES;
 	}
+	
+	function clear() {
+		for (var i = 0; i < entries.length; i++) {
+			var e = entries[i];
+			if (e) {
+				e.remove();
+				entries[i] = null;
+			}
+		}
+	}
 
 	//////////////////// Public API ///////////////////////////////////////////////////
 
@@ -197,6 +207,7 @@ define(["jquery", "jquery_ui"], function () {
 	});
 
 	return {
+		clear: clear,
 		log: log,
 		error: function (msg) {
 			log(msg, 'error');

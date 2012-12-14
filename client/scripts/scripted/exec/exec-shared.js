@@ -21,7 +21,8 @@
 //   TODO: actually, exec-keys isn't using this yet. The code was merely copied
 //     from it.
 /////////////////////////////
-define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'], function (require) {
+define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'], 
+function (require) {
 
 	var exec = require('servlets/exec-client').exec;
 	var execConsole = require('scripted/exec/exec-console');
@@ -80,6 +81,7 @@ define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'], functi
 		
 		return function(replaceParams) {
 			var cmd = replaceParams(cmdSpec);
+			execConsole.clear();
 			execConsole.log(cmd.cmd, "command");
 			exec(cmd,
 				function(error, stdout, stderr) {
