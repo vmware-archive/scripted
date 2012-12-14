@@ -78,8 +78,13 @@ function (mKeybinder, mKeystroke, keyeditHtml) {
 		}
 		input.focus();
 		input.keydown(function (e) {
-			clearMessage();
-			$(input).val(mKeystroke.fromKeyDownEvent(e));
+			var keystroke = mKeystroke.fromKeyDownEvent(e);
+			if (keystroke==='Enter') {
+				bindButton.click();
+			} else {
+				clearMessage();
+				$(input).val(keystroke);
+			}
 			return false;
 		});
 		
