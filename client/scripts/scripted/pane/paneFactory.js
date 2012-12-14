@@ -96,11 +96,7 @@ define(['jquery'], function() {
 				return panes;
 			} else {
 				return panes.filter(function(item) {
-					if (item.paneId === id) {
-						return item;
-					} else {
-						return undefined;
-					}
+					return item.paneId === id;
 				});
 			}
 		},
