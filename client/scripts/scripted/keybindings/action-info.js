@@ -140,9 +140,9 @@ define([], function () {
 //		'Open declaration in same editor',
 //		'Open declaration in new tab',
 //		'Open declaration in other editor',
-		'Look in files' : true
+		'Look in files' : true,
 //		'Switch Subeditor and Main Editor',
-//		'Toggle Subeditor',
+		'Toggle Subeditor' : true
 	 };
 	
 	/**

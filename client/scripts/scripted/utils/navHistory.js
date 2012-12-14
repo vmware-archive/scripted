@@ -195,6 +195,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils) {
 		mainItem = mPageState.generateHistoryItem(window.editor);
 		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(window.subeditors[0]);
 		mPageState.storeBrowserState(mainItem, subItem, false);
+		return true;
 	};
 	
 	/**
