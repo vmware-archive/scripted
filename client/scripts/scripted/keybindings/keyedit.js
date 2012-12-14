@@ -91,10 +91,10 @@ function (mKeybinder, mKeystroke, keyeditHtml) {
 		cancelButton.click(doAndClose(function (){}));
 		bindButton.click(doAndClose(function () {
 			var newKeystroke = input.val();
-			if (keystroke) {
-				setKeyBinding(keystroke, null);
-			}
 			if (newKeystroke) {
+				if (keystroke) {
+					setKeyBinding(keystroke, null);
+				}
 				setKeyBinding(newKeystroke, actionName);
 			} else {
 				throw new Error('Keystroke not specified');
