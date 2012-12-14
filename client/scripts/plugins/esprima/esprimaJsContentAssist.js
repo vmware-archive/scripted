@@ -2328,9 +2328,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			} else if (r.relevance > l.relevance) {
 				return 1;
 			}
-			if (l.description < r.description) {
+			
+			var ldesc = l.description.toLowerCase();
+			var rdesc = r.description.toLowerCase();
+			if (ldesc < rdesc) {
 				return -1;
-			} else if (r.description < l.description) {
+			} else if (rdesc < ldesc) {
 				return 1;
 			}
 			return 0;
