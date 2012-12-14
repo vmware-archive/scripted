@@ -13,7 +13,7 @@
  *     Kris De Volder
  *     Andrew Eisenberg
  *******************************************************************************/
-/*global orion:true window define dojo FormData js_beautify statusReporter Worker localStorage scripted $*/
+/*global orion:true window define dojo FormData js_beautify statusReporter Worker scripted $*/
 /*jslint browser:true devel:true */
 
 define([
