@@ -1550,7 +1550,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				return prefix + "(" + args + ") -> " + createReadableType(funType, env, useFunctionSig, 1);
 			} else {
 				// use the return type
-				return createReadableType(funType, env, useFunctionSig, 0);
+				return createReadableType(funType, env, useFunctionSig, depth);
 			}
 		} else if (typeName.indexOf(GEN_NAME) === 0) {
 			// a generated object

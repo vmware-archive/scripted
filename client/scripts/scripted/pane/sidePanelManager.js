@@ -51,6 +51,7 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils
 		}
 		sidePanel.trigger('open');
 		$(document).trigger('sidePanelShown', sidePanel);
+		$(window).resize();
 		
 		return true;
 	};

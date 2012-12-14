@@ -11,7 +11,7 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
-/*global resolve require define esprima console module*/
+/*global resolve require define:true esprima console module*/
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }

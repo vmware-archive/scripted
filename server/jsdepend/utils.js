@@ -43,7 +43,7 @@ function map(array, f, keepfalse) {
 }
 
 /**
- * Convert a pattern that uses '*' into a regexp. 
+ * Convert a pattern that uses '*' into a regexp.
  *
  * @param String
  * @return RegExp
@@ -158,7 +158,7 @@ function pathNormalize(path) {
 			normalized.push(segment);
 		}
 	}
-	return normalized.join('/') || '.'; 
+	return normalized.join('/') || '.';
 	   //Note: || '.' is to avoid returning '' because it counts as false!
 	   //so always use '.' as the normalized form of the 'current dir'.
 }
@@ -176,7 +176,7 @@ function pathResolve(basePath, resolvePath) {
 //Map a function onto an array in callback (continuation passing) style:
 function mapk(array, f, k) {
 	if (array.length===0) {
-		//Special case for zero length, otherwise k won't get called. 
+		//Special case for zero length, otherwise k won't get called.
 		return k([]);
 	}
 	var remaining = array.length;
@@ -229,8 +229,8 @@ function filter(array, pred) {
 
 /**
  * Create a new object using another object as a prototype 'proto'.
- * If 'addProps' is provided, then all the 'own' properties of 'addProps' are 
- * copied onto the new object. 
+ * If 'addProps' is provided, then all the 'own' properties of 'addProps' are
+ * copied onto the new object.
  *
  * @param Object proto
  * @param Object addProps
@@ -262,11 +262,11 @@ function ork() {
 	var theArgs = arguments;
 	return function(k) {
 		function loop(i) {
-			if (i<theArgs.length) { 
+			if (i<theArgs.length) {
 				//at least one argument remains
 				theArgs[i](function (r) {
 					if (r) {
-						k(r); 
+						k(r);
 					} else {
 						loop(i+1);
 					}
@@ -280,9 +280,9 @@ function ork() {
 	};
 }
 
-/** 
- * Follow a 'trail' of properties starting at given object. 
- * If one of the values on the trail is 'falsy' then 
+/**
+ * Follow a 'trail' of properties starting at given object.
+ * If one of the values on the trail is 'falsy' then
  * this value is returned instead of trying to keep following the
  * trail down.
  */

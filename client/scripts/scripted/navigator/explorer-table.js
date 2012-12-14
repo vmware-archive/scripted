@@ -78,7 +78,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var url = 'http://localhost:7261/fs_list/' + parentItem.ChildrenLocation;
-					scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
+//					scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
 					xhrobj.open("GET", url, true);
 					xhrobj.onreadystatechange = function() {
 						if (xhrobj.readyState === 4) {
@@ -597,7 +597,7 @@ if (mExtensionCommands) {
 			var xhrobj = new XMLHttpRequest();
 			try {
 				var url = 'http://localhost:7261/fs_list/' + path;
-				scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
+//				scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
 				xhrobj.open("GET", url, true);
 				xhrobj.onreadystatechange = function() {
 					if (xhrobj.readyState === 4) {
