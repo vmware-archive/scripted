@@ -11,9 +11,11 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define require FileReader window Worker XMLHttpRequest ActiveXObject setTimeout localStorage scriptedLogger disableIndexerWorker */
+/*global define require FileReader window Worker XMLHttpRequest ActiveXObject setTimeout scriptedLogger disableIndexerWorker */
 /*jslint browser:true */
 
+
+// TODO use promises
 //eachk :: ([a], (a, Continuation<Void>) -> Void, Coninuation<Void>) -> Void
 // This is a 'foreach' on an array, where the function that needs to be called on the
 // elements of the array is callback style. I.e. the function calls some other function when its
@@ -39,9 +41,8 @@ function eachk(array, f, callback) {
  *   retrieveSummaries(file)  grabs the summaries for files that depend on the file file passed in
  *   performIndex(file)   calculates the dependencies of the file and updates the summaries of all of these dependencies
  */
-define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], function() {
-	var mEsprimaContentAssist = require('plugins/esprima/esprimaJsContentAssist');
-	var jsdepend = require('servlets/jsdepend-client');
+define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client", "scripted/utils/storage"],
+function(mEsprimaContentAssist, jsdepend, storage) {
 	
 	
 	// webworkers exist
@@ -194,34 +195,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	}
 
 	/**
-	 * Manages the local storage produced by this class.
-	 * OK to access local storage directly since this function will never be called from a webworker
-	 * but be careful about the statusFn since scriptedLogger not available from tests
-	 */
-	var purgeStaleStorage = function(statusFn) {
-		var len = localStorage.length;
-		var keysToPurge = [];
-		var currentTime = generateTimeStamp();
-		for (var i = 0; i < len; i++) {
-			var key = localStorage.key(i);
-			if (key.indexOf('-ts') === key.length - '-ts'.length && isStale(localStorage[key], currentTime)) {
-				keysToPurge.push(key);
-				var otherKey = key.substring(0, key.length-'-ts'.length);
-				if (localStorage[otherKey]) {
-					keysToPurge.push(otherKey);
-				}
-			}
-		}
-	
-		statusFn("Purging from local storage:\n" + keysToPurge, "INDEXER");
-		for (i = 0; i < keysToPurge.length; i++) {
-			localStorage.removeItem(keysToPurge[i]);
-		}
-	};
-	
-	
-	
-	/**
 	 * Creates a new indexer.
 	 * Since the indexer can be called as part of a webworker, we cannot access local storage directly
 	 * The webworker must use a callback to access the console or local storage. Hence the following parameters:
@@ -234,10 +207,10 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 	function Indexer(persistFn, retrieveFn, statusFn) {
 	
 		if (!persistFn) {
-			persistFn = function(key, value) { localStorage[key] = value; };
+			persistFn = function(key, value) { storage.safeStore(key, value); };
 		}
 		if (!retrieveFn) {
-			retrieveFn = function(key) { return localStorage[key]; };
+			retrieveFn = function(key) { return storage.get(key); };
 		}
 		if (!statusFn) {
 			statusFn = function(msg) { scriptedLogger.debug(msg, "INDEXER"); };
@@ -375,7 +348,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 					var obj = event.data;
 					switch(obj.op) {
 						case 'set':
-							localStorage[obj.key] = obj.val;
+							storage.safeStore(obj.key, obj.val);
 							break;
 						case 'status':
 							scriptedLogger.debug(obj.msg, "INDEXER");
@@ -383,7 +356,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 						case 'finished':
 							// indexing is complete
 							callback();
-							purgeStaleStorage(statusFn);
 							break;
 					}
 				};
@@ -391,7 +363,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client"], f
 				var that = this;
 				setTimeout(function() {
 					that._internalPerformIndex(fileName, callback);
-					purgeStaleStorage(statusFn);
 				}, 100);
 			}
 			

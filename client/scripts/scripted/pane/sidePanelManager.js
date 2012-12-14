@@ -15,7 +15,7 @@
 
 /*global confirm */
 
-define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], function(mPageState, mPaneFactory) {
+define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils/storage", 'jquery'], function(mPageState, mPaneFactory, storage) {
 
 	var sidePanel = $('#side_panel');
 	
@@ -44,7 +44,7 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', 'jquery'], func
 		}
 		sidePanel.show();
 		// restore last size if known
-		var storedWidth = localStorage.getItem("scripted.sideWidth");
+		var storedWidth = storage.get("scripted.sideWidth");
 		if (storedWidth) {
 			sidePanel.width(storedWidth);
 			sidePanel.resize();

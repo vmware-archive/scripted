@@ -15,7 +15,7 @@
  *     Scott Andrews
  ******************************************************************************/
 
-/*global location confirm localStorage requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
+/*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
 
 /**
@@ -34,7 +34,8 @@ var scriptedLoggerCategories = {
 	CONTENT_ASSIST : true,
 	EXPLORER_TABLE : true,
 	SETUP : true,
-	PANE : true
+	PANE : true,
+	STORAGE : true
 };
 
 var scriptedLogger = {
@@ -100,20 +101,18 @@ requirejs.config({
 		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
 	}
 });
-
+ 
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver",
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
 		 // need to load this module in order to have it register with paneFactory
 		 "scripted/editor/editorPane"],
-		 
-	function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
-		mKeystroke, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
-		mExecConsole, mExecOnLoad, mWhen, mJshintDriver) {
-			
-	if (!window.scripted) {
-		window.scripted = {};
-	}
+ 
+function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
+	mKeystroke, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
+	mExecConsole, mExecOnLoad, mWhen, mJshintDriver, storage) {
+		
+	window.scripted = {};
 
 	/**
 	 * This function will perform checks on the configuration and where appropriate ensure options are consistent.
@@ -272,12 +271,12 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 				var width = $('#navigator-wrapper').width();
 				$('#editor').css('margin-left', width);
 				window.editor._textView._updatePage();
-				localStorage.setItem("scripted.navigatorWidth", width);
+				storage.unsafeStore("scripted.navigatorWidth", width);
 			});
 			
 			if (window.navigator) {
 				// use last size if known
-				var storedWidth = localStorage.getItem("scripted.navigatorWidth");
+				var storedWidth = storage.get("scripted.navigatorWidth");
 				if (storedWidth) {
 					nav.width(storedWidth);
 					nav.resize();
@@ -303,18 +302,10 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 					for (var i = 0; i < window.subeditors.length; i++){
 						window.subeditors[i].getTextView().update();
 					}
-					localStorage.setItem("scripted.sideWidth", side_width);
+					storage.unsafeStore("scripted.sideWidth", side_width);
 				}
 			});
 			
-//			// use last size if known
-//			storedWidth = localStorage.getItem("scripted.sideWidth");
-//			if (storedWidth) {
-//				sidePanel.width(storedWidth);
-//				sidePanel.resize();
-//			}
-		});
-
 		//Make sure the keyhelp UI is setup. We do this asynchronously since its initially
 		//invisible and its not necessary to hold up the editor for this.
 		require(['scripted/keybindings/keyhelp'], function (mKeyHelp) {
@@ -423,4 +414,5 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		window.editor.cursorFix( $('#editor') );
 		
 	});
+});
 });

@@ -18,6 +18,10 @@
 //    registerPane(id, cb)
 //    createPane(id, kind) : pane  (kind is either main or side)
 //    destroyPane(pane)
+//    getMainPane : returns just the main pane
+//    getPanes(id) : returns all panes as an array if id is included, only returns panes with the given id
+//    getPane(id,isMain) : returns the first pane with the given id
+//    getSidePanes : returns all side panes as an array
 //    events:
 //    paneCreated
 //    paneDestroyed

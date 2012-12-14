@@ -64,29 +64,20 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 		return null;
 	}
 	
-	function lookForMissingSyncCall(call, indexer) {
-		// TODO not yet
-		// not even sure if we need this any more since 
-		// I think this is covered in lookForMissingAsyncCall()
-		// inside of a synchronous require call
-	}
-	
 	/**
 	 * This module defines a module verifier that checks for unresolvable modules
 	 */
 	 function checkModules(buffer, indexer) {
 		var root = mVisitor.parse(buffer, { range: false, loc: true });
-				
+		if (!root) {
+			// problem parsing
+			return [];
+		}
 		var operation = function(node, missingModules) {
 			// look for methods called define or require
 			var maybeMissing = lookForMissingAsyncCall(node, indexer);
 			if (maybeMissing) {
 				missingModules.push(maybeMissing);
-			} else {
-				maybeMissing = lookForMissingSyncCall(node, indexer);
-				if (maybeMissing) {
-					missingModules.push(maybeMissing);
-				}
 			}
 			return true;
 		};
@@ -136,7 +127,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 		});
 		var operation = function(node) {
 			if (isAfter(start, node.range)) {
-				// can ignore this branch
+				// can ignore this branc
 				return false;
 			}
 			if (isBefore(end, node.range)) {
@@ -146,7 +137,7 @@ define(["plugins/esprima/esprimaVisitor"], function(mVisitor) {
 			
 			var arrayElts = extractModuleArray(node);
 			if (arrayElts) {
-				// check each array element to see if it matches the 
+				// check each array element to see if it matches the covered range
 				for (var i = 0; i < arrayElts.length; i++) {
 					if (coveredByRange(start, end, arrayElts[i].range)) {
 						throw arrayElts[i].value;

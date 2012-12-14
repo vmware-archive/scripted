@@ -14,7 +14,7 @@
  *     Scott Andrews
  ******************************************************************************/
 /*jslint browser:true */
-/*global localStorage JSON5 */
+/*global JSON5 */
 
 /**
  * This module provides oeprations for manipulating scripted URLs, history, and page state.
@@ -36,7 +36,7 @@ side : { // side panel can be specified as an array for multiple side panels
 </pre>
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
-define(['lib/json5'], function() {
+define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 
 	var editorPrefix, windowsPathRE;
 
@@ -147,7 +147,7 @@ define(['lib/json5'], function() {
 		 * @return {Array.<{path:String,range:Array,scroll:Number}>}
 		 */
 		getHistory : function() {
-			var historyJSON = localStorage.getItem("scripted.recentFileHistory");
+			var historyJSON = storage.get("scripted.recentFileHistory");
 			if (!historyJSON) {
 				return [];
 			}
@@ -173,7 +173,7 @@ define(['lib/json5'], function() {
 		},
 	
 		setHistory : function(history) {
-			localStorage.setItem("scripted.recentFileHistory", JSON5.stringify(history));
+			storage.safeStore("scripted.recentFileHistory", JSON5.stringify(history));
 		},
 	
 		/**

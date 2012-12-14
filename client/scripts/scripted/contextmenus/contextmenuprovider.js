@@ -134,8 +134,7 @@ var getNavigatorContextMenus = function(resource) {
 		actions.push(rename);
         
         // For now only support deletion on files.
-		if (!resource.isDirectory) {
-			var del = {
+		var del = {
 				name: "Delete",
 				handler: function(selectionContext) {
 					
@@ -148,8 +147,7 @@ var getNavigatorContextMenus = function(resource) {
 					});
 				}
 			};
-			actions.push(del);
-		}
+	    actions.push(del);
 
 
 		return actions;
