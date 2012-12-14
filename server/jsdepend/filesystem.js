@@ -152,27 +152,63 @@ function withBaseDir(baseDir) {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param handle file or directory name and path
 	 * @returns promise
 	 */
 	function deleteResource(handle) {
-		var resourcePath = handle2file(handle);
-		console.log("Requesting resource delete for: " + resourcePath);
+		console.log("Requesting resource delete for: " + handle);
+		return stat(handle).then(function (stats) {
+//			console.log("stat => "+JSON.stringify(stats));
+			if (stats.isDirectory) {
+				var deleteChildren = when.map(listFiles(handle), function (name) {
+//					console.log('mapped: '+name);
+					return deleteResource(path.resolve(handle, name));
+				});
+				return deleteChildren.then(function () {
+					return rmDir(handle);
+				});
+			} else if (stats.isFile) {
+				return deleteFile(handle);
+			} else {
+				return when.reject("Neither file nor dir: "+handle);
+			}
+		});
+	}
+	
+	function deleteFile(_handle) {
+		var file = handle2file(_handle);
 		var deferred = when.defer();
-		if (resourcePath) {
-			fs.unlink(resourcePath, function(err) {
-				if (err) {
-					deferred.reject(err);
-				} else {
-					deferred.resolve();
-				}
-			});
-		} else {
-			var message = "No resource specified to delete";
-			deferred.reject(message);
-		}
-		return deferred.promise;
+		fs.unlink(file, function(err) {
+			if (err) {
+				deferred.reject(err);
+			} else {
+				deferred.resolve();
+			}
+		});
+
+		deferred.promise.then(function() {
+			console.log('delete: ' + file);
+		});
+
+		return deferred;
+	}
+
+	function rmDir(_handle) {
+		var file = handle2file(_handle);
+		var deferred = when.defer();
+		fs.rmdir(file, function(err) {
+			if (err) {
+				deferred.reject(err);
+			} else {
+				deferred.resolve();
+			}
+		});
+
+		deferred.promise.then(function() {
+			console.log('rmdir: ' + file);
+		});
+		return deferred;
 	}
 	
 	function getContents(handle, callback, errback) {
@@ -210,15 +246,29 @@ function withBaseDir(baseDir) {
 		return d;
 	}
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
+
+	/**
+	 * wraps a callback function so that is logs the value passed to the callback
+	 * in JSON.stringified form.
+	 */
+	function logBack(msg, callback) {
+		return function(result) {
+			console.log(msg);
+			console.log(JSON.stringify(result, null, "  "));
+			callback(result);
+		};
+	}
+
 	
 	function listFiles(handle, callback, errback) {
 		var d;
 		if (!callback) {
 			d = when.defer();
 			callback = function (files) {
-				when.resolve(files);
+				d.resolve(files);
 			};
 		}
+		//callback = logBack("listFiles("+handle+") => ", callback);
 		errback = errback || function (err) {
 			//console.log(err);
 			callback([]); //a reasonable substitute that most clients will be able to deal with.
@@ -276,7 +326,7 @@ function withBaseDir(baseDir) {
 	 * @return Promise
 	 */
 	function stat(handle) {
-		console.log('statting: '+handle);
+		//console.log('statting: '+handle);
 		var d = when.defer();
 		fs.stat(file2handle(handle), function (err, statObj) {
 			if (err) {
