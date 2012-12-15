@@ -36,7 +36,7 @@ define(['when'], function(when) {
 		
 		var deferred = when.defer();
 		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "/templates?scope=" + scope +
+		xhr.open("GET", "/templates?scope=" + scope.toLowerCase() +
 			(completionsRoot ? "&root=" + completionsRoot : ""), true);
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {

@@ -26,7 +26,7 @@ if(!Array.isArray) {
 
 define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 
-	/** 
+	/**
 	 * shared templates
 	 * @type {{completions:Array}}
 	 */
@@ -56,8 +56,8 @@ define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 			var deferred = when.defer();
 			if (! allTemplates[scope]) {
 				var templatesDeferred = getTemplates.loadRawTemplates(scope, root);
-				templatesDeferred.then(function(templates) { 
-					allTemplates[scope] = templates; 
+				templatesDeferred.then(function(templates) {
+					allTemplates[scope] = templates;
 					deferred.resolve(templates);
 				}, function(err) {
 					deferred.reject(err);
@@ -87,7 +87,7 @@ define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 						description : template.description,
 						escapePosition : template.escapePosition ? offset + template.escapePosition : null,
 						positions : extractPositions(template.positions, offset),
-						relevance : 2000,
+						relevance : 20000,
 						replace : true
 					});
 				}
@@ -99,8 +99,8 @@ define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 	return {
 		TemplateContentAssist : TemplateContentAssist,
 		_getAllTemplates : function() { return allTemplates; },
-		_reset : function() { 
-			allTemplates = {}; 
+		_reset : function() {
+			allTemplates = {};
 			getTemplates._reset();
 		}
 	};

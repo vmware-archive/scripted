@@ -11,6 +11,8 @@
                 { "trigger": "acronym", "contents": "${bar}" },
                 { "trigger": "acronym", "contents": "$bar" },
                 { "trigger": "acronym", "contents": "${2:}" },
-                { "trigger": "acronym", "contents": "${2bar}" }
+                { "trigger": "acronym", "contents": "${2bar}" },
+				{ "trigger": "jQuery()","contents":"jQuery(${1})$0" },
+				{ "trigger": "data(obj)\tjQuery","contents":"data(${1})$0" }
         ]
 }

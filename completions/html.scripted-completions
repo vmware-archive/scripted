@@ -1,0 +1,21 @@
+{
+	"scope": "text.html",
+	"completions": [
+		{ trigger: "dl", contents:"<dl>\n	<dt>${1:First definition}</dt>  <dd>${2:First explanation}</dd>\n	<dt> ${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n</dl>" },
+		{ trigger: "comment", contents:"<!-- ${1:say sumthin good} -->$0" },
+		{ trigger: "img", contents: "<img src=\"\" />"},
+		{ trigger: "html new frameset", contents: "<!DOCTYPE html >\n<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>${1:Insert title here}</title>\n</head>\n<frameset>\n    <frame>\n    <frame>\n    <noframes>\n    <body>\n    <p>This page uses frames. The current browser you are using does not support frames.</p>\n    </body>\n    </noframes>\n</frameset>\n</html>" },
+		{ trigger: "html new (4.01 strict)", contents: "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Strict//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>${1:Insert title here}</title>\n</head>\n<body>\n$0\n</body>\n</html>" },
+		{ trigger: "html new (4.01 transitional)", contents: "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>Insert title here</title>\n</head>\n<body>\n$0\n</body>\n</html>" },
+		{ trigger: "html new (5)", contents: "<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>${1:Insert title here}</title>\n</head>\n<body>\n$0\n</body>\n</html>" },
+		{ trigger: "ol", contents: "<ol>\n  <li>${1:Item one}</li>\n  <li>${2:Item two}</li>\n</ol>" },
+		{ trigger: "ul", contents: "<ul>\n  <li>${1:Item one}</li>\n  <li>${2:Item two}</li>\n</ul>" },
+		{ trigger: "table", contents: "<table>\n  <tr>\n    <th>${1:Column 1 Heading}</th>\n    <th>$21:Column 2 Heading}</th>\n  </tr>\n  <tr>\n    <td>${3:Row 1: Col 1}</td>\n    <td>${4:Row 1: Col 2}</td>\n  </tr>\n</table>" },
+		{ "trigger": "script", "contents": "<script type=\"${1:text/javascript}\">$0</script>" },
+		{ "trigger": "style", "contents": "<style type=\"${1:text/css}\">$0</style>" },
+		{ "trigger": "a", "contents": "<a href=\"${1:link}\">${2:text}</a>" },
+	]
+}
+
+
+

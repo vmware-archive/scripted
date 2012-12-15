@@ -50,8 +50,8 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders
 	completionsFolders : [
-		process.env.HOME + '/.scriptedrc',
-		path.resolve('../completions')
+		process.env.HOME + '/.scriptedrc/',
+		path.resolve('../completions') + '/'
 	],
 
 	// 1. determine the file locations where completions are stored
@@ -129,7 +129,7 @@ exports.CompletionsProcessor.prototype = {
 					i++;
 					isNamed = true;
 				}
-				var argNum = parseInt(rawContents[i]);
+				var argNum = parseInt(rawContents[i], 10);
 				if (!isNaN(argNum)) {
 					if (argNum === 0) {
 						escapePosition = j;
@@ -139,7 +139,7 @@ exports.CompletionsProcessor.prototype = {
 							return null;
 						}
 					} else {
-						var nextNum = parseInt(rawContents[i+1]);
+						var nextNum = parseInt(rawContents[i+1], 10);
 						if (!isNaN(nextNum)) {
 							// we have a number >= 10
 							i++;
@@ -204,7 +204,7 @@ exports.CompletionsProcessor.prototype = {
 			proposal : contents,
 			description : trigger + " : " + contents,
 			trigger: trigger,
-			positions : positions,
+			positions : positions.length === 0 ? null : positions,
 			escapePosition : escapePosition ? escapePosition : contents.length
 		};
 	},
@@ -228,6 +228,10 @@ exports.CompletionsProcessor.prototype = {
 					rawCompletions = JSON5.parse(data);
 				} else {
 					rawCompletions = data;
+				}
+				
+				if (!rawCompletions) {
+					console.log('Invalid completions file: ' + data);
 				}
 
 				// 4. Convert from pure JSON into proposals suitable for content assist
