@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
- * 
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define window document navigator*/
@@ -212,6 +212,12 @@ orion.TextSearcher = (function() {
 					evt.stopPropagation();
 				}
 				evt.cancelBubble = true;
+				
+				// Ctrl/Cmd + f should always reset focus to the find box
+				var findBox = document.getElementById("localSearchFindWith");
+				findBox.focus();
+				findBox.select();
+				
 				return false;
 			}
 			if((ctrlKey &&  evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
@@ -286,7 +292,7 @@ orion.TextSearcher = (function() {
 				window.setTimeout(function() {
 						findDiv.select();
 						findDiv.focus();
-				}, 10);				
+				}, 10);
 				return;
 			}
 			this._createActionTable();
@@ -297,7 +303,7 @@ orion.TextSearcher = (function() {
 			window.setTimeout(function() {
 				findDiv.select();
 				findDiv.focus();
-			}, 10);				
+			}, 10);
 
 			var findNextCommand = new mCommands.Command({
 				tooltip : "Find next match",
@@ -422,13 +428,13 @@ orion.TextSearcher = (function() {
 			if (this._undoStack) {
 				this._undoStack.startCompoundChange();
 			}
-		}, 
+		},
 		
 		endUndo: function() {
 			if (this._undoStack) {
 				this._undoStack.endCompoundChange();
 			}
-		}, 
+		},
 	
 		replace: function() {
 			this.startUndo();
@@ -533,7 +539,7 @@ orion.TextSearcher = (function() {
 						editor.reportStatus("Nothing replaced", "error");
 					}
 					this._replacingAll = false;
-				}), 100);				
+				}), 100);
 				
 			}
 		},
