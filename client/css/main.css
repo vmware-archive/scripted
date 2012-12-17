@@ -741,7 +741,13 @@ a.dialog_button:hover {
 	text-align: left;
 	cursor: pointer;
 	color: black;
-				
+	background-color:white; 
+	
+		/* rounded corner */
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+	
 	padding-top: 5px;
 	padding-bottom: 5px;
 	padding-left: 20%;
@@ -761,6 +767,10 @@ a.dialog_button:hover {
 .context_menu_item:hover {
 	background-color: #4f4f4f;
 	color: white;
+		/* rounded corner */
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
 }
 
 /*

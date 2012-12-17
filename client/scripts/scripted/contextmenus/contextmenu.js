@@ -24,15 +24,27 @@ function(contextMenuProvider) {
 
 	var hideContextMenu;
 
-	var addClickHandler = function(menudiv, menuItem, menuTable,
-		selectedContext) {
-			menudiv.click(function() {
+	var clickHandler = function(menuItem, menuTable, selectedContext) {
 
-				if (menuItem.handler && (typeof menuItem.handler === "function")) {
-					hideContextMenu(menuTable);
-					menuItem.handler(selectedContext);
+			if (menuItem.handler && (typeof menuItem.handler === "function")) {
+				hideContextMenu(menuTable);
+				menuItem.handler(selectedContext);
+			}
+		};
+
+	var addClickHandler = function(menuDiv, menuItem, menuTable,
+		selectedContext) {
+			menuDiv.click(function() {
+				clickHandler(menuItem, menuTable, selectedContext);
+			});
+
+			menuDiv.mouseup(function(event) {
+				// Only handle action selection on right-click mouseup
+				if (event.which === 3) {
+					clickHandler(menuItem, menuTable, selectedContext);
 				}
 			});
+
 		};
 
 	var createContextMenu = function(menus, selectedContext) {
@@ -58,6 +70,11 @@ function(contextMenuProvider) {
 						} else {
 							// Disable the menu item.
 							menudiv.css("color", "grey");
+							// Prevent the hover from highlighting the disabled action
+
+							menudiv.hover(function(event) {
+								$(this).css("background-color", "white");
+							});
 						}
 
 						mainDiv.append(menudiv);
