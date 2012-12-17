@@ -50,8 +50,16 @@ function(contextMenuProvider) {
 					if (menuItem.name && menuItem.handler && (typeof menuItem.handler === "function")) {
 
 						var menudiv = $('<div class="' + contextMenuItemClass + '">' + menuItem.name + '</div>');
-						addClickHandler(menudiv, menuItem, mainDiv,
-						selectedContext);
+
+						//Only add a click handler if the menu is enabled
+						if ((typeof menuItem.isEnabled === "function") && menuItem.isEnabled()) {
+							addClickHandler(menudiv, menuItem, mainDiv,
+							selectedContext);
+						} else {
+							// Disable the menu item.
+							menudiv.css("color", "grey");
+						}
+
 						mainDiv.append(menudiv);
 					}
 				}
@@ -105,7 +113,7 @@ function(contextMenuProvider) {
 				left: position.x + "px"
 			});
 
-            // be sure to attach a click listener to the window to have the context menu disappear
+			// be sure to attach a click listener to the window to have the context menu disappear
 			$(window).one('click', null, function() {
 				hideContextMenu(contextMenu);
 			});
@@ -118,6 +126,9 @@ function(contextMenuProvider) {
 		}
 	};
 
+	/**
+	 * context to which the context menus should be attached too.It should be a DOM element.
+	 */
 	var initContextMenus = function(context) {
 
 			var error = null;
@@ -146,6 +157,9 @@ function(contextMenuProvider) {
 							e);
 							currentContextMenu = cmenu;
 							e.preventDefault();
+
+							// To avoid context menus from appearing for nested DOM elements, stop event propagation to any parents
+							e.stopPropagation();
 						}
 					}
 				});

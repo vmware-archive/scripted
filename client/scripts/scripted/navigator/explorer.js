@@ -79,21 +79,7 @@ exports.Explorer = (function() {
 				return dojo.byId(rowId);
 			}
 		},
-/*		FIXNS: for context menu selections to avoid server requests when determining if dir or file
-		isDirectory: function(resourcePath) {
-			var row = this.getRow(resourcePath);
-			if (!row || !row._isDirectory || row._isDirectory === false) {
-				return false;
-			} else {
-				return true;
-			}
-		},
-		
-		getParent: function(resourcePath) {
-		
-		
-		}
-*/		
+	
 		/**
 		 * Displays tree table containing filled with data provided by given model
 		 * 
@@ -637,10 +623,9 @@ exports.SelectionRenderer = (function(){
 		
 		// Attach context menus to tree elements
 		mContextMenu.initContextMenus(tableRow);
+		
 		// Mark it as type directory
-		if (item.directory) {
-			$(tableRow).attr("type","dir");
-		}
+	    $(tableRow).attr("resourceType", item.directory ? "dir" : "file");
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {

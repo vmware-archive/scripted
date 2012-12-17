@@ -51,8 +51,20 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 			$(dialogueID).remove();
 			*/
 		};
+		
+		var displayError = function(message) {
+		    if ($('.dialog_error_message').length > 0) {
+		        $('.dialog_error_message').text(message);
+		    }
+		};
 
-	var openDialogue = function(dialogueID, dialogue, operations) {
+	/**
+	* Operations should contain an onClose handler that returns a when promise. The promise
+	* is used to determine whether the dialogue should remain open while an operation is being performed (e.g.
+	*  waiting for a response from a server, and display the error message if one is obtained). If no promise
+	* is returned, or the promise is resolved, the dialogue will close after the onClose handler is invoked.
+	*/
+	var openDialogue = function(dialogueID, dialogue, operations /*should contain an onClose function that returns a promise*/) {
 
 			var activeElement = document.activeElement;
 
@@ -88,9 +100,20 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 			$('#dialogue_ok_button').off('click.dialogs');
 			$('#dialogue_ok_button').on('click.dialogs', function() {
 				var value = operations.onOK ? operations.onOK() : null;
-				removeDialogue(dialogueID);
+
 				if (operations.onClose) {
-					operations.onClose(value);
+					var promise = operations.onClose(value);
+					if (!promise) {
+						// Close the dialogue right away
+						removeDialogue(dialogueID);
+					} else {
+					    // Defer closing only on success, otherwise display the error
+						promise.then(function() {
+							removeDialogue(dialogueID);
+						}, function(err) {
+						    displayError(err);
+						});
+					}
 				}
 
 				$(activeElement).focus();
@@ -142,37 +165,37 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 
 
 
-var createDialogue = function(initialValue) {
+	var createDialogue = function(initialValue) {
 
-		var addResource = function(onClose) {
-				modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
-			};
-
-		var renameResource = function(onClose) {
-				modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose, initialValue);
-			};
-
-		var deleteResource = function(onClose) {
-
-				var operations = {
-					onClose: onClose
+			var addResource = function(onClose) {
+					modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
 				};
 
-				openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
+			var renameResource = function(onClose) {
+					modifyResourceDialogue("#dialog_rename_resource", renameResourceDialogue, onClose, initialValue);
+				};
 
-				if (initialValue) {
-					$("#dialog_message_resource_to_delete").text(initialValue);
-				}
+			var deleteResource = function(onClose) {
 
+					var operations = {
+						onClose: onClose
+					};
+
+					openDialogue("#dialog_delete_resource", deleteResourceDialogue, operations);
+
+					if (initialValue) {
+						$("#dialog_message_resource_to_delete").text(initialValue);
+					}
+
+				};
+
+			return {
+				addResource: addResource,
+				renameResource: renameResource,
+				deleteResource: deleteResource
 			};
 
-		return {
-			addResource: addResource,
-			renameResource: renameResource,
-			deleteResource: deleteResource
 		};
-
-	};
 
 	return {
 		createDialogue: createDialogue

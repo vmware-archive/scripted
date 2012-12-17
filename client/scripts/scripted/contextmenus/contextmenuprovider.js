@@ -15,37 +15,38 @@ define(
 function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 
-      var loggingCategory = "CONTEXT_MENU";
+	var loggingCategory = "CONTEXT_MENU";
 
-      var pathSeparator = pathUtils.getPathSeparator();
+	var pathSeparator = pathUtils.getPathSeparator();
 
-      var doNavigatorRefresh = function(resourceToNavigate) {
-		window.explorer.fullRefresh(function() {
+	var doNavigatorRefresh = function(resourceToNavigate) {
+			window.explorer.fullRefresh(function() {
 				if (resourceToNavigate) {
 					navHistory.navigateToURL(resourceToNavigate);
-					window.explorer.highlight(resourceToNavigate);
-			}
-		});
+					// TODO: May not be necessary: Remove if not needed:
+					//	window.explorer.highlight(resourceToNavigate);
+				}
+			});
 
-	};
+		};
 
-		var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
+	var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
 
-				if (operationPromise) {
+			if (operationPromise) {
 
-					// On a successful promise result, refresh navigator, and if specified, highlight and navigate
-					// to a resource
-					var resolveCallBack = function() {
+				// On a successful promise result, refresh navigator, and if specified, highlight and navigate
+				// to a resource
+				var resolveCallBack = function() {
 						doNavigatorRefresh(resourceToSelect);
 					};
 
-					var errorCallBack = function(err) {
+				var errorCallBack = function(err) {
 						scriptedLogger.error(err, loggingCategory);
 					};
 
-					operationPromise.then(resolveCallBack, errorCallBack);
-				}
-			};
+				operationPromise.then(resolveCallBack, errorCallBack);
+			}
+		};
 
 
 	var getResource = function(location, isDirectory) {
@@ -64,108 +65,146 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 				if (target && $(target).size()) {
 					var resource = $(target).attr('id');
-					var type = $(target).attr('type');
-					var isDir = type && type === "dir";
-					return getResource(resource, isDir);
+
+					if (resource) {
+						var type = $(target).attr('resourceType');
+						// If resourcetype is not defined, then its not
+						// a navigator element context, therefore no resource can be resolved at this stage
+						if (type) {
+							var isDir = type === "dir";
+							return getResource(resource, isDir);
+						}
+					}
 				}
 			}
 		};
 
-/**
- *
- */
-var getNavigatorContextMenus = function(resource) {
 
-		var actions = [];
+	/**
+	 *
+	 */
+	var getNavigatorContextMenus = function(selectionContext) {
 
-		var addFile = {
-			name: "New File...",
-			handler: function(selectionContext) {
+			var contextResource = getResourceFromContextSelection(selectionContext);
 
-				var fileCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
-				resourcesDialogue.createDialogue(fileCreationPath).addResource(function(
-				resourceName) {
-					var urlNewResource = fileCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
-					var promise = fileOperationsClient.createFile(urlNewResource);
-					performNavigatorRefreshOperation(promise, urlNewResource);
+			var resourceCreationPath = function() {
 
-				});
-			}
-		};
-		actions.push(addFile);
+					if (contextResource) {
+						return !contextResource.isDirectory ? pathUtils.getDirectory(contextResource.location) : contextResource.location;
 
-		var addFolder = {
-			name: "New Folder...",
-			handler: function(selectionContext) {
+					} else {
+						// Use the file system root
+						return window.fsroot;
+					}
+				}();
 
-				var folderCreationPath = !resource.isDirectory ? pathUtils.getDirectory(resource.location) : resource.location;
-				resourcesDialogue.createDialogue(folderCreationPath).addResource(function(
-				resourceName) {
-					var urlNewResource = folderCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
-					var promise = fileOperationsClient.mkdir(urlNewResource);
-					performNavigatorRefreshOperation(promise, urlNewResource);
-				});
-			}
-		};
-		actions.push(addFolder);
+			var actions = [];
 
-		var rename = {
-			name: "Rename...",
-			handler: function(selectionContext) {
-				var toRename = pathUtils.getLastSegmentFromPath(resource.location);
+			var addAction = function(action) {
+					if (action) {
+						actions.push(action);
+					}
+				};
 
-				if (toRename) {
-					resourcesDialogue.createDialogue(toRename).renameResource(function(
-					renamedResource) {
+			var getActions = function() {
+					return actions;
+				};
 
-						var parentPath = pathUtils.getDirectory(resource.location);
-						if (parentPath) {
-							var urlNewResource = parentPath + pathSeparator + renamedResource;
-							var promise = fileOperationsClient.rename(
-							resource.location,
-							urlNewResource);
-							performNavigatorRefreshOperation(promise, urlNewResource);
+			var getMenusActions = function() {
+
+					addAction({
+						name: "New File...",
+						handler: function(selectionContext) {
+
+							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+							resourceName) {
+								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
+								var promise = fileOperationsClient.createFile(urlNewResource);
+								performNavigatorRefreshOperation(promise, urlNewResource);
+							});
+						},
+						isEnabled: function() {
+							return typeof resourceCreationPath !== "undefined";
 						}
 					});
-				}
-			}
+
+					addAction({
+						name: "New Folder...",
+						handler: function(selectionContext) {
+
+							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+							resourceName) {
+								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
+								var promise = fileOperationsClient.mkdir(urlNewResource);
+								performNavigatorRefreshOperation(promise, urlNewResource);
+							});
+						},
+						isEnabled: function() {
+							return typeof resourceCreationPath !== "undefined";
+						}
+					});
+
+					addAction({
+						name: "Rename...",
+						handler: function(selectionContext) {
+							var toRename = pathUtils.getLastSegmentFromPath(contextResource.location);
+
+							if (toRename) {
+								resourcesDialogue.createDialogue(toRename).renameResource(function(
+								renamedResource) {
+
+									var parentPath = pathUtils.getDirectory(contextResource.location);
+									if (parentPath) {
+										var urlNewResource = parentPath + pathSeparator + renamedResource;
+										var promise = fileOperationsClient.rename(
+										contextResource.location,
+										urlNewResource);
+										performNavigatorRefreshOperation(promise, urlNewResource);
+									}
+								});
+							}
+						},
+						isEnabled: function() {
+							return typeof contextResource !== "undefined";
+						}
+
+					});
+
+					addAction({
+						name: "Delete",
+						handler: function(selectionContext) {
+
+							var parent = pathUtils.getDirectory(contextResource.location);
+
+							resourcesDialogue.createDialogue(contextResource.location).deleteResource(function(value) {
+								var promise = fileOperationsClient.deleteResource(contextResource.location);
+								// Navigate to parent folder.
+								performNavigatorRefreshOperation(promise, parent);
+							});
+						},
+						isEnabled: function() {
+							return typeof contextResource !== "undefined";
+						}
+					});
+
+					return getActions();
+
+				};
+
+
+			return {
+				getMenusActions: getMenusActions
+			};
 
 		};
-		actions.push(rename);
-        
-        // For now only support deletion on files.
-		var del = {
-				name: "Delete",
-				handler: function(selectionContext) {
-					
-					var parent = pathUtils.getDirectory(resource.location);
-					
-					resourcesDialogue.createDialogue(resource.location).deleteResource(function(value) {
-						var promise = fileOperationsClient.deleteResource(resource.location);
-						// Navigate to parent folder.
-						performNavigatorRefreshOperation(promise, parent);
-					});
-				}
-			};
-	    actions.push(del);
-
-
-		return actions;
-
-	};
 
 	var getContextMenusForSelection = function(context,
 		selectionContext) {
-
-			// get the location from the selectionContext
-			var resourceLocation = getResourceFromContextSelection(selectionContext);
-
-			return getNavigatorContextMenus(resourceLocation);
+			return getNavigatorContextMenus(selectionContext).getMenusActions();
 		};
 
 	return {
 		getContextMenusForSelection: getContextMenusForSelection
-
 	};
 
 });
