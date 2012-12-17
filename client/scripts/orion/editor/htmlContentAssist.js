@@ -1,14 +1,16 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+// THIS FILE IS NO LONGER BEING USED BY SCRIPTED.  CONSIDER DELETING.
+
 /*global define */
 
 define("orion/editor/htmlContentAssist", [], function() {
@@ -157,7 +159,7 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
 		}
 		if ("table".indexOf(prefix) === 0) {
-			proposalText = "table>\n" + whitespace + "\t<tr>\n" + whitespace + "\t\t<td></td>\n" + 
+			proposalText = "table>\n" + whitespace + "\t<tr>\n" + whitespace + "\t\t<td></td>\n" +
 				whitespace + "\t</tr>\n" + whitespace + "</table>";
 			description = "<table> - basic HTML table";
 			//exit position inside first table data

@@ -138,7 +138,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			completion += argName;
 		}
 		completion += ')';
-		return {completion: completion, positions: positions};
+		return {completion: completion, positions: positions.length === 0 ? null : positions};
 	}
 	
 	/**

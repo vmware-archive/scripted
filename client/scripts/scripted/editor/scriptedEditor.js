@@ -24,7 +24,7 @@ define([
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-	"orion/editor/htmlContentAssist", "orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
+	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
@@ -35,7 +35,7 @@ define([
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,  
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-	mHtmlContentAssist, mCssContentAssist, mTemplateContentAssist,
+	mCssContentAssist, mTemplateContentAssist,
 	mMarkoccurrences, tHelptext
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
@@ -180,7 +180,6 @@ define([
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
-		var htmlContentAssistant = new mHtmlContentAssist.HTMLContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 		
@@ -255,8 +254,6 @@ define([
 			if (isJS) {
 				providers.push(jsContentAssistant);
 				providers.push(jsTemplateContentAssistant);
-			} else if (isHTML) {
-				providers.push(htmlContentAssistant);
 			} else if (isCSS) {
 				providers.push(cssContentAssistant);
 			}
