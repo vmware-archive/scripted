@@ -23,8 +23,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 			window.explorer.fullRefresh(function() {
 				if (resourceToNavigate) {
 					navHistory.navigateToURL(resourceToNavigate);
-					// TODO: May not be necessary: Remove if not needed:
-					//	window.explorer.highlight(resourceToNavigate);
+
+				    window.explorer.highlight(resourceToNavigate);
 				}
 			});
 
