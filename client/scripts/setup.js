@@ -104,13 +104,13 @@ requirejs.config({
  
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage", "scripted/contextmenus/contextmenu",
 		 // need to load this module in order to have it register with paneFactory
 		 "scripted/editor/editorPane"],
  
 function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 	mKeystroke, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
-	mExecConsole, mExecOnLoad, mWhen, mJshintDriver, storage) {
+	mExecConsole, mExecOnLoad, mWhen, mJshintDriver, storage, contextMenu) {
 		
 	window.scripted = {};
 
@@ -183,6 +183,9 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 				}
 			}
 		}
+		
+		// Perform navigator context menu hook-up
+		contextMenu.initContextMenus('#navigator-wrapper');
 	};
 	
 	// Create new FileExplorer
