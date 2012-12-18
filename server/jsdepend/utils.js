@@ -12,10 +12,10 @@
  ******************************************************************************/
 
 /*global require define console module*/
-//if (typeof define !== 'function') {
-//    var define = require('amdefine')(module);
-//}
-//define(function(require, exports, module) {
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+define(function(require, exports, module) {
 ///////////////////////////////////////////
 // utils
 //////////////////////////////////////////
@@ -48,11 +48,21 @@ function map(array, f, keepfalse) {
  * @param String
  * @return RegExp
  */
-function toRegexp(pat) {
-	//TODO: dirty hack and not really correct. It doesn't do correct escaping
-	//of chars that would be special inside of regexps.
-	return new RegExp('^' + pat.replace('*', '.*'), 'i');
-}
+var toRegexp= (function () {
+
+	var SPECIAL = /[\-\/\\\^\$+?.()|\[\]{}]/g;
+
+	function toRegexp(pat) {
+		pat = pat.replace(SPECIAL, "\\$&"); //First escape special chars, except for '*'.
+		var exp = '^' + pat.replace(/\*/g, '.*');
+		//console.log('regexp = '+exp);
+		return new RegExp(exp, 'i');
+	}
+
+	return toRegexp;
+
+})();
+
 
 function toCompareString(obj) {
 	return JSON.stringify(obj, null, '  ');
@@ -174,6 +184,7 @@ function pathResolve(basePath, resolvePath) {
 }
 
 //Map a function onto an array in callback (continuation passing) style:
+//Actually this isn't really a 'CPS style'. It's a parrallel version of map.
 function mapk(array, f, k) {
 	if (array.length===0) {
 		//Special case for zero length, otherwise k won't get called.
@@ -217,6 +228,7 @@ function eachk(array, f, callback) {
 	
 
 function filter(array, pred) {
+	//TODO: remove this... Why not simply use 'Array.filter'???
 	var results = [];
 	for (var i = 0; i < array.length; i++) {
 		var el = array[i];
@@ -297,7 +309,7 @@ function deref(obj, props) {
 function startsWith(string, prefix) {
 	return string.substring(0, prefix.length)===prefix;
 }
-	
+
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
 exports.pathResolve = pathResolve;
@@ -316,4 +328,4 @@ exports.deref = deref;
 exports.startsWith = startsWith;
 
 //////////////////////////////////////////
-//});
+});
