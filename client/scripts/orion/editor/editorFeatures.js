@@ -12,9 +12,12 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/textview/undoStack', 'orion/textview/keyBinding',
-	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex', 'orion/textview/util','scripted/dialogs/gotoLineDialog'],
-function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex, mUtil, mGotoLineDialog) {
+define(['i18n!orion/editor/nls/messages', 'orion/textview/undoStack', 'orion/textview/keyBinding',
+	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex',
+	'orion/textview/util',
+	'scripted/dialogs/gotoLineDialog', 'scripted/keybindings/keybinder'],
+function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex, mUtil,
+	mGotoLineDialog, mKeybinder) {
 
 	function UndoFactory() {
 	}
@@ -961,6 +964,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			if (this.linkedModeActive) {
 				return;
 			}
+			var kbs = mKeybinder.getKeyBindings(this.editor);
+			this.oldTabBinding = kbs['Tab'];
+			this.oldShiftTabBinding = kbs['Shift+Tab'];
 			this.linkedModeActive = true;
 
 			// NOTE: only the first position from each group is supported for now
@@ -1006,7 +1012,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			this.cancel();
 			return true;
 		},
-		/** 
+		/**
 		 * Exits Linked Mode. Optionally places the caret at linkedModeEscapePosition. 
 		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the 
 		 * escape position.
@@ -1017,8 +1023,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			}
 			this.linkedModeActive = false;
 			this.textView.removeEventListener("Verify", this.linkedModeListener.onVerify);
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab");
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), null);
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), this.oldTabBinding);
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), this.oldShiftTabBinding);
 			
 			if (!ignoreEscapePosition) {
 				this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
