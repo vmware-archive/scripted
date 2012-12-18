@@ -24,7 +24,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 				if (resourceToNavigate) {
 					navHistory.navigateToURL(resourceToNavigate);
 
-				    window.explorer.highlight(resourceToNavigate);
+					window.explorer.highlight(resourceToNavigate);
 				}
 			});
 
@@ -175,8 +175,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 						handler: function(selectionContext) {
 
 							var parent = pathUtils.getDirectory(contextResource.location);
-
-							resourcesDialogue.createDialogue(contextResource.location).deleteResource(function(value) {
+							var resourceNameToDelete = pathUtils.getLastSegmentFromPath(contextResource.location);
+							resourcesDialogue.createDialogue(resourceNameToDelete).deleteResource(function(value) {
 								var promise = fileOperationsClient.deleteResource(contextResource.location);
 								// Navigate to parent folder.
 								performNavigatorRefreshOperation(promise, parent);
