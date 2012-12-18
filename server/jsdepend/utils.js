@@ -310,6 +310,14 @@ function startsWith(string, prefix) {
 	return string.substring(0, prefix.length)===prefix;
 }
 
+/**
+ * A combination of map and filter. Works like Array.map, but it filters out
+ * any results that are falsy.
+ */
+function mapFilter(arr, f) {
+	return arr.map(f).filter(function (x) { return x; });
+}
+
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
 exports.pathResolve = pathResolve;
@@ -326,6 +334,7 @@ exports.toRegexp = toRegexp;
 exports.ork = ork;
 exports.deref = deref;
 exports.startsWith = startsWith;
+exports.mapFilter = mapFilter;
 
 //////////////////////////////////////////
 });

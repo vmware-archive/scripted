@@ -15,6 +15,10 @@
 var eachk = require('./utils').eachk;
 var pathResolve = require('./utils').pathResolve;
 var getFileName = require('./utils').getFileName;
+var getDirectory = require('./utils').getDirectory;
+var or = require('../utils/promises').or;
+var orMap = require('../utils/promises').orMap;
+var when = require('when');
 
 function configure(conf) {
 
@@ -24,7 +28,7 @@ function configure(conf) {
 
 	// Walk the FILESYSTEM
 	//A walk function written in callback style. Calls the function f on each file (excluding directories)
-	//The function f is a non-callbacky function. 
+	//The function f is a non-callbacky function.
 	//After all files have been walked, then orginal callback function passed to the toplevel walk
 	//call will be called.
 	function fswalk(node, f, k, exit) {
@@ -115,6 +119,39 @@ function configure(conf) {
 			}
 		});
 	}
+
+	/**
+	 * Walk filesystem starting from given path looking for a file that meets
+	 * some interesting property, possibly to extract some information from this file.
+	 *
+	 * Files are visited starting from the current directory visiting all files in
+	 * this directory, then files in the parent directory and so on.
+	 * When a file is found that contains what we are looking for then the walk aborts.
+	 *
+	 * We use promises to indicate whether or not the 'interesting result' was found.
+	 * The f function should return a promise which is resolved when result is found,
+	 * and rejected if result is not found.
+	 *
+	 * @return Promise
+	 */
+	function parentSearch(path, f) {
+		return or(
+			function () {
+				return orMap(listFiles(path), function (name) {
+					var child = pathResolve(path, name);
+					return f(child);
+				});
+			},
+			function () {
+				var parent = getDirectory(path);
+				if (parent) {
+					return parentSearch(parent, f);
+				} else {
+					return when.reject('No more parents');
+				}
+			}
+		);
+	}
 	
 	return {
 		fswalk: function (path, f, k) {
@@ -122,7 +159,8 @@ function configure(conf) {
 		},
 		asynchWalk: function (path, f, k) {
 			asynchWalk(path, f, k);
-		}
+		},
+		parentSearch: parentSearch
 	};
 
 }

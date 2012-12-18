@@ -326,7 +326,7 @@ exports.withParseErrors = function(test) {
 exports.globalDependenciesSimple1 = function(test) {
 	var api = makeApi('with-global-dependencies');
 	api.getDGraph('simple/scripts/main.js', function(deps) {
-		test.equals(toCompareString(deps), {
+		test.equals(toCompareString(deps), toCompareString({
 			"simple/scripts/foo.js": {
 				"kind": "global",
 				"refs": {}
@@ -349,7 +349,9 @@ exports.globalDependenciesSimple1 = function(test) {
 					}
 				}
 			}
-		});
+		}));
 		test.done();
 	});
 };
+
+//TODO: add a globalDependencies test with unparsable html file.

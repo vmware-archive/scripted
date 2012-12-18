@@ -22,6 +22,8 @@ define(function(require, exports, module) {
 var parser = require("./parser");
 var findReferences = require("./reference-finder").findReferences;
 var eachk = require("./utils").eachk;
+var getModuleType = require('./module-types').getModuleType;
+var when = require('when');
 
 //function dumpTree(parseTree) {
 //	console.log(JSON.stringify(parseTree, null, "  "));
@@ -60,29 +62,31 @@ function configure(config) {
 	var getIndexer = require('./file-indexer').configure(config).getIndexer;
 	var getConf = require('./dot-scripted').configure(config).getConfiguration;
 	var retrieveNearestFile = require('./retrieve-nearest-file').configure(config).retrieveNearestFile;
+	var findGlobalDependencies = require('./global-dependencies-finder').configure(config);
 	
 //	console.log('jsdepend/api is using encoding: '+encoding);
 	
-	function getReferences(handle, callback) {
-		getContents(handle,
-			function (contents) {
-				var tree = parser.parse(contents);
-				findReferences(tree, callback);
-			},
-			function (err) {
-				console.error(err);
-				callback([]);
-			}
-		);
+	function getReferences(handle, moduleType, tree, callback) {
+		findReferences(handle, moduleType, tree, callback);
 	}
 	
 	function getDependencies(handle, callback) {
 		//callback = logBack("getDependencies("+handle+") ==> ", callback);
-		getReferences(handle, function (refs, kind) {
-			resolve(handle, refs, function (resolvedRefs) {
-				callback(resolvedRefs, kind);
-			});
-		});
+		getContents(handle,
+			function (contents) {
+				var tree = parser.parse(contents);
+				var moduleType = getModuleType(tree);
+				findReferences(tree, moduleType, function (refs) {
+					resolve(handle, refs, function (resolvedRefs) {
+						callback(resolvedRefs, moduleType);
+					});
+				});
+			},
+			function (err) {
+				console.error(err);
+				callback([], 'unknown');
+			}
+		);
 	}
 
     /**
@@ -102,7 +106,7 @@ function configure(config) {
 			 * added (i.e. it was not 'marked' before).
 			 *
 			 * @param String handle
-			 * @return boolean 
+			 * @return boolean
 			 */
 			mark: function (handle, mark) {
 				var notMarked = !seen.hasOwnProperty(handle);
@@ -141,7 +145,7 @@ function configure(config) {
 						refs[dep.name] = dep;
 						buildGraph(dep.path, store, k);
 					},
-					function () {  
+					function () {
 						//all deps have been processed
 						store.addNode(handle, node);
 						k();
@@ -157,12 +161,28 @@ function configure(config) {
 		//callback = logBack('getDGraph '+handle+ ' => ', callback);
 		var store = makeGraphStore();
 		buildGraph(handle, store, function () {
-			callback(store.getGraph());
+			var graph = store.getGraph();
+			if (graph[handle].kind === 'unknown') {
+				//This means we didn't get a dependency graph, the start node was of 'unknown' type.
+				//So now let's try looking for global dependencies.
+				when(findGlobalDependencies(handle),
+					callback,
+					function (error) {
+						console.error(Array.isArray(error)
+							? JSON.stringify(error, null, '  ')
+							: error
+						);
+						callback(store.getGraph());
+					}
+				);
+			} else {
+				callback(store.getGraph());
+			}
 		});
 	}
 	
 	function findFileNamesContaining(currentFile, substring, callback, errback) {
-		getIndexer(currentFile, 
+		getIndexer(currentFile,
 			function (indexer) {
 				indexer.findFileNamesContaining(substring, callback, errback);
 			}

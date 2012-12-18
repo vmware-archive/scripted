@@ -212,8 +212,9 @@ function withBaseDir(baseDir) {
 	}
 	
 	function getContents(handle, callback, errback) {
-		var d = when.defer();
+		var d;
 		if (!callback) {
+			d = when.defer();
 			callback = function (v) {
 				d.resolve(v);
 			};

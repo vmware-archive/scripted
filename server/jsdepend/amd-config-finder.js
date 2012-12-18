@@ -44,25 +44,16 @@ function configure(filesystem) {
 	var pathResolve = require('./utils').pathResolve;
 	var getScriptTags = require('./script-tag-finder').getScriptTags;
 	var getScriptCode = require('./script-tag-finder').getScriptCode;
-	var htmlExtensions = ['.html', '.htm', '.HTML', '.HTM' ];
 	var objectPat = treeMatcher.objectPat;
 	var successPat = treeMatcher.successPat;
 	var containsPat = treeMatcher.containsPat;
 //	var successMatcher = treeMatcher.successMatcher;
 	var variablePat = treeMatcher.variablePat;
 	var arrayWithElementPat = treeMatcher.arrayWithElementPat;
+	var isHtml = require('./html-utils').isHtml;
 	
 	function endsWith(str, suffix) {
 		return str.indexOf(suffix, str.length - suffix.length) !== -1;
-	}
-	
-	//isHtml :: String -> (String | false)
-	// if given name is the name of a html file then returns the name.
-	// otherwise returns false.
-	function isHtml(name) {
-		return orMap(htmlExtensions, function (ext) {
-			return endsWith(name, ext) && name;
-		});
 	}
 	
 	function objectWithProperty(propName) {

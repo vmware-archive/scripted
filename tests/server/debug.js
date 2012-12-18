@@ -17,6 +17,9 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+var testCase = require('./api-test')
+	.globalDependenciesSimple1;
+
 //var testCase = require('./dot-scripted-test')
 //	.getScriptedRcFile;
 
@@ -29,8 +32,9 @@
 //	.getAmdConfig2;
 //	.simpleRequireJsProject;
 
-var testCase = require('./resolver-test')
-	.usePlugins;
+//var testCase = require('./resolver-test')
+//	.commonsJsWrappedModuleInAmdEnabledContext;
+//	.usePlugins;
 //	.requireCallWithBaseDir;
 //	.useTextPlugin;
 //	.resolveInScriptsFolder;

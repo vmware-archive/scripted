@@ -19,7 +19,7 @@ define(function(require, exports, module) {
 
 //////////////////////////////////////////////////////////////////
 // tree-walker.js
-// 
+//
 // Very simple tree walker utility.
 //////////////////////////////////////////////////////////////////
 
@@ -30,14 +30,14 @@ function getChildren(node) {
 		var children = [];
 		for (var property in node) {
 			if (node.hasOwnProperty(property)) {
-				children.push(node[property]);	
+				children.push(node[property]);
 			}
 		}
 		return children;
 	}
 }
 
-//walk that allows the nodeFun to immediately abort the walk. 
+//walk that allows the nodeFun to immediately abort the walk.
 //if nodeFun returns true the walk stops right away: no children or siblings of current node
 //will be visited.
 function abortableWalk(tree, nodeFun) {

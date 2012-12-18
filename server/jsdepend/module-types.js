@@ -95,7 +95,7 @@ var commonJsWrapper = containsPat(commonJsDefine);
 
 function getModuleType(tree) {
 	if (matches(amdDefine, tree)) {
-		return 'AMD'; 
+		return 'AMD';
 	} else if (matches(commonJsWrapper, tree)) {
 		return 'commonjs,AMD';
 	} else if (matches(commonJsPlain, tree)) {
@@ -105,6 +105,19 @@ function getModuleType(tree) {
 	}
 }
 
+function makeLogged(f) {
+	function logged() {
+		var args = Array.prototype.slice.apply(arguments);
+		console.log(f.name + " <= " +JSON.stringify(args));
+		var r = f.apply(this, args);
+		console.log(f.name + " => " +JSON.stringify(r));
+		return r;
+	}
+	return logged;
+}
+
+//getModuleType = makeLogged(getModuleType);
+
 exports.getModuleType = getModuleType;
 exports.forTest = {
 	callPat: callPat,
@@ -112,4 +125,4 @@ exports.forTest = {
 };
 
 ///////////////////////////////////////////////
-}); // end: define (commonsj wrapper) 
+}); // end: define (commonsj wrapper)

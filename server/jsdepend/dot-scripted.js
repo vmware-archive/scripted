@@ -24,7 +24,7 @@ var pipeline = require('when/pipeline');
 var JSON5 = require('json5');
 
 function debug_log(msg) {
-	console.log(msg);
+//	console.log(msg);
 }
 
 function configure(filesystem) {

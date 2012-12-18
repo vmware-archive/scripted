@@ -11,7 +11,7 @@
  *     Kris De Volder
  ******************************************************************************/
 
-define(['scripted/keybindings/keystroke', 'scripted/utils/os'], function (_unconfigured, os) {
+define(['scripted/keybindings/keystroke'], function (_unconfigured) {
 
 var tests = {};
 
@@ -56,6 +56,33 @@ function makeTests(isMac) {
 	makeToKeybindingsModifierKeysTest(false, true,  false, false);
 	makeToKeybindingsModifierKeysTest(false, false, true,  false);
 	makeToKeybindingsModifierKeysTest(false, false, false, true);
+
+
+
+	if (isMac) {
+		tests.mac_ctrlF = function (test) {
+			var ctrlF = mKeystroke.toKeyBinding("Ctrl+F");
+			test.equals(false, ctrlF.mod1);
+			test.equals(false, ctrlF.mod2);
+			test.equals(false, ctrlF.mod3);
+			test.equals(true, ctrlF.mod4);
+			test.equals("Ctrl+F", mKeystroke.fromKeyBinding(ctrlF));
+			
+			var cmdF = mKeystroke.toKeyBinding("Cmd+F");
+			test.equals(true,  cmdF.mod1);
+			test.equals(false, cmdF.mod2);
+			test.equals(false, cmdF.mod3);
+			test.equals(false, cmdF.mod4);
+			test.equals("Cmd+F", mKeystroke.fromKeyBinding(cmdF));
+			
+			test.equals(false, cmdF.equals(ctrlF));
+			test.equals(false, ctrlF.equals(cmdF));
+			test.equals(true, ctrlF.equals(ctrlF));
+			test.equals(true, cmdF.equals(cmdF));
+			
+			test.done();
+		};
+	}
 }
 
 makeTests(true);  //mac platform tests

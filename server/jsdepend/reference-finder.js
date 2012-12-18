@@ -41,11 +41,12 @@ var finders = {
 // references and the second is the module-type of the originating module
 // (It is cheap to add this extra second param because we have to determine
 // the module type)
-function findReferences(tree, callback) {
+function findReferences(tree, moduleType, callback) {
+	if (!callback) {
+		callback = moduleType;
+		moduleType = getModuleType(tree);
+	}
 
-	//How exactly we find references in a module depends on the module type
-	var moduleType = getModuleType(tree);
-	
 	//A module may have multiple module types simultaneously 
 	//If so we will use only the first module type to determine how to find references.
 	var finderType = (typeof(moduleType)==='string') ? moduleType : moduleType[0]; 
@@ -53,10 +54,10 @@ function findReferences(tree, callback) {
 	var finder = finderType && finders[finderType];
 	if (finder) {
 		finder(tree, function (refs) {
-			callback(refs, moduleType);
-		});	
+			callback(refs);
+		});
 	} else {
-		callback([], moduleType);
+		callback([]);
 	}
 }
 
