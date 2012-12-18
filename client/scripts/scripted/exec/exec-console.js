@@ -145,7 +145,7 @@ define(["jquery", "jquery_ui"], function () {
 				disabled: false
 			});
 
-			window.editor._textView._updatePage();
+			window.editor.getTextView()._updatePage();
 			updateWidth();
 		}
 	}
