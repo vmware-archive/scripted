@@ -48,10 +48,10 @@ exports.CompletionsProcessor.prototype = {
 		return rawScope.split(/\s+/)[0].split('.')[1];
 	},
 
-	// these are the default folders
+	// these are the default folders.  Must end with a /
 	completionsFolders : [
-		process.env.HOME + '/.scriptedrc/',
-		path.resolve('../completions') + '/'
+		path.resolve((process.env.HOME || process.env.HOMEPATH), '.scriptedrc') + path.sep,
+		path.resolve(__dirname, '../../completions') + path.sep
 	],
 
 	// 1. determine the file locations where completions are stored
@@ -98,7 +98,7 @@ exports.CompletionsProcessor.prototype = {
 	},
 
 	/**
-	 * @return {{ proposal:String, description:String, escapePosition:Number, positions:Array.<{offset:Number,length:Number}>, relevance:Number, style:String , trigger:String}}
+	 * @return {{ proposal:String, description:String, escapePosition:Number, positions:Array.<{offset:Number,length:Number}>, relevance:Number, style:String, trigger:String}}
 	 */
 	convertCompletion : function(rawCompletion) {
 		if (!rawCompletion.contents) {
