@@ -1,7 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
 
-
 <style type="text/css">
 p, table, td, th {  font-family: verdana, arial, helvetica, geneva; font-size: 10pt}
 pre {  font-family: "Courier New", Courier, mono; font-size: 10pt}
@@ -55,26 +54,95 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 </td>
 
 </tr>
-	<tr id="newlook">
-		<td class="title">Enhancements to "Open File" Dialog<br>
+
+<tr id="newlook">
+
+<td class="title">
+   Keybinding's related bugfixes
 </td>
-		<td class="description">Here is a really long drawn out tedious and mundane description of foobar.
-		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
-		</td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Enhancements to "Look in Files" Dialog<br>
+<td class="description">
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-266">Scripted-260</a>: Some keybindings/actions are 
+	now marked as <b>Global</b> and will work even if the editor does not currently have focus. E.g. 'Open file' dialog's
+	keybinding.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-255">Scripted-255</a>: Opening help is now assigned to 
+	<b>F1</b> by default.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-240">Scripted-240</a>: Fixed a bug that caused 'SHIFT-TAB'
+	keybinding to occasionally get lost.</p>
 </td>
-		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
-		</td>
-	</tr>
-	<tr>
-      <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc' folder.</span><br>
-      </td>
-      <td style="vertical-align: top;"><br>
-      </td>
-    </tr>
+</tr>
+
+<tr id="newlook">
+
+<td class="title">
+	Enhancements to AMD configuration discovery
+</td>
+<td class="description">
+
+	<p>Recognize more idioms for extracting the AMD loader configuration from projects: 
+	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-253">Scripted-253</a>,
+	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-239">Scripted-239</a>.
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-252">Scripted-252</a>: Sloppy resolution disabled.
+	Prior to 0.3 when a dependency was not being found a 'sloppy' resolution would kick in to look for any js file with a 
+	matching name. This would sometimes inadvertently resolve dependencies that should not be resolvable. This creates 
+	the impression that incorrect project structures are in fact correct. In 0.3 we have completely disabled this 
+	'sloppy' mode and instead focus on making the resolution algos more accurate and complete.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-208">Scripted-208</a>: Minimal support for 
+	discovering  AMD loader config in curl-based projects.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-238">Scripted-238</a>: Use AMD resolver config 
+	for AMD  modules that are 'commonjs-wrapped'.
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-237">Scripted-237</a>: Recognize 'packages' 
+	declarations in AMD loader configuration.</p>
+</td>
+</tr>
+
+<tr id="newlook">
+
+<td class="title">Enhancements to <b>Open File</b> and <b>Look in Files</b> search dialogs</td>
+<td class="description">
+   <p>Besides having a new look. These dialogs now perform a 'dynamic incremental' search. A search kicks of as soon
+   as enough characters have been typed (0 characters for 'Open File' file-name searches and 3 characters for 'Look in File' 
+   text searches). As the search is still/already running you can continue to type and the still executing query is 
+   dynamically updated as you type. The backend optimizes dynamic query updates by using the already found results 
+   while changing the search-term for the remaing part of a still ongoing search.
+   <p>
+   <p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">: Searches are also automatically paused 
+   when the number of displayed results exceeds what can be visibly displayed on-screen. A paused-search is 
+   automatically resumed when you scroll near the end of the visible results.<p>
+</td>
+</tr>
+
+<tr>
+  <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span><br>
+  </td>
+  <td style="vertical-align: top;"><br>
+  </td>
+</tr>
+    
+<tr>
+  <td style="vertical-align: top;"><span style="font-weight: bold;">Parse config files using JSON5'</span><br>
+  </td>
+  <td style="vertical-align: top;">
+  	All Scripted's json config files are now parsed using JSON5 instead of 
+  	plain JSON. JSON5 is an extension of plain JSON <a href="http://json5.org/">JSON5</a> but has a more 
+  	user-friendly, forgiving syntax. For example, it allows for comments in the config files.
+  </td>
+</tr>
+    
+<tr id="newlook">
+
+<td class="title">Something
+</td>
+<td class="description">
+	Blah blah...
+</td>
+</tr>
+    
 <tr>
 		<td id="xyz" class="section" colspan="2"><h2>ADE</h2></td>
 	</tr>
