@@ -5,7 +5,7 @@
 
 .textviewContainer {
 	background-color: #eeeeee;
-	font-family: Monaco,"Ubuntu Mono",Consolas, "Lucida Console", "Courier New", monospace;
+	font-family: Monaco, Consolas, "Lucida Console", "Ubuntu Mono", Monospace, monospace;
 	font-size: 9pt;
 }
 ::-webkit-scrollbar-corner {
