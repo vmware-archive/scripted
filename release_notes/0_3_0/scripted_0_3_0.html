@@ -55,9 +55,49 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		<td id="xyz" class="section" colspan="2"><h2>ADE</h2></td>
 	</tr>
 	<tr id="newlook">
-		<td class="title">Added a foobar</td>
-		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<td class="title">Inferring object shape based on usage</td>
+		<td class="description">Inferencing will now guess the shape of an object (i.e., its valid properties) based on how it is used. SCRIPTED-257</p>
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Inferring variables before they are declared</td>
+		<td class="description">Forward referencing of functions and variables will now be recognized by the inferencer for content assist, hovers, and navigation.  SCRIPTED-256
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Type inferencing of arrays</td>
+		<td class="description">Scripted will now be able to infer the type of array elements.  It makes the simplifying assumption that all elements are of the same type.  For array literals, the first element determines the parameterized type of the array.
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">History and navigation improvements</td>
+		<td class="description">The complete page state of your scripted editor will be stored in browser history.  This includes current file, selected text, and scroll position for both the main editor and the side panel.  Going backwards and forwards in history will properly open or close the side panel.
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Mark occurrences</td>
+		<td class="description">Scripted now implements <em>lexical</em> mark occurrences. 
+			
+			IMG
+			
+			Any selected word and all occurrences of that word in the current file will be outlined.  Mark Occurrences is configurable in yuor .scripted file using the following configuration options:
+			
+			 SCRIPTED-28 
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Completion templates</td>
+		<td class="description">Scripted now recognizes completion template files.  To provide compatibility with existing ...</p>
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Inferencing of global dependencies</td>
+		<td class="description"></p>
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title"></td>
+		<td class="description"></p>
 		</td>
 	</tr>
 	<tr>
