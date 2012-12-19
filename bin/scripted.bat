@@ -1,5 +1,5 @@
 @echo off
-setlocal enableDelayedExpansion
+setlocal enabledelayedexpansion
 
 set thisdir=%~dp0
 pushd..
@@ -16,17 +16,25 @@ set arg=%1
 IF "%arg%" EQU "." (
 set patharg=%cd%\
 ) ELSE (
-	set identifiers=%arg:~1,2%
-	IF DEFINED identifiers (
-		IF "%identifiers%" EQU ":\" (
-			set patharg=%1
+        set leadingchar=%arg:~0,1%
+	IF DEFINED leadingchar (
+		IF "!leadingchar!" EQU "\" (
+			set patharg=%cd:~0,2%%1
 		) ELSE (
-			set patharg=%cd%\%1
+			set identifiers=%arg:~1,2%
+			IF DEFINED identifiers (
+				IF "!identifiers!" EQU ":\" (
+					set patharg=%1
+				) ELSE (
+					set patharg=%cd%\%1
+				)
+			) ELSE (
+				set patharg=%cd%\
+			)
 		)
-	) ELSE (
-		set patharg=%cd%\
 	)
 )
+rem echo "patharg is '%patharg%'"
 
 set patharg=%patharg:\=/%
 set "patharg=!patharg: =%%20!"
