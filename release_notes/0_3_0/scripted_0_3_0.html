@@ -1,5 +1,6 @@
-<html>
-<head>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
 <style type="text/css">
 p, table, td, th {  font-family: verdana, arial, helvetica, geneva; font-size: 10pt}
 pre {  font-family: "Courier New", Courier, mono; font-size: 10pt}
@@ -22,42 +23,56 @@ table.nan tr { vertical-align: top; }
 table.nan tr td.section { font-size: 20px; font-weight: bold; }
 table.nan tr td.title { vertical-align: top; width: 30%; font-weight: bold; }
 table.nan tr td.description { vertical-align: top; width: 70%; }
-</style>
-<title>Scripted 0.3 - release notes</title>
-</head>
-<body>
+</style><title>Scripted 0.3 - release notes</title></head><body>
 <h2>Scripted 0.3 - release notes</h2>
 <p>These are the foobars</p>
 
 <table class="nan" cellpadding="10" cellspacing="0">
-	<tr>
+	<tbody><tr>
 		<td id="xyz" class="section" colspan="2"><h2>KDV</h2></td>
 	</tr>
 	<tr id="newlook">
-		<td class="title">Added a foobar</td>
-		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<td class="title">Added a Keybinding UI<br>
+</td>
+		<td class="description">It is now possible to redefine
+Scripted's keybindings via a simple UI. To access this UI open the
+'Help panel' by clicking the question mark icon in the toolbar or
+pressing 'F1'. Click any of the shortcut keys to change it. <p><img style="width: 301px; height: 213px;" src="keybinding-ui.png" alt="Screenshot of it"><br>
+</p>
+      <p>Any changes you make to the keybindings are saved in <span style="font-family: monospace;">${user.home}/.scriptedrc/keymap-${os.name}.json<br>
+      </span></p>
+      <p>There's no 'reset' button yet. To reset the keybindings to their default values you can simply delete the keymap file.<span style="font-family: monospace;"><br>
+      </span></p>
+
 		</td>
 	</tr>
 	<tr id="newlook">
-		<td class="title">Added a foobar</td>
+		<td class="title">Enhancements to "Open File" Dialog<br>
+</td>
 		<td class="description">Here is a really long drawn out tedious and mundane description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
 		</td>
 	</tr>
 	<tr id="newlook">
-		<td class="title">Added a foobar</td>
+		<td class="title">Enhancements to "Look in Files" Dialog<br>
+</td>
 		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
 		</td>
 	</tr>
 	<tr>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+<tr>
 		<td id="xyz" class="section" colspan="2"><h2>ADE</h2></td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Added a foobar</td>
 		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
 		</td>
 	</tr>
 	<tr>
@@ -66,9 +81,9 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	<tr id="newlook">
 		<td class="title">Added a foobar</td>
 		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" width="20" alt="Screenshot of it"/></p>
+		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
 		</td>
 	</tr>
-</table>
-</body>
-</html>
+</tbody></table>
+
+</body></html>
