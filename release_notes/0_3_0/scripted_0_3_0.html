@@ -23,7 +23,7 @@ table.nan tr { vertical-align: top; }
 table.nan tr td.section { font-size: 20px; font-weight: bold; }
 table.nan tr td.title { vertical-align: top; width: 30%; font-weight: bold; }
 table.nan tr td.description { vertical-align: top; width: 70%; }
-#code { font-family: monospace; }
+.code { font-family: monospace; }
 </style><title>Scripted 0.3 - release notes</title></head><body>
 <h2>Scripted 0.3 - release notes</h2>
 <p>These are the foobars</p>
@@ -47,7 +47,7 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	<img src="keybinding-ui.png" alt="Screenshot of it">
 
     <p>Any changes you make to the keybindings are saved in 
-    <span id="code">${user.home}/.scriptedrc/keymap-${os.name}.json</span></p>
+    <span class="code">${user.home}/.scriptedrc/keymap-${os.name}.json</span></p>
 
     <p>There is no reset button yet. To reset the keybindings to their default values 
     you can simply delete the keymap file.</p>
@@ -68,21 +68,26 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-255">Scripted-255</a>: Opening help is now assigned to 
 	<b>F1</b> by default.</p>
 	
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-240">Scripted-240</a>: Fixed a bug that caused 'SHIFT-TAB'
-	keybinding to occasionally get lost.</p>
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-240">Scripted-240</a>: Fixed a bug that caused 
+	<b>SHIFT-TAB</b> keybinding to occasionally get lost.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-176">Scripted-176</a>: CTRL-L "center editor on cursor" 
+	now also works in Firefox on Macs.</p>
+	
 </td>
 </tr>
 
 <tr id="newlook">
 
 <td class="title">
-	Enhancements to AMD configuration discovery
+	Enhancements to dependency resolution and configuration discovery
 </td>
 <td class="description">
 
 	<p>Recognize more idioms for extracting the AMD loader configuration from projects: 
 	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-253">Scripted-253</a>,
-	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-239">Scripted-239</a>.
+	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-239">Scripted-239</a>,
+	  <a href="https://github.com/scripted-editor/scripted/issues/38">GH-Scripted-38<a>.
 	
 	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-252">Scripted-252</a>: Sloppy resolution disabled.
 	Prior to 0.3 when a dependency was not being found a 'sloppy' resolution would kick in to look for any js file with a 
@@ -98,6 +103,18 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	
 	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-237">Scripted-237</a>: Recognize 'packages' 
 	declarations in AMD loader configuration.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-167">Scripted-167</a>: Support for relative path 
+	    references in amd module dependencies.</p>
+	    
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-117">Scripted-117</a>: Adopted the
+	<a href="https://github.com/webpack/enhanced-resolve">enhanced-resolve</a> library to cover missing cases in handling
+	relative-path commonjs module references.</p>
+	
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-103">Scripted-103</a>, 
+	   <a href="https://github.com/scripted-editor/scripted/issues/22">GH-Scripted-22<a>: Added hard-coded support for
+	'text!' and 'i18n!' AMD loader plugins. Other plugins are treated as 'unsupported' and errors associated with them
+	are supressed.
 </td>
 </tr>
 
@@ -105,22 +122,38 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 
 <td class="title">Enhancements to <b>Open File</b> and <b>Look in Files</b> search dialogs</td>
 <td class="description">
-   <p>Besides having a new look. These dialogs now perform a 'dynamic incremental' search. A search kicks of as soon
+   <p>Besides having a new look. These dialogs now perform a dynamic incremental search. A search kicks of as soon
    as enough characters have been typed (0 characters for 'Open File' file-name searches and 3 characters for 'Look in File' 
    text searches). As the search is still/already running you can continue to type and the still executing query is 
    dynamically updated as you type. The backend optimizes dynamic query updates by using the already found results 
-   while changing the search-term for the remaing part of a still ongoing search.
-   <p>
-   <p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">: Searches are also automatically paused 
+   while changing the search-term for the remainder of an ongoing search.</p>
+
+   <p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">Scripted-229</a>: Searches are also automatically paused 
    when the number of displayed results exceeds what can be visibly displayed on-screen. A paused-search is 
    automatically resumed when you scroll near the end of the visible results.<p>
+   
+   <p>Some other minor enhancements to these search dialogs include:</p>
+   <ul>
+      <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-200">Scripted-200</a>: Prefill the search text
+      with either the current editor selection or, if the selection is empty, the last-used search-text.
+      <li><a href="https://github.com/scripted-editor/scripted/issues/77">GH-Scripted-77</a>: Fixed a bug that caused server 
+      crash when typing funny characters into opne-file dialog.</li>
+   </ul>
+   
+  <img src="open-file-dialog-new-look.png" alt="Screenshot of it">
+ 
+  
 </td>
 </tr>
 
 <tr>
-  <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span><br>
-  </td>
-  <td style="vertical-align: top;"><br>
+  <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span></td>
+  <td style="vertical-align: top;">
+    It is now possible to share config options across multiple projects. To do so they should be placed in a file
+    <span class="code">${user.home}/.scriptedrc/scripted.json</span> instead of a project-specific 
+    <span class="code">.scripted</span> file. The shared config options are read before the .scripted file and
+    both sets of options are merged. When there is a conflict, <span class="code">.scripted</span> takes 
+    priority.
   </td>
 </tr>
     
@@ -136,10 +169,23 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
     
 <tr id="newlook">
 
-<td class="title">Something
+<td class="title">Event-driven Shell Actions
 </td>
 <td class="description">
-	Blah blah...
+	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-145">Scripted-145</a> added support to
+	allow user-configured shell commands to trigger by certain editor events. Notably, you can execute
+	any given shell command when a file is saved or when the editor first opens. </p>
+	<p>Detailed document on this feature can be found on the 
+	<a href="https://github.com/scripted-editor/scripted/wiki/Executing-Shell-Commands">
+	Scripted-Wiki</a>.
+</td>
+</tr>
+
+<td class="title">Console UI to display shell command results
+</td>
+<td class="description">
+	<a href="https://issuetracker.springsource.com/browse/SCRIPTED-110">Scripted-110</a>: A simple console-like UI
+	pops out to display the result of any executed shell commands.
 </td>
 </tr>
     
