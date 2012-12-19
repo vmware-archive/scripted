@@ -48,10 +48,10 @@ exports.CompletionsProcessor.prototype = {
 		return rawScope.split(/\s+/)[0].split('.')[1];
 	},
 
-	// these are the default folders
+	// these are the default folders.  Must end with a /
 	completionsFolders : [
-		process.env.HOME + '/.scriptedrc/',
-		path.resolve('../completions') + '/'
+		path.resolve((process.env.HOME || process.env.HOMEPATH), '.scriptedrc'),
+		path.resolve(__dirname, '../../completions')
 	],
 
 	// 1. determine the file locations where completions are stored
@@ -80,7 +80,7 @@ exports.CompletionsProcessor.prototype = {
 					for (var i = 0; i < files.length; i++) {
 						//console.log("Found file " + files[i]);
 						if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-							realFiles.push(folder + files[i]);
+							realFiles.push(folder + path.sep + files[i]);
 						}
 					}
 					
@@ -98,7 +98,7 @@ exports.CompletionsProcessor.prototype = {
 	},
 
 	/**
-	 * @return {{ proposal:String, description:String, escapePosition:Number, positions:Array.<{offset:Number,length:Number}>, relevance:Number, style:String , trigger:String}}
+	 * @return {{ proposal:String, description:String, escapePosition:Number, positions:Array.<{offset:Number,length:Number}>, relevance:Number, style:String, trigger:String}}
 	 */
 	convertCompletion : function(rawCompletion) {
 		if (!rawCompletion.contents) {
@@ -258,9 +258,9 @@ exports.CompletionsProcessor.prototype = {
 				console.log("Finished finding completions in " + fName);
 				deferred.resolve({scope : scope, completions : realCompletions });
 			} catch (e) {
-				console.warn("Invalid completions file " + fName + " ...ignoring");
+				console.warn("Invalid completions file " + fName + "...ignoring");
 				console.trace(e.stack);
-				deferred.reject(e);
+				deferred.reject({});
 			}
 		});
 		return deferred.promise;
