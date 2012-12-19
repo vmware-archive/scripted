@@ -36,25 +36,25 @@ function configure(conf) {
 		isDirectory(node, function(isDir) {
 			if (isDir) {
 				listFiles(node,
+					function(names) {
+						eachk(names,
 
-				function(names) {
-					eachk(names,
-
-					function(name, k) {
-						if (ignore(name)) {
-							k();
-						} else {
-							var file = pathResolve(node, name);
-							fswalk(file, f, k, exit);
-						}
+						function(name, k) {
+							if (ignore(name)) {
+								k();
+							} else {
+								var file = pathResolve(node, name);
+								fswalk(file, f, k, exit);
+							}
+						},
+						k);
 					},
-					k);
-				},
 
-				function(err) {
-					//ignore error and proceed.
-					k();
-				});
+					function(err) {
+						//ignore error and proceed.
+						k();
+					}
+				);
 			} else {
 				var abort = f(node); // The f function ain't callback style.
 				if (abort) {
