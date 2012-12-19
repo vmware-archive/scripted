@@ -46,7 +46,7 @@ exports.processTemplates = function(root) {
 	console.log("Processing templates");
 	// can be called synchronously
 	clearTimeout(t);
-	/** @param {Array} files */
+	/** @param {Array.<String>} files */
 	thisCompletionsProcessor.findCompletionsFiles(function(files) {
 		console.log("found template files: " + files);
 		if (!files) {

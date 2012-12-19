@@ -50,8 +50,8 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders.  Must end with a /
 	completionsFolders : [
-		path.resolve((process.env.HOME || process.env.HOMEPATH), '.scriptedrc') + path.sep,
-		path.resolve(__dirname, '../../completions') + path.sep
+		path.resolve((process.env.HOME || process.env.HOMEPATH), '.scriptedrc'),
+		path.resolve(__dirname, '../../completions')
 	],
 
 	// 1. determine the file locations where completions are stored
@@ -80,7 +80,7 @@ exports.CompletionsProcessor.prototype = {
 					for (var i = 0; i < files.length; i++) {
 						//console.log("Found file " + files[i]);
 						if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-							realFiles.push(folder + files[i]);
+							realFiles.push(folder + path.sep + files[i]);
 						}
 					}
 					
@@ -258,9 +258,9 @@ exports.CompletionsProcessor.prototype = {
 				console.log("Finished finding completions in " + fName);
 				deferred.resolve({scope : scope, completions : realCompletions });
 			} catch (e) {
-				console.warn("Invalid completions file " + fName + " ...ignoring");
+				console.warn("Invalid completions file " + fName + "...ignoring");
 				console.trace(e.stack);
-				deferred.reject(e);
+				deferred.reject({});
 			}
 		});
 		return deferred.promise;
