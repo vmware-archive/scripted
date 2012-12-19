@@ -29,8 +29,6 @@ function ignore(name) {
 	var result = false;
 	if (typeof(name)!=='string') {
 		result = true;
-	} else if (name.length<=1) {
-		result = true;
 	} else if (name===".git") {
 		result = true;
 	} else if (name===".svn") {
