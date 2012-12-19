@@ -46,7 +46,7 @@ function isBinary (buffer){
 
 function get(response, request) {
   var file = url.parse(request.url,true).query.file;
-  //console.log("Processing get request for "+file);
+//  console.log("Processing get request for "+file);
   fs.readFile(file, function(err,data){
     if(err) {
 		if (err.errno === 28 /*EISDIR*/) {
@@ -94,7 +94,7 @@ function get(response, request) {
  */
 function get2(response, request) {
   var file = url.parse(request.url,true).query.file;
-  //console.log("Processing get request for "+file);
+//  console.log("Processing get2 request for "+file);
   if (!file) {
     // no file passed in
     response.writeHead(500, {
@@ -107,7 +107,9 @@ function get2(response, request) {
   
   fs.readFile(file, function(err,data){
     if(err) {
-		if (err.errno === 28 /*EISDIR*/) {
+    	// Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
+//    	console.log("get2() err.errno is "+err.errno);
+		if (err.errno === 28 /*EISDIR*/ || err.errno === -1 /*Windows returns this for readFile on dirs*/) {
 			// is a directory
 			response.writeHead(500, { "Content-Type": "text/plain"});
 			response.write("File is a directory");
