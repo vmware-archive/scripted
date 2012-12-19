@@ -9,8 +9,8 @@ popd
 
 rem taskkill /F /IM "node.exe" > killed.log 2>&1
 
-echo =================================================== >> scripted.log
-echo launching node again: %DATE% %TIME% >> scripted.log
+echo =================================================== >> %TEMP%\scripted.log
+echo launching node again: %DATE% %TIME% >> %TEMP%\scripted.log
 
 set arg=%1
 IF "%arg%" EQU "." (
@@ -39,8 +39,8 @@ rem echo "patharg is '%patharg%'"
 set patharg=%patharg:\=/%
 set "patharg=!patharg: =%%20!"
 
-echo Starting scripted.js... >> scripted.log
+echo Starting scripted.js... >> %TEMP%\scripted.log
 
-start /MIN cmd /c node %rootdir%\server\scripted.js^>^>scripted.log
+start /MIN cmd /c node "%rootdir%\server\scripted.js"^>^>%TEMP%\scripted.log
 
 start "" %SCRIPTED_BROWSER% "http://localhost:7261/editor/%patharg%"
