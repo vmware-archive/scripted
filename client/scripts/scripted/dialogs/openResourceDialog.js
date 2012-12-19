@@ -401,7 +401,13 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				var results = $("a",$(that.dialog));
 				if (results && results.length>0) {
 					var result = results[(that.selected===-1)?0:that.selected];
-					$(result).trigger('click');
+					var click = new $.Event('click');
+					//Take care to retain modifier keys on simulated clicks!
+					click.shiftKey = e.shiftKey;
+					click.ctrlKey = e.ctrlKey;
+					click.altKey = e.altKey;
+					click.metaKey = e.metaKey;
+					$(result).trigger(click);
 				}
 				return false;
 		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
