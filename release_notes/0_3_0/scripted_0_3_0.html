@@ -123,26 +123,24 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 <td class="title">Enhancements to <b>Open File</b> and <b>Look in Files</b> search dialogs</td>
 <td class="description">
    <p>Besides having a new look. These dialogs now perform a dynamic incremental search. A search kicks of as soon
-   as enough characters have been typed (0 characters for 'Open File' file-name searches and 3 characters for 'Look in File' 
-   text searches). As the search is still/already running you can continue to type and the still executing query is 
+   as enough characters have been typed (0 characters for 'Open File' searches and 3 characters for 'Look in File' 
+   searches). As the search is still running you can continue to type and the still executing query is 
    dynamically updated as you type. The backend optimizes dynamic query updates by using the already found results 
    while changing the search-term for the remainder of an ongoing search.</p>
 
    <p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">Scripted-229</a>: Searches are also automatically paused 
-   when the number of displayed results exceeds what can be visibly displayed on-screen. A paused-search is 
-   automatically resumed when you scroll near the end of the visible results.<p>
+   when the number of displayed results exceeds what can be visibly displayed on-screen. A paused search is 
+   automatically resumed when you scroll near the end of the visible results area.<p>
    
    <p>Some other minor enhancements to these search dialogs include:</p>
    <ul>
       <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-200">Scripted-200</a>: Prefill the search text
       with either the current editor selection or, if the selection is empty, the last-used search-text.
       <li><a href="https://github.com/scripted-editor/scripted/issues/77">GH-Scripted-77</a>: Fixed a bug that caused server 
-      crash when typing funny characters into opne-file dialog.</li>
+      crash when typing funny characters into open-file dialog.</li>
    </ul>
    
   <img src="open-file-dialog-new-look.png" alt="Screenshot of it">
- 
-  
 </td>
 </tr>
 
