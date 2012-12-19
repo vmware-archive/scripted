@@ -1,6 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
 
+
 <style type="text/css">
 p, table, td, th {  font-family: verdana, arial, helvetica, geneva; font-size: 10pt}
 pre {  font-family: "Courier New", Courier, mono; font-size: 10pt}
@@ -23,29 +24,37 @@ table.nan tr { vertical-align: top; }
 table.nan tr td.section { font-size: 20px; font-weight: bold; }
 table.nan tr td.title { vertical-align: top; width: 30%; font-weight: bold; }
 table.nan tr td.description { vertical-align: top; width: 70%; }
+#code { font-family: monospace; }
 </style><title>Scripted 0.3 - release notes</title></head><body>
 <h2>Scripted 0.3 - release notes</h2>
 <p>These are the foobars</p>
 
 <table class="nan" cellpadding="10" cellspacing="0">
-	<tbody><tr>
-		<td id="xyz" class="section" colspan="2"><h2>KDV</h2></td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Added a Keybinding UI<br>
-</td>
-		<td class="description">It is now possible to redefine
-Scripted's keybindings via a simple UI. To access this UI open the
-'Help panel' by clicking the question mark icon in the toolbar or
-pressing 'F1'. Click any of the shortcut keys to change it. <p><img style="width: 301px; height: 213px;" src="keybinding-ui.png" alt="Screenshot of it"><br>
-</p>
-      <p>Any changes you make to the keybindings are saved in <span style="font-family: monospace;">${user.home}/.scriptedrc/keymap-${os.name}.json<br>
-      </span></p>
-      <p>There's no 'reset' button yet. To reset the keybindings to their default values you can simply delete the keymap file.<span style="font-family: monospace;"><br>
-      </span></p>
+<tbody><tr>
+	<td id="xyz" class="section" colspan="2"><h2>KDV</h2></td>
+</tr>
+<tr id="newlook">
 
-		</td>
-	</tr>
+<td class="title">
+	Added a Keybinding UI
+</td>
+
+<td class="description">
+	<p>It is now possible to redefine
+	Scripted's keybindings via a simple UI. To access this UI open the
+	<b>'Help panel'</b> by clicking the question mark icon in the toolbar or
+	pressing <b>'F1'</b>. Click any of the shortcut keys to change it.</p>
+
+	<img src="keybinding-ui.png" alt="Screenshot of it">
+
+    <p>Any changes you make to the keybindings are saved in 
+    <span id="code">${user.home}/.scriptedrc/keymap-${os.name}.json</span></p>
+
+    <p>There is no reset button yet. To reset the keybindings to their default values 
+    you can simply delete the keymap file.</p>
+</td>
+
+</tr>
 	<tr id="newlook">
 		<td class="title">Enhancements to "Open File" Dialog<br>
 </td>
@@ -61,7 +70,7 @@ pressing 'F1'. Click any of the shortcut keys to change it. <p><img style="width
 		</td>
 	</tr>
 	<tr>
-      <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span><br>
+      <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc' folder.</span><br>
       </td>
       <td style="vertical-align: top;"><br>
       </td>
