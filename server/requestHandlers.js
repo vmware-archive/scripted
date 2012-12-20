@@ -49,11 +49,9 @@ function isBinary (buffer){
 
 function get(response, request) {
   var file = url.parse(request.url,true).query.file;
-	console.log("OOOO: Processing get request for "+file);
+	console.log("Processing get request for "+file);
 	if (isNativeNodeModulePath(file)) {
-		console.log("It's a native node module!");
 		var contents = nodeNatives.getCode(nativeNodeModuleName(file));
-		console.log("contents = "+contents);
 
 		if (contents) {
 			response.writeHead(200, {
