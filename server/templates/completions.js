@@ -21,10 +21,11 @@
  * File format of completions http://sublimetext.info/docs/en/extensibility/completions.html
  */
 
-var fs = require('fs');
 var JSON5 = require('json5');
 var when = require('when');
 var path = require('path');
+var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
 
 var EXTENSION = ".scripted-completions";
 var EXTENSION_LEN = EXTENSION.length;
@@ -48,38 +49,42 @@ exports.CompletionsProcessor.prototype = {
 		return rawScope.split(/\s+/)[0].split('.')[1];
 	},
 
-	// these are the default folders.  Must end with a /
+	// these are the default folders.
 	completionsFolders : [
-		path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.scriptedrc'),
-		path.resolve(__dirname, '../../completions')
+		path.resolve(__dirname, '../../completions'),
+		dotscripted.getScriptedRcDirLocation()
 	],
 
-	// 1. determine the file locations where completions are stored
-	// for now assume $HOME/.scripted-completions
+	// determine the file locations where completions are stored
 	findCompletionsFiles : function(cb) {
 		var realFiles = [];
+		
 		var processDir = function(deferred, folder) {
-			fs.stat(folder, function (err, stats) {
-				if (err) {
-					console.log(err);
-					deferred.resolve(realFiles);
-				} else if (stats.isDirectory()) {
-					fs.readdir(folder, function(err, files) {
-						if (err) {
-							console.log ("Directory " + err.path + " not found");
-							deferred.resolve(realFiles);
-						} else {
-							for (var i = 0; i < files.length; i++) {
-								if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-									realFiles.push(folder + path.sep + files[i]);
-								}
+			// first go stat the directory to make sure it exists and is a dir
+			// were getting problems on windows when trying to list files
+			// of a non-existant dir
+			filesystem.stat(folder).then(function (stats) {
+				if (stats.isDirectory) {
+					console.log("listing files for " + folder);
+					filesystem.listFiles(folder).then(function(files) {
+						for (var i = 0; i < files.length; i++) {
+							if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
+								console.log("Found " + files[i]);
+								realFiles.push(folder + path.sep + files[i]);
 							}
 						}
 						deferred.resolve(realFiles);
+					}, function(err) {
+						console.log ("Directory " + err.path + " not found");
+						deferred.resolve(realFiles);
 					});
 				} else {
+					console.log (folder + " is not a directory");
 					deferred.resolve(realFiles);
 				}
+			}, function(err) {
+				console.log(err);
+				deferred.resolve(realFiles);
 			});
 		};
 		
@@ -94,6 +99,7 @@ exports.CompletionsProcessor.prototype = {
 	},
 
 	/**
+	 * Converts a template entry into a proposal that can be sent to the client
 	 * @return {{ proposal:String, description:String, escapePosition:Number, positions:Array.<{offset:Number,length:Number}>, relevance:Number, style:String, trigger:String}}
 	 */
 	convertCompletion : function(rawCompletion) {
@@ -214,27 +220,15 @@ exports.CompletionsProcessor.prototype = {
 		var deferred = when.defer();
 		var self = this;
 		
-		// 2. Read the completions
-		fs.readFile(fName, "utf-8", function(err,data) {
+		// Read the completions
+		dotscripted.parseJsonFile(fName, function(rawCompletions) {
 			console.log("Starting to find completions in " + fName);
 
-			if (err && (err.errno === 28 /*EISDIR directory */ || err.errno === 30 /*EISDIR file not found */)) {
-				deferred.reject(err);
+			if (rawCompletions.error) {
+				deferred.reject(rawCompletions.error);
 				return;
 			}
-			// 3. Parse to JSON
 			try {
-				var rawCompletions;
-				if (typeof data === 'string') {
-					rawCompletions = JSON5.parse(data);
-				} else {
-					rawCompletions = data;
-				}
-				
-				if (!rawCompletions) {
-					console.log('Invalid completions file: ' + data);
-				}
-
 				// 4. Convert from pure JSON into proposals suitable for content assist
 				var scope = self.extractScope(rawCompletions.scope);
 				if (!scope) {
