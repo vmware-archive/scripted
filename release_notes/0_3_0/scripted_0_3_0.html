@@ -195,43 +195,77 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	</tr>
 	<tr id="newlook">
 		<td class="title">Inferring object shape based on usage</td>
-		<td class="description">Inferencing will now guess the shape of an object (i.e., its valid properties) based on how it is used. SCRIPTED-257</p>
+		<td class="description">Inferencing will now guess the shape of an object (i.e., its valid properties) based on how it is used. For example, 
+		in the following screenshot, you can see a function with a single parameter called <tt>address</tt>.  Based on how the parameter is used, content assist is able to 
+		infer that it has three properties:<br/><br/>
+		<img src="shape.png" border="1" title="Inferring object shape through usage"/></p>
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Inferring variables before they are declared</td>
-		<td class="description">Forward referencing of functions and variables will now be recognized by the inferencer for content assist, hovers, and navigation.  SCRIPTED-256
+		<td class="description">Forward referencing of functions and variables will now be recognized by the inferencer for content assist, hovers, and navigation.  For 
+		example:<br/><br/>
+		<img src="forward_ref.png" border="1" title="Inferring forward references"/<br/><br/>
+		In the screenshot above, even though <tt>addressParser</tt> is lexically defined after its usage, hovering is still able to determine the function's type.
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Type inferencing of arrays</td>
-		<td class="description">Scripted will now be able to infer the type of array elements.  It makes the simplifying assumption that all elements are of the same type.  For array literals, the first element determines the parameterized type of the array.
-		</td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">History and navigation improvements</td>
-		<td class="description">The complete page state of your scripted editor will be stored in browser history.  This includes current file, selected text, and scroll position for both the main editor and the side panel.  Going backwards and forwards in history will properly open or close the side panel.
+		<td class="description">Scripted will now be able to infer the type of array elements.  It makes the simplifying assumption that all elements are of the same type.  
+		For array literals, the first element determines the parameterized type of the array.  See this screenshot as an example:<br/><br/>
+		<img src="array1.png" border="1" title="Inferring parameterization of arrays"/><br/><br/>
+		And, content assist will work as expected when dereferencing an array:<br/><br/>
+		<img src="array2.png" border="1" title="Content assist and arrays"/><br/><br/>
+		Scripted also recognizes JSDoc syntax for array parameterization:<br/><br/>
+		<img src="array3.png" border="1" title="JSDoc and array parameterization"/><br/><br/>
+		The syntax recognized by Scripted is described in the documentation for the <a 
+		href="https://developers.google.com/closure/compiler/docs/js-for-compiler">Google closure compiler</a>.
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Inferencing of global dependencies</td>
-		<td class="description"></p>
+		<td class="description">TODO Scripted will now make educated guesses as to which global dependencies are available in JavaScript files.</p>
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Completion templates</td>
-		<td class="description">Scripted now recognizes completion template files.  To provide compatibility with existing ...</p>
+		<td class="description">TODO Scripted now recognizes completion template files.  To provide compatibility with existing ...</p>
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Click to navigate</td>
+		<td class="description">Ctrl/Cmd + Click will navigate to the definition of the currently selected identifier.  Ctrl/Cmd + Shift + Click will navigate
+		to the definition in the other editor pane.  This behavior mimics that of F8 and Shift+F8.</p>
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Mark occurrences</td>
-		<td class="description">Scripted now implements <em>lexical</em> mark occurrences. 
-			
-			IMG
-			
-			Any selected word and all occurrences of that word in the current file will be outlined.  Mark Occurrences is configurable in yuor .scripted file using the following configuration options:
-			
-			 SCRIPTED-28 
+		<td class="description">Scripted now implements <em>lexical</em> mark occurrences. 	Any selected word and all occurrences of that word in the current file will be outlined.  
+			For example, see this screenshot:<br/><br/>
+		<img src="mark_occurrences.png" border="1" title="Mark occurrences"/><br/><br/>
+		Mark Occurrences is configurable in yuor <tt>.scripted</tt> file using the following configuration options:
+		<dl>
+			<dt>interval</dt>  <dd>The amount of time between moving the caret and invoking the mark_occurrences operation. Default 500.</dd>
+			<dt>disable</dt> <dd>If set to <tt>true</tt> will disable mark occurrences. Default <tt>false</tt></dd>
+			<dt>retain</dt> <dd>If set to <tt>true</tt> will retain the previous marks even after the caret position is moved to another (non-word) location. Default <tt>false</tt></dd>
+		</dl>
+		The configuration looks like this:
+		<pre>
+{
+	mark_occurrences : {
+		interval : 500,
+		disable : false,
+		retain : false
+	}
+}
+		</pre>
+		</td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">History and navigation improvements</td>
+		<td class="description">The complete page state of your scripted editor will be stored in browser history.  This includes current file, 
+		selected text, and scroll position for both the main editor and the side panel.  Going backwards and forwards in history will properly open or close the side panel, as well as
+		set selections and scroll positions.
 		</td>
 	</tr>
 	<tr>
