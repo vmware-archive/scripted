@@ -119,7 +119,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
-								var promise = fileOperationsClient.createFile(urlNewResource);
+								// pass '' as contents
+								var promise = fileOperationsClient.createFile(urlNewResource,'');
 								performNavigatorRefreshOperation(promise, urlNewResource);
 							});
 						},
