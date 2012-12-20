@@ -50,51 +50,47 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders.  Must end with a /
 	completionsFolders : [
-		path.resolve((process.env.HOME || process.env.HOMEPATH), '.scriptedrc'),
+		path.resolve(process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'], '.scriptedrc'),
 		path.resolve(__dirname, '../../completions')
 	],
 
 	// 1. determine the file locations where completions are stored
 	// for now assume $HOME/.scripted-completions
 	findCompletionsFiles : function(cb) {
-		if (!process.env.HOME) {
-			cb(null);
-		} else {
-			var realFiles = [];
-			
-			var deferreds = [];
-			var processDir = function(deferred, folder) {
-				return function(err, files) {
-					//console.log("Processing " + folder + ". found " + files.length + " files");
-					if (err) {
-						if (err.errno === 34 /* dir not found */) {
+		var realFiles = [];
+		var processDir = function(deferred, folder) {
+			fs.stat(folder, function (err, stats) {
+				if (err) {
+					console.log(err);
+					deferred.resolve(realFiles);
+				} else if (stats.isDirectory()) {
+					fs.readdir(folder, function(err, files) {
+						if (err) {
 							console.log ("Directory " + err.path + " not found");
 							deferred.resolve(realFiles);
 						} else {
-							console.log(JSON5.stringify(err));
-							deferred.reject(err);
+							for (var i = 0; i < files.length; i++) {
+								if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
+									realFiles.push(folder + path.sep + files[i]);
+								}
+							}
 						}
-						return;
-					}
-					// only return files we care about
-					for (var i = 0; i < files.length; i++) {
-						//console.log("Found file " + files[i]);
-						if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-							realFiles.push(folder + path.sep + files[i]);
-						}
-					}
-					
+						deferred.resolve(realFiles);
+					});
+				} else {
 					deferred.resolve(realFiles);
-				};
-			};
-			
-			for (var i = 0; i < this.completionsFolders.length; i++) {
-				console.log("About to process " + this.completionsFolders[i]);
-				deferreds.push(when.defer());
-				fs.readdir(this.completionsFolders[i], processDir(deferreds[i], this.completionsFolders[i]));
-			}
-			when.all(deferreds).then(function() { cb(realFiles); });
+				}
+			});
+		};
+		
+		var deferreds = [];
+		for (var i = 0; i < this.completionsFolders.length; i++) {
+			console.log("About to process " + this.completionsFolders[i]);
+			var deferred = when.defer();
+			deferreds.push(deferred);
+			processDir(deferred, this.completionsFolders[i]);
 		}
+		when.all(deferreds).then(function() { cb(realFiles); });
 	},
 
 	/**
