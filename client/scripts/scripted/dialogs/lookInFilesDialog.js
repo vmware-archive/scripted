@@ -72,18 +72,24 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 		var searchRoot = window.fsroot;
 		renderer.start(query);
 		var activeSearch = isearch(searchRoot, query, {
-			add: function(searchresult) {
+			start: function () {
 				$('#dialog_indicator').addClass('inprogress_indicator');
+			},
+			pause: function () {
+// Uncomment to 'freeze' spinner when paused. (Note: this will make it nearly impossible
+//  to ever see the spinner actually spinning.
+//				$('#dialog_indicator').removeClass('inprogress_indicator');
+//				$('#dialog_indicator').addClass('paused_indicator');
+			},
+			add: function(searchresult) {
 				// path will actually be an object:
 				// { file: "A/B/C/D.txt", line: NN, col: NN, context: "xxxx" }
 				renderer.add(parseFile(searchresult));
 			},
 			revoke: function (searchresult) {
-				$('#dialog_indicator').addClass('inprogress_indicator');
 				renderer.revoke(searchresult);
 			},
 			update: function (r) {
-				$('#dialog_indicator').addClass('inprogress_indicator');
 				renderer.update(parseFile(r));
 			},
 			done: function() {

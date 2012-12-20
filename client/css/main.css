@@ -893,3 +893,12 @@ a.keybinding_button {
 	background: url(../images/pending-1.gif) no-repeat center;  
 	width: 16px; height: 16px;
 }
+
+.paused_indicator {
+	float:right;
+	font-family:InconsolataEmbedded,monospace;
+	margin-right: 4px;
+	background: url(../images/pending-1-paused.gif) no-repeat center;  
+	width: 16px; height: 16px;
+}
+

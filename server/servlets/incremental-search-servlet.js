@@ -255,7 +255,7 @@ exports.install = function (server) {
 							//Note: we can get here with activeWalker still null if the the
 							//initial query is not started yet. This can happen because we have ascynch
 							//code in determining the search context.
-							console.log('Resume activewalker');
+							//console.log('Resume activewalker');
 							activeWalker.resume();
 						}
 					}

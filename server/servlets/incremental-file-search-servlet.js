@@ -144,6 +144,7 @@ exports.install = function (server) {
 			                    // work is actually suspended, a 'work' function will be
 			                    // stored in here. To resume the work, this function is
 			                    // called with no params.
+			var done = false; // Set to true when search has finished the whole walk
 			 
 			//console.log("starting search in: "+searchRoot);
 			
@@ -156,6 +157,7 @@ exports.install = function (server) {
 				if (paused===true) { // a 'pause' was requested.
 					//console.log("suspend walking");
 					paused = work;
+					send({pause:[]});
 				} else {
 					if (!paused) {
 						//console.log("continue walking");
@@ -168,6 +170,7 @@ exports.install = function (server) {
 				}
 			}
 
+			send({start:[]});
 			fswalk(searchRoot,
 				/*called for each file*/
 				function (filepath, k) {
@@ -195,6 +198,7 @@ exports.install = function (server) {
 				function () {
 					if (!canceled) {
 						//console.log("sending done");
+						done = true;
 						send({done: []});
 					}
 				}
@@ -205,12 +209,18 @@ exports.install = function (server) {
 					canceled = true;
 				},
 				pause: function () {
-					//If double pausing, take care not to accidentally wipe out a work function that may 
+					//If double pausing, take care not to accidentally wipe out a work function that may
 					//already be stored in the 'paused' variable.
 					paused = paused || true;
 				},
 				resume: function () {
-					if (typeof(paused)==='function') {
+					if (done) {
+						//Client will expect/need to see something happening here even though there's
+						// nothing to do. Send start and done events to the client so it will
+						// get what it expects and can update 'noresults found' info if needed.
+						send({start:[]});
+						send({done:[]});
+					} else if (typeof(paused)==='function') {
 						//we have some work to resume
 						var work = paused;
 						paused = false;
