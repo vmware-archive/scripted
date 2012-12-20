@@ -224,12 +224,54 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	</tr>
 	<tr id="newlook">
 		<td class="title">Inferencing of global dependencies</td>
-		<td class="description">TODO Scripted will now make educated guesses as to which global dependencies are available in JavaScript files.</p>
+		<td class="description">Scripted now recognizes a form of global dependencies for JavaScript files.  When a JavaScript file is not deteremined to be an AMD style module or a CommonJS syle module,
+		it is considered a global module (i.e., it doesn't use a module system).  For files that have a global module, the Scripted dependency resolver will look for other global modules that it depends on.
+		It does this by looking for references to the current JavaScript file in script tags in HTML files. And when a reference is found, Scripted will find all other JavaScript files referenced in that HTML file.
+		In order to avoid circular dependencies, only JavaScript files that come before the current file are considered referenced.
+		<br/><br/>
+		All global variables from referenced files will be available for content assist and navigation in the current JavaScript file.  For example:
+		<pre>
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src="scripts/foo.js"&gt;&lt;/script&gt;
+    &lt;script src="scripts/bar.js"&gt;&lt;/script&gt;
+    &lt;script src="scripts/main.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body/&gt;
+&lt;/html&gt;
+		</pre>
+		When editing in <tt>main.js</tt>, you will have access to all global variables defined in both <tt>bar.js</tt> and <tt>foo.js</tt>.  When
+		editing <tt>bar.js</tt>, you will have access only to global variables from <tt>foo.js</tt>.  And when in <tt>foo.js</tt>, you will not
+		have access to any other global variables.
+		<br/><br/>
+		Here is a screen shot of performing content assist inside of <tt>main.js</tt> that depends on <tt>bar,js</tt>:
+		<br/><br/>
+		<img src="global_deps.png" />		
+		<br/><br/>
+		As you can see, <tt>bar</tt> is available in content assist.  There are two important things to keep in mind here:
+		<ol>
+		  <li>You must have an HTML file somewhere in a parent directory to gather the JavaScript files.</li>
+		  <li>References to identifiers defined in other files will be marked as an error by jshint unless you use the <tt>/*global */</tt> directive.</li>
+		</ol>
 		</td>
 	</tr>
 	<tr id="newlook">
 		<td class="title">Completion templates</td>
-		<td class="description">TODO Scripted now recognizes completion template files.  To provide compatibility with existing ...</p>
+		<td class="description">
+		Scripted now has basic support for defining your own completion templates.  To use this feature, create a file called 
+		<em>anything</em>.scripted-completions and place this file inside of your <tt>.scriptedrc</tt> folder.
+		You can see examples of scripted-completions files in the scripted/completions folder of your Scripted installation.
+		<br/><br/>
+		Out of the box, we provide templates for common JavaScript, JQuery, and HTML idioms.  But, you can provide your own templates.
+		<br/><br/>
+		A full description of the syntax of scripted-completions files are available at the 
+		<a href="http://docs.sublimetext.info/en/latest/extensibility/completions.html">Sublime text documentation</a>.
+		Since many of our users will be familiar with <a href="http://www.sublimetext.com/">Sublime Text</a>, we provide compatibility
+		with their completions files.  If you want to use an existing <em>sublime-completions</em> file, then all you need to do is
+		change the file extension and move it to your <tt>.scriptedrc</tt> folder.
+		<br/><br/>
+		Note that it is possible to place your scripted-completions files in the scripted/completions folder, but this is not recommended
+		since they will be lost on upgrades or re-installs.
 		</td>
 	</tr>
 	<tr id="newlook">
