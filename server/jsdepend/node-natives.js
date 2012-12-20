@@ -28,7 +28,7 @@ function getCode(name) {
 
 function isNativeNodeModulePath(handle) {
 	var r = handle.lastIndexOf(MAGIC_PATH_PREFIX, 0)===0;
-	console.log('isNativeNodeModulePath('+handle+') => '+r);
+//	console.log('isNativeNodeModulePath('+handle+') => '+r);
 	return r;
 }
 
