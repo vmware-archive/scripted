@@ -20,6 +20,9 @@ var fs = require("fs");
 var formidable = require("formidable");
 var url = require('url');
 var templates = require('./templates/template-provider');
+var nodeNatives = require('./jsdepend/node-natives');
+var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
+var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
 
 // TODO handle binary files
 /*
@@ -46,7 +49,23 @@ function isBinary (buffer){
 
 function get(response, request) {
   var file = url.parse(request.url,true).query.file;
-//  console.log("Processing get request for "+file);
+	console.log("OOOO: Processing get request for "+file);
+	if (isNativeNodeModulePath(file)) {
+		console.log("It's a native node module!");
+		var contents = nodeNatives.getCode(nativeNodeModuleName(file));
+		console.log("contents = "+contents);
+
+		if (contents) {
+			response.writeHead(200, {
+				"Content-Type": "text/plain",
+				"Cache-Control": "no-store"
+			});
+			response.write(contents);
+			response.end();
+			return;
+		}
+	}
+
   fs.readFile(file, function(err,data){
     if(err) {
 		if (err.errno === 28 /*EISDIR*/) {
@@ -331,6 +350,12 @@ function fs_list(response, request, path) {
 // write a file
 function put(response, request) {
   var file = url.parse(request.url,true).query.file;
+  if (isNativeNodeModulePath(file)) {
+	response.writeHead(500, {'content-type': 'text/plain'});
+	response.write('Cannot save read only resource: '+file);
+    response.end();
+	return;
+  }
   console.log(">> Processing put request for "+file);
   if (request.method.toLowerCase() === 'post') {
     // parse a file upload
@@ -369,7 +394,6 @@ function put(response, request) {
 }
 
 exports.get = get;
-exports.get2 = get2;
 exports.put = put;
 exports.fs_list = fs_list;
 exports.templates = handleTemplates;

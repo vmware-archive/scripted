@@ -14,6 +14,8 @@
 /*global exports process*/
 var nodeNatives = (process && process.binding('natives')) || {};
 
+var MAGIC_PATH_PREFIX = '/NODE-NATIVES/';
+
 function isNativeNodeModule(name) {
 	return nodeNatives.hasOwnProperty(name);
 }
@@ -24,6 +26,20 @@ function getCode(name) {
 	return typeof(code)==='string' && code;
 }
 
-exports.MAGIC_PATH_PREFIX = '/NODE-NATIVES/';
+function isNativeNodeModulePath(handle) {
+	var r = handle.lastIndexOf(MAGIC_PATH_PREFIX, 0)===0;
+	console.log('isNativeNodeModulePath('+handle+') => '+r);
+	return r;
+}
+
+function nativeNodeModuleName(handle) {
+	//handle looks like: '/NODE_NATIVES/<name>.js'
+	return handle.substring(MAGIC_PATH_PREFIX.length, handle.length-3);
+}
+
+
+exports.MAGIC_PATH_PREFIX = MAGIC_PATH_PREFIX;
 exports.isNativeNodeModule = isNativeNodeModule;
 exports.getCode = getCode;
+exports.isNativeNodeModulePath = isNativeNodeModulePath;
+exports.nativeNodeModuleName = nativeNodeModuleName;

@@ -24,6 +24,10 @@
 
 var nodeNatives = require('./node-natives');
 var when = require('when');
+var oneCache = require('./one-cache');
+
+var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
+var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
 
 function ignore(name) {
 	var result = false;
@@ -44,15 +48,6 @@ function withBaseDir(baseDir) {
 	var fs = require('fs');
 	var path = require('path');
 	var encoding = 'UTF-8';
-	
-	function isNativeNodeModulePath(handle) {
-		return handle.lastIndexOf(nodeNatives.MAGIC_PATH_PREFIX, 0)===0;
-	}
-	
-	function nativeNodeModuleName(handle) {
-		//handle looks like: '/NODE_NATVE/<name>.js'
-		return handle.substring(nodeNatives.MAGIC_PATH_PREFIX.length, handle.length-3);
-	}
 	
 	function getUserHome() {
 		if (baseDir) {
@@ -357,5 +352,5 @@ function withBaseDir(baseDir) {
 	};
 }
 
-exports.withBaseDir = withBaseDir;
+exports.withBaseDir = oneCache.makeCached(withBaseDir);
 exports.ignore = ignore;
