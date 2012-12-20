@@ -96,6 +96,13 @@ function configure(filesystem) {
 	 * by adding an explanation to the object in a property called 'error'.
 	 */
 	function parseJsonFile(handle, callback) {
+		var d;
+		if (!callback) {
+			d = when.defer();
+			callback = function (result) {
+				d.resolve(result);
+			};
+		}
 		getContents(handle,
 			function (contents) {
 				var data = null;
@@ -120,6 +127,7 @@ function configure(filesystem) {
 				});
 			}
 		);
+		return d;
 	}
 	
 	function findAndParseDotScripted(handle, callback) {
