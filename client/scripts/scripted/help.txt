@@ -19,7 +19,7 @@
 		  use the context menus within it to create new files/folders.
 
 		  Help on all supported key bindings is available by clicking the
-		  '?' icon in the top right, or simply pressing 'Cmd/Ctrl+h'
+		  '?' icon in the top right, or simply pressing 'F1'
 
 		  To search your project for a file to open by name, press 'Cmd/Ctrl+Shift+F'
 		  to show the 'Open File' dialog.

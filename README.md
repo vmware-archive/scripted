@@ -81,7 +81,7 @@ Launching scripted will cause the Node.js server to start in the background.
 
 Here are some of the more vital key bindings to use once the editor is open:
 
-- `Cmd/Ctrl+h` - open help to show all key bindings (or press '?' in the top right)
+- `F1` - open help to show all key bindings (or press '?' in the top right)
 - `Cmd/Ctrl+s` - save!
 - `Cmd/Ctrl+Shift+E` - open/close subeditor
 - `Cmd/Ctrl+Shift+F` - open Find File dialog. Inside the dialog, you can search for files in the project by regular expression and:
