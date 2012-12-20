@@ -556,7 +556,7 @@ define([
 		
 		var xhrobj = new XMLHttpRequest();
 		try {
-			var url = 'http://localhost:7261/get2?file=' + filePath;
+			var url = 'http://localhost:7261/get?file=' + filePath;
 			//console.log("Getting contents for " + url);
 			xhrobj.open("GET", url, false); // synchronous xhr
 			

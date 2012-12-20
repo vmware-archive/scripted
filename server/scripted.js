@@ -35,7 +35,7 @@ require("./servlets/filesystem-servlet");
 
 // Request to read a file (returns contents)
 servlets.register("/get", requestHandlers.get);
-servlets.register("/get2", requestHandlers.get2);
+// servlets.register("/get2", requestHandlers.get2);
 // Request to save a file
 servlets.register("/put", requestHandlers.put);
 // Request information about a file/directory
