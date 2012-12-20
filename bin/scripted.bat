@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 set thisdir=%~dp0
 pushd..
-cd %thisdir%..
+cd /d %thisdir%..
 set rootdir=%cd%
 popd
 
