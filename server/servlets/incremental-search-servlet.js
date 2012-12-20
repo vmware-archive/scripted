@@ -103,6 +103,7 @@ exports.install = function (server) {
 			                    // work is actually suspended, a 'work' function will be
 			                    // stored in here. To resume the work, this function is
 			                    // called with no params.
+			var done = false;   // Set to true when search has finished the whole walk.
 			
 			/**
 			 * Given a function that represents 'remaining work'. Either continue the work,
@@ -113,6 +114,7 @@ exports.install = function (server) {
 				if (paused===true) { // a 'pause' was requested.
 					//console.log("suspend walking");
 					paused = work;
+					send({pause:[]});
 				} else {
 					if (!paused) {
 						//console.log("continue walking");
@@ -124,7 +126,7 @@ exports.install = function (server) {
 					}
 				}
 			}
-			
+			send({start: []});
 			fswalk(searchRoot,
 				/*called for eachFile*/
 				function (filepath, k) {
@@ -142,6 +144,7 @@ exports.install = function (server) {
 				/*called when walk stops*/
 				function () {
 					if (!canceled) {
+						done = true;
 						send({done: []});
 					}
 				}
@@ -156,7 +159,13 @@ exports.install = function (server) {
 					paused = paused || true;
 				},
 				resume: function () {
-					if (typeof(paused)==='function') {
+					if (done) {
+						//Client will expect/need to see something happening here even though there's
+						// nothing to do. Send start and done events to the client so it will
+						// get what it expects and can update 'noresults found' info if needed.
+						send({start:[]});
+						send({done:[]});
+					} else if (typeof(paused)==='function') {
 						//we have some work to resume
 						var work = paused;
 						paused = false;
@@ -182,6 +191,7 @@ exports.install = function (server) {
 		function cancelActiveWalker() {
 			if (activeWalker) {
 				activeWalker.cancel();
+				activeWalker = null;
 			}
 		}
 		
@@ -235,7 +245,7 @@ exports.install = function (server) {
 					//should always be true. Leave it in anyway in case we might go back to
 					//needing some asynch work in getting the walker going.
 					if (!isMoreSpecificThan(query, oldQuery)) {
-						console.log('new query is not an "extension": restarting query');
+						//console.log('new query is not an "extension": restarting query');
 						//If the query is not more specialized from the oldQuery, we have to restart the search
 						//or we risk not getting all matches in the already processed part of the tree.
 						cancelActiveWalker();
@@ -245,6 +255,7 @@ exports.install = function (server) {
 							//Note: we can get here with activeWalker still null if the the
 							//initial query is not started yet. This can happen because we have ascynch
 							//code in determining the search context.
+							console.log('Resume activewalker');
 							activeWalker.resume();
 						}
 					}

@@ -48,12 +48,19 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		renderer.start(query);
 		var activeSearch = isearch(searchRoot, query, {
 			//	maxResults: 30, (if not specified then a default value is chosen by the server)
-			add: function(path) {
+			start: function () {
 				$('#dialog_indicator').addClass('inprogress_indicator');
+			},
+			pause: function () {
+// Uncomment to 'freeze' spinner when paused. (Note: this will make it nearly impossible
+//  to ever see the spinner actually spinning.
+//				$('#dialog_indicator').removeClass('inprogress_indicator');
+//				$('#dialog_indicator').addClass('paused_indicator');
+			},
+			add: function(path) {
 				renderer.add(parseFile(path));
 			},
 			revoke: function (path) {
-				$('#dialog_indicator').addClass('inprogress_indicator');
 				renderer.revoke(path);
 			},
 			done: function() {
@@ -196,7 +203,8 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			},
 			done: function () {
 				var links = $(".dialog_results_row",$(that.dialog));
-				if (links.length===0) {
+				var nores = $(".dialog_noresults_row", $(that.dialog));
+				if (links.length===0 && nores.length===0) {
 					table = document.createElement('div');
 					table.id = 'dialog_results';
 					$(resultsNode).append(table);
