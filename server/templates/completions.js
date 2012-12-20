@@ -145,15 +145,20 @@ exports.CompletionsProcessor.prototype = {
 						if (isNamed) {
 							i++;
 							if (rawContents[i] !== ':') {
-								return null;
+								if (rawContents[i] === '}') {
+									name = "arg" + argNum;
+								} else {
+									return null;
+								}
+							} else {
+								var nameStart = i+1;
+								var nameEnd = rawContents.indexOf('}', i);
+								if (nameEnd <= nameStart) {
+									return null;
+								}
+								name = rawContents.substring(nameStart, nameEnd);
+								i = nameEnd;
 							}
-							var nameStart = i+1;
-							var nameEnd = rawContents.indexOf('}', i);
-							if (nameEnd <= nameStart) {
-								return null;
-							}
-							name = rawContents.substring(nameStart, nameEnd);
-							i = nameEnd;
 						} else {
 							name = "arg" + argNum;
 						}

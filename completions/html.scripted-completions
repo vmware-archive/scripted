@@ -11,7 +11,7 @@
 		{ trigger: "html new (5)", contents: "<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>${1:Insert title here}</title>\n</head>\n<body>\n$0\n</body>\n</html>" },
 		{ trigger: "ol", contents: "<ol>\n  <li>${1:Item one}</li>\n  <li>${2:Item two}</li>\n</ol>" },
 		{ trigger: "ul", contents: "<ul>\n  <li>${1:Item one}</li>\n  <li>${2:Item two}</li>\n</ul>" },
-		{ trigger: "table", contents: "<table>\n  <tr>\n    <th>${1:Column 1 Heading}</th>\n    <th>$21:Column 2 Heading}</th>\n  </tr>\n  <tr>\n    <td>${3:Row 1: Col 1}</td>\n    <td>${4:Row 1: Col 2}</td>\n  </tr>\n</table>" },
+		{ trigger: "table", contents: "<table>\n  <tr>\n    <th>${1:Column 1 Heading}</th>\n    <th>${2:Column 2 Heading}</th>\n  </tr>\n  <tr>\n    <td>${3:Row 1: Col 1}</td>\n    <td>${4:Row 1: Col 2}</td>\n  </tr>\n</table>" },
 		{ trigger: "script", contents: "<script type=\"${1:text/javascript}\">$0</script>" },
 		{ trigger: "script", contents: "<script src=\"${1:file}\"></script>$0" },
 		{ trigger: "script", contents: "<script data-main=\"${1:file}\" src=\"${2:file}\"></script>$0" },
