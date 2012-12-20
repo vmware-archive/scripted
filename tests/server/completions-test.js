@@ -24,8 +24,9 @@
 // 'nodeunit <this-filename>'
 
 var completionsModule = require("../../server/templates/completions");
-//var testResourcesFolder = process.cwd() + "/test-resources/";
-var testResourcesFolder = __dirname + "/test-resources/";
+var path = require('path');
+
+var testResourcesFolder = path.resolve(__dirname, "test-resources");
 
 
 var assertEqualArrays = require('./test-utils').assertEqualArrays;
@@ -45,13 +46,12 @@ exports.findCompletionsFiles = function(test) {
 	completionsProcessor.findCompletionsFiles(
 		function(files) {
 			var expect = [1,2,3].map(function (i) {
-				return testResourcesFolder + "test"+i+".scripted-completions";
+				return testResourcesFolder + path.sep + "test"+i+".scripted-completions";
 			});
 			assertEqualArrays(test, expect, files);
 			test.done();
 		},
 		function(err) {
-			console.trace('here');
 			test.fail(err);
 			test.done();
 		}
@@ -70,7 +70,7 @@ exports.findCompletions = function(test) {
 
 	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletions(
-		testResourcesFolder + "test1.scripted-completions").then(
+		testResourcesFolder + path.sep + "test1.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
 			test.equals(completions.length, 5);
@@ -86,14 +86,14 @@ exports.findCompletions = function(test) {
 			test.equals(completions[1].proposal, completion);
 			test.equals(completions[1].description, completions[1].trigger + " : " + completion);
 			test.equals(completions[1].trigger, "abbr");
-			test.deepEqual(completions[1].positions, []);
+			test.deepEqual(completions[1].positions, null);
 			test.equals(completions[1].escapePosition, completion.indexOf("</abbr>"));
 			
 			completion = '<acronym></acronym>';
 			test.equals(completions[2].proposal, completion);
 			test.equals(completions[2].description, completions[2].trigger + " : " + completion);
 			test.equals(completions[2].trigger, "acronym");
-			test.deepEqual(completions[2].positions, []);
+			test.deepEqual(completions[2].positions, nul);
 			test.equals(completions[2].escapePosition, completion.indexOf("</acronym>"));
 			
 			completion = '<acronym>arg1</acronym>';
@@ -113,7 +113,7 @@ exports.findCompletions = function(test) {
 		}, errback);
 		
 	completionsProcessor.findCompletions(
-		testResourcesFolder + "test2.scripted-completions").then(
+		testResourcesFolder + path.sep + "test2.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
 			test.equals(completions.length, 4);
@@ -159,11 +159,11 @@ exports.findCompletions = function(test) {
 		}, errback);
 		
 	completionsProcessor.findCompletions(
-		testResourcesFolder + "test3.scripted-completions").then(
+		testResourcesFolder + path.sep + "test3.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
 			// last two completions are invalid
-			test.equals(completions.length, 7);
+			test.equals(completions.length, 9);
 			var i = 0;
 			var completion = '<acronym>foo</acronym>';
 			test.equals(completions[i].proposal, completion);
@@ -216,7 +216,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].proposal, completion);
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
-			test.deepEqual(completions[i].positions, []);
+			test.deepEqual(completions[i].positions, null);
 			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
@@ -224,7 +224,23 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].proposal, completion);
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
-			test.deepEqual(completions[i].positions, []);
+			test.deepEqual(completions[i].positions, null);
+			test.equals(completions[i].escapePosition, completion.length);
+			i++;
+			
+			completion = 'jQuery(arg1)';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].trigger, "jQuery()");
+			test.deepEqual(completions[i].positions, [{offset: "jQuery(".length, length:"arg1".length }]);
+			test.equals(completions[i].escapePosition, completion.length);
+			i++;
+			
+			completion = 'data(arg1)';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].trigger, "data(obj)\tjQuery");
+			test.deepEqual(completions[i].positions, [{offset: "data(".length, length:"arg1".length }]);
 			test.equals(completions[i].escapePosition, completion.length);
 			i++;
 			
