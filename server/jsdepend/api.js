@@ -168,10 +168,10 @@ function configure(config) {
 				when(findGlobalDependencies(handle),
 					callback,
 					function (error) {
-						console.error(Array.isArray(error)
-							? JSON.stringify(error, null, '  ')
-							: error
-						);
+//						console.error(Array.isArray(error)
+//							? JSON.stringify(error, null, '  ')
+//							: error
+//						);
 						callback(store.getGraph());
 					}
 				);
