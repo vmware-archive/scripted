@@ -111,7 +111,7 @@ exports.install = function (server) {
 			function pauseOrRun(work) {
 				//process.nextTick(work);
 				if (paused===true) { // a 'pause' was requested.
-					console.log("suspend walking");
+					//console.log("suspend walking");
 					paused = work;
 				} else {
 					if (!paused) {
@@ -160,7 +160,7 @@ exports.install = function (server) {
 						//we have some work to resume
 						var work = paused;
 						paused = false;
-						console.log('Resume walking');
+						//console.log('Resume walking');
 						work();
 					} else if (paused) {
 						//paused, but we have no work to resume.
