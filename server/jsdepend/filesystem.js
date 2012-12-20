@@ -99,13 +99,6 @@ function withBaseDir(baseDir) {
 		}
 	}
 
-	/**
-	 * Now useable both in callback or promise form... if no callback is
-	 * passed then a promise is returned. Eventually the callack form
-	 * should go away... but we will need to update all uses of this method
-	 * first.
-	 * @return {Promise.boolean}
-	 */
 	function isDirectory(handle, callback) {
 		fs.stat(handle2file(handle), function (err, stats) {
 			if (err) {
