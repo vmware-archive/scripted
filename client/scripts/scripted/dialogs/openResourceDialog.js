@@ -415,7 +415,10 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					click.ctrlKey = e.ctrlKey;
 					click.altKey = e.altKey;
 					click.metaKey = e.metaKey;
-					$(result).trigger(click);
+					// If this isn't done in a timeout block then on windows firefox(17.0.1) the return
+					// key seems to get into the editor and surface as a temporary newline in the
+					// text - it isn't really there (reload and it'll disappear), very annoying.
+					setTimeout(function() { $(result).trigger(click);},0);
 				}
 				return false;
 		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
