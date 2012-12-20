@@ -325,7 +325,8 @@ function withBaseDir(baseDir) {
 	 * @return Promise
 	 */
 	function stat(handle) {
-		//console.log('statting: '+handle);
+//		console.log('statting: '+handle);
+		
 		var d = when.defer();
 		fs.stat(file2handle(handle), function (err, statObj) {
 			if (err) {
@@ -337,7 +338,7 @@ function withBaseDir(baseDir) {
 				});
 			}
 		});
-		return d;
+		return d.promise;
 	}
 	
 	return {

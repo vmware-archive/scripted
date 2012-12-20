@@ -284,7 +284,9 @@ function configure(filesystem) {
 	return {
 		getConfiguration: getConfiguration,
 		getScriptedRcFile: getScriptedRcFile,
-		putScriptedRcFile: putScriptedRcFile
+		putScriptedRcFile: putScriptedRcFile,
+		getScriptedRcDirLocation: getScriptedRcDirLocation,
+		parseJsonFile: parseJsonFile
 	};
 
 }
