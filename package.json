@@ -23,7 +23,7 @@
 		"scripted": "./bin/scripted"
 	},
 	"scripts": {
-		"test": "cd tests/server;./all-tests.sh"
+		"test": "node tests/server/run-all.js"
 	},
 	"dependencies": {
         "amdefine": "0.0.2",

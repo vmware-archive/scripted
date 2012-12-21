@@ -1,1 +1,0 @@
-nodeunit `find . -name "*-test.js"`
