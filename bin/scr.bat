@@ -39,8 +39,9 @@ rem echo "patharg is '%patharg%'"
 set patharg=%patharg:\=/%
 set "patharg=!patharg: =%%20!"
 
-echo Starting scripted.js... >> %TEMP%\scripted.log
+rem echo Starting scripted.js... >> %TEMP%\scripted.log
 
-start /MIN cmd /c node "%rootdir%\server\scripted.js"^>^>%TEMP%\scripted.log
+rem /B - Start application without creating a new window
+start /B /MIN cmd /c node "%rootdir%\server\scripted.js"^>^>%TEMP%\scripted.log
 
 start "" %SCRIPTED_BROWSER% "http://localhost:7261/editor/%patharg%"
