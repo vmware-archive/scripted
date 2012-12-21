@@ -11,9 +11,16 @@ set arg=%1
 set restart="no"
 
 if "!arg!" EQU "-r" (
+	set restart="yes"
+)
+
+if "!arg!" EQU "--restart" (
+	set restart="yes"
+)
+
+if !restart! EQU "yes" (
 	echo Restarting node process
 	taskkill /F /IM "node.exe" 
-	set restart="yes"
 )
 
 CALL :APPEND_MESSAGE =================================================== 2>NUL
