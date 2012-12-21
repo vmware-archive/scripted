@@ -28,6 +28,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		sub : "sub",
 		tab : "tab"
 	};
+	
+	
+	window.subeditors = [];
 
 	function openOnClick(event, editor) {
 		if (mOsUtils.isCtrlOrMeta(event)) {

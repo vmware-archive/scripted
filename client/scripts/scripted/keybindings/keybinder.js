@@ -18,8 +18,8 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/editor/current-editor'
-], function (mActionInfo, mKeystroke, OS, mConfig, getCurrentEditor) {
+define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/utils/editorUtils'
+], function (mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
 
 function debug_log(msg) {
 	//console.log(msg);
@@ -60,16 +60,14 @@ var defaults = {
  * other high-level-ish functions to obtain editor instances.
  */
 function eachEditor(doFun) {
-	var abort = doFun(window.editor);
+	var abort = doFun(editorUtils.getMainEditor());
 	if (abort) {
 		return abort;
 	}
-	var subeditors = window.subeditors;
-	for (var i = 0; i < subeditors.length; i++) {
-		abort = doFun(subeditors[i]);
-		if (abort) {
-			return abort;
-		}
+	var subeditor = editorUtils.getSubEditor();
+	abort = doFun(subeditor);
+	if (abort) {
+		return abort;
 	}
 }
 
@@ -110,7 +108,7 @@ function toJSON(kbs) {
  * are action names.
  */
 function getKeyBindings(editor) {
-	editor = editor || window.editor;
+	editor = editor || editorUtils.getMainEditor();
 	return toJSON(editor.getTextView()._keyBindings);
 }
 
@@ -182,7 +180,7 @@ var installKeyEventTrap = (function () {
 					var globalAction = getGlobalAction(keystroke);
 					if (globalAction) {
 						debug_log('Gotcha: '+keystroke);
-						var editor = getCurrentEditor();
+						var editor = editorUtils.getCurrentEditor();
 						if (editor) {
 							editor.getTextView().invokeAction(globalAction);
 						}

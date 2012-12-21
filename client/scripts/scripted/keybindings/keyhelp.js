@@ -20,15 +20,16 @@
 // When loaded it sets itself up without requiring any further help
 // from the main app.
 
-define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit', 'text!./_keybinding.tmpl.html', './action-info'],
-function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, commandTemplate, mActionInfo) {
+define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit', 
+	"scripted/utils/editorUtils",'text!./_keybinding.tmpl.html', './action-info'],
+function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, commandTemplate, mActionInfo) {
 
 	var attachKeyEditor = mKeyedit.attachKeyEditor;
 	var getActionDescription = mActionInfo.getActionDescription;
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
-		var keyBindings = window.editor.getTextView()._keyBindings.filter(function (kb) { return kb.name; });
+		var keyBindings = editorUtil.getMainEditor().getTextView()._keyBindings.filter(function (kb) { return kb.name; });
 		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
@@ -111,7 +112,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, commandTemplate,
 		render(otherKeyBindings, cl);
 		cl.append('<li><hr /></li>');
 		render(
-			mKeybinder.getUnboundActionNames(window.editor).map(function (name) {
+			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).map(function (name) {
 				return {
 					name: name
 				};
@@ -119,7 +120,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, commandTemplate,
 			cl
 		);
 
-		window.editor._textView._updatePage();
+		editorUtil.getMainEditor().getTextView()._updatePage();
 	}
 	
 	/*Command help panel*/

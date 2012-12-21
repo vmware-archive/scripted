@@ -104,13 +104,14 @@ requirejs.config({
  
 require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", "fileapi", "orion/textview/keyBinding",
 		 "scripted/keybindings/keystroke", "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client", "scripted/utils/os",
-		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage", "scripted/contextmenus/contextmenu",
+		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage", 
+		 "scripted/contextmenus/contextmenu", "scripted/utils/editorUtils",
 		 // need to load this module in order to have it register with paneFactory
 		 "scripted/editor/editorPane"],
  
 function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 	mKeystroke, mJquery, mNavHistory, mPageState, mJsdepend, mOsUtils,
-	mExecConsole, mExecOnLoad, mWhen, mJshintDriver, storage, contextMenu) {
+	mExecConsole, mExecOnLoad, mWhen, mJshintDriver, storage, contextMenu, editorUtils) {
 		
 	window.scripted = {};
 
@@ -190,12 +191,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 	
 	// Create new FileExplorer
 	var explorer  = new mExplorerTable.FileExplorer({
-		//serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection,
-		//searcher: searcher, fileClient: fileClient, commandService: commandService,
-		//contentTypeService: contentTypeService,
 		parentId: "explorer-tree"
-		//breadcrumbId: "location", toolbarId: "pageActions",
-	    //selectionToolsId: "selectionTools", preferences: preferences
 	});
 
 	window.explorer = explorer;
@@ -220,9 +216,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 				if (jshintrc.error) {
 					scriptedLogger.error(jshintrc.error);
 				} else {
-//					scriptedLogger.info(JSON.stringify(jshintrc,null," "));
 					mJshintDriver.resolveConfiguration(jshintrc);
-//					window.scripted.config.jshint = jshintrc;
 				}
 			} else {
 				scriptedLogger.info("No .jshintrc found");
@@ -235,8 +229,6 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 	
 	// TODO why is getConf on jsdepend?
 	mJsdepend.getConf(pageState.main.path, function (dotScripted) {
-//		scriptedLogger.info("fetched dot-scripted conf from server");
-//		scriptedLogger.info(JSON.stringify(dotScripted, null, "  ")); // too verbose to print this out
 		window.fsroot = dotScripted.fsroot;
 		window.scripted.config = dotScripted;
 		
@@ -260,7 +252,6 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			$('#editor').css("left","0px");
 			$('#explorer-tree').remove();
 		}
-		window.subeditors = [];
 		mNavHistory.setupPage(pageState, false);
 		
 		require(['jquery_ui'], function(mJqueryUI){
@@ -273,7 +264,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			nav.resize(function(){
 				var width = $('#navigator-wrapper').width();
 				$('#editor').css('margin-left', width);
-				window.editor._textView._updatePage();
+				editorUtils.getMainEditor().getTextView()._updatePage();
 				storage.unsafeStore("scripted.navigatorWidth", width);
 			});
 			
@@ -300,10 +291,11 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 				var side_percent = (side_width / $('#editor_wrapper').width())*100;
 				sidePanel.css('width', side_percent + "%");
 				
-				if (window.editor._textView) {
-					window.editor._textView._updatePage();
-					for (var i = 0; i < window.subeditors.length; i++){
-						window.subeditors[i].getTextView().update();
+				if (editorUtils.getMainEditor()) {
+					editorUtils.getMainEditor().getTextView()._updatePage();
+					var subEditor = editorUtils.getSubEditor();
+					if (subEditor) {
+						subEditor.getTextView().update();
 					}
 					storage.unsafeStore("scripted.sideWidth", side_width);
 				}
@@ -354,33 +346,20 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 			$('#editor').css('margin-right', side_width);
 
-			/*
-			var resizable_handle = $('#side_panel > .ui-resizable-w');
-			resizable_handle.hide(); // we have to remove the resizable handle, or else it adds to scrollHeight
-			resizable_handle.height( $('#side_panel')[0].scrollHeight );
-			resizable_handle.show();
-			
-			var subeditor;
-			for (var i in window.subeditors){
-				subeditor = window.subeditors[i].domNode;
-				subeditor.height( $('#side_panel').height() - parseInt(subeditor.css('margin-top')) - parseInt(subeditor.css('margin-bottom')) );
-				window.subeditors[i].editor.getTextView().update();
-			}
-			*/
-			if (window.editor._textView) {
-				window.editor._textView._updatePage();
+			if (editorUtils.getMainEditor()) {
+				editorUtils.getMainEditor().getTextView()._updatePage();
 			}
 		});
 		
 		$(window).bind('beforeunload', function() {
-			var sidePanelOpen = window.subeditors && window.subeditors[0];
-			var mainItem = mPageState.generateHistoryItem(window.editor);
-			var subItem = sidePanelOpen ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
+			var subEditor = editorUtils.getSubEditor();
+			var mainItem = mPageState.generateHistoryItem(editorUtils.getMainEditor());
+			var subItem = subEditor ? mPageState.generateHistoryItem(subEditor) : null;
 			mPageState.storeBrowserState(mainItem, subItem, false);
 		});
 		
 		$(window).bind('beforeunload', function() {
-			if (window.editor.isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
+			if (editorUtils.getMainEditor().isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
 				return "There are unsaved changes.";
 			}
 		});
@@ -414,7 +393,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		
 		// Fix disappearing caret
 		// if we ever add an anchor tag anywhere, we can use that instead of this fix.
-		window.editor.cursorFix( $('#editor') );
+		editorUtils.getMainEditor().cursorFix( $('#editor') );
 		
 	});
 });

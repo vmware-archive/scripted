@@ -103,7 +103,9 @@ define(['jquery'], function() {
 		
 		/**
 		 * Shortcut for getting the first pane of the given kind
-		 * null if doesn't exist
+		 * null if doesn't exist.  If isMain, then returns only the main
+		 * pane if it matches the id.  Else ignores the main pane and
+		 * only looks at side panes.
 		 */
 		getPane : function(id, isMain) {
 			for (var i = 0; i < panes.length; i++) {

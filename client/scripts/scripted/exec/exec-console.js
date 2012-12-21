@@ -22,7 +22,7 @@
 
 //So 'exec-console' is not a good name for this module.
 
-define(["jquery", "jquery_ui"], function () {
+define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUtils) {
 
 	/**
 	 * Maximum number of log entries in the console. If more entries are
@@ -113,7 +113,7 @@ define(["jquery", "jquery_ui"], function () {
 				$(CONSOLE_WRAPPER).css('top', '0px'); //I think JQuery resizable is changing this from 0 but it messes things up.
 				$(CONSOLE_WRAPPER).height(console_height);
 				$("#editor").height(editor_height);
-				window.editor._textView._updatePage();
+				editorUtils.getMainEditor().getTextView()._updatePage();
 				updateWidth();
 			});
 			$("#navigator-wrapper").resize(updateWidth);
@@ -129,7 +129,7 @@ define(["jquery", "jquery_ui"], function () {
 		initialize();
 		var c = $(CONSOLE_WRAPPER);
 		var e = $("#editor");
-		if (!isVisible()) { 
+		if (!isVisible()) {
 			//TODO: should remember previous size not reset to 1/3 of the screen.
 			//If the console is presently hidden...
 			var editor_height = e.height();
@@ -145,7 +145,7 @@ define(["jquery", "jquery_ui"], function () {
 				disabled: false
 			});
 
-			window.editor.getTextView()._updatePage();
+			editorUtils.getMainEditor().getTextView()._updatePage();
 			updateWidth();
 		}
 	}
@@ -160,7 +160,7 @@ define(["jquery", "jquery_ui"], function () {
 				disabled: true
 			});
 			e.height(e.height()+console_height);
-			window.editor._textView._updatePage();
+			editorUtils.getMainEditor().getTextView()._updatePage();
 		}
 	}
 	

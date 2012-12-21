@@ -1,12 +1,12 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2009 - 2012 IBM Corporation, VMware and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
  *  IBM Corporation - initial API and implementation
  *     Andy Clement - hacked to support our needs in scripted (needs more work)
  ******************************************************************************/
@@ -54,7 +54,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 			if (n1 < n2) { return -1; }
 			if (n1 > n2) { return 1; }
 			return 0;
-		}); 
+		});
 */
 	}
 
@@ -67,7 +67,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 			onComplete([]);
 		} else if (parentItem.Location) {
 /*
-			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
+			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then(
 				dojo.hitch(this, function(children) {
 					mUtil.processNavigatorParent(parentItem, children);
 					onComplete(children);
@@ -83,12 +83,6 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 					xhrobj.onreadystatechange = function() {
 						if (xhrobj.readyState === 4) {
 							// TODO status =200 should proceed otherwise error (xhrObj.status     ==200)
-	/*
-	                                                  window.editor2.setInput("Content", null, xhrobj2.responseText);
-	                                                  window.editor2.thefile = files[1];
-	                                                  // TODO not sure this is the right bit to 'set' but it does work
-	                                                  e2fp.firstElementChild.innerText=files[1];
-	*/
 							var children = JSON.parse(xhrobj.responseText).children;
 							// skip kids that start '.'
 							if (children) {
@@ -254,7 +248,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
-				var i;			
+				var i;
 				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
 				// otherwise use default editor.
 				if (!this.openWithCommands) {
@@ -279,7 +273,7 @@ if (mExtensionCommands) {
 				var contentType = this.contentTypeService.getFileContentType(item);
 				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
 					href = this.defaultEditor.hrefCallback({items: item});
-				}				
+				}
 
 				link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameColumn", href: href, target:this.target}, span, "last");
 				addImageToLink(contentType, link);
@@ -485,7 +479,7 @@ if (mExtensionCommands) {
 		this._highlightingId = id;
 		var element = dojo.byId(id);
 		if (element === null || element === undefined) {
-			function expandSection(root, splits, index) {
+			var expandSection = function(root, splits, index) {
 				if (index < (splits.length - 1)) {
 					var newroot = root + "/" + splits[index];
 					var stringid = self.model.getIdFromString(newroot);
@@ -581,11 +575,11 @@ if (mExtensionCommands) {
 			// fileClient.js:156
 /*
 {
-	Directory: true, 
-	Length: 0, 
+	Directory: true,
+	Length: 0,
 	LocalTimeStamp: 0,
 	Name: "File Servers",
-	Location: "/", 
+	Location: "/",
 	Children: _fileSystemsRoots,
 	ChildrenLocation: "/"
 }
@@ -601,20 +595,13 @@ if (mExtensionCommands) {
 				xhrobj.open("GET", url, true);
 				xhrobj.onreadystatechange = function() {
 					if (xhrobj.readyState === 4) {
-						// TODO status =200 should proceed otherwise error (xhrObj.status     ==200)
-/*
-                          window.editor2.setInput("Content", null, xhrobj2.responseText);
-                          window.editor2.thefile = files[1];
-                          // TODO not sure this is the right bit to 'set' but it does work
-                          e2fp.firstElementChild.innerText=files[1];
-*/
 						var response = JSON.parse(xhrobj.responseText);
 						// skip kids that start '.'
 						if (response.children) {
 							var newchildren = [];
 							for (var i=0;i<response.children.length;i++) {
 								var kid = response.children[i];
-								// TODO this is duplicate code 								
+								// TODO this is duplicate code
 								if (kid.name[0]!=='.' || !(kid.name==='.git' || kid.name==='.svn')) {
 									newchildren.push(kid);
 								}
@@ -659,7 +646,7 @@ if (mExtensionCommands) {
 						this.treeRoot[i] = loadedWorkspace[i];
 					}
 					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);	
+					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
 					//If current location is not the root, set the search location in the searcher
 					this.searcher.setLocationByMetaData(this.treeRoot);
 					// erase any old page title
@@ -667,7 +654,7 @@ if (mExtensionCommands) {
 					if (breadcrumb) {
 						dojo.empty(breadcrumb);
 						new mBreadcrumbs.BreadCrumbs({
-							container: breadcrumb, 
+							container: breadcrumb,
 							resource: this.treeRoot,
 							firstSegmentName: this.fileClient.fileServiceName(this.treeRoot.Path)
 						});
@@ -700,7 +687,7 @@ if (mExtensionCommands) {
 	};
 	
 	FileExplorer.prototype.fullRefresh = function(postRefresh) {
-			explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
+		explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
 	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
