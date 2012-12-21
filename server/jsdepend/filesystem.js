@@ -25,6 +25,9 @@
 var nodeNatives = require('./node-natives');
 var when = require('when');
 var oneCache = require('./one-cache');
+var utils = require('./utils');
+
+var pathNormalize = utils.pathNormalize;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -39,6 +42,8 @@ function ignore(name) {
 		result = true;
 	} else if (name === "scripted.log") {
 		result = true;
+	} else if (name === 'node_modules') {
+		result = true;
 	}
 	// console.log('ignore? '+name+' => '+result);
 	return result;
@@ -46,7 +51,6 @@ function ignore(name) {
 
 function withBaseDir(baseDir) {
 	var fs = require('fs');
-	var path = require('path');
 	var encoding = 'UTF-8';
 	
 	function getUserHome() {
@@ -64,22 +68,26 @@ function withBaseDir(baseDir) {
 	
 	function handle2file(handle) {
 		if (baseDir) {
-			return path.normalize(baseDir + '/' + handle);
+			return pathNormalize(baseDir + '/' + handle);
 		} else {
 			return handle;
 		}
 	}
 	
 	function file2handle(file) {
+		var h;
 		if (baseDir) {
-			var h = file.substring(baseDir.length+1);
+			h = file.substring(baseDir.length+1);
 			if (!h) {
 				h = '.'; //Always use '.' instead of "", it causes trouble because it counts as 'false'.
 			}
-			return h;
 		} else {
-			return file;
+			h = file;
 		}
+		return h.replace(/\\/g, '/'); //Always use slashes even on Windows. Fewer problems with bad code that
+									// assumes slashes are used.
+									// TODO: in the long run the right thing to do is properly use
+									// libraries like 'path' in node to do all path manipulation.
 	}
 	
 	function isFile(handle, callback) {

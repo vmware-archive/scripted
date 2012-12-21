@@ -145,7 +145,6 @@ function getFileName(handle) {
 }
 
 function pathNormalize(path) {
-
 	var segments = path.split('/');
 	var normalized = [];
 	var i = 0;
