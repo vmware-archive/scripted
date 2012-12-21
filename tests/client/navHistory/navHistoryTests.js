@@ -16,13 +16,14 @@
 /*global $ define module localStorage window console */
 
 define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'tests/client/common/testutils',
-	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'setup', 'jquery'],
-function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane) {
+	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'scripted/utils/os', 'setup', 'jquery'],
+function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, os) {
 	
-	var testResourcesRoot = mTestutils.discoverTestRoot();
+	var fsroot = mTestutils.discoverTestRoot();
+	var encoded_fsroot = encodeURI(fsroot);
+	var testResourcesRoot = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
 	var testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
 	var urlPathPrefix = "/clientServerTests?" + testResourcesRoot;
-	
 	var getFileContents = mTestutils.getFileContents;
 	
 	function setup() {
@@ -30,11 +31,12 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		for (var i = 0; i < panes.length; i++) {
 			mPaneFactory.destroyPane(panes[i]);
 		}
-		window.fsroot = testResourcesRootNoSlash;
+		window.fsroot = fsroot;
 		mSidePanelManager.closeSidePanel();
 		window.subeditors=[];
 		localStorage.removeItem("scripted.recentFileHistory");
 		createEditor(testResourcesRoot + "foo.js");
+		window.editor.setSelection(0,0);
 		localStorage.removeItem("scripted.recentFileHistory");
 		refreshBreadcrumbAndHistory(testResourcesRoot + "bar.js");
 	}
@@ -73,12 +75,12 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		setTimeout(function() {
 			assert.ok(window.editor);
 			createEditor(testResourcesRoot + "foo.js");
-			getFileContents(testResourcesRoot, "foo.js",
+			getFileContents(fsroot, "foo.js",
 				function(contents) {
 					assert.equal(getMainEditorText(), contents);
 					
-					createEditor(testResourcesRoot + "bar.js");
-					getFileContents(testResourcesRoot, "bar.js", function(contents) {
+					createEditor(fsroot + "bar.js");
+					getFileContents(fsroot, "bar.js", function(contents) {
 						assert.equal(getMainEditorText(), contents);
 						assert.start();
 					});
@@ -108,7 +110,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		var breadcrumbs = $('#breadcrumb');
 		assert.equal(breadcrumbs.children().length, 3);
 		assert.equal(breadcrumbs.children()[0], $('#historycrumb')[0]);
-		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>" + testResourcesRootNoSlash + "</span>");
+		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>" + fsroot + "</span>");
 		assert.equal(breadcrumbs.children()[2].innerHTML, "<span>bar.js</span>");
 	};
 	
@@ -278,12 +280,12 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			mNavHistory.toggleSidePanel();
 			assert.ok(window.subeditors[0]);
 			createEditor(testResourcesRoot + "foo.js");
-			getFileContents(testResourcesRoot, "foo.js",
+			getFileContents(fsroot, "foo.js",
 				function(contents) {
 					createEditor(testResourcesRoot + "foo.js",  "sub");
 					assert.equal(getSubEditorText(), contents);
 					
-					getFileContents(testResourcesRoot, "bar.js", function(contents) {
+					getFileContents(fsroot, "bar.js", function(contents) {
 						createEditor(testResourcesRoot + "bar.js", "sub");
 						assert.equal(getSubEditorText(), contents);
 						assert.start();
@@ -499,7 +501,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	// tests a single page only
 	function oddUrlTest(fname, urlSuffix, selection) {
 		setup();
-		getFileContents(testResourcesRoot, fname,
+		getFileContents(fsroot, fname,
 			function(contents) {
 				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/clientServerTests" + urlSuffix },
 					window.editor);
@@ -511,43 +513,43 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	// now we throw a whole bunch of urls at the editor and test to make sure it behaves correctly
 	tests.asyncTestOddUrl1= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js", [0,0]);
+		oddUrlTest("bar.js", "?" + fsroot + "bar.js", [0,0]);
 	};
 	tests.asyncTestOddUrl1a= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#", [0,0]);
+		oddUrlTest("bar.js", "?" + fsroot + "bar.js#", [0,0]);
 	};
 	tests.asyncTestOddUrl2= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#10,20", [10,20]);
+		oddUrlTest("bar.js", "?" + fsroot + "bar.js#10,20", [10,20]);
 	};
 	tests.asyncTestOddUrl3= function() {
-		oddUrlTest("bar.js", "?#path:'" + testResourcesRoot + "bar.js',range:[10,20]", [10,20]);
+		oddUrlTest("bar.js", "?#path:'" + fsroot + "bar.js',range:[10,20]", [10,20]);
 	};
 	tests.asyncTestOddUrl4= function() {
-		oddUrlTest("bar.js", "?#main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}", [10,20]);
+		oddUrlTest("bar.js", "?#main:{path:'" + fsroot + "bar.js',range:[10,20]}", [10,20]);
 	};
 	tests.asyncTestOddUrl5= function() {
-		oddUrlTest("bar.js", "?#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "?#{main:{path:'" + fsroot + "bar.js',range:[10,20]}}", [10,20]);
 	};
 	tests.asyncTestOddUrl6= function() {
-		oddUrlTest("bar.js", "#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "#{main:{path:'" + fsroot + "bar.js',range:[10,20]}}", [10,20]);
 	};
 	tests.asyncTestOddUrl7= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#{main:{range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "?" + fsroot + "bar.js#{main:{range:[10,20]}}", [10,20]);
 	};
 	
 	function changeLocation(url) {
-		var state = mPageState.extractPageStateFromUrl("http://localhost:7261" + url);
+		var state = mPageState.extractPageStateFromUrl("http://localhost:7261/clientServerTests" + url);
 		mNavHistory.setupPage(state, true);
 	}
 	
 	function testLocation(mainPath, mainSel, subPath, subSel) {
-		assert.equal(window.editor.getFilePath(),testResourcesRoot +  mainPath);
+		assert.equal(window.editor.getFilePath(), fsroot +  mainPath);
 		assert.deepEqual(window.editor.getSelection(), {start: mainSel[0], end: mainSel[1]});
 		if (subPath) {
 			if (!window.subeditors[0]) {
 				assert.fail('Expected a subeditor');
 			} else {
-				assert.equal(window.subeditors[0].getFilePath(), testResourcesRoot + subPath);
+				assert.equal(window.subeditors[0].getFilePath(), fsroot + subPath);
 				assert.deepEqual(window.subeditors[0].getSelection(), {start: subSel[0], end: subSel[1]});
 			}
 		} else {
@@ -557,14 +559,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.testPageSetup1 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
+		changeLocation("?" + fsroot + "bar.js");
 		testLocation("bar.js", [0,0]);
 	};
 
 	tests.asyncTestPageSetup2 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
-		changeLocation("?" + testResourcesRoot + "foo.js");
+		changeLocation("?" + fsroot + "bar.js");
+		changeLocation("?" + fsroot + "foo.js");
 		testLocation("foo.js", [0,0]);
 		history.back();
 		setTimeout(function() {
@@ -579,8 +581,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup3 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
-		changeLocation("?" + testResourcesRoot + "foo.js");
+		changeLocation("?" + fsroot + "bar.js");
+		changeLocation("?" + fsroot + "foo.js");
 		testLocation("foo.js", [0,0]);
 		history.back();
 		setTimeout(function() {
@@ -595,8 +597,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup4 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + fsroot + "bar.js#20,21");
+		changeLocation("?" + fsroot + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
 		setTimeout(function() {
@@ -611,9 +613,9 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup5 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
-		changeLocation("?" + testResourcesRoot + "bar.js#5,7");
-		changeLocation("?" + testResourcesRoot + "bar.js#8,10");
+		changeLocation("?" + fsroot + "bar.js#20,21");
+		changeLocation("?" + fsroot + "bar.js#5,7");
+		changeLocation("?" + fsroot + "bar.js#8,10");
 		testLocation("bar.js", [8,10]);
 		history.back();
 		setTimeout(function() {
@@ -629,15 +631,15 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	// with sub editor
 	tests.asyncTestPageSetup6 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourcesRoot + "baz.js\",range:[9,10]}");
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + fsroot + "bar.js#main:{range:[20,21]},side:{path:\"" + fsroot + "baz.js\",range:[9,10]}");
+		changeLocation("?" + fsroot + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
 		setTimeout(function() {
 			testLocation("bar.js", [20,21], "baz.js", [9,10]);
 			history.back();
 			setTimeout(function() {
-				testLocation("foo.js", [5,7]);
+				testLocation("foo.js", [0,0]);
 				history.forward();
 				setTimeout(function() {
 					testLocation("bar.js", [20,21], "baz.js", [9,10]);
@@ -650,7 +652,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.asyncTestToggleSide = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + fsroot + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		mNavHistory.toggleSidePanel();
 		testLocation("foo.js", [5,7], "foo.js", [5,7]);

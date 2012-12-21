@@ -14,7 +14,7 @@
 /*jslint browser:true */
 /*global test asyncTest */
 
-define(["jquery"], function() {
+define(["scripted/utils/os", "jquery"], function(osUtils) {
 
 	function discoverTestRoot() {
 		var xhrobj = new XMLHttpRequest();
@@ -22,8 +22,9 @@ define(["jquery"], function() {
 		xhrobj.send();  // synchronous xhr request
 		var testroot = xhrobj.responseText;
 		if (testroot.charAt(testroot.length-1) !== '/') {
-			testroot += '/';
+			testroot +='/';
 		}
+		
 		return testroot;
 	}
 
@@ -33,7 +34,7 @@ define(["jquery"], function() {
 		xhrobj.send();  // synchronous xhr request
 		var testResourcesRoot = xhrobj.responseText;
 		if (testResourcesRoot.charAt(testResourcesRoot.length-1) !== '/') {
-			testResourcesRoot += '/';
+			testResourcesRoot +='/';
 		}
 		
 		var popper = function() { 

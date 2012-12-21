@@ -15,7 +15,7 @@
 var stat = require('node-static');
 var fs = require('fs');
 var util = require('util');
-var path = require('path');
+var pathResolve = require('./jsdepend/utils').pathResolve;
 
 if (process.platform.indexOf('win32') !== -1) {
     var webroot = __dirname + "\\..\\client";
@@ -80,7 +80,7 @@ function route(handle, pathname, response, request, next) {
             }, request, response);
         } else if (pathname.indexOf("/fs_list") === 0) {
             // looks like a mucked up request from the dojo filestore
-            // e.g. /fs_list//Users/aclement/gits/jseditor/002_nodeserver 
+            // e.g. /fs_list//Users/aclement/gits/jseditor/002_nodeserver
             handle('/fs_list')(response, request, pathname.substr(9));
         } else if (pathname === '/scripts/htmlparser.js') {
             jsdepend.serveFile("/node_modules/htmlparser/lib/htmlparser.js", 200, {
@@ -91,7 +91,7 @@ function route(handle, pathname, response, request, next) {
             response.writeHead(200, {
                 "Content-Type": "text/plain"
             });
-            response.write(path.resolve('../tests/client/test-resources/'));
+            response.write(pathResolve(__dirname, '../tests/client/test-resources/'));
             response.end();
         } else {
             next();
