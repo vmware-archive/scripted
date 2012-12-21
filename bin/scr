@@ -1,5 +1,6 @@
-#!/bin/bash
+# no hashbang as it disturbs npm install on windows!
 # Launch script for Scripted 
+
  
 # Does the following:
 # 1. Provide help if requested
