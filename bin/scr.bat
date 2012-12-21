@@ -7,12 +7,18 @@ cd /d %thisdir%..
 set rootdir=%cd%
 popd
 
-rem taskkill /F /IM "node.exe" > killed.log 2>&1
+set arg=%1
+set restart="no"
+
+if "!arg!" EQU "-r" (
+	echo Restarting node process
+	taskkill /F /IM "node.exe" 
+	set restart="yes"
+)
 
 CALL :APPEND_MESSAGE =================================================== 2>NUL
 CALL :APPEND_MESSAGE launching node again: %DATE% %TIME% 2>NUL
 
-set arg=%1
 
 rem echo %arg%
 rem Using ! rather than % copes with spaces in the arg
@@ -47,7 +53,12 @@ set "patharg=!patharg: =%%20!"
 
 call :LAUNCH_NODE 2>NUL
 
+if !restart! EQU "yes" (
+  GOTO :EOF
+)
+
 start "" %SCRIPTED_BROWSER% "http://localhost:7261/editor/%patharg%"
+
 GOTO :EOF
 
 :APPEND_MESSAGE 
