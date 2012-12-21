@@ -105,7 +105,7 @@ function(assert, mTemplates, mTestutils) {
 				assert.equal(completions.length, 5, "Find 5 completions");
 				assert.equal(completions[4].description, "acronym14 : $bar");
 				assert.equal(completions[4].proposal, "$bar");
-				assert.equal(completions[4].positions.length, 0, "Should have empty positions array");
+				assert.equal(completions[4].positions, null, "Should have no positions array");
 				
 				assert.start();
 			}

@@ -41,26 +41,6 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	function createEditor(path, kind) {
 		mNavHistory.handleNavigationEvent({testTarget : path, shiftKey : (kind === 'sub') });
-		
-//		if (!kind) {
-//			kind = 'main';
-//		}
-//		var pane;
-//		if (kind === 'main') {
-//			pane = mPaneFactory.getMainPane();
-//			if (pane) {
-//				mPaneFactory.destroyPane(pane);
-//			}
-//		} else if (kind === 'sub') {
-//			var panes = mPaneFactory.getSidePanes();
-//			for (var i = 0; i < panes.length; i++) {
-//				mPaneFactory.destroyPane(panes[i]);
-//			}
-//		}
-//		pane = mPaneFactory.createPane("scripted.editor", kind, {
-//			filepath : path
-//		});
-//		return pane.editor;
 	}
 	
 	function getMainEditorText() {
@@ -657,7 +637,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			testLocation("bar.js", [20,21], "baz.js", [9,10]);
 			history.back();
 			setTimeout(function() {
-				testLocation("foo.js", [0,0]);
+				testLocation("foo.js", [5,7]);
 				history.forward();
 				setTimeout(function() {
 					testLocation("bar.js", [20,21], "baz.js", [9,10]);
