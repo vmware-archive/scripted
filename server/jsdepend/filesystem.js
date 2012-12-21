@@ -41,9 +41,7 @@ function ignore(name) {
 		result = true;
 	} else if (name===".svn") {
 		result = true;
-	} else if (name === "scripted.log") {
-		result = true;
-	} else if (name === 'node_modules') {
+	} else if (name==="node_modules") {
 		result = true;
 	}
 	// console.log('ignore? '+name+' => '+result);

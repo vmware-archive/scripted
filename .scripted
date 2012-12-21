@@ -106,6 +106,15 @@
 	},
 */
 
+	search: {
+//		exclude: "*/**/.scripted"
+		exclude: [
+			"*/**/.scripted", //only wanna see the toplevel .scripted file!
+			"**/scripts/lib",
+			"**/node_modules"
+		]
+	},
+
 	/* Configuring the mark occurrences behavior */
 	mark_occurrences : {
 		interval :500,  // interval between requests. set to 0 for instantaneous, or higher numbers for more of a delay
