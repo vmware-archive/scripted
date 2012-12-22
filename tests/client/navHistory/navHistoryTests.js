@@ -21,7 +21,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
-	var testResourcesRootNoClosingSlash = testResourcesRootOpeningSlash.substring(0, testResourcesRootOpeningSlash.length-1);
+	var testResourcesRootNoClosingSlash = testResourceRootClosingSlash.substring(0, testResourcesRootOpeningSlash.length-1);
 	var urlPathPrefix = "/clientServerTests?" + testResourcesRootOpeningSlash;
 	var getFileContents = mTestutils.getFileContents;
 	
@@ -34,7 +34,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		mSidePanelManager.closeSidePanel();
 		window.subeditors=[];
 		localStorage.removeItem("scripted.recentFileHistory");
-		createEditor(testResourcesRootOpeningSlash + "foo.js");
+		createEditor(testResourceRootClosingSlash + "foo.js");
 		window.editor.setSelection(0,0);
 		localStorage.removeItem("scripted.recentFileHistory");
 		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
