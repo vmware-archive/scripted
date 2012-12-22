@@ -130,7 +130,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 			return false;
 		}
 		var mainEditor = mEditorUtils.getMainEditor();
-		var subEdtitor = mEditorUtils.getSubEditor();
+		var subEditor = mEditorUtils.getSubEditor();
 		
 		var main_path = mainEditor.getFilePath();
 		var main_scrollpos = $(mainEditor._domNode).find('.textview').scrollTop();
@@ -138,11 +138,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 		var main_text = mainEditor.getText();
 		var main_dirty = mainEditor.isDirty();
 		
-		var sub_path = subEdtitor.getFilePath();
-		var sub_scrollpos = $(subEdtitor._domNode).find('.textview').scrollTop();
-		var sub_sel = subEdtitor.getTextView().getSelection();
-		var sub_text = subEdtitor.getText();
-		var sub_dirty = subEdtitor.isDirty();
+		var sub_path = subEditor.getFilePath();
+		var sub_scrollpos = $(subEditor._domNode).find('.textview').scrollTop();
+		var sub_sel = subEditor.getTextView().getSelection();
+		var sub_text = subEditor.getText();
+		var sub_dirty = subEditor.isDirty();
 		
 		// TODO This is not working when using the button to switch since
 		// clicking on the button will call a blur() on the active editor
@@ -152,18 +152,18 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 		navigate({path:sub_path, range:[sub_sel.start, sub_sel.end], scroll:sub_scrollpos}, EDITOR_TARGET.main, true);
 		
 		$(mainEditor._domNode).find('.textview').scrollTop(sub_scrollpos);
-		$(subEdtitor._domNode).find('.textview').scrollTop(main_scrollpos);
+		$(subEditor._domNode).find('.textview').scrollTop(main_scrollpos);
 		
 		if (sub_dirty) {
 			mainEditor.setText(sub_text);
 		}
 		if (main_dirty) {
-			subEdtitor.setText(main_text);
+			subEditor.setText(main_text);
 		}
 		
 		setTimeout(function() {
 			if (main_active) {
-				subEdtitor.getTextView().focus();
+				subEditor.getTextView().focus();
 			} else {
 				mainEditor.getTextView().focus();
 			}
@@ -172,11 +172,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 	
 	var toggleSidePanel = function() {
 		var mainEditor = mEditorUtils.getMainEditor();
-		var subEdtitor = mEditorUtils.getSubEditor();
+		var subEditor = mEditorUtils.getSubEditor();
 	
 		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
 		var mainItem = mPageState.generateHistoryItem(mainEditor);
-		var subItem = sidePanelOpen ? mPageState.generateHistoryItem(subEdtitor) : null;
+		var subItem = sidePanelOpen ? mPageState.generateHistoryItem(subEditor) : null;
 		mPageState.storeBrowserState(mainItem, subItem, true);
 		if (sidePanelOpen) {
 			mSidePanelManager.closeSidePanel();
@@ -196,10 +196,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 				range:[sel.start, sel.end],
 				scroll: $(mainEditor._domNode).find('.textview').scrollTop()
 			}, "sub");
-			subEdtitor.getTextView().focus();
+			subEditor = mEditorUtils.getSubEditor();
+			subEditor.getTextView().focus();
 		}
 		mainItem = mPageState.generateHistoryItem(mainEditor);
-		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(subEdtitor);
+		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(subEditor);
 		mPageState.storeBrowserState(mainItem, subItem, false);
 		return true;
 	};
@@ -242,12 +243,12 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 		var mainItem;
 		var subItem;
 		var mainEditor = mEditorUtils.getMainEditor();
-		var subEdtitor = mEditorUtils.getSubEditor();
+		var subEditor = mEditorUtils.getSubEditor();
 
 		if (doSaveState && mainEditor) {
 			mainItem = mPageState.generateHistoryItem(mainEditor);
-			if (subEdtitor) {
-				subItem = mPageState.generateHistoryItem(subEdtitor);
+			if (subEditor) {
+				subItem = mPageState.generateHistoryItem(subEditor);
 			}
 			
 			// replace existing history with current page state (ie- update selection ranges and scroll pos
@@ -302,15 +303,15 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 	navigate = function(editorDesc, target, doSaveState) {
 		var mainItem, filepath = editorDesc.path, range = editorDesc.range, scroll = editorDesc.scroll;
 		var mainEditor = mEditorUtils.getMainEditor();
-		var subEdtitor = mEditorUtils.getSubEditor();
+		var subEditor = mEditorUtils.getSubEditor();
 
 		if (mainEditor) {
 			// if any editor exists at all, save the state.
 			mainItem = mPageState.generateHistoryItem(mainEditor);
 			mPageState.storeScriptedHistory(mainItem);
 			var sideItem;
-			if (subEdtitor) {
-				sideItem = mPageState.generateHistoryItem(subEdtitor);
+			if (subEditor) {
+				sideItem = mPageState.generateHistoryItem(subEditor);
 				mPageState.storeScriptedHistory(sideItem);
 			}
 			
@@ -378,10 +379,10 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, mEditorUtils) {
 			// now add a history entry for the new page state
 			if (doSaveState) {
 				mainEditor = mEditorUtils.getMainEditor();
-				subEdtitor = mEditorUtils.getSubEditor();
+				subEditor = mEditorUtils.getSubEditor();
 				mPageState.storeBrowserState(
 					mPageState.generateHistoryItem(mainEditor),
-					subEdtitor ? mPageState.generateHistoryItem(subEdtitor) : null);
+					subEditor ? mPageState.generateHistoryItem(subEditor) : null);
 			}
 			targetEditor.getTextView().focus();
 
