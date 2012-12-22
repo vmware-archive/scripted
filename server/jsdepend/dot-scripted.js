@@ -124,7 +124,8 @@ function configure(filesystem) {
 	
 	function findAndParseDotScripted(handle, callback) {
 		getRootDir(handle, function (root) {
-			root = root || getDirectory(handle);
+			//use found rootdir, or parent dir, or handle itself (if the handle is itself a root dir so it doesn't have a parent)
+			root = root || getDirectory(handle) || handle;
 			if (!root) {
 				return callback({});
 			} else {

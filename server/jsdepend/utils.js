@@ -129,7 +129,7 @@ function getDirectory(handle) {
 	} else {
 		segments.splice(-1, 1);
 		var result = segments.join('/');
-		if (result.length==='2' && result[1]===':') {
+		if (result.length===2 && result[1]===':') {
 			//Special case for windows: we get this 'C:' as parent of 'C:/something'
 			//What we want instead is 'C:/'
 			return result+'/';
