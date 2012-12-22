@@ -16,13 +16,13 @@
 /*global $ define module localStorage window console */
 
 define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'tests/client/common/testutils',
-	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'setup', 'jquery'],
-function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane) {
+	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'scripted/utils/os', 'setup', 'jquery'],
+function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, os) {
 	
-	var testResourcesRoot = mTestutils.discoverTestRoot();
-	var testResourcesRootNoSlash = testResourcesRoot.substring(0, testResourcesRoot.length-1);
-	var urlPathPrefix = "/clientServerTests?" + testResourcesRoot;
-	
+	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
+	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
+	var testResourcesRootNoClosingSlash = testResourcesRootOpeningSlash.substring(0, testResourcesRootOpeningSlash.length-1);
+	var urlPathPrefix = "/clientServerTests?" + testResourcesRootOpeningSlash;
 	var getFileContents = mTestutils.getFileContents;
 	
 	function setup() {
@@ -30,13 +30,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		for (var i = 0; i < panes.length; i++) {
 			mPaneFactory.destroyPane(panes[i]);
 		}
-		window.fsroot = testResourcesRootNoSlash;
+		window.fsroot = testResourcesRootNoClosingSlash;
 		mSidePanelManager.closeSidePanel();
 		window.subeditors=[];
 		localStorage.removeItem("scripted.recentFileHistory");
-		createEditor(testResourcesRoot + "foo.js");
+		createEditor(testResourcesRootOpeningSlash + "foo.js");
+		window.editor.setSelection(0,0);
 		localStorage.removeItem("scripted.recentFileHistory");
-		refreshBreadcrumbAndHistory(testResourcesRoot + "bar.js");
+		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
 	}
 	
 	function createEditor(path, kind) {
@@ -72,13 +73,13 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		setup();
 		setTimeout(function() {
 			assert.ok(window.editor);
-			createEditor(testResourcesRoot + "foo.js");
-			getFileContents(testResourcesRoot, "foo.js",
+			createEditor(testResourcesRootOpeningSlash + "foo.js");
+			getFileContents(testResourceRootClosingSlash, "foo.js",
 				function(contents) {
 					assert.equal(getMainEditorText(), contents);
 					
-					createEditor(testResourcesRoot + "bar.js");
-					getFileContents(testResourcesRoot, "bar.js", function(contents) {
+					createEditor(testResourceRootClosingSlash + "bar.js");
+					getFileContents(testResourceRootClosingSlash, "bar.js", function(contents) {
 						assert.equal(getMainEditorText(), contents);
 						assert.start();
 					});
@@ -104,17 +105,17 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.testBreadcrumb = function() {
 		setup();
-		refreshBreadcrumbAndHistory(testResourcesRoot + "bar.js");
+		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
 		var breadcrumbs = $('#breadcrumb');
 		assert.equal(breadcrumbs.children().length, 3);
 		assert.equal(breadcrumbs.children()[0], $('#historycrumb')[0]);
-		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>" + testResourcesRootNoSlash + "</span>");
+		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>" + testResourcesRootNoClosingSlash + "</span>");
 		assert.equal(breadcrumbs.children()[2].innerHTML, "<span>bar.js</span>");
 	};
 	
 	tests.testEmptyHistorycrumb = function() {
 		setup();
-		refreshBreadcrumbAndHistory(testResourcesRoot + "bar.js");
+		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
 		var historyMenu = $("#history_menu");
 		// history should be empty because no navigation happened
 		assert.equal(historyMenu.children().length, 0);
@@ -127,7 +128,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.equal(historyMenu.children().length, 0);
 		
 		// already on foo.js, navigate to itself
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 1);
@@ -142,7 +143,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.equal(historyMenu.children().length, 0);
 		
 		// navigate to new location.  remember foo
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 1);
@@ -156,8 +157,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		// history should be empty because no navigation happened
 		assert.equal(historyMenu.children().length, 0);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 2);
@@ -174,9 +175,9 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		window.editor.setSelection(15, 25);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
 		historyMenu = $("#history_menu");
 		
 		assert.equal(historyMenu.children().length, 2);
@@ -193,15 +194,15 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		window.editor.setSelection(15, 25);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
 		window.editor.setSelection(5, 10);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 		window.editor.setSelection(6, 7);
 		
 		// this one is not stored in history yet
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 		window.editor.setSelection(6, 8);
 		historyMenu = $("#history_menu");
 		
@@ -222,20 +223,20 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.equal(historyMenu.children().length, 0);
 		window.editor.setSelection(10, 20);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js", shiftKey:true });
 		window.subeditors[0].setSelection(15, 25);
 //		$(window.editor._domNode).find('.textview').scrollTop(10);
 //		var scrollTop1 = $(window.editor._domNode).find('.textview').scrollTop();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "baz.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js", shiftKey:true });
 		window.subeditors[0].setSelection(5, 10);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js", shiftKey:true });
 		window.subeditors[0].setSelection(6, 7);
 //		$(window.editor._domNode).find('.textview').scrollTop(12);
 //		var scrollTop2 = $(window.editor._domNode).find('.textview').scrollTop();
 		
 		
 		// this one is not stored in history yet
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 		window.subeditors[0].setSelection(6, 8);
 		historyMenu = $("#history_menu");
 		
@@ -277,14 +278,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			$('#side_panel').css('display', 'none');
 			mNavHistory.toggleSidePanel();
 			assert.ok(window.subeditors[0]);
-			createEditor(testResourcesRoot + "foo.js");
-			getFileContents(testResourcesRoot, "foo.js",
+			createEditor(testResourcesRootOpeningSlash + "foo.js");
+			getFileContents(testResourceRootClosingSlash, "foo.js",
 				function(contents) {
-					createEditor(testResourcesRoot + "foo.js",  "sub");
+					createEditor(testResourcesRootOpeningSlash + "foo.js",  "sub");
 					assert.equal(getSubEditorText(), contents);
 					
-					getFileContents(testResourcesRoot, "bar.js", function(contents) {
-						createEditor(testResourcesRoot + "bar.js", "sub");
+					getFileContents(testResourceRootClosingSlash, "bar.js", function(contents) {
+						createEditor(testResourcesRootOpeningSlash + "bar.js", "sub");
 						assert.equal(getSubEditorText(), contents);
 						assert.start();
 					});
@@ -294,61 +295,61 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.testEditorNavigation1 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testEditorNavigation2 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#40,50" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 	tests.testEditorNavigation3 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 	};
 	
 //	tests.testEditorNavigation4 = function() {
 //		setup();
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN" });
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN" });
 //		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 //		assert.deepEqual(window.editor.getSelection(), {start:20,end:30});
 //	};
 	
 	tests.testSubeditorNavigation1 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation2 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#40,50", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:40,end:50});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 	tests.testSubeditorNavigation3 = function() {
 		setup();
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 	};
 	
 //	tests.testSubeditorNavigation4 = function() {
 //		setup();
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#NaN,NaN", shiftKey:true });
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN", shiftKey:true });
 //		assert.deepEqual(window.subeditors[0].getSelection(), {start:0,end:0});
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 //		assert.deepEqual(window.subeditors[0].getSelection(), {start:20,end:30});
 //	};
 	
@@ -356,19 +357,19 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		setup();
 		
 		// initial selection should be 0
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// explicit set of selection through url
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#40,50" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#40,50" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 		
 		// go to a new file
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:0,end:0});
 		
 		// back to original file and ensure selection is grabbed from history
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 		assert.deepEqual(window.editor.getSelection(), {start:40,end:50});
 	};
 	
@@ -379,10 +380,10 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		function confirmer(done) {
 			confirmed = done ? "yes" : "no";
 		}
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30" });
 		
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// no edit sub --- no confirm
@@ -393,9 +394,9 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			return true;
 		}
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30", shiftKey:true });
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// edit sub, navigate in main --- no confirm
@@ -406,12 +407,12 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			return true;
 		}
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		window.subeditors[0].setText('foo', 0,0);
 		
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	// edit main navigate in sub  --- no confirm
@@ -421,13 +422,13 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			confirmed = done ? "yes" : "no";
 			return true;
 		}
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30", shiftKey:true });
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
 		assert.equal(confirmed, "no", "Should not have opened confirm dialog if no edits");
 	};
 	
@@ -439,11 +440,11 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			return true;
 		}
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		// should be false and not "no" since the confirmation never occurs if in same file
 		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
 	};
@@ -455,11 +456,11 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			return true;
 		}
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true  });
 		window.subeditors[0].setText('foo', 0,0);
 		
 		mPaneFactory._setNavigationConfirmer(confirmer);
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true  });
 		// should be false and not "no" since the confirmation never occurs if in same file
 		assert.equal(confirmed, false, "Should not have opened confirm dialog because target is same file");
 	};
@@ -474,10 +475,10 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		}
 		mPaneFactory._setNavigationConfirmer(confirmer);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
 		window.editor.setText('foo', 0,0);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30" });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30" });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
 	// edit sub navigate in sub  --- confirm
@@ -489,17 +490,17 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		}
 		mPaneFactory._setNavigationConfirmer(confirmer);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "bar.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true  });
 		window.subeditors[0].setText('foo', 0,0);
 		
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRoot + "foo.js#20,30", shiftKey:true  });
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js#20,30", shiftKey:true  });
 		assert.equal(confirmed, "yes", "Should have opened confirm dialog because there was an edit");
 	};
 
 	// tests a single page only
 	function oddUrlTest(fname, urlSuffix, selection) {
 		setup();
-		getFileContents(testResourcesRoot, fname,
+		getFileContents(testResourceRootClosingSlash, fname,
 			function(contents) {
 				mNavHistory.handleNavigationEvent({testTarget : "http://localhost:7261/clientServerTests" + urlSuffix },
 					window.editor);
@@ -511,43 +512,43 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	// now we throw a whole bunch of urls at the editor and test to make sure it behaves correctly
 	tests.asyncTestOddUrl1= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js", [0,0]);
+		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js", [0,0]);
 	};
 	tests.asyncTestOddUrl1a= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#", [0,0]);
+		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js#", [0,0]);
 	};
 	tests.asyncTestOddUrl2= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#10,20", [10,20]);
+		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js#10,20", [10,20]);
 	};
 	tests.asyncTestOddUrl3= function() {
-		oddUrlTest("bar.js", "?#path:'" + testResourcesRoot + "bar.js',range:[10,20]", [10,20]);
+		oddUrlTest("bar.js", "?#path:'" + testResourceRootClosingSlash + "bar.js',range:[10,20]", [10,20]);
 	};
 	tests.asyncTestOddUrl4= function() {
-		oddUrlTest("bar.js", "?#main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}", [10,20]);
+		oddUrlTest("bar.js", "?#main:{path:'" + testResourceRootClosingSlash + "bar.js',range:[10,20]}", [10,20]);
 	};
 	tests.asyncTestOddUrl5= function() {
-		oddUrlTest("bar.js", "?#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "?#{main:{path:'" + testResourceRootClosingSlash + "bar.js',range:[10,20]}}", [10,20]);
 	};
 	tests.asyncTestOddUrl6= function() {
-		oddUrlTest("bar.js", "#{main:{path:'" + testResourcesRoot + "bar.js',range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "#{main:{path:'" + testResourceRootClosingSlash + "bar.js',range:[10,20]}}", [10,20]);
 	};
 	tests.asyncTestOddUrl7= function() {
-		oddUrlTest("bar.js", "?" + testResourcesRoot + "bar.js#{main:{range:[10,20]}}", [10,20]);
+		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js#{main:{range:[10,20]}}", [10,20]);
 	};
 	
 	function changeLocation(url) {
-		var state = mPageState.extractPageStateFromUrl("http://localhost:7261" + url);
+		var state = mPageState.extractPageStateFromUrl("http://localhost:7261/clientServerTests" + url);
 		mNavHistory.setupPage(state, true);
 	}
 	
 	function testLocation(mainPath, mainSel, subPath, subSel) {
-		assert.equal(window.editor.getFilePath(),testResourcesRoot +  mainPath);
+		assert.equal(window.editor.getFilePath(), testResourceRootClosingSlash +  mainPath);
 		assert.deepEqual(window.editor.getSelection(), {start: mainSel[0], end: mainSel[1]});
 		if (subPath) {
 			if (!window.subeditors[0]) {
 				assert.fail('Expected a subeditor');
 			} else {
-				assert.equal(window.subeditors[0].getFilePath(), testResourcesRoot + subPath);
+				assert.equal(window.subeditors[0].getFilePath(), testResourceRootClosingSlash + subPath);
 				assert.deepEqual(window.subeditors[0].getSelection(), {start: subSel[0], end: subSel[1]});
 			}
 		} else {
@@ -557,14 +558,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.testPageSetup1 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
 		testLocation("bar.js", [0,0]);
 	};
 
 	tests.asyncTestPageSetup2 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
-		changeLocation("?" + testResourcesRoot + "foo.js");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
+		changeLocation("?" + testResourceRootClosingSlash + "foo.js");
 		testLocation("foo.js", [0,0]);
 		history.back();
 		setTimeout(function() {
@@ -579,8 +580,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup3 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js");
-		changeLocation("?" + testResourcesRoot + "foo.js");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
+		changeLocation("?" + testResourceRootClosingSlash + "foo.js");
 		testLocation("foo.js", [0,0]);
 		history.back();
 		setTimeout(function() {
@@ -595,8 +596,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup4 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js#20,21");
+		changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
 		setTimeout(function() {
@@ -611,9 +612,9 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup5 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#20,21");
-		changeLocation("?" + testResourcesRoot + "bar.js#5,7");
-		changeLocation("?" + testResourcesRoot + "bar.js#8,10");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js#20,21");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js#5,7");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js#8,10");
 		testLocation("bar.js", [8,10]);
 		history.back();
 		setTimeout(function() {
@@ -629,15 +630,15 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	// with sub editor
 	tests.asyncTestPageSetup6 = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourcesRoot + "baz.js\",range:[9,10]}");
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + testResourceRootClosingSlash + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourceRootClosingSlash + "baz.js\",range:[9,10]}");
+		changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
 		setTimeout(function() {
 			testLocation("bar.js", [20,21], "baz.js", [9,10]);
 			history.back();
 			setTimeout(function() {
-				testLocation("foo.js", [5,7]);
+				testLocation("foo.js", [0,0]);
 				history.forward();
 				setTimeout(function() {
 					testLocation("bar.js", [20,21], "baz.js", [9,10]);
@@ -650,7 +651,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	
 	tests.asyncTestToggleSide = function() {
 		setup();
-		changeLocation("?" + testResourcesRoot + "foo.js#5,7");
+		changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		mNavHistory.toggleSidePanel();
 		testLocation("foo.js", [5,7], "foo.js", [5,7]);

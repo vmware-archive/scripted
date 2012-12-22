@@ -65,7 +65,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				hash = hash.substring(1);
 			}
 		
-			if (!isNaN(parseInt(hash.charAt(0)))) {
+			if (!isNaN(parseInt(hash.charAt(0), 10))) {
 				// http://localhost:7261/editor/path.js#10,20
 				hash = "main:{range:[" + hash + "]}";
 			}
@@ -94,6 +94,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				path = path.substring(1);
 			}
 			try {
+				// escape backslashes. json5 will get tripped up on them
 				var state = JSON5.parse(hash);
 				if (typeof state !== "object") {
 					// assume invalid

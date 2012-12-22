@@ -14,17 +14,24 @@
  * this module provides OS specific utilities
  */
  /*jslint browser:true */
-define({
-	name: (function () {
+define([], function() {
+	
+	function osName() {
 		if (navigator.appVersion.indexOf("Win")!==-1) { return "windows"; }
 		if (navigator.appVersion.indexOf("Mac")!==-1) { return "macos"; }
 		if (navigator.appVersion.indexOf("X11")!==-1) { return "unix"; }
 		if (navigator.appVersion.indexOf("Linux")!==-1) { return "linux"; }
 		return 'unkown';
-	})(),
-	// this function is re-defined in many places.
-	isMac : navigator.platform.indexOf("Mac") !== -1,
-	isCtrlOrMeta : function(event) {
-		return (this.isMac && event.metaKey) || (!this.isMac && event.ctrlKey);
 	}
+	
+	
+	return {
+		name: osName(),
+		// this function is re-defined in many places.
+		isMac : navigator.platform.indexOf("Mac") !== -1,
+		isCtrlOrMeta : function(event) {
+			return (this.isMac && event.metaKey) || (!this.isMac && event.ctrlKey);
+		},
+		pathsep : (osName() === 'windows' ? '\\' : '/')
+	};
 });
