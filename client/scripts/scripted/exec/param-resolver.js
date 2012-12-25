@@ -83,6 +83,11 @@ function forEditor(editor) {
 		return editor.getFilePath();				
 	});
 	
+	def("${filename}", function() {
+		var p = editor.getFilePath();
+		return p.substring(p.lastIndexOf('/')+1);
+	});
+	
 	def("${dir}", getDir);
 	
 	def("${projectDir}", function () {
