@@ -124,8 +124,8 @@ function get(response, request) {
 //  
 //  fs.readFile(file, function(err,data){
 //    if(err) {
-//    	// Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
-////    	console.log("get2() err.errno is "+err.errno);
+//	// Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
+//	console.log("get2() err.errno is "+err.errno);
 //		if (err.errno === 28 /*EISDIR*/ || err.errno === -1 /*Windows returns this for readFile on dirs*/) {
 //			// is a directory
 //			response.writeHead(500, { "Content-Type": "text/plain"});

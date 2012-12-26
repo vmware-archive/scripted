@@ -24,7 +24,7 @@ define([
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
+	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/utils/editorUtils",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
@@ -33,9 +33,9 @@ define([
 	mEditorFeatures, mTextStyler, mTextMateStyler,
 	mJsContentAssist, mJSTemplateContentAssist, mContentAssist,
 	mIndexerService, mTextSearcher, mSelection, mCommands,
-	mParameterCollectors, mHtmlGrammar, mModuleVerifier,  
+	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-	mCssContentAssist, mTemplateContentAssist,
+	mCssContentAssist, mTemplateContentAssist, editorUtils,
 	mMarkoccurrences, tHelptext
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
@@ -100,10 +100,11 @@ define([
 				document.title = fileName + " :: Scripted";
 			}
 		} else if (editor.type === 'sub') {
+			var domNode = editorUtils.getSubEditor()._domNode;
 			if (editor.isDirty()) {
-				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text("* " + fileName);
+				$(domNode).parent().find('.subeditor_title').text("* " + fileName);
 			} else {
-				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text(fileName);
+				$(domNode).parent().find('.subeditor_title').text(fileName);
 			}
 		}
 	}

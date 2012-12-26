@@ -15,7 +15,8 @@
 /*jslint browser:true */
 /*global $ define module localStorage window console */
 
-define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'setup', 'jquery'], function(testutils, assert, mNavHistory, mPageState) {
+define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'scripted/utils/editorUtils', 'setup', 'jquery'], 
+function(testutils, assert, mNavHistory, mPageState, editorUtils) {
 	 
 	var testroot = testutils.discoverTestRoot();
 	
@@ -23,15 +24,14 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 		window.fsroot = testroot.slice(0,-1);
 		localStorage.removeItem("scripted.recentFileHistory");
 		$('.subeditor_wrapper').remove();
-		window.subeditors = [];
-		var editor = mNavHistory._loadEditor(testroot + "foo.js");
-		if (window.isSub) {
-			window.subeditors[0] = editor;
-		} else {
-			window.editor = editor;
-		}
-		mNavHistory.initializeBreadcrumbs(testroot + "foo.js");
+		var editor = createEditor(testroot + "foo.js". window.isSub);
+		localStorage.removeItem("scripted.recentFileHistory");
 	}
+	
+	function createEditor(path, kind) {
+		mNavHistory.handleNavigationEvent({testTarget : path, shiftKey : (kind === 'sub') });
+	}
+
 	
 	module('Linter tests');
 
@@ -41,10 +41,10 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 		setup();
 		setTimeout(function() {
 			activateJshint();
-			assert.ok(window.editor);
+			assert.ok(editorUtils.getMainEditor());
 			mNavHistory.handleNavigationEvent({testTarget : testroot + "boo.js" });
 			// TODO is handleNavigationEvent synchronous? (can't be, linter invocation is at least in an async block)
-			var problems = window.editor.problems;
+			var problems = editorUtils.getMainEditor().problems;
 			assert.equal(1, problems.length);
 			assert.equal("12>12: Missing semicolon.", stringifyProblem(problems[0]));
 			assert.start();
@@ -55,10 +55,10 @@ define(['testutils', 'orion/assert', 'scripted/utils/navHistory', 'scripted/util
 		setup();
 		setTimeout(function() {
 			activateJshint({ "undef": true});
-			assert.ok(window.editor);
+			assert.ok(editorUtils.getMainEditor());
 			mNavHistory.handleNavigationEvent({testTarget : testroot + "boo2.js" });
 			// TODO is handleNavigationEvent synchronous? (can't be, linter invocation is at least in an async block)
-			var problems = window.editor.problems;
+			var problems = editorUtils.getMainEditor().problems;
 			console.log(problems);
 			assert.equal(1, problems.length);
 			assert.equal("2>7: 'define' is not defined.", stringifyProblem(problems[0]));

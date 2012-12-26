@@ -13,7 +13,7 @@
  ******************************************************************************/
 
 // implements the pane interface for editors
-/*global scripted JSON5 dojo confirm*/
+/*global scripted JSON5 dojo confirm define $*/
 /*jslint browser:true */
 define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory",
 "orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/dialogs/outlineDialog",
@@ -80,7 +80,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	var initializeBreadcrumbs = function(path) {
 		var root = window.fsroot;
 
-//		$('#breadcrumb li:not(:first)').remove();
 		$('.breadcrumb_menu').remove();
 		$('#breadcrumb li').remove();
 
@@ -104,7 +103,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 				xhrobj.send();
 				var kids = JSON5.parse(xhrobj.responseText).children;
 				if (kids) {
-
 					kids.sort(fileEntryCompare);
 
 					var newMenu = $('<ul class="breadcrumb_menu" data-id="'+i+'"></ul>');
@@ -157,9 +155,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		});
 	};
 
-	// Need to load searcher here instead of scriptedEditor.js to avoid circular dependencies
-	// Before : scriptedEditor.js -> searchClient.js -> navHistory.js -> scriptedEditor.js : BAD
-
 	var attachSearchClient = function(editor) {
 
 		if (editor) {
@@ -186,7 +181,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		});
 	};
 
-	// TODO move to scriptedEditor.js
 	var attachFileSearchClient = function(editor) {
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("l",/*CMD/CTRL*/true,/*SHIFT*/true,/*ALT*/false),"Look in files");
 		editor.getTextView().setAction("Look in files",function() {

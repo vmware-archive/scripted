@@ -194,6 +194,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		parentId: "explorer-tree"
 	});
 
+	// TODO BAD! global variable
 	window.explorer = explorer;
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
@@ -359,7 +360,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		});
 		
 		$(window).bind('beforeunload', function() {
-			if (editorUtils.getMainEditor().isDirty() || (window.subeditors[0] && window.subeditors[0].isDirty())) {
+			if (editorUtils.getMainEditor().isDirty() || (editorUtils.getSubEditor() && editorUtils.getSubEditor().isDirty())) {
 				return "There are unsaved changes.";
 			}
 		});
