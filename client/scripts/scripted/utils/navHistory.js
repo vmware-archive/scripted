@@ -171,13 +171,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 	};
 	
 	var toggleSidePanel = function() {
+		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
 	
-		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
-		var mainItem = mPageState.generateHistoryItem(mainEditor);
-		var subItem = sidePanelOpen ? mPageState.generateHistoryItem(subEditor) : null;
-		mPageState.storeBrowserState(mainItem, subItem, true);
+		storeAllState(true);
 		if (sidePanelOpen) {
 			mSidePanelManager.closeSidePanel();
 		} else {
@@ -199,9 +197,8 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 			subEditor = editorUtils.getSubEditor();
 			subEditor.getTextView().focus();
 		}
-		mainItem = mPageState.generateHistoryItem(mainEditor);
-		subItem = sidePanelOpen ? null: mPageState.generateHistoryItem(subEditor);
-		mPageState.storeBrowserState(mainItem, subItem, false);
+		
+		storeAllState(false);
 		return true;
 	};
 	
@@ -240,19 +237,8 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 	};
 	
 	var setupPage = function(state, doSaveState) {
-		var mainItem;
-		var subItem;
-		var mainEditor = editorUtils.getMainEditor();
-		var subEditor = editorUtils.getSubEditor();
-
-		if (doSaveState && mainEditor) {
-			mainItem = mPageState.generateHistoryItem(mainEditor);
-			if (subEditor) {
-				subItem = mPageState.generateHistoryItem(subEditor);
-			}
-			
-			// replace existing history with current page state (ie- update selection ranges and scroll pos
-			mPageState.storeBrowserState(mainItem, subItem, true);
+		if (doSaveState) {
+			storeAllState(doSaveState);
 		}
 
 		if (!state.side) {
@@ -271,12 +257,25 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		} else {
 			navigate(state, EDITOR_TARGET.main, false);
 		}
-		mainItem  = state.main ? state.main : state;
-		subItem = state.side;
+		var mainItem  = state.main ? state.main : state;
+		var subItem = state.side;
 		if (doSaveState) {
 			mPageState.storeBrowserState(mainItem, subItem);
 		}
 	};
+	
+	var storeAllState = function(doReplace) {
+		var mainItem;
+		var subItem;
+		var mainEditor = editorUtils.getMainEditor();
+		var subEditor = editorUtils.getSubEditor();
+		mainItem = mPageState.generateHistoryItem(mainEditor);
+		if (subEditor) {
+			subItem = mPageState.generateHistoryItem(subEditor);
+		}
+		mPageState.storeBrowserState(mainItem, subItem, doReplace);
+	};
+
 
 	/**
 	 * handles the onpopstate event
@@ -407,6 +406,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		setupPage: setupPage,
 		switchEditors: switchEditors,
 		toggleSidePanel: toggleSidePanel,
-		openOnRange: openOnRange
+		openOnRange: openOnRange,
+		storeAllState : storeAllState
 	};
 });

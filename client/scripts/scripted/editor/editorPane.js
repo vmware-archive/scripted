@@ -28,9 +28,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		sub : "sub",
 		tab : "tab"
 	};
-	
-	
-	window.subeditors = [];
 
 	function openOnClick(event, editor) {
 		if (mOsUtils.isCtrlOrMeta(event)) {
@@ -231,12 +228,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 				clearTimeout(currentRequest);
 			}
 			currentRequest = setTimeout(function() {
-				if (!window.editor.getFilePath) {
-					return;
-				}
-				var mainItem = mPageState.generateHistoryItem(window.editor);
-				var subItem = window.subeditors && window.subeditors.length > 0 ? mPageState.generateHistoryItem(window.subeditors[0]) : null;
-				mPageState.storeBrowserState(mainItem, subItem, true);
+				mNavHistory.storeAllState(true);
 			}, 1000);
 
 		}
@@ -246,28 +238,32 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	/**
 	 * Adds one-time configuration to the main editor
 	 */
-	var buildMainEditor = function() {
-		var domNode = $('#editor');
-		domNode.click(function(event) {
-			openOnClick(event, window.editor);
-		});
-		$(document).on('sidePanelClosed.mainEditor', function(event) {
-			// ensure that the main editor goes back to full size
-			domNode.css('margin-right', '0');
-		});
-		$(document).on('sidePanelShown.mainEditor', function(event) {
-			// ensure that the main editor goes back to full size
-			domNode.css('margin-right', $('#side_panel').width());
-		});
-		domNode.css('display','block');
-		return domNode;
+	var attachEventHandlers = function(editor, domNode, isMain) {
+		if (isMain) {
+			domNode.click(function(event) {
+				openOnClick(event, editor);
+			});
+			$(document).on('sidePanelClosed.mainEditor', function(event) {
+				// ensure that the main editor goes back to full size
+				domNode.css('margin-right', '0');
+			});
+			$(document).on('sidePanelShown.mainEditor', function(event) {
+				// ensure that the main editor goes back to full size
+				domNode.css('margin-right', $('#side_panel').width());
+			});
+			domNode.css('display','block');
+		} else {
+			domNode.click(function(event) {
+				openOnClick(event, editor);
+			});
+		}
 	};
 
 	
 	var buildSubEditor = function(filepath, evtName) {
 		var filename = filepath.split('/').pop();
 		// remove this html snippet to separate file
-		var subeditor =
+		var subeditorHTML =
 		$('<div class="subeditor_wrapper">'+
 			'<div class="subeditor_titlebar">'+
 				'<span class="subeditor_title" title="'+filepath+'">'+filename+'</span>'+
@@ -279,7 +275,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			'<div class="subeditor scriptededitor"></div>'+
 		'</div>');
 		
-		$('#side_panel').append(subeditor);
+		$('#side_panel').append(subeditorHTML);
 		var domNode = $('.subeditor');
 		
 		var sideHeight = $('#side_panel').height();
@@ -295,9 +291,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		$('.subeditor_close').on('click.' + evtName, mNavHistory.toggleSidePanel);
 		$('.subeditor_switch').on('click.' + evtName, mNavHistory.switchEditors);
 		
-		domNode.click(function(event) {
-			openOnClick(event, window.subeditors[0]);
-		});
 		return domNode;
 	};
 
@@ -309,14 +302,16 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		this.evtName = Date.now();
 		var domNode;
 		if (kind === EDITOR_TARGET.main) {
-			domNode = buildMainEditor();
+			domNode = $('#editor');
 		} else {
 			domNode = buildSubEditor(filepath, this.evtName);
 		}
 		
 		domNode.show();
-		$('body').off('keydown');
 		var editor = mEditor.makeEditor(domNode[0], filepath, kind);
+		attachEventHandlers(editor, domNode, kind === EDITOR_TARGET.main);
+
+		$('body').off('keydown');
 		if (editor.loadResponse === 'error') {
 			domNode.hide();
 			attachSearchClient(null);
@@ -351,12 +346,10 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			if (this.isMain) {
 				$(document).off('sidePanelClosed.mainEditor');
 				$(document).off('sidePanelShown.mainEditor');
-				delete window.editor;
 			} else {
 				$('.subeditor_close').off('click.' + this.evtName, mNavHistory.toggleSidePanel);
 				$('.subeditor_switch').off('click.' + this.evtName, mNavHistory.switchEditors);
 				$('.subeditor_wrapper').remove();
-				window.subeditors = [];
 			}
 		},
 		/**
@@ -381,9 +374,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			this.editor = newContents;
 			if (this.kind === EDITOR_TARGET.main) {
 				initializeBreadcrumbs(newContents.getFilePath());
-				window.editor = newContents;
 			} else {
-				window.subeditors[0] = newContents;
 				initializeHistoryMenu();
 			}
 		}

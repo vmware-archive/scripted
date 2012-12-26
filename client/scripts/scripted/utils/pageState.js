@@ -181,7 +181,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 		 * generates an item to be stored in scripted.recentFileHistory as well as browser state
 		 */
 		generateHistoryItem : function(editor) {
-			if (!editor || !editor.getFilePath) {
+			if (!editor) {
 				return { path : "", range : [0,0] };
 			}
 			var path = editor.getFilePath();
