@@ -256,6 +256,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			'flart', "Number", 'flart :: Number');
 	};
 	
+	// https://github.com/scripted-editor/scripted/issues/96
+	tests.testMultiFileConstructorExport = function() {
+		doMultiFileTest( "car", "define(function() {\n" +
+			"    function Car(model) {\n" +
+			"        this.model = model;\n" +
+			"    }\n" +
+			"    Car.prototype = {\n" +
+			"        show: function() {\n" +
+			"            console.log(this.model);\n" +
+			"		}\n" +
+			"    };\n" +
+			"    return Car;\n" +
+			"});",
+			"define(['car'], function(Car) { var c = new Car('ford'); c.show(); });",
+			'show', "?undefined:", 'show :: () -> undefined');
+	};
+	
 	//////////////////////////////////////////////////////////
 	// LHS of assingments and variable declarators
 	//////////////////////////////////////////////////////////

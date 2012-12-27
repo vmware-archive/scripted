@@ -1913,6 +1913,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 						//  3. new type name is more general than old type
 						if (!current.$$isBuiltin && current.hasOwnProperty(name) &&
 								!leftTypeIsMoreGeneral(typeName, current[name].typeName, this)) {
+							// since we are just overwriting the type we do not want to change 
+							// the path or the range
 							current[name].typeName = typeName;
 						}
 						found = true;
@@ -2025,8 +2027,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				constructorName = constructorName.substring(0,constructorName.lastIndexOf(":")+1);
 				this.newFleetingObject(constructorName);
 				var flobj = this.newFleetingObject(constructorName + "~proto");
-				this._allTypes[constructorName].$$proto = new mTypes.Definition(flobj, this.uidj);
-				this._allTypes[rawTypeName].$$proto = new mTypes.Definition(constructorName, this.uid);
+				this._allTypes[constructorName].$$proto = new mTypes.Definition(flobj, null, this.uidj);
+				this._allTypes[rawTypeName].$$proto = new mTypes.Definition(constructorName, null, this.uid);
 			},
 			
 			findType : function(typeName) {
@@ -2207,6 +2209,10 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	}
 	
 	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
+		if (currentTypeName.charAt(0) === '*') {
+			// constructors are not stored with their arguments so need to remove them in order to find them
+			currentTypeName = currentTypeName.substring(0, currentTypeName.lastIndexOf(":")+1);
+		}
 		var currentType = allTypes[currentTypeName];
 		if (currentType) {
 			for(var prop in currentType) {
@@ -2264,6 +2270,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					} else {
 						constrType = retType;
 					}
+					// don't strictly need this if the protoype of the object has been changed, but OK to keep
 					reachable[constrType + "~proto"] = true;
 					retType = extractReturnType(retType);
 				} else if (isArrayType(retType)) {
@@ -2277,6 +2284,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			}
 			reachable[retType] = true;
 		}
+		
 		findUnreachable(moduleTypeName, allTypes, reachable);
 		for (var prop in allTypes) {
 			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
