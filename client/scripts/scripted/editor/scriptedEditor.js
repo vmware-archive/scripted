@@ -24,7 +24,7 @@ define([
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
-	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist", "scripted/utils/editorUtils",
+	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
@@ -35,7 +35,7 @@ define([
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-	mCssContentAssist, mTemplateContentAssist, editorUtils,
+	mCssContentAssist, mTemplateContentAssist,
 	mMarkoccurrences, tHelptext
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
@@ -100,11 +100,10 @@ define([
 				document.title = fileName + " :: Scripted";
 			}
 		} else if (editor.type === 'sub') {
-			var domNode = editorUtils.getSubEditor()._domNode;
 			if (editor.isDirty()) {
-				$(domNode).parent().find('.subeditor_title').text("* " + fileName);
+				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text("* " + fileName);
 			} else {
-				$(domNode).parent().find('.subeditor_title').text(fileName);
+				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text(fileName);
 			}
 		}
 	}
@@ -179,6 +178,11 @@ define([
 		});
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
+		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
+		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
+		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
+		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
+		
 		var postSave = function (text) {
 			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
@@ -244,13 +248,7 @@ define([
 			return tv;
 		};
 
-		// define this outside of the closure since it needs to be referenced outside
-		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var contentAssistFactory = function(editor) {
-			var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
-			var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
-			var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist(editor);
-			
 			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 			var providers = [];
 			if (isJS) {
@@ -326,14 +324,25 @@ define([
 					options.indent_level = determineIndentLevel(editor, start, options);
 					formatted = js_beautify(toFormat, options);
 					if (formatted) {
-//                        formatted = fixFirstLineFormatting(toFormat, formatted);
 						editor.setText(formatted, start, end);
 					}
+					// selection is lost if not re-set
+					editor.setSelection(start, end);
 				} else {
 					toFormat = editor.getText();
 					formatted = js_beautify(toFormat, options);
 					if (formatted) {
+						// can't just set the same selection after formatting since offsets may have chanbged
+						// instead use line/col
+						var model = editor.getTextView().getModel();
+						var line = model.getLineAtOffset(start);
+						var col = start - model.getLineStart(line);
 						editor.setText(formatted);
+						
+						var newOffset = Math.min(model.getLineStart(line) + col, model.getLineEnd(line));
+						editor.setSelection(newOffset, newOffset, true);
+					} else {
+						editor.setSelection(start, end);
 					}
 				}
 				return true;
