@@ -207,6 +207,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nreturn Exported; });", "a");
 	};
 	
+	// https://github.com/scripted-editor/scripted/issues/96
+	tests["test constructor export with changed prototype"] = function() {
+		assertCreateSummary('{"provided":"*Car:model","types":{"Car":{"$$proto":"*Car:","model":"gen~a~5"},"*Car:":{"$$proto":"gen~a~9"},"*Car:~proto":{"$$proto":"Object"},"gen~a~9":{"$$proto":"Object","show":"?undefined:","model":"gen~a~14"},"gen~a~14":{"$$proto":"Object"}},"kind":"AMD"}',
+			"define(function() {\n" +
+			"    function Car(model) {\n" +
+			"        this.model = model;\n" +
+			"    }\n" +
+			"    Car.prototype = {\n" +
+			"        show: function() {\n" +
+			"            console.log(this.model);\n" +
+			"	    }\n" +
+			"    };\n" +
+			"    return Car;\n" +
+			"});", "a");
+	};
+
+	
 	//////////////////////////////////////////////////////////
 	// common js modules are modules that have an exports variable in the global scope
 	//////////////////////////////////////////////////////////
