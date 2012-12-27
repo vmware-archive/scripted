@@ -110,7 +110,7 @@ exports.CompletionsProcessor.prototype = {
 					proposal : rawCompletion,
 					description : rawCompletion + " : " + rawCompletion,
 					trigger: rawCompletion,
-					positions : [],
+					positions : null,
 					escapePosition : rawCompletion.length
 				};
 			} else {

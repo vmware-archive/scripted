@@ -179,11 +179,6 @@ define([
 		});
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
-		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
-		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
-		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
-		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
-		
 		var postSave = function (text) {
 			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
@@ -249,7 +244,13 @@ define([
 			return tv;
 		};
 
+		// define this outside of the closure since it needs to be referenced outside
+		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var contentAssistFactory = function(editor) {
+			var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
+			var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
+			var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist(editor);
+			
 			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
 			var providers = [];
 			if (isJS) {

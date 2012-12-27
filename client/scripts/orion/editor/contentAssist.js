@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -15,7 +15,7 @@
 define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
 
 	/**
-	 * Set of styles available for proposals.  The key corresponds to the value of the 'style' 
+	 * Set of styles available for proposals.  The key corresponds to the value of the 'style'
 	 * property of the proposal.  The value corresponds to a css class for styling that proposal.
 	 */
 	var STYLES = {
@@ -182,6 +182,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			this.ignoreNextChange = true;
 			this.cancel();
+			
+			// SCRIPTED start
+			// allow proposals to be functions
+			if (typeof proposal === "function") {
+				proposal = proposal();
+			}
+			// SCRTIPED end
 
 			var offset = this.textView.getCaretOffset();
 			var start = offset;
@@ -204,7 +211,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				var child = nodes[i];
 				var selIndex = child.className.indexOf(STYLES.selected);
 				if (selIndex >= 0) {
-					child.className = child.className.substring(0, selIndex) + 
+					child.className = child.className.substring(0, selIndex) +
 							child.className.substring(selIndex + STYLES.selected.length);
 				}
 				if (child === node) {

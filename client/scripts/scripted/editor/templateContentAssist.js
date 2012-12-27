@@ -24,7 +24,7 @@ if(!Array.isArray) {
  * This module provides content assist gathered from .scripted-completion files
  */
 
-define(['servlets/get-templates', 'when'], function(getTemplates, when) {
+define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], function(getTemplates, when, resolver) {
 
 	/**
 	 * shared templates
@@ -47,7 +47,8 @@ define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 		return newPositions;
 	}
 
-	function TemplateContentAssist() {
+	function TemplateContentAssist(editor) {
+		this.replaceParams = resolver.forEditor(editor);
 	}
 	
 	TemplateContentAssist.prototype = {
@@ -78,23 +79,35 @@ define(['servlets/get-templates', 'when'], function(getTemplates, when) {
 			// we're in business
 			var newTemplates = [];
 			var prefix = context.prefix;
+			var replaceParams = this.replaceParams;
 			// find offset of the start of the word
 			var offset = invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
 				if (template.trigger.substr(0,prefix.length) === prefix) {
-					newTemplates.push({
-						proposal : template.proposal,
-						description : template.description,
-						escapePosition : template.escapePosition ? offset + template.escapePosition : null,
-						positions : extractPositions(template.positions, offset),
-						relevance : 20000,
-						replace : true
-					});
+					// defer the actual calculation of the proposal until it is accepted
+					var proposalFunc = function() {
+						var actualText = replaceParams(template.proposal);
+						return {
+							proposal : actualText,
+							description : template.description,
+							escapePosition : template.escapePosition ? offset + template.escapePosition : null,
+							positions : extractPositions(template.positions, offset),
+							// relevance not used...should it be?
+	//						relevance : 20000,
+							replace : true
+						};
+					};
+					proposalFunc.description = template.description;
+					newTemplates.push(proposalFunc);
 				}
 			});
 			return newTemplates;
 		}
 	};
+	
+	function resolveVariable(variableName) {
+		
+	}
 
 	return {
 		TemplateContentAssist : TemplateContentAssist,

@@ -18,7 +18,7 @@ define(['scripted/utils/pathUtils'], function () {
 
 // This module provides a mechanism to replace 'parameters' of the form ${name}
 // inside of data objects. It walks the data object creating a copy of it, replacing
-// all occurrences of the params in every string found in the data object. 
+// all occurrences of the params in every string found in the data object.
 
 //Creates a parameter replacement function that is base on a given set of parameter definitions.
 function createParamReplacer(paramDefs) {
@@ -59,6 +59,33 @@ function createParamReplacer(paramDefs) {
 	return replaceParams;
 }
 
+/**
+ * Returns a string of all the whitespace at the start of the current line.
+ * @param {String} buffer The document
+ * @param {Integer} offset The current selection offset
+ */
+function leadingWhitespace(buffer, offset) {
+	var whitespace = "";
+	offset = offset-1;
+	while (offset > 0) {
+		var c = buffer.charAt(offset--);
+		if (c === '\n' || c === '\r') {
+			//we hit the start of the line so we are done
+			break;
+		}
+		if (/\s/.test(c)) {
+			//we found whitespace to add it to our result
+			whitespace = c.concat(whitespace);
+		} else {
+			//we found non-whitespace, so reset our result
+			whitespace = "";
+		}
+	}
+	return whitespace;
+}
+
+
+
 var getDirectory = require('scripted/utils/pathUtils').getDirectory;
 
 //Create a param replacer function that 'resolves' parameters relative to
@@ -80,7 +107,7 @@ function forEditor(editor) {
 	}
 	
 	def("${file}", function() {
-		return editor.getFilePath();				
+		return editor.getFilePath();
 	});
 	
 	def("${dir}", getDir);
@@ -88,7 +115,28 @@ function forEditor(editor) {
 	def("${projectDir}", function () {
 		return window.fsroot || getDir();
 	});
+	
+	// function to return the leading offset of the currently selected line
+	def("${lineStart}", function() {
+		var offset = editor.getTextView().getSelection().start;
+		var buffer = editor.getText();
+		return leadingWhitespace(buffer, offset);
+	});
+	
+	def("${now}", function() {
+		return new Date();
+	});
 
+	def("${selection}", function() {
+		var selection = editor.getTextView().getSelection();
+		return editor.getText(selection.start, selection.end);
+	});
+	
+	// for testing
+	def("${hello}", function() {
+		return "Hi, dude!";
+	});
+	
 	return createParamReplacer(paramDefs);
 
 }
