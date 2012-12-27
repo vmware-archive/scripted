@@ -334,11 +334,12 @@ define([
 					if (formatted) {
 						// can't just set the same selection after formatting since offsets may have chanbged
 						// instead use line/col
+						// not perfect, since lines may have been added or removed.
 						var model = editor.getTextView().getModel();
 						var line = model.getLineAtOffset(start);
 						var col = start - model.getLineStart(line);
 						editor.setText(formatted);
-						
+						line = Math.min(line, model.getLineCount()-1);
 						var newOffset = Math.min(model.getLineStart(line) + col, model.getLineEnd(line));
 						editor.setSelection(newOffset, newOffset, true);
 					} else {
