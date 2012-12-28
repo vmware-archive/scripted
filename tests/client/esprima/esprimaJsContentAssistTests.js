@@ -4003,6 +4003,38 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxyz", "xxyz : Number"]
 		]);
 	};
+	
+	// https://github.com/scripted-editor/scripted/issues/65
+	tests["test loosely match 1"] = function() {
+		var results = computeContentAssist(
+			"var getAnotherThing = 0;\n" +
+			"gAT", "gAT");
+		testProposals(results, [
+			["getAnotherThing", "getAnotherThing : Number"]
+		]);
+	};
+	tests["test loosely match 2"] = function() {
+		var results = computeContentAssist(
+			"var getAnotherThing = 0;\n" +
+			"getan", "getan");
+		testProposals(results, [
+			["getAnotherThing", "getAnotherThing : Number"]
+		]);
+	};
+	tests["test loosely match 3"] = function() {
+		var results = computeContentAssist(
+			"var getAnotherThing = 0;\n" +
+			"getaN", "getaN");
+		testProposals(results, [
+		]);
+	};
+	tests["test loosely match 4"] = function() {
+		var results = computeContentAssist(
+			"var getAnotherThing = 0;\n" +
+			"getAN", "getAN");
+		testProposals(results, [
+		]);
+	};
 
 	return tests;
 });
