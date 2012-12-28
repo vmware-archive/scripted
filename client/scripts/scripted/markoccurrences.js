@@ -26,7 +26,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		return (char >= 'a' && char <= 'z') ||
 			(char >= 'A' && char <= 'Z') ||
 			(char >= '0' && char <= '9') ||
-			char === '_' || char === '$'; 
+			char === '_' || char === '$';
 	}
 	
 	function isWord(selstart, selend, buffer) {

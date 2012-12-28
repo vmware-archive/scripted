@@ -13,8 +13,8 @@
  ******************************************************************************/
 
 /*global define require eclipse esprima window scriptedLogger doctrine */
-define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "esprima/esprima", "doctrine/doctrine"],
-		function(mVisitor, mTypes) {
+define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "esprima/esprima", "doctrine/doctrine"],
+		function(mVisitor, mTypes, proposalUtils) {
 	
 	/** @type {function(obj):Boolean} a safe way of checking for arrays */
 	var isArray = Array.isArray;
@@ -2120,7 +2120,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 					// minified files sometimes have invalid property names (eg- numbers).  Ignore them)
 					continue;
 				}
-				if (propName.indexOf(prefix) === 0) {
+				if (proposalUtils.looselyMatches(prefix, propName)) {
 					propType = type[prop].typeName;
 					var first = propType.charAt(0);
 					if (first === "?" || first === "*") {
@@ -2129,20 +2129,22 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 								propType, replaceStart - 1);
 						var funcDesc = res.completion + " : " + createReadableType(propType, env);
 						proposals["$"+propName] = {
-							proposal: removePrefix(prefix, res.completion),
+							proposal: res.completion,
 							description: funcDesc,
 							positions: res.positions,
 							escapePosition: replaceStart + res.completion.length,
 							// prioritize methods over fields
 							relevance: relevance + 5,
-							style: 'emphasis'
+							style: 'emphasis',
+							replace: true
 						};
 					} else {
 						proposals["$"+propName] = {
-							proposal: removePrefix(prefix, propName),
+							proposal: propName,
 							relevance: relevance,
 							description: createProposalDescription(propName, propType, env),
-							style: 'emphasis'
+							style: 'emphasis',
+							replace: true
 						};
 					}
 				}
