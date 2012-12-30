@@ -83,9 +83,23 @@ function forEditor(editor) {
 		return editor.getFilePath();				
 	});
 	
-	def("${filename}", function() {
+	// Returns 'hello.js' from '/path/project/sub/helloworld.js'
+	def("${fileName}", function() {
 		var p = editor.getFilePath();
 		return p.substring(p.lastIndexOf('/')+1);
+	});
+	
+	// Returns 'sub/hello.js' from '/path/project/sub/helloworld.js'
+	def("${filePath}", function() {
+		var p = editor.getFilePath();
+		return p.substring((window.fsroot || getDir()).length+1);
+	});
+	
+	// Returns 'hello' from '/path/project/sub/helloworld.js'
+	def("${fileBase}", function() {
+		var p = editor.getFilePath();
+		p = p.substring(p.lastIndexOf('/')+1);
+		return p.substring(0, p.lastIndexOf('.'));
 	});
 	
 	def("${dir}", getDir);
