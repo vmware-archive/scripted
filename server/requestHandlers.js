@@ -87,9 +87,9 @@ function get(response, request) {
 	  var binary = isBinary(data);
 
 	  if(binary){
-		  console.log('cannot open binary file');
-		  response.writeHead(204, {"Content-Type": "text/plain"});
-		  response.write("cannot open binary file");
+		  console.log('Cannot open binary file');
+		  response.writeHead(500, {"Content-Type": "text/plain"});
+		  response.write("Cannot open binary file");
 		  response.end();
 	  } else {
 		  response.writeHead(200, {

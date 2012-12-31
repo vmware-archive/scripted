@@ -57,27 +57,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		tv.setTopIndex(line);
 	};
 		
-	var isBinary = function(path) {
-		try {
-			var xhrobj = new XMLHttpRequest();
-			var url = GET_URL + path;
-			xhrobj.open("GET", url, false); // synchronous xhr
-			xhrobj.send();
-			if (xhrobj.readyState === 4) {
-				if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
-					return true;
-				} else {
-					return false;
-				}
-			}
-		} catch (e) {
-			console.log("Error getting " + path);
-			console.log(e);
-			return true;
-		}
-		return false;
-	};
-
 	/**
 	 * Handles navigation requests from clicking on links
 	 */
@@ -87,11 +66,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		var pageState = mPageState.extractPageStateFromUrl(url);
 		if (pageState.main) {
 			var path = pageState.main.path;
-			if (isBinary(path)) {
-				alert("Cannot open binary files");
-				return false;
-			}
-
 			var histItem = mPageState.getHistoryAsObject()[path];
 			var range = pageState.main.range;
 			if (!range) {

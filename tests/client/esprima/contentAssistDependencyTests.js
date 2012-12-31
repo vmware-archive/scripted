@@ -79,6 +79,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	function testProposals(prefix, actualProposals, expectedProposals) {
 //		console.log("Proposals:");
 //		console.log(actualProposals);
+
+		if (prefix) assert.ok(false);
 		
 		assert.equal(actualProposals.length, expectedProposals.length, 
 			"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals, prefix));
@@ -100,10 +102,10 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testGlobal1 = function() {
 		var results = computeContentAssist(
 			"aa", "aa", new MockIndexer(
-			{ 
+			{
 				first: "var aaa = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : Number"]
 		]);
 	};
@@ -114,7 +116,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var aaa = 9",
 				second: "var aab = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : Number"],
 			["aab", "aab : Number"]
 		]);
@@ -126,7 +128,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var aaa = 9",
 				second: "var aab = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : Number"],
 			["aab", "aab : Number"],
 			["aac", "aac : Number"]
@@ -141,7 +143,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var aaa = 9",
 				second: "var aab = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : String"],
 			["aab", "aab : Number"]
 		]);
@@ -153,7 +155,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var aaa = { bbb : { aaa : ''} }",
 				second: "var aab = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : String"]
 		]);
 	};
@@ -164,7 +166,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var aaa = { bbb : { aaa : function(a,b,c) { return 9; } } }",
 				second: "var aab = 9"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa(a, b, c)", "aaa(a, b, c) : Number"]
 		]);
 	};
@@ -175,9 +177,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var AAA = function(a,b,c) { this.ff1 = 9; }\n" +
 						"AAA.prototype.ff2 = 3;"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -191,7 +193,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return 9; });"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : Number"]
 		]);
 	};
@@ -201,7 +203,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { aaa : 9 } });"
 			}));
-		testProposals("aa", results, [
+		testProposals("", results, [
 			["aaa", "aaa : Number"]
 		]);
 	};
@@ -211,7 +213,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { aaa : 9 } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -222,7 +224,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "define('first', [], function() { return { aaa : 9 } });",
 				second: "define('second', [], function() { return { aaa : 9 } });"
 			}));
-		testProposals("f", results, [
+		testProposals("", results, [
 			["fa", "fa : { aaa : Number }"],
 			["fb", "fb : { aaa : Number }"]
 		]);
@@ -235,7 +237,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return function(a,b) { return 9; } });"
 			}));
-		testProposals("f", results, [
+		testProposals("", results, [
 			["ff(a, b)", "ff(a, b) : Number"]
 		]);
 	};
@@ -245,7 +247,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return function(a,b) { return 9; } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -258,7 +260,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { fun : function(a,b) { return 9; } } });"
 			}));
-		testProposals("fun", results, [
+		testProposals("", results, [
 			["fun(a, b)", "fun(a, b) : Number"]
 		]);
 	};
@@ -268,7 +270,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { fun : function(a,b) { return 9; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -280,7 +282,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });"
 			}));
-		testProposals("f", results, [
+		testProposals("", results, [
 			["ff", "ff : Number"]
 		]);
 	};
@@ -290,7 +292,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -305,7 +307,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define({ fun : 8 });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -315,7 +317,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define({ fun : function() { return 8; }});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -325,7 +327,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define({ Fun : function() { this.ff = 8; }});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -341,7 +343,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -353,7 +355,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });",
 				second: "define('second', [], function() { return { Fun2 : function(a,b) { this.ff = 9; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -365,7 +367,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });",
 				second: "define('second', [], function() { return { Fun2 : function(a,b) { this.ff = 9; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -377,7 +379,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });",
 				second: "define('second', [], function() { return { Fun2 : function(a,b) { this.ff = ''; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -389,7 +391,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "define('first', [], function() { return { Fun : function(a,b) { this.ff = 9; } } });",
 				second: "define('second', [], function() { return { Fun2 : function(a,b) { this.ff = ''; } } });"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -403,9 +405,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { function Fun(a,b) { this.ff1 = 9; };\n Fun.prototype.ff2 = '';\n return { Fun : Fun } });"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : String"]
 		]);
 	};
@@ -415,9 +417,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { function Fun(a,b) { this.ff1 = 9; };\n Fun.prototype.ff2 = function(a,b) { return '' };;\n return { Fun : Fun } });"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2(a, b)", "ff2(a, b) : String"]
 		]);
 	};
@@ -427,9 +429,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { function Fun(a,b) { this.ff1 = 9; };\n Fun.prototype = { ff2 : function(a,b) { return '' }, ff3 : '' };\n return { Fun : Fun } });"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2(a, b)", "ff2(a, b) : String"],
 			["ff3", "ff3 : String"]
 		]);
@@ -440,9 +442,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "define('first', [], function() { function Fun(a,b) { this.ff1 = 9; };\n Fun.prototype.ff2 = '';\n return Fun });"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : String"]
 		]);
 	};
@@ -457,7 +459,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "exports = 9;"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -468,7 +470,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "exports = 9;"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -479,7 +481,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "exports = { first : 9 };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -490,7 +492,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first: "var first = 9;\nexports = { first : first };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -502,7 +504,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var first = function() { return 9; }\n" +
 				       "exports = { first : first };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -514,7 +516,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var First = function() { this.x = 9 }\n" +
 				       "exports = { First : First };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -529,7 +531,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var First = function() { this.x = 9 }\n" +
 				       "exports = { First : First };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -542,7 +544,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var First = function() { this.x = 9 }\n" +
 				       "exports = { First : First };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -554,7 +556,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var First = function() { this.x = 9 }\n" +
 				       "exports = { First : First };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -567,7 +569,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first: "var Foo = function() { this.x = 9 }\n" +
 				       "exports = { a : { First : Foo  } };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -581,7 +583,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"var b = { c : c }\n" +
 				        "exports = { a : { b : b } };"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -599,9 +601,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"F.prototype.ff2 = 2;\n" +
 				        "exports = { F : F };"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -614,9 +616,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"F.prototype = { ff2: 7, ff3 : { a : 1, b: 2 } };\n" +
 				        "exports = { F : F };"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"],
 			["ff3", "ff3 : { a : Number, b : Number }"]
 		]);
@@ -630,9 +632,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"F.prototype = { ff2: 7, ff3 : { a : 1, b: 2 } };\n" +
 				        "exports = F ;"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"],
 			["ff3", "ff3 : { a : Number, b : Number }"]
 		]);
@@ -646,9 +648,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"F.prototype.ff2 = 2;\n" +
 				        "exports = F;"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -661,9 +663,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"F.prototype.ff2 = 2;\n" +
 				        "exports = new F();"
 			}));
-		testProposals("ff", results, [
+		testProposals("", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "---------------------------------"],
+			["", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -685,7 +687,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				        "  return { a : { b : b } };\n" +
 				        "});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);	
 	};
@@ -700,7 +702,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				        "  return function() { return 9; };\n" +
 				        "});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -714,7 +716,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				        "  return function() { return 9; };\n" +
 				        "});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -732,7 +734,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"  exports.a = { flart: function(a,b) { return 1; } }\n" +
 						"});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -744,7 +746,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 						"  exports.a = { flart: function(a,b) { return 1; } }\n" +
 						"});"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -756,7 +758,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "  exports.a = { flart: function(a,b) { return 1; } }\n"
 			}));
-		testProposals("toF", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -774,11 +776,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first:  "/*jslint browser:true*/\n" +
 						"define({ loc : location });"
 			}));
-		testProposals("p", results, [
+		testProposals("", results, [
 			["pathname", "pathname : String"],
 			["port", "port : String"],
 			["protocol", "protocol : String"],
-			["p", "---------------------------------"],
+			["", "---------------------------------"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
 		]);
@@ -791,11 +793,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first:  "/*jslint browser:true*/\n" +
 						"define({ loc : location });"
 			}));
-		testProposals("p", results, [
+		testProposals("", results, [
 			["pathname", "pathname : String"],
 			["port", "port : String"],
 			["protocol", "protocol : String"],
-			["p", "---------------------------------"],
+			["", "---------------------------------"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
 		]);
@@ -808,7 +810,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "define({ loc : location });"
 			}));
-		testProposals("p", results, [
+		testProposals("", results, [
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
 		]);
@@ -821,7 +823,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "define([], function() { return [1]; });"
 			}));
-		testProposals("toFi", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -833,7 +835,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "define([], function() { return {a : [1]}; });"
 			}));
-		testProposals("toFi", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -844,7 +846,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "define([], function() { return [{a: 1}]; });"
 			}));
-		testProposals("toFi", results, [
+		testProposals("", results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
@@ -855,7 +857,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			[], {
 				first:  "define([], function() { return [{a: 1}]; });"
 			}));
-		testProposals("concat", results, [
+		testProposals("", results, [
 			["concat(first, [rest...])", "concat(first, [rest...]) : Array"]
 		]);
 	};

@@ -610,8 +610,9 @@ define([
 						// Set the editor to show some help, a la vim
 						editor.setInput("Content", null, tHelptext);
 						editor.getTextView().setReadonly(true);
-					} else if (xhrobj.status === 204 || xhrobj.status === 1223) { //IE9 turns '204' status codes into '1223'...
-						alert('cannot open a binary file');
+					} else if (xhrobj.status === 500 && xhrobj.responseText === "Cannot open binary file") {
+						editor.setInput("Content", null, xhrobj.responseText);
+						editor.getTextView().setReadonly(true);
 						//ret = false;
 					} else if (xhrobj.status === 500 && xhrobj.responseText === "Error: Error: UNKNOWN, read64") {
 						// This occurs on windows, the server side doesn't get an EISDIR rc so cannot easily

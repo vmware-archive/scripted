@@ -19,11 +19,12 @@
 					 "tests/client/esprima/navigationTests", 
 					 "tests/client/esprima/summaryBuildingTests", 
 					 "tests/client/esprima/contentAssistDependencyTests",
+					 "tests/client/esprima/proposalUtilsTests",
 					 "tests/client/markoccurrences/markOccurrencesTests",
 					 "tests/client/indexer/indexerTests",
 					 "tests/client/keybindings/keystroke-tests"],
 				function(nodeunitShim, pageState, contentAssistTests, navTests, summaryTests, dependencyTests,
-					markOccurrencesTests, indexerTests, keystroke) {
+					proposalUtilsTests, markOccurrencesTests, indexerTests, keystroke) {
 					pageState._setEditorPrefix(window.location.pathname + '?');
 					function testShim(tests) {
 						for (var t in tests) {
@@ -46,6 +47,8 @@
 					testShim(summaryTests);
 					module("Dependency tests");
 					testShim(dependencyTests);
+					module("Proposal Utils tests");
+					testShim(proposalUtilsTests);
 					module("Indexer tests");
 					testShim(indexerTests);
 					module("Mark occurrences tests");
