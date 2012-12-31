@@ -31,18 +31,18 @@ function(assert, mTemplates, mTestutils) {
 	tests.asyncTestLoadProposals1 = function() {
 		mTemplates._reset();
 		var templateCA = new mTemplates.TemplateContentAssist();
-		templateCA.install("json", testResourcesRoot).then(
+		templateCA.install(null, "json", testResourcesRoot).then(
 			function(templates) {
 				assert.equal(templates.length, 7, "Should have found 7 templates for json files");
 				assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 7 templates for json files");
 				assert.ok(!mTemplates._getAllTemplates()['html'], "Should have not have any html templates");
-				templateCA.install("json").then(
+				templateCA.install(null, "json").then(
 					function(templates, testResourcesRoot) {
 						assert.equal(templates.length, 7, "Should have found 7 templates for json files");
 						assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 7 templates for json files");
 						assert.ok(!mTemplates._getAllTemplates()['html'], "Should have not have any html templates");
 						templateCA = new mTemplates.TemplateContentAssist();
-						templateCA.install("json", testResourcesRoot).then(
+						templateCA.install(null, "json", testResourcesRoot).then(
 							function(templates) {
 								assert.equal(templates.length, 7, "Should have found 7 templates for json files");
 								assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 7 templates for json files");
@@ -60,7 +60,7 @@ function(assert, mTemplates, mTestutils) {
 	tests.asyncTestLoadProposals2 = function() {
 		mTemplates._reset();
 		var templateCA = new mTemplates.TemplateContentAssist();
-		templateCA.install("json", testResourcesRoot).then(
+		templateCA.install(null, "json", testResourcesRoot).then(
 			function(templates) {
 				assert.equal(templates.length, 7, "Should have found 7 templates for json files");
 				assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 7 templates for json files");
@@ -71,7 +71,7 @@ function(assert, mTemplates, mTestutils) {
 						assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 9 templates for json files");
 						assert.equal(mTemplates._getAllTemplates()['html'].length, 5, "Should have found 5 templates for html files");
 						templateCA = new mTemplates.TemplateContentAssist();
-						templateCA.install("html", testResourcesRoot).then(
+						templateCA.install(null, "html", testResourcesRoot).then(
 							function(templates) {
 								assert.equal(templates.length, 5, "Should have found 7 templates for html files");
 								assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 9 templates for json files");
@@ -88,7 +88,7 @@ function(assert, mTemplates, mTestutils) {
 	tests.asyncTestComputeProposals1 = function() {
 		mTemplates._reset();
 		var templateCA = new mTemplates.TemplateContentAssist();
-		templateCA.install("json", testResourcesRoot).then(
+		templateCA.install(null, "json", testResourcesRoot).then(
 			function(templates) {
 				var buffer = "acronym1";
 				var completions = templateCA.computeProposals(buffer, buffer.length, { prefix : buffer } );

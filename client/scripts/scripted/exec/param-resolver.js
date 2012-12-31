@@ -55,8 +55,46 @@ function createParamReplacer(paramDefs) {
 			return target;
 		}
 	}
-
-	return replaceParams;
+	
+	var PARAM_START = "${";
+	var PARAM_END = "}";
+	
+	/**
+	 * Finds the replacements for a given target string.  Does not apply the replacements.
+	 * Instead, returns an array of replacements that would be applied.
+	 * @param String target the target text to determine replacements for
+	 * @return {Array.<{start:Number,end:Number,text:String,lengthAdded:Number}>} an array of replacements that
+	 * would be applied if the replaceParams function is called.  the lengthAdded property
+	 * is the number of chars added minus the number of chars removed
+	 */
+	function findReplacements(target) {
+		var curr = 0;
+		var res = [];
+		while ((curr = target.indexOf(PARAM_START, curr)) >= 0) {
+			var end = target.indexOf(PARAM_END, curr)+1;
+			if (end > 0) {
+				var param = target.substring(curr, end);
+				for (var paramDef in paramDefs) {
+					if (paramDefs.hasOwnProperty(paramDef)) {
+						while (param === paramDef) {
+							var value = resolve(param);
+							res.push({start:curr, end: end, text:value, lengthAdded:(value.length - end + curr+1)});
+							break;
+						}
+					}
+				}
+				curr = end +1;
+			} else {
+				break;
+			}
+		}
+		return res;
+	}
+	
+	return {
+		replaceParams : replaceParams,
+		findReplacements : findReplacements
+	};
 }
 
 /**
@@ -123,22 +161,18 @@ function forEditor(editor) {
 		return leadingWhitespace(buffer, offset);
 	});
 	
-	def("${now}", function() {
-		return new Date();
-	});
-
 	def("${selection}", function() {
 		var selection = editor.getTextView().getSelection();
 		return editor.getText(selection.start, selection.end);
 	});
 	
-	// for testing
-	def("${hello}", function() {
-		return "Hi, dude!";
-	});
+	// current line
+	// current user name (requires server call)
+	// year
+	// time
+	// date (but how to format???)
 	
 	return createParamReplacer(paramDefs);
-
 }
 
 function forFsRoot(fsroot) {

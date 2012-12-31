@@ -32,27 +32,54 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 	 */
 	var allTemplates = {};
 	
-	function extractPositions(origPositions, offset) {
+	function updatePosition(initialOffset, replacements, invocationOffset) {
+		var newOffset = initialOffset;
+		for (var i = 0; i < replacements.length; i++) {
+			if (invocationOffset + replacements[i].start <= initialOffset) {
+				newOffset += replacements[i].lengthAdded;
+			} else {
+				break;
+			}
+		}
+		return newOffset;
+	}
+	
+	function extractPositions(origPositions, offset, replacements) {
 		if (!origPositions) {
 			return null;
 		}
 		var newPositions = [];
 		if (Array.isArray(origPositions)) {
 			origPositions.forEach(function(position) {
-				newPositions.push(extractPositions(position, offset));
+				newPositions.push(extractPositions(position, offset, replacements, offset));
 			});
 		} else {
-			newPositions = { offset : origPositions.offset + offset, length : origPositions.length };
+			newPositions = {
+				offset : updatePosition(origPositions.offset + offset, replacements, offset),
+				length : origPositions.length
+			};
 		}
 		return newPositions;
 	}
 
-	function TemplateContentAssist(editor) {
-		this.replaceParams = resolver.forEditor(editor);
+	function TemplateContentAssist() {
 	}
 	
 	TemplateContentAssist.prototype = {
-		install : function(scope, root) {
+		install : function(editor, scope, root) {
+			if (editor) {
+				this.replacer = resolver.forEditor(editor);
+			} else {
+				// a noop replacer
+				this.replacer = {
+					replaceParams : function(val) {
+						return val;
+					},
+					updatePosition : function(pos) {
+						return pos;
+					}
+				};
+			}
 			this.scope = scope;
 			var deferred = when.defer();
 			if (! allTemplates[scope]) {
@@ -79,7 +106,8 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			// we're in business
 			var newTemplates = [];
 			var prefix = context.prefix;
-			var replaceParams = this.replaceParams;
+			var replaceParams = this.replacer.replaceParams;
+			var findReplacements = this.replacer.findReplacements;
 			// find offset of the start of the word
 			var offset = invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
@@ -87,11 +115,17 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
 						var actualText = replaceParams(template.proposal);
+						var escape = template.escapePosition ? offset + template.escapePosition : null;
+						var replacements = findReplacements(template.proposal);
+						if (escape) {
+							escape = updatePosition(escape, replacements, invocationOffset);
+						}
+						
 						return {
 							proposal : actualText,
 							description : template.description,
-							escapePosition : template.escapePosition ? offset + template.escapePosition : null,
-							positions : extractPositions(template.positions, offset),
+							escapePosition : escape,
+							positions : extractPositions(template.positions, offset, replacements),
 							// relevance not used...should it be?
 	//						relevance : 20000,
 							replace : true
@@ -105,10 +139,6 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 		}
 	};
 	
-	function resolveVariable(variableName) {
-		
-	}
-
 	return {
 		TemplateContentAssist : TemplateContentAssist,
 		_getAllTemplates : function() { return allTemplates; },

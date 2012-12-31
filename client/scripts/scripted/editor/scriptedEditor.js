@@ -101,9 +101,9 @@ define([
 			}
 		} else if (editor.type === 'sub') {
 			if (editor.isDirty()) {
-				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text("* " + fileName);
+				$(editor._domNode).parent().find('.subeditor_title').text("* " + fileName);
 			} else {
-				$(window.subeditors[0]._domNode).parent().find('.subeditor_title').text(fileName);
+				$(editor._domNode).parent().find('.subeditor_title').text(fileName);
 			}
 		}
 	}
@@ -257,7 +257,7 @@ define([
 			} else if (isCSS) {
 				providers.push(cssContentAssistant);
 			}
-			templateContentAssistant.install(extension);
+			templateContentAssistant.install(editor, extension);
 			providers.push(templateContentAssistant);
 			contentAssist.setProviders(providers);
 			return contentAssist;

@@ -27,7 +27,7 @@ define(["require", "orion/textview/keyBinding",
 
 	function installOn(editor) {
 
-		var replaceParams = require('scripted/exec/param-resolver').forEditor(editor);
+		var replaceParams = require('scripted/exec/param-resolver').forEditor(editor).replaceParams;
 		var namesUsed = {}; //Maps command names we've already used to a number (how many times we've used it.
 		                    //Any *actual* names we've used that are used more than once will get a number appended
 		                    //starting from the second use onward.

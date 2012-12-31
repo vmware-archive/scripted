@@ -69,7 +69,7 @@ define(['scripted/exec/param-resolver', 'scripted/exec/exec-shared'], function (
 	
 	function installOn(editor) {
 
-		var replaceParams = mParamResolver.forEditor(editor);
+		var replaceParams = mParamResolver.forEditor(editor).replaceParams;
 
 		var afterSaves = [];
 	
