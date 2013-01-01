@@ -52,19 +52,24 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 			*/
 		};
 		
-		var displayError = function(message) {
-		    if ($('.dialog_error_message').length > 0) {
-		        $('.dialog_error_message').text(message);
-		    }
+	var displayError = function(message) {
+			if ($('#dialog_error_message').length > 0) {
+				if (message) {
+					$('#dialog_error_message').text(message);
+				} else {
+					$('#dialog_error_message').text("");
+				}
+
+			}
 		};
 
 	/**
-	* Operations should contain an onClose handler that returns a when promise. The promise
-	* is used to determine whether the dialogue should remain open while an operation is being performed (e.g.
-	*  waiting for a response from a server, and display the error message if one is obtained). If no promise
-	* is returned, or the promise is resolved, the dialogue will close after the onClose handler is invoked.
-	*/
-	var openDialogue = function(dialogueID, dialogue, operations /*should contain an onClose function that returns a promise*/) {
+	 * Operations should contain an onClose handler that returns a when promise. The promise
+	 * is used to determine whether the dialogue should remain open while an operation is being performed (e.g.
+	 *  waiting for a response from a server, and display the error message if one is obtained). If no promise
+	 * is returned, or the promise is resolved, the dialogue will close after the onClose handler is invoked.
+	 */
+	var openDialogue = function(dialogueID, dialogue, operations /*should contain an onClose function that returns a promise*/ ) {
 
 			var activeElement = document.activeElement;
 
@@ -100,19 +105,22 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 			$('#dialogue_ok_button').off('click.dialogs');
 			$('#dialogue_ok_button').on('click.dialogs', function() {
 				var value = operations.onOK ? operations.onOK() : null;
+				
+				// Clear error messages first
+				displayError(null);
 
 				if (operations.onClose) {
 					var promise = operations.onClose(value);
-					if (!promise) {
-						// Close the dialogue right away
-						removeDialogue(dialogueID);
-					} else {
-					    // Defer closing only on success, otherwise display the error
+					if (promise && promise.then) {
+						// Defer closing only on success, otherwise display the error
 						promise.then(function() {
 							removeDialogue(dialogueID);
 						}, function(err) {
-						    displayError(err);
+							displayError(err);
 						});
+					} else {
+						// Close the dialogue right away
+						removeDialogue(dialogueID);
 					}
 				}
 
@@ -164,7 +172,13 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 		};
 
 
-
+    /**
+    * Returns various operations that can be performed after a dialogue is created. For example, adding a resource.
+    * Each operation has the option of taking a callback function that is performed when the user closes the dialogue.
+    * The callback should return a promise that when resolved, will result in the actual dialogue being closed, or if rejected,
+    * will keep the dialogue open and display the rejection error. If no callback is specified, the dialogue will close immediately
+    * after a user selects to close it.
+    */
 	var createDialogue = function(initialValue) {
 
 			var addResource = function(onClose) {

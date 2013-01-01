@@ -123,8 +123,9 @@ function withBaseDir(baseDir) {
 		var newname = handle2file(handleRename);
 		console.log("Requesting resource rename for: " + original + " into " + newname);
 		var deferred = when.defer();
-		if (original && newname) {
-
+		if (original === newname) {
+			deferred.reject("Both original and new names are the same.");
+		} else if (original && newname) {
 			fs.rename(original, newname, function(err) {
 				if (err) {
 					deferred.reject(err);
@@ -132,7 +133,6 @@ function withBaseDir(baseDir) {
 					deferred.resolve();
 				}
 			});
-
 		} else {
 			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
 			deferred.reject(message);

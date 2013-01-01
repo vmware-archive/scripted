@@ -30,9 +30,12 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 		};
 
-	var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
+    /**
+    * Wrapper call around an operation promise that performs a navigator refresh upon a promise resolve, or error logging on reject.
+    */
+	var navigatorRefreshHandler = function(operationPromise, resourceToSelect) {
 
-			if (operationPromise) {
+			if (operationPromise && operationPromise.then) {
 
 				// On a successful promise result, refresh navigator, and if specified, highlight and navigate
 				// to a resource
@@ -43,9 +46,10 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 				var errorCallBack = function(err) {
 						scriptedLogger.error(err, loggingCategory);
 					};
-
+             
 				operationPromise.then(resolveCallBack, errorCallBack);
 			}
+	
 		};
 
 
@@ -113,21 +117,25 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 			var getMenusActions = function() {
 
 					addAction({
-						name: "New File...",
-						handler: function(selectionContext) {
+					name: "New File...",
+					handler: function(selectionContext) {
 
-							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
-							resourceName) {
-								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
-								// pass '' as contents
-								var promise = fileOperationsClient.createFile(urlNewResource,'');
-								performNavigatorRefreshOperation(promise, urlNewResource);
-							});
-						},
-						isEnabled: function() {
-							return typeof resourceCreationPath !== "undefined";
-						}
-					});
+						resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+						resourceName) {
+							var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
+
+                            // pass '' as contents to avoid undefined new file
+							var promise = fileOperationsClient.createFile(urlNewResource, '');
+
+							navigatorRefreshHandler(promise, urlNewResource);
+							
+							return promise;
+						});
+					},
+					isEnabled: function() {
+						return typeof resourceCreationPath !== "undefined";
+					}
+				});
 
 					addAction({
 						name: "New Folder...",
@@ -137,7 +145,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
 								var promise = fileOperationsClient.mkdir(urlNewResource);
-								performNavigatorRefreshOperation(promise, urlNewResource);
+								navigatorRefreshHandler(promise, urlNewResource);
+								return promise;
 							});
 						},
 						isEnabled: function() {
@@ -160,7 +169,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 										var promise = fileOperationsClient.rename(
 										contextResource.location,
 										urlNewResource);
-										performNavigatorRefreshOperation(promise, urlNewResource);
+										navigatorRefreshHandler(promise, urlNewResource);
+										return promise;
 									}
 								});
 							}
@@ -180,7 +190,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 							resourcesDialogue.createDialogue(resourceNameToDelete).deleteResource(function(value) {
 								var promise = fileOperationsClient.deleteResource(contextResource.location);
 								// Navigate to parent folder.
-								performNavigatorRefreshOperation(promise, parent);
+								navigatorRefreshHandler(promise, parent);
+								return promise;
 							});
 						},
 						isEnabled: function() {

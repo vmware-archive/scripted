@@ -675,6 +675,15 @@ a.dialog_button:hover {
     color:#666; 
 }
 
+#dialog_error_message {
+    font-family:arial;
+    font-size:13px; 
+    text-align:center;
+    margin:13px;
+    padding:10px; 
+    color:red; 
+}
+
 .dialogue_text {
    width:200px; 
 }
