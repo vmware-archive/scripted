@@ -44,7 +44,15 @@ function computeLineSeps(text) {
  */
 function searchFile(term, fullpath, matchFn, doneFn){
 	//console.log("Checking "+fullpath);
-	var text = fs.readFileSync(fullpath, 'utf-8'); //TODO: make asycn
+	var text;
+	try {
+		text = fs.readFileSync(fullpath, 'utf-8'); //TODO: make asycn
+	} catch (e) {
+		//Ensure server doesn't crash when some problem reading the file
+		//See https://issuetracker.springsource.com/browse/SCRIPTED-270
+		console.log(e);
+		return doneFn();
+	}
 	
 	if (isBinary(text)){
 		return doneFn();
