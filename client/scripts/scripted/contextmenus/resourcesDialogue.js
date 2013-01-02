@@ -87,8 +87,8 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 
 
 			// Handle ENTER and ESCAPE keypresses on the dialog
-			$(dialogueID).off('keyp.dialogs');
-			$(dialogueID).on('keyup.dialogs', function(e) {
+			$(window).off('keyup.dialogs');
+			$(window).on('keyup.dialogs', function(e) {
 				// Pressing ENTER triggers the button click
 				if (e.keyCode === $.ui.keyCode.ENTER) {
 					$('#dialogue_ok_button').trigger('click');
