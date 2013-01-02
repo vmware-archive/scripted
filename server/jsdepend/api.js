@@ -59,7 +59,6 @@ function configure(config) {
 
 	var getContents = fromConfig(config, 'getContents', 'function');
 	var resolve = require("./resolver").configure(config).resolve;
-	var getIndexer = require('./file-indexer').configure(config).getIndexer;
 	var getConf = require('./dot-scripted').configure(config).getConfiguration;
 	var retrieveNearestFile = require('./retrieve-nearest-file').configure(config).retrieveNearestFile;
 	var findGlobalDependencies = require('./global-dependencies-finder').configure(config);
@@ -181,18 +180,9 @@ function configure(config) {
 		});
 	}
 	
-	function findFileNamesContaining(currentFile, substring, callback, errback) {
-		getIndexer(currentFile,
-			function (indexer) {
-				indexer.findFileNamesContaining(substring, callback, errback);
-			}
-		);
-	}
-	
 	getDGraph.remoteType =  ['JSON', 'callback'];
 	getDependencies.remoteType = ['JSON', 'callback'];
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
-	findFileNamesContaining.remoteType =  ['JSON', 'JSON', 'callback', 'errback'];
 	getConf.remoteType = ['JSON', 'callback'];
 	retrieveNearestFile.remoteType = ['JSON', 'JSON', 'JSON', 'callback'];
 	
@@ -201,7 +191,6 @@ function configure(config) {
 		getContents: getContents,
 		getDependencies: getDependencies,
 		getDGraph: getDGraph,
-		findFileNamesContaining: findFileNamesContaining,
 		getConf: getConf,
 		retrieveNearestFile: retrieveNearestFile
 	};

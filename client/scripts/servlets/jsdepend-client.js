@@ -26,7 +26,6 @@ define(function(require, exports, module) {
 	var signatures = {
 		getDependencies: ['JSON', 'callback'],
 		getContents: ['JSON', 'callback', 'errback'],
-		findFileNamesContaining: ['JSON', 'JSON', 'callback', 'errback'],
 		getDGraph: ['JSON', 'callback'],
 		getConf: ['JSON', 'callback'],
 		retrieveNearestFile: ['JSON', 'JSON', 'JSON', 'callback']
