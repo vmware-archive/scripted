@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -75,7 +75,7 @@ exports.noRootMarkerFile = function(test) {
 	//The behavior for this case has changed a few times.
 	//current expected behavior is that we use directory of the file itself as the root.
 	var api = makeApi('no-root-marker-file');
-	api.getIndexer('subdir/subsubdir/dummy.js', 
+	api.getIndexer('subdir/subsubdir/dummy.js',
 		function (indexer) {
 			test.equals(indexer.getRootDir(), 'subdir/subsubdir');
 			test.done();
