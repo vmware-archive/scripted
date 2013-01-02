@@ -9,6 +9,8 @@
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
 
+/*jslint browser:true jquery:true */
+
 define(
 ['scripted/contextmenus/contextmenuprovider', 'jquery'],
 
@@ -80,6 +82,8 @@ function(contextMenuProvider) {
 						mainDiv.append(menudiv);
 					}
 				}
+
+
 				return mainDiv;
 			}
 
@@ -103,12 +107,32 @@ function(contextMenuProvider) {
 				'y': y
 			};
 		};
+		
+		var attachContextMenuEvents = function(contextMenu) {
+				// Handle ESCAPE keypresses on the dialog
+				$(window).on('keyup.' + contextMenuClass, function(e) {
+
+					if (e.keyCode === $.ui.keyCode.ESCAPE) {
+						hideContextMenu(contextMenu);
+					}
+				});
+
+				// be sure to attach a click listener to the window to have the context menu disappear
+				$(window).one('click', null, function() {
+					hideContextMenu(contextMenu);
+				});
+
+			};
 
 	var showContextMenu = function(context, contextMenu, eventContext) {
 
+			// Hide existing context menu
 			if (currentContextMenu) {
-				$(currentContextMenu).remove();
+				hideContextMenu(currentContextMenu);
 			}
+
+			// Keep reference of new context menu
+			currentContextMenu = contextMenu;
 
 			if (!contextMenu || !eventContext) {
 				return;
@@ -130,10 +154,8 @@ function(contextMenuProvider) {
 				left: position.x + "px"
 			});
 
-			// be sure to attach a click listener to the window to have the context menu disappear
-			$(window).one('click', null, function() {
-				hideContextMenu(contextMenu);
-			});
+			attachContextMenuEvents(contextMenu);
+
 
 		};
 
@@ -141,6 +163,8 @@ function(contextMenuProvider) {
 		if (contextMenu) {
 			$(contextMenu).remove();
 		}
+		// Be sure to remove any event listeners on window
+		$(window).off('keyup.' + contextMenuClass);
 	};
 
 	/**
@@ -172,7 +196,7 @@ function(contextMenuProvider) {
 						if (cmenu) {
 							showContextMenu(context, cmenu,
 							e);
-							currentContextMenu = cmenu;
+							
 							e.preventDefault();
 
 							// To avoid context menus from appearing for nested DOM elements, stop event propagation to any parents
