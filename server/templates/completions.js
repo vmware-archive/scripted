@@ -180,6 +180,7 @@ exports.CompletionsProcessor.prototype = {
 					}
 				} else {
 					i--;
+					j++;
 					if (isNamed) {
 						contents += rawContents[i-1];
 					}
@@ -212,7 +213,7 @@ exports.CompletionsProcessor.prototype = {
 			description : trigger + " : " + contents,
 			trigger: trigger,
 			positions : positions.length === 0 ? null : positions,
-			escapePosition : escapePosition ? escapePosition : contents.length
+			escapePosition : escapePosition ? escapePosition : null
 		};
 	},
 

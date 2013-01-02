@@ -32,10 +32,10 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 	 */
 	var allTemplates = {};
 	
-	function updatePosition(initialOffset, replacements, invocationOffset) {
+	function updatePosition(initialOffset, replaceStart, replacements) {
 		var newOffset = initialOffset;
 		for (var i = 0; i < replacements.length; i++) {
-			if (invocationOffset + replacements[i].start <= initialOffset) {
+			if (replaceStart + replacements[i].start <= initialOffset) {
 				newOffset += replacements[i].lengthAdded;
 			} else {
 				break;
@@ -44,18 +44,21 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 		return newOffset;
 	}
 	
-	function extractPositions(origPositions, offset, replacements) {
+	/**
+	 * @param Number offset offset into unreplaced text
+	 */
+	function extractPositions(origPositions, replaceStart, replacements) {
 		if (!origPositions) {
 			return null;
 		}
 		var newPositions = [];
 		if (Array.isArray(origPositions)) {
 			origPositions.forEach(function(position) {
-				newPositions.push(extractPositions(position, offset, replacements, offset));
+				newPositions.push(extractPositions(position, replaceStart, replacements));
 			});
 		} else {
 			newPositions = {
-				offset : updatePosition(origPositions.offset + offset, replacements, offset),
+				offset : updatePosition(origPositions.offset + replaceStart, replaceStart, replacements),
 				length : origPositions.length
 			};
 		}
@@ -75,8 +78,8 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 					replaceParams : function(val) {
 						return val;
 					},
-					updatePosition : function(pos) {
-						return pos;
+					findReplacements : function(val) {
+						return [];
 					}
 				};
 			}
@@ -109,23 +112,25 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			var replaceParams = this.replacer.replaceParams;
 			var findReplacements = this.replacer.findReplacements;
 			// find offset of the start of the word
-			var offset = invocationOffset - prefix.length;
+			var replaceStart = invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
 				if (template.trigger.substr(0,prefix.length) === prefix) {
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
 						var actualText = replaceParams(template.proposal);
-						var escape = template.escapePosition ? offset + template.escapePosition : null;
+						var escape = template.escapePosition;
 						var replacements = findReplacements(template.proposal);
 						if (escape) {
-							escape = updatePosition(escape, replacements, invocationOffset);
+							escape = updatePosition(escape + replaceStart, replaceStart, replacements);
+						} else {
+							escape = actualText.length + replaceStart;
 						}
 						
 						return {
 							proposal : actualText,
 							description : template.description,
 							escapePosition : escape,
-							positions : extractPositions(template.positions, offset, replacements),
+							positions : extractPositions(template.positions, replaceStart, replacements),
 							// relevance not used...should it be?
 	//						relevance : 20000,
 							replace : true

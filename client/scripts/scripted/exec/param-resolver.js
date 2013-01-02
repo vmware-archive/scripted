@@ -11,7 +11,7 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
-/*global require define console window */
+/*global require define window scripted */
 /*jslint browser:true devel:true*/
 
 define(['scripted/utils/pathUtils'], function () {
@@ -71,19 +71,19 @@ function createParamReplacer(paramDefs) {
 		var curr = 0;
 		var res = [];
 		while ((curr = target.indexOf(PARAM_START, curr)) >= 0) {
-			var end = target.indexOf(PARAM_END, curr)+1;
-			if (end > 0) {
-				var param = target.substring(curr, end);
+			var end = target.indexOf(PARAM_END, curr);
+			if (end >= 0) {
+				var param = target.substring(curr, end+1);
 				for (var paramDef in paramDefs) {
 					if (paramDefs.hasOwnProperty(paramDef)) {
 						while (param === paramDef) {
 							var value = resolve(param);
-							res.push({start:curr, end: end, text:value, lengthAdded:(value.length - end + curr+1)});
+							res.push({start:curr, end: end, text:value, lengthAdded:(value.length - end + curr-1)});
 							break;
 						}
 					}
 				}
-				curr = end +1;
+				curr = end+1;
 			} else {
 				break;
 			}
@@ -105,7 +105,7 @@ function createParamReplacer(paramDefs) {
 function leadingWhitespace(buffer, offset) {
 	var whitespace = "";
 	offset = offset-1;
-	while (offset > 0) {
+	while (offset >= 0) {
 		var c = buffer.charAt(offset--);
 		if (c === '\n' || c === '\r') {
 			//we hit the start of the line so we are done
@@ -122,6 +122,28 @@ function leadingWhitespace(buffer, offset) {
 	return whitespace;
 }
 
+/**
+ * @return {String} indentation preferences for current project
+ */
+function indent() {
+	var formatterPrefs = scripted && scripted.config && scripted.config.editor;
+	if (!formatterPrefs) {
+		return '\t';
+	}
+	
+	var expandtab = formatterPrefs.expandtab;
+	var tabsize = formatterPrefs.tabsize ? formatterPrefs.tabsize : 4;
+	
+	var indentText = '';
+	if (expandtab) {
+		for (var i = 0; i < tabsize; i++) {
+			indentText += " ";
+		}
+	} else {
+		indentText = '\t';
+	}
+	return indentText;
+}
 
 
 var getDirectory = require('scripted/utils/pathUtils').getDirectory;
@@ -159,6 +181,14 @@ function forEditor(editor) {
 		var offset = editor.getTextView().getSelection().start;
 		var buffer = editor.getText();
 		return leadingWhitespace(buffer, offset);
+	});
+	
+	var indentText;
+	def("${indent}", function() {
+		if (!indentText) {
+			indentText = indent();
+		}
+		return indentText;
 	});
 	
 	def("${selection}", function() {
