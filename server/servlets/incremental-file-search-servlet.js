@@ -28,7 +28,6 @@ var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
 var searchFile = require('../textsearch/searcher').searchFile;
-//var fileindexer = require('../jsdepend/file-indexer').configure(conf);
 var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
 
 var LOG_SOCKET_COUNT = false;
