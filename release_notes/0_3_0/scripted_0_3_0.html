@@ -258,6 +258,20 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		</td>
 	</tr>
 	<tr id="newlook">
+		<td class="title">Smart matching for content assist</td>
+		<td class="description">
+		Scripted now performs fuzzy matching for content assist proposals.  Typing text in all lower case will look for proposals case-insensitively. as shown in this screenshot:
+		<br/><br/>
+		<img src="content_assist_matching1.png" border="1" />
+		<br/><br/>
+		Scripted also recognizes camelCase matching.  You can shortcut each fragment in a camelCased word and the completion engine will match against each fragment portion, as shown here:
+		<br/><br/>
+		<img src="content_assist_matching2.png" border="1" />
+		<br/><br/>
+		
+		</td>
+	</tr>
+	<tr id="newlook">
 		<td class="title">Completion templates</td>
 		<td class="description">
 		Scripted now has basic support for defining your own completion templates.  To use this feature, create a file called 
