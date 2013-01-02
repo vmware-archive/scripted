@@ -26,8 +26,12 @@ var ignore = require('../filesystem').ignore;
 //TODO: allow setting configuration options via .scripted file.
 
 var FAKE = true; //Set to true to supress creating any real file system watchers.
-                 // Dirwatch will function correctly assuming no file system changes
-                 // are being made. 
+                 // Dirwatch will function 'correctly' assuming no file system changes
+                 // are being made. (i.e. it will read initial files but won't become
+                 // aware of any changes).
+//TODO: right now it is ok to use 'FAKE' always because the only code using dirwatch is test code
+// and test code currently has never makes changes to the filesystem that need to
+// be watched.
 
 function makeWatcher(path, listener) {
 
@@ -64,7 +68,7 @@ function makeWatcher(path, listener) {
 	//	       path.indexOf('/dijit/')>=0 ||
 	//	       path.indexOf('/dojo/')>=0 ||
 	//	       path.indexOf('/nls/')>=0;
-		return false; // Watch everything
+		return FAKE; // Watch everything unless we are faking it.
 	}
 
 	var watchers = 0; //Counts the number of fs.watch instances that are active at the moment (mostly
@@ -390,8 +394,8 @@ function makeWatcher(path, listener) {
 						refreshChildren(node);
 					});
 					watchers++;
-					//console.log('Watching: '+node.path);
-					//console.log('Number of watchers: '+watchers);
+					console.log('Watching: '+node.path);
+					console.log('Number of watchers: '+watchers);
 				}
 		        k();
 			});
