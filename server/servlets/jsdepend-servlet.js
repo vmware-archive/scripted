@@ -25,7 +25,8 @@ var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 
 var conf = configuration.withBaseDir(null);
-conf.sloppy = false;
+conf.sloppy = false; //IMPORTANT: if this gets switched back on... must also make sure
+					 // to switch dirwatch back on (i.e. disable the FAKE mode)
 var api = apiMaker.configure(conf);
 
 var basePath = "/jsdepend";
