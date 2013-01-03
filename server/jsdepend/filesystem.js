@@ -124,7 +124,7 @@ function withBaseDir(baseDir) {
 		console.log("Requesting resource rename for: " + original + " into " + newname);
 		var deferred = when.defer();
 		if (original === newname) {
-			deferred.reject("Both original and new names are the same.");
+			deferred.reject("Both original and new names are the same. Please enter a different name.");
 		} else if (original && newname) {
 			fs.rename(original, newname, function(err) {
 				if (err) {
