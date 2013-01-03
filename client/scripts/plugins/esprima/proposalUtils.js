@@ -31,7 +31,7 @@ define({
 		}
 
 		// Exclude a bunch right away
-		if (prefix.charAt(0) !== target.charAt(0)) {
+		if (prefix.charAt(0).toLowerCase() !== target.charAt(0).toLowerCase()) {
 			return false;
 		}
 

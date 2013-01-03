@@ -18,12 +18,12 @@ define(["plugins/esprima/proposalUtils", "orion/assert"], function(utils, assert
 	var tests = [];
 	
 	
-	tests['test isUpper'] = function() {
-		assert.ok(utils.isUpper('A'));
-		assert.ok(utils.isUpper('Z'));
-		assert.ok(!utils.isUpper('a'));
-		assert.ok(!utils.isUpper('z'));
-		assert.ok(!utils.isUpper('0'));
+	tests['test isUpperCase'] = function() {
+		assert.ok(utils.isUpperCase('A'));
+		assert.ok(utils.isUpperCase('Z'));
+		assert.ok(!utils.isUpperCase('a'));
+		assert.ok(!utils.isUpperCase('z'));
+		assert.ok(!utils.isUpperCase('0'));
 	};
 	tests['test startsWith'] = function() {
 		assert.ok(utils.startsWith('Aaa', ''));
@@ -32,12 +32,12 @@ define(["plugins/esprima/proposalUtils", "orion/assert"], function(utils, assert
 		assert.ok(!utils.startsWith('Aaa', 'Aaaa'));
 	};
 	tests['test toCamelCaseParts'] = function() {
-		assert.equal(utils.toCamelCaseParts('aaa'), ['aaa']);
-		assert.equal(utils.toCamelCaseParts('aaaAaa'), ['aaa', 'Aaa']);
-		assert.equal(utils.toCamelCaseParts('aaaAAaa'), ['aaa', 'A', 'Aaa']);
-		assert.equal(utils.toCamelCaseParts('AAAA'), ['A', 'A', 'A', 'A']);
-		assert.equal(utils.toCamelCaseParts('A0A1A2Aa'), ['A0', 'A1', 'A2', 'A3']);
-		assert.equal(utils.toCamelCaseParts(''), ['']);
+		assert.deepEqual(utils.toCamelCaseParts('aaa'), ['aaa']);
+		assert.deepEqual(utils.toCamelCaseParts('aaaAaa'), ['aaa', 'Aaa']);
+		assert.deepEqual(utils.toCamelCaseParts('aaaAAaa'), ['aaa', 'A', 'Aaa']);
+		assert.deepEqual(utils.toCamelCaseParts('AAAA'), ['A', 'A', 'A', 'A']);
+		assert.deepEqual(utils.toCamelCaseParts('A0A1A2Aa'), ['A0', 'A1', 'A2', 'Aa']);
+		assert.deepEqual(utils.toCamelCaseParts(''), []);
 	};
 	tests['test looselyMatches'] = function() {
 		assert.ok(utils.looselyMatches('aaa', 'aaa'));
@@ -51,4 +51,6 @@ define(["plugins/esprima/proposalUtils", "orion/assert"], function(utils, assert
 		assert.ok(!utils.looselyMatches('SoLoWo', 'SomeOtherLongWord'));
 		assert.ok(!utils.looselyMatches('somElon', 'SomeLongWord'));
 	};
+	
+	return tests;
 });

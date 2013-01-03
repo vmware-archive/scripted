@@ -14,15 +14,6 @@
 /*jslint node:true */
 /*global require exports __dirname console */
 
-//To run this test do this on the commandline:
-
-//1) install nodeunit:
-// 'cd ~'
-// 'npm install nodeunit'
-//2) run the tests
-// 'cd <this-directory>'
-// 'nodeunit <this-filename>'
-
 var completionsModule = require("../../server/templates/completions");
 var path = require('path');
 
@@ -40,12 +31,11 @@ exports.extractScope = function(test) {
 	test.done();
 };
 
-// no test is too silly!
 exports.findCompletionsFiles = function(test) {
 	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletionsFiles(
 		function(files) {
-			var expect = [1,2,3].map(function (i) {
+			var expect = [1,2,3, 4].map(function (i) {
 				return testResourcesFolder + path.sep + "test"+i+".scripted-completions";
 			});
 			assertEqualArrays(test, expect, files);
@@ -58,8 +48,8 @@ exports.findCompletionsFiles = function(test) {
 	);
 };
 
-exports.findCompletions = function(test) {
-	var errback = function(err) {
+var errback = function(test) {
+	return function(err) {
 		if (err.stack) {
 			console.log(err);
 			console.log(err.stack);
@@ -67,7 +57,9 @@ exports.findCompletions = function(test) {
 		test.fail(err);
 		test.done();
 	};
+};
 
+exports.findCompletions1 = function(test) {
 	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletions(
 		testResourcesFolder + path.sep + "test1.scripted-completions").then(
@@ -93,7 +85,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[2].proposal, completion);
 			test.equals(completions[2].description, completions[2].trigger + " : " + completion);
 			test.equals(completions[2].trigger, "acronym");
-			test.deepEqual(completions[2].positions, nul);
+			test.deepEqual(completions[2].positions, null);
 			test.equals(completions[2].escapePosition, completion.indexOf("</acronym>"));
 			
 			completion = '<acronym>arg1</acronym>';
@@ -109,9 +101,12 @@ exports.findCompletions = function(test) {
 			test.equals(completions[4].trigger, "acronym");
 			test.deepEqual(completions[4].positions, [{offset:completion.indexOf("arg1"), length:"arg1".length}, {offset:completion.indexOf("arg2"), length:"arg2".length}]);
 			test.equals(completions[4].escapePosition, completion.indexOf("</acronym>"));
-			
-		}, errback);
+			test.done();
+		}, errback(test));
+};
 		
+exports.findCompletions2 = function(test) {
+	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletions(
 		testResourcesFolder + path.sep + "test2.scripted-completions").then(
 		function(res) {
@@ -155,9 +150,12 @@ exports.findCompletions = function(test) {
 			]);
 			test.equals(completions[i].escapePosition, completion.length);
 			i++;
-			
-		}, errback);
-		
+			test.done();
+		}, errback(test));
+};
+
+exports.findCompletions3 = function(test) {
+	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
 	completionsProcessor.findCompletions(
 		testResourcesFolder + path.sep + "test3.scripted-completions").then(
 		function(res) {
@@ -170,7 +168,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.equals(completions[i].escapePosition, completion.length);
+			test.ok(!completions[i].escapePosition);
 			i++;
 			
 			completion = 'foo<acronym></acronym>';
@@ -178,7 +176,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.equals(completions[i].escapePosition, completion.length);
+			test.ok(!completions[i].escapePosition);
 			i++;
 			
 			completion = '<acronym></acronym>foo';
@@ -186,7 +184,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, [{offset:completion.indexOf("foo"), length:"foo".length}]);
-			test.equals(completions[i].escapePosition, completion.length);
+			test.ok(!completions[i].escapePosition);
 			i++;
 			
 			completion = '<acronym>foobar</acronym>';
@@ -217,7 +215,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, null);
-			test.equals(completions[i].escapePosition, completion.length);
+			test.ok(!completions[i].escapePosition);
 			i++;
 			
 			completion = '$bar';
@@ -225,7 +223,7 @@ exports.findCompletions = function(test) {
 			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
 			test.equals(completions[i].trigger, "acronym");
 			test.deepEqual(completions[i].positions, null);
-			test.equals(completions[i].escapePosition, completion.length);
+			test.ok(!completions[i].escapePosition);
 			i++;
 			
 			completion = 'jQuery(arg1)';
@@ -245,7 +243,44 @@ exports.findCompletions = function(test) {
 			i++;
 			
 			test.done();
-		}, errback);
+		}, errback(test));
 };
+exports.findCompletions4 = function(test) {
+	var completionsProcessor = new completionsModule.CompletionsProcessor(testResourcesFolder);
+	completionsProcessor.findCompletions(
+		testResourcesFolder + path.sep + "test4.scripted-completions").then(
+		function(res) {
+			var completions = res.completions;
+			test.equals(completions.length, 2);
+			var i = 0;
 
-//exports.convertCompletion
+			// var origCompletion = '<dl>\n${lineStart}${indent}<dt>${1:First definition}</dt> <dd>${2:First explanation}</dd>\n${lineStart}${indent}<dt>${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n${lineStart}</dl>';
+			var completion = '<dl>\n${lineStart}${indent}<dt>First definition</dt> <dd>First explanation</dd>\n${lineStart}${indent}<dt>Second definition</dt> <dd>Second explanation</dd>\n${lineStart}</dl>';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].trigger, "dl");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("First definition"), length:"First definition".length },
+				{offset: completion.indexOf("First explanation"), length:"First explanation".length },
+				{offset: completion.indexOf("Second definition"), length:"Second definition".length },
+				{offset: completion.indexOf("Second explanation"), length:"Second explanation".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			completion = '<table>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<th>Column 1 Heading</th>\n${lineStart}${indent}${indent}<th>Column 2 Heading</th>\n${lineStart}${indent}</tr>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<td>R1C1</td>\n${lineStart}${indent}${indent}<td>R1C2</td>\n${lineStart}${indent}</tr>\n${lineStart}</table>';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].trigger, "table");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("Column 1 Heading"), length:"Column 1 Heading".length },
+				{offset: completion.indexOf("Column 2 Heading"), length:"Column 2 Heading".length },
+				{offset: completion.indexOf("R1C1"), length:"R1C1".length },
+				{offset: completion.indexOf("R1C2"), length:"R1C2".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			test.done();
+		}, errback(test));
+};

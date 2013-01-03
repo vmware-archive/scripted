@@ -1,0 +1,9 @@
+{
+    "scope": "text.other - some more complex completions",
+
+    "completions":
+    [
+		{ trigger : "dl", contents:"<dl>\n${lineStart}${indent}<dt>${1:First definition}</dt> <dd>${2:First explanation}</dd>\n${lineStart}${indent}<dt>${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n${lineStart}</dl>" },
+		{ trigger : "table", contents: "<table>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<th>${1:Column 1 Heading}</th>\n${lineStart}${indent}${indent}<th>${2:Column 2 Heading}</th>\n${lineStart}${indent}</tr>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<td>${3:R1C1}</td>\n${lineStart}${indent}${indent}<td>${4:R1C2}</td>\n${lineStart}${indent}</tr>\n${lineStart}</table>" }
+    ]
+}

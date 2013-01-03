@@ -22,11 +22,15 @@
 					 "tests/client/esprima/proposalUtilsTests",
 					 "tests/client/markoccurrences/markOccurrencesTests",
 					 "tests/client/indexer/indexerTests",
-					 "tests/client/keybindings/keystroke-tests"],
+					 "tests/client/keybindings/keystroke-tests",
+					 "tests/client/templates/param-resolverTests"],
 				function(nodeunitShim, pageState, contentAssistTests, navTests, summaryTests, dependencyTests,
-					proposalUtilsTests, markOccurrencesTests, indexerTests, keystroke) {
+					proposalUtilsTests, markOccurrencesTests, indexerTests, keystroke, resolverTests) {
 					pageState._setEditorPrefix(window.location.pathname + '?');
 					function testShim(tests) {
+						if (tests.module) {
+							tests.module();
+						}
 						for (var t in tests) {
 							if (tests.hasOwnProperty(t)) {
 								if (t.indexOf('test') === 0) {
@@ -39,6 +43,9 @@
 					}
 					module("keystroke-test");
 					nodeunitShim(keystroke);
+					// qunit module created in test module
+//					module("Param Resolver tests");
+					testShim(resolverTests);
 					module("Esprima JS Content Assist tests");
 					testShim(contentAssistTests);
 					module("Navigation tests");

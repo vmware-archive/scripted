@@ -371,42 +371,42 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	
 	tests["test no dupe 1"] = function() {
 		var results = computeContentAssist(
-				"var foo = 9; var other = function(foo) { f/**/ }", "f");
+				"var coo = 9; var other = function(coo) { c/**/ }", "c");
 		testProposals(results, [
-			["foo", "foo : {  }"]
+			["coo", "coo : {  }"]
 		]);
 	};
 	
 	tests["test no dupe 2"] = function() {
 		var results = computeContentAssist(
-				"var foo = { }; var other = function(foo) { foo = 9;\nf/**/ }", "f");
+				"var coo = { }; var other = function(coo) { coo = 9;\nc/**/ }", "c");
 		testProposals(results, [
-			["foo", "foo : Number"]
+			["coo", "coo : Number"]
 		]);
 	};
 	
 	tests["test no dupe 3"] = function() {
 		var results = computeContentAssist(
-				"var foo = function () { var foo = 9; \n f/**/};", "f");
+				"var coo = function () { var coo = 9; \n c/**/};", "c");
 		testProposals(results, [
-			["foo", "foo : Number"]
+			["coo", "coo : Number"]
 		]);
 	};
 	
 	tests["test no dupe 4"] = function() {
 		var results = computeContentAssist(
-				"var foo = 9; var other = function () { var foo = function() { return 9; }; \n f/**/};", "f");
+				"var coo = 9; var other = function () { var coo = function() { return 9; }; \n c/**/};", "c");
 		testProposals(results, [
-			["foo()", "foo() : Number"]
+			["coo()", "coo() : Number"]
 		]);
 	};
 	
 	tests["test scopes 1"] = function() {
 		// only the outer foo is available
 		var results = computeContentAssist(
-				"var foo;\nfunction other(a, b, c) {\nfunction inner() { var foo2; }\nf/**/}", "f");
+				"var coo;\nfunction other(a, b, c) {\nfunction inner() { var coo2; }\nco/**/}", "co");
 		testProposals(results, [
-			["foo", "foo : {  }"]
+			["coo", "coo : {  }"]
 		]);
 	};
 	tests["test scopes 2"] = function() {
@@ -418,9 +418,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test multi function content assist 2"] = function() {
-		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {}\nf", "f");
+		var results = computeContentAssist("function ffun(a, b, c) {}\nfunction other(a, b, c) {}\nff", "ff");
 		testProposals(results, [
-			["fun(a, b, c)", "fun(a, b, c) : undefined"]
+			["ffun(a, b, c)", "ffun(a, b, c) : undefined"]
 		]);
 	};
 	tests["test in function 1"] = function() {
@@ -513,7 +513,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test in function 3"] = function() {
 		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(a, b, c) {f/**/}", "f");
 		testProposals(results, [
-			["fun(a, b, c)", "fun(a, b, c) : undefined"]
+			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"]
 		]);
 	};
 	tests["test in function 4"] = function() {
@@ -521,7 +522,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
-			["arguments", "arguments : Arguments"]
+			["arguments", "arguments : Arguments"],
+			["", "---------------------------------"],
+			["Array([val])", "Array([val]) : Array"]
 		]);
 	};
 	tests["test in function 5"] = function() {
@@ -532,7 +535,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
-			["arguments", "arguments : Arguments"]
+			["arguments", "arguments : Arguments"],
+			["", "---------------------------------"],
+			["Array([val])", "Array([val]) : Array"]
 		]);
 	};
 	tests["test in function 6"] = function() {
@@ -548,7 +553,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["ab", "ab : {  }"],
 			["arguments", "arguments : Arguments"],
 			["", "---------------------------------"],
-			["a", "a : {  }"]
+			["a", "a : {  }"],
+			["", "---------------------------------"],
+			["Array([val])", "Array([val]) : Array"]
 		]);
 	};
 	tests["test in function 7"] = function() {
@@ -786,6 +793,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
+			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
@@ -796,6 +804,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
+			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
@@ -806,6 +815,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
+			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
@@ -835,6 +845,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["", "---------------------------------"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"]
 		]);
 	};
@@ -1303,12 +1314,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test complex name 1"] = function() {
 		var results = computeContentAssist("function Ttt() { }\nvar ttt = new Ttt();\ntt", "tt");
 		testProposals(results, [
+			["Ttt()", "Ttt() : Ttt"],
 			["ttt", "ttt : Ttt"]
 		]);
 	};
 	tests["test complex name 2"] = function() {
 		var results = computeContentAssist("var Ttt = function() { };\nvar ttt = new Ttt();\ntt", "tt");
 		testProposals(results, [
+			["Ttt()", "Ttt() : Ttt"],
 			["ttt", "ttt : Ttt"]
 		]);
 	};
@@ -1973,6 +1986,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { Fun : function() { }, fun : function() {}, fun2 : 9 }\nnew obj", "obj");
 		testProposals(results, [
 			["obj.Fun()", "obj.Fun() : obj.Fun"],
+			["Object([val])", "Object([val]) : Object"],
 			["obj", "obj : { Fun : obj.Fun, fun : undefined, fun2 : Number }"]
 		]);
 	};
@@ -1990,6 +2004,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { };\nobj.Fun = function() { };\nnew obj", "obj");
 		testProposals(results, [
 			["obj.Fun()", "obj.Fun() : obj.Fun"],
+			["Object([val])", "Object([val]) : Object"],
 			["obj", "obj : { Fun : obj.Fun }"]
 		]);
 	};
@@ -1999,6 +2014,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
 		testProposals(results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
+			["Object([val])", "Object([val]) : Object"],
 			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
@@ -2008,6 +2024,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
 		testProposals(results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
+			["Object([val])", "Object([val]) : Object"],
 			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
@@ -2017,6 +2034,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : {  } }\nobj.inner.inner2 = { Fun : function() { } }\nnew obj", "obj");
 		testProposals(results, [
 			["obj.inner.inner2.Fun()", "obj.inner.inner2.Fun() : obj.inner.inner2.Fun"],
+			["Object([val])", "Object([val]) : Object"],
 			["obj", "obj : { inner : { inner2 : {...} } }"]
 		]);
 	};
@@ -2192,6 +2210,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"window.xx = 9;\nx", "x"
 		);
 		testProposals(results, [
+			["XMLHttpRequest()", "XMLHttpRequest() : XMLHttpRequest"],
 			["xx", "xx : Number"]
 		]);
 	};
@@ -2202,6 +2221,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var xx = 9;\nwindow.x", "x"
 		);
 		testProposals(results, [
+			["XMLHttpRequest()", "XMLHttpRequest() : XMLHttpRequest"],
 			["xx", "xx : Number"]
 		]);
 	};
@@ -2212,6 +2232,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var xx = 9;\nthis.x", "x"
 		);
 		testProposals(results, [
+			["XMLHttpRequest()", "XMLHttpRequest() : XMLHttpRequest"],
 			["xx", "xx : Number"]
 		]);
 	};
@@ -3738,7 +3759,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"}\n" +
 			"function x() { return ''; }", "f");
 		testProposals(results, [
-			["fff", "fff : String"]
+			["fff", "fff : String"],
+			["", "---------------------------------"],
+			["Function()", "Function() : Function"]
 		]);
 	};
 
@@ -3749,6 +3772,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"f/**/;\n" +
 			"function x() { return ''; }", "f");
 		testProposals(results, [
+			["Function()", "Function() : Function"],
 			["fff", "fff : {  }"]
 		]);
 	};
@@ -3761,7 +3785,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"  f/**/;\n" +
 			"  return ''; }", "f");
 		testProposals(results, [
-			["fff", "fff : undefined"]
+			["fff", "fff : undefined"],
+			["", "---------------------------------"],
+			["Function()", "Function() : Function"]
 		]);
 	};
 
@@ -3775,7 +3801,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"}\n" +
 			"var x = function() { return ''; }", "f");
 		testProposals(results, [
-			["fff", "fff : String"]
+			["fff", "fff : String"],
+			["", "---------------------------------"],
+			["Function()", "Function() : Function"]
 		]);
 	};
 
@@ -3786,6 +3814,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"f/**/;\n" +
 			"var x = function() { return ''; }", "f");
 		testProposals(results, [
+			["Function()", "Function() : Function"],
 			["fff", "fff : {  }"]
 		]);
 	};
@@ -3795,7 +3824,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist(
 			"var x = function() { var fff = x();\nf/**/;return ''; }", "f");
 		testProposals(results, [
-			["fff", "fff : undefined"]
+			["fff", "fff : undefined"],
+			["", "---------------------------------"],
+			["Function()", "Function() : Function"]
 		]);
 	};
 	

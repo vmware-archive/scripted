@@ -65,8 +65,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 		return newPositions;
 	}
 
-	function TemplateContentAssist() {
-	}
+	function TemplateContentAssist() { }
 	
 	TemplateContentAssist.prototype = {
 		install : function(editor, scope, root) {

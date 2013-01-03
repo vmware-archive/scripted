@@ -196,6 +196,8 @@ function forEditor(editor) {
 		return editor.getText(selection.start, selection.end);
 	});
 	
+	
+	// Other possible parameters
 	// current line
 	// current user name (requires server call)
 	// year

@@ -1,0 +1,7 @@
+{
+        "scope": "source.testingOnly - a completions file with some funky tests",
+
+        "completions":
+        [
+        ]
+}
