@@ -302,11 +302,11 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 			For example, see this screenshot:<br/><br/>
 		<img src="mark_occurrences.png" border="1" title="Mark occurrences"/><br/><br/>
 		Mark Occurrences is configurable in your <tt>.scripted</tt> file using the following configuration options:
-		<dl>
-			<dt>interval</dt>  <dd>The amount of time between moving the caret and invoking the mark_occurrences operation. Default 500.</dd>
-			<dt>disable</dt> <dd>If set to <tt>true</tt> will disable mark occurrences. Default <tt>false</tt></dd>
-			<dt>retain</dt> <dd>If set to <tt>true</tt> will retain the previous marks even after the caret position is moved to another (non-word) location. Default <tt>false</tt></dd>
-		</dl>
+		<ul>
+			<li><tt>interval</tt>: The amount of time between moving the caret and invoking the mark_occurrences operation. Default 500.</li> 
+			<li><tt>disable</tt>: If set to <tt>true</tt> will disable mark occurrences. Default <tt>false</tt></li>
+			<li><tt>retain</tt>: If set to <tt>true</tt> will retain the previous marks even after the caret position is moved to another (non-word) location. Default <tt>false</tt></li>
+		</ul>
 		The configuration looks like this:
 		<pre>
 {
@@ -339,7 +339,7 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		<td id="xyz" class="section" colspan="2"><h2>NS</h2></td>
 	</tr>
 	<tr id="newlook">
-		<td class="title">Added navigator context menu</td>
+		<td class="title">Navigator context menu</td>
 		<td class="description">It is now possible to add new files and folders, as well as delete or rename existing files and folders, from the scripted navigator through a navigator context menu.
 		<br/><br/>
 		The context menu is invoked anywhere in the navigator area by right-clicking on a navigator element like a file or folder. The four context menu options are:
