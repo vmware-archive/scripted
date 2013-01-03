@@ -28,6 +28,7 @@ var oneCache = require('./one-cache');
 var utils = require('./utils');
 
 var pathNormalize = utils.pathNormalize;
+var pathResolve = utils.pathResolve;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -157,7 +158,7 @@ function withBaseDir(baseDir) {
 			if (stats.isDirectory) {
 				var deleteChildren = when.map(listFiles(handle), function (name) {
 //					console.log('mapped: '+name);
-					return deleteResource(path.resolve(handle, name));
+					return deleteResource(pathResolve(handle, name));
 				});
 				return deleteChildren.then(function () {
 					return rmDir(handle);

@@ -8,7 +8,7 @@
  * 
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
-
+/*global define window $*/
 /*jslint browser:true jquery:true */
 
 define(
@@ -26,30 +26,37 @@ function(contextMenuProvider) {
 
 	var hideContextMenu;
 
-	var clickHandler = function(menuItem, menuTable, selectedContext) {
+	var clickHandler = function(menuItem, menuTable, contextEvent) {
 
 			if (menuItem.handler && (typeof menuItem.handler === "function")) {
 				hideContextMenu(menuTable);
-				menuItem.handler(selectedContext);
+				menuItem.handler(contextEvent);
 			}
 		};
 
 	var addClickHandler = function(menuDiv, menuItem, menuTable,
-		selectedContext) {
-			menuDiv.click(function() {
-				clickHandler(menuItem, menuTable, selectedContext);
+		contextEvent) {
+
+			// This handles both the case where a user wants to invoke the context menu action
+			// using a hold right click mousedown and release, as well as left-clicking on the 
+			// context menu action.
+			menuDiv.mouseup(function(event) {
+				clickHandler(menuItem, menuTable, contextEvent);
 			});
 
-			menuDiv.mouseup(function(event) {
-				// Only handle action selection on right-click mouseup
-				if (event.which === 3) {
-					clickHandler(menuItem, menuTable, selectedContext);
-				}
+			// Since there is also a window mousedown event handler that closes the context menu
+			// when  user clicks anywhere in the window, to avoid the context menu from closing
+			// when a user clicks on the context menu, add a separate mousedown event handler on the
+			// context menu itself that prevents the event from propagating to the window handler. That
+			// way the window handler only is called when a user clicks OUTSIDE of the context menu div
+			menuDiv.mousedown(function(event) {
+				event.stopPropagation();
+				return false;
 			});
 
 		};
 
-	var createContextMenu = function(menus, selectedContext) {
+	var createContextMenu = function(menus, contextEvent) {
 
 			if (menus) {
 
@@ -68,7 +75,7 @@ function(contextMenuProvider) {
 						//Only add a click handler if the menu is enabled
 						if ((typeof menuItem.isEnabled === "function") && menuItem.isEnabled()) {
 							addClickHandler(menudiv, menuItem, mainDiv,
-							selectedContext);
+							contextEvent);
 						} else {
 							// Disable the menu item.
 							menudiv.css("color", "grey");
@@ -107,22 +114,25 @@ function(contextMenuProvider) {
 				'y': y
 			};
 		};
-		
-		var attachContextMenuEvents = function(contextMenu) {
-				// Handle ESCAPE keypresses on the dialog
-				$(window).on('keyup.' + contextMenuClass, function(e) {
 
-					if (e.keyCode === $.ui.keyCode.ESCAPE) {
-						hideContextMenu(contextMenu);
-					}
-				});
+	var attachContextMenuEvents = function(contextMenu) {
+			// Handle ESCAPE keypresses on the dialog
+			$(window).on('keyup.' + contextMenuClass, function(e) {
 
-				// be sure to attach a click listener to the window to have the context menu disappear
-				$(window).one('click', null, function() {
+				if (e.keyCode === $.ui.keyCode.ESCAPE) {
 					hideContextMenu(contextMenu);
-				});
+				}
+			});
 
-			};
+			// click listener to the window so that the context menu disappear when clicking
+			// outside the context menu to close it. Note that to prevent the context menu to close when a user is
+			// clicking within the contextmenu, another mousedown event handler is needs to be attached to the 
+			// context menu dom node which prevents the mousedown event from propagating.
+			$(window).on('mousedown.' + contextMenuClass, function(e) {
+				hideContextMenu(contextMenu);
+			});
+
+		};
 
 	var showContextMenu = function(context, contextMenu, eventContext) {
 
@@ -145,7 +155,7 @@ function(contextMenuProvider) {
 			var eventx = eventContext.pageX;
 			var eventy = eventContext.pageY;
 
-			// Hardcode navigator wrapper as the context for now. Refactor when context menus should be more general
+			// TODO: Hardcoded navigator wrapper as the context for now. Refactor when context menus should be more general
 			var position = getPosition(eventx, eventy, "#navigator-wrapper");
 
 			// reposition context menu based on mouse click
@@ -163,20 +173,22 @@ function(contextMenuProvider) {
 		if (contextMenu) {
 			$(contextMenu).remove();
 		}
-		// Be sure to remove any event listeners on window
+		// Remove any event listeners on window
 		$(window).off('keyup.' + contextMenuClass);
+		
+		$(window).off('mousedown.' + contextMenuClass);
 	};
 
 	/**
-	 * context to which the context menus should be attached too.It should be a DOM element.
+	 * nodecontext to which the context menus should be attached too.It should be a DOM element.
 	 */
-	var initContextMenus = function(context) {
+	var initContextMenus = function(nodeContext) {
 
 			var error = null;
-			if (!context) {
+			if (!nodeContext) {
 				error = "No context provided for context menu. Unable to open context menu.";
-			} else if (!$(context).size()) {
-				error = "Unable to find context element to display its context menu " + context.toString();
+			} else if (!$(nodeContext).size()) {
+				error = "Unable to find context element to display its context menu " + nodeContext.toString();
 			}
 
 			if (error) {
@@ -185,18 +197,18 @@ function(contextMenuProvider) {
 			}
 
 			$(function() {
-				$(context).contextmenu(
+				$(nodeContext).contextmenu(
 
 				function(e) {
 					var menus = contextMenuProvider.getContextMenusForSelection(
-					context, e);
+					nodeContext, e);
 					if (menus) {
 						var cmenu = createContextMenu(
 						menus, e);
 						if (cmenu) {
-							showContextMenu(context, cmenu,
+							showContextMenu(nodeContext, cmenu,
 							e);
-							
+
 							e.preventDefault();
 
 							// To avoid context menus from appearing for nested DOM elements, stop event propagation to any parents

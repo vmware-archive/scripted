@@ -9,6 +9,8 @@
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
 
+/*global define window $*/
+
 define(
 ['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'jquery'],
 
@@ -118,7 +120,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 					name: "New File...",
-					handler: function(selectionContext) {
+					handler: function(contextEvent) {
 
 						resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
 						resourceName) {
@@ -139,7 +141,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "New Folder...",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 
 							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
 							resourceName) {
@@ -156,7 +158,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "Rename...",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 							var toRename = pathUtils.getLastSegmentFromPath(contextResource.location);
 
 							if (toRename) {
@@ -183,7 +185,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "Delete",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 
 							var parent = pathUtils.getDirectory(contextResource.location);
 							var resourceNameToDelete = pathUtils.getLastSegmentFromPath(contextResource.location);
