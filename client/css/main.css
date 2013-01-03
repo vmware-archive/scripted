@@ -30,17 +30,12 @@ body{
 }
 
 header{
-	height: 26px;
+	height: 31px;
 	background: #404040; /* for non-css3 browsers */
-
-	border-top-width: 1px;
-	border-left-width:0px;
-	border-right-width:0px;
-	border-bottom-width: 1px;
-	border-style: solid;
-	
-	border-top-color: #969497;
-	border-bottom-color: #000000;
+	border-top: 1px solid #626666;
+	border-bottom: 1px solid #000;
+	border-left: 0;
+	border-right: 0;
 }
 
 #main{
@@ -64,6 +59,7 @@ header{
 #navigator-container{ 
 	height:100%;
 	overflow:auto;
+	margin-top: 10px;
 }
 
 #navigator-wrapper{
@@ -143,8 +139,6 @@ header{
 	background-position:0px -198px;
 }
 
-
-
 .light_gradient{
 	background-color: #323232;
 }
@@ -154,7 +148,8 @@ header{
 }
 
 footer{
-	background-color:#777;
+	background-color:#EEE;
+	border-top: 1px solid #D3D3D3;
 	height:18px;
 	min-height:18px;
 	width:100%;
@@ -163,13 +158,13 @@ footer{
 
 #status{
 	font-size:12px;
-	color:#eee;
+	color:#666;
 	float:right;
 }
 
 .main_gradient{
-	background: -webkit-gradient(linear, left top, left bottom, from(#aaaaaa), to(#6c6c6c)); /* webkit */
-	background: -moz-linear-gradient(top,  #aaaaaa,  #6c6c6c); /* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, from(#393737), to(#272626)); /* webkit */
+	background: -moz-linear-gradient(top,  #393737,  #272626); /* firefox */
 }
 
 .scriptedlogo {
@@ -184,62 +179,61 @@ footer{
 }
 
 #help_open{
-	margin:4px 5px 0 0;
+	margin:5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/help.png);
-	width:16px;
-	height:16px;
+	width:20px;
+	height:20px;
 }
 
 #side_toggle{
-	margin: 4px 5px 0 0;
+	margin: 5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/split.png);
-	width:16px;
-	height:16px;
+	width:20px;
+	height:20px;
 }
 
 #console_toggle {
-	margin: 4px 5px 0 0;
+	margin: 5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/console.png);
-	width:16px;
-	height:16px;
+	width:20px;
+	height:20px;
 }
 
 #breadcrumb{
-	height:22px;
+	height:36px;
 	width:auto;
-	border-top:2px solid #323232;
 	background-color: #323232;
 }
 
 #breadcrumb > li{
-	height:16px;
+	height:36px;
 	float:left;
-	border-right:2px solid #ffffff;
 	font-size:12px;
 	color: #ffffff;
-	line-height:12px;
-	padding:2px 7px 0px 7px;
-	-webkit-transform: skew(-20deg);
-	-webkit-transform-origin: bottom left;
-	-moz-transform: skew(-20deg);
-	-moz-transform-origin: bottom left;
-	transform: skew(-20deg);
-	transform-origin: bottom left;
+	line-height:36px;
+}
+#breadcrumb > li:after {
+	background: url(../images/core_sprites.png) no-repeat -96px -1505px;
+	content: "\0020";
+	display: inline-block;
+	width: 12px;
+	height: 36px;
+	float: right;
+	margin: 0 5px;
+}
+#breadcrumb > li:first-child{
+	margin-left: 12px;
+}
+#breadcrumb > li:last-child:after{
+	background: none
 }
 
-#breadcrumb > li:last-child{
-	border-right:0;
-}
-
-
-#breadcrumb > li span{
-	-webkit-transform: skew(20deg);
-	-moz-transform: skew(20deg);
-	transform: skew(20deg);
-	display:inline-block;
+#breadcrumb #historycrumb img{
+	position: relative;
+	top: 3px;
 }
 
 .breadcrumb_menu{
@@ -293,7 +287,11 @@ footer{
 }
 
 .highlightrow > td {
-	background-color: #bfbfbf;
+	background: #D3D1D1;
+	background: -webkit-gradient(linear, left top, left bottom, from(#DDD), to(#C5C2C2)); /* webkit */
+	background: -moz-linear-gradient(top,  #DDD,  #C5C2C2); /* firefox */
+	border-top: 1px solid #F1F1F1;
+	border-bottom: 1px solid #1C1C1C;
 	color: #000000;
 }
 
@@ -352,7 +350,7 @@ footer{
 }
 
 .lightTreeTableRow > td {
-	background: #3e3e3e
+	/*background: #3e3e3e*/
 }
 
 .darkTreeTableRow > td {
@@ -385,9 +383,9 @@ footer{
         margin-right: 0px;
 }
 
-.core-sprite-twistie_closed{ background-position: -96px -1242px; width: 16px; height: 16px; } 
+.core-sprite-twistie_closed{ background-position: -94px -1241px; width: 16px; height: 16px; } 
 
-.core-sprite-twistie_open{ background-position: -96px -1308px; width: 16px; height: 16px; } 
+.core-sprite-twistie_open{ background-position: -94px -1307px; width: 16px; height: 16px; } 
 
 .core-sprite-file_model{ background-position: 0 -891px; width: 16px; height: 16px; } 
 
