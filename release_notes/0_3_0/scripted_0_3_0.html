@@ -335,6 +335,34 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
 		</td>
 	</tr>
+	<tr>
+		<td id="xyz" class="section" colspan="2"><h2>NS</h2></td>
+	</tr>
+	<tr id="newlook">
+		<td class="title">Added navigator context menu</td>
+		<td class="description">It is now possible to add new files and folders, as well as delete or rename existing files and folders, from the scripted navigator through a navigator context menu.
+		<br/><br/>
+		The context menu is invoked anywhere in the navigator area by right-clicking on a navigator element like a file or folder. The four context menu options are:
+		 <ul><li>
+		<b>New File</b>: Creates a new file in either a selected folder, or if a file was selected, in the same parent folder containing that file.
+		</li><li>
+		<b>New Folder</b>: Creates a new folder in either a selected folder, or if a file was selected, in the same parent folder containing that file.
+		</li><li>
+		<b>Rename</b>: Renames an existing file or folder. If another resource already exists with the new name, the existing resource will be replaced.
+		</li><li>
+		<b>Delete</b>: Deletes a file or folder. For folders, all content of the folders are also deleted.
+		</li></ul>
+		<p><img src="navigator_context_menu.png" border="1" title="Navigator Context Menu"/></p>
+		If right-clicking in an empty space in the navigator, <b>Rename</b> and <b>Delete</b> are disabled, and creating a new file or folder will add the resource at root level.
+		<br/><br/>
+		Each context menu action opens a modal dialogue that either prompts the user to confirm the operation, as in the case of deleting a resource, or asks the user for input. If an error
+		occurs during the resource operation, for example, renaming a folder, an error message is displayed to the user and the dialogue remains open.
+		<br/><br/> 
+		Closing the dialogues can be done by either clicking the Cancel button, pressing Esc, or clicking outside the dialogues.
+		<p><img src="rename_dialogue_with_error.png" border="1" title="Rename Dialogue With Error"/></p>
+		
+		</td>
+	</tr>
 </tbody></table>
 
 </body></html>
