@@ -29,21 +29,27 @@ define(["jshint"], function () {
 		//		bitwise: false, regexp: true, newcap: true, immed: true, strict: false, indent: 1};
 		var options;
 		if (window.scripted.config.jshint) {
-			options = window.scripted.config.jshint;
+			options = window.scripted.config.jshint.options;
+			if (!options) {
+				options = {};
+				window.scripted.config.jshint = { "options": options };
+			}
 			for (var key in jshintrc) {
 				options[key] = jshintrc[key];
 			}
 		} else {
-			window.scripted.config.jshint = jshintrc;
+			window.scripted.config.jshint = { "options": jshintrc };
 		}
+		// The globals can be defined in three places. jshint.options.predef jshint.global and as a comment in the file.
+		// This code will merge jshint.options.predef and jshint.global - jshint.global wins on clashes
 		if (window.scripted.config.jshint.global) {
-		  // TODO should switch to using predef rather than global
-		  window.scripted.config.jshint.predef = window.scripted.config.jshint.global;
+			// For now let jshint.global splat over any jshint.options.predef
+			window.scripted.config.jshint.options.predef = window.scripted.config.jshint.global;
 		}
 		// Here we have merged the jshintrc with anything loaded from .scripted. Now set our
 		// defaults if values haven't already been set for these config options.
 		var defaults = [ "undef", "newcap", "smarttabs" ];
-		options = window.scripted.config.jshint;
+		options = window.scripted.config.jshint.options;
 		for (var d=0;d<defaults.length;d++) {
 			if (!options.hasOwnProperty(defaults[d])) {
 				options[defaults[d]]=true;
@@ -52,7 +58,7 @@ define(["jshint"], function () {
 	}
 	
 	function jshint(contents) {
-		JSHINT(contents, window.scripted.config.jshint);
+		JSHINT(contents, window.scripted.config.jshint.options, window.scripted.config.jshint.options.predef);
 		return JSHINT.data();
 	}
 
