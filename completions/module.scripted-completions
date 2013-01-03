@@ -15,11 +15,8 @@
 {
 	"scope": "source.js",
 	"completions": [
-		{ "trigger" : "define (AMD)", "contents" : "define([${1:modules}], function(${2:names}) {\n${lineStart}${indent}$0\n${lineStart}});" },
-		{ "trigger" : "define (AMD)", "contents" : "define({\n${lineStart}${indent}$0\n${lineStart}});" },
-		{ "trigger" : "require (AMD)", "contents" : "define([${1:modules}], function(${2:names}) {\n${lineStart}${indent}$0\n${lineStart}});" },
-		{ "trigger" : "function (named)", "contents" : "function ${1:name}(${2:args}) {\n${lineStart}${indent}$0\n${lineStart}}" },
-		{ "trigger" : "function (anon)", "contents" : "function(${1:args}) {\n${lineStart}${indent}$0\n${lineStart}}" },
-		{ "trigger" : "testing", "contents" : "(${dir}  ${1:args}) {\n${lineStart}${indent}$0\n${lineStart}}" }
+		{ "trigger" : "define (AMD)", "contents" : "define([${1:modules}], function(${2:names}) {\n\t$0\n});" },
+		{ "trigger" : "define (AMD)", "contents" : "define({\n\t$0\n});" },
+		{ "trigger" : "require (AMD)", "contents" : "define([${1:modules}], function(${2:names}) {\n\t$0\n});" }
 	]
 }

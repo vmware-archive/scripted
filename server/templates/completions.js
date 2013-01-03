@@ -119,6 +119,11 @@ exports.CompletionsProcessor.prototype = {
 		}
 		/** @type String */
 		var rawContents = rawCompletion.contents;
+		
+		// fix indentation
+		rawContents = rawContents.replace(/\n/g, "\n${lineStart}");
+		rawContents = rawContents.replace(/\t/g, "${indent}");
+		
 		var trigger = rawCompletion.trigger;
 		var contents = "";
 		var positions = [];

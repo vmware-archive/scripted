@@ -18,9 +18,8 @@
 
 define([
 	"require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
-	"scripted/keybindings/keystroke",
-	"orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
-	"plugins/esprima/esprimaJsContentAssist", "orion/editor/jsTemplateContentAssist", "orion/editor/contentAssist",
+	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
+	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
@@ -28,10 +27,8 @@ define([
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
-	require, mTextView, mKeyBinding, mEditor,
-	mKeystroke,
-	mEditorFeatures, mTextStyler, mTextMateStyler,
-	mJsContentAssist, mJSTemplateContentAssist, mContentAssist,
+	require, mTextView, mKeyBinding, mEditor, mKeystroke,
+	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
@@ -179,7 +176,6 @@ define([
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
-		var jsTemplateContentAssistant = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 		
@@ -253,7 +249,6 @@ define([
 			var providers = [];
 			if (isJS) {
 				providers.push(jsContentAssistant);
-				providers.push(jsTemplateContentAssistant);
 			} else if (isCSS) {
 				providers.push(cssContentAssistant);
 			}

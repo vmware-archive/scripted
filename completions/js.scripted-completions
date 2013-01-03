@@ -1,0 +1,36 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Andrew Eisenberg - initial API and implementation
+ ******************************************************************************/
+
+// general javascript completions
+{
+	"scope": "source.js",
+	"completions": [
+		// keywords
+		"break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
+		"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
+		"var", "void", "while", "with",
+		
+		{ "trigger" : "if statement", "contents" : "if (${1:condition}) {\n\t$0\n}" },
+		{ "trigger" : "ifelse statement", "contents" : "if (${1:condition}) {\n\t$0\n} else {\n\t\n}" },
+		{ "trigger" : "for (array iterator)", "contents" : "for (var ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {\n\t$0\n}" },
+		{ "trigger" : "for (property iterator)", "contents" : "for (var ${1:property} in ${2:object}) {\n\tif (${2:object}.hasOwnProperty(${1:property})) {\n\t\t$0\n\t}\n}" },
+		{ "trigger" : "while loop", "contents" : "while (${1:condition}) {\n\t$0\n}" },
+		{ "trigger" : "do while loop", "contents" : "do {\n\t$0\n} while (${1:condition};" },
+		{ "trigger" : "switch", "contents" : "switch (expression) {\n\tcase ${1:val}:\n\t\t${2:expr}\n\t\tbreak;\n\tdefault:\n\t\t\n}" },
+		{ "trigger" : "try..catch", "contents" : "try {\n\t$0\n} catch (${1:err}) {\n\t\n}" },
+		{ "trigger" : "try..catch..finally", "contents" : "try {\n\t$0\n} catch (${1:err}) {\n\t\n} finally {\n\t\n}" },
+		{ "trigger" : "try..finally", "contents" : "try {\n\t$0\n} finally {\n\t\n}" },
+		{ "trigger" : "function (named)", "contents" : "function ${1:name}(${2:args}) {\n\t$0\n}" },
+		{ "trigger" : "function (anon)", "contents" : "function(${1:args}) {\n\t$0\n}" }
+	]
+}

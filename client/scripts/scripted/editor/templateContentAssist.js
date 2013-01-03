@@ -65,6 +65,26 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 		return newPositions;
 	}
 
+
+		
+	function findPreviousChar(buffer, offset) {
+		var c = "";
+		while (offset >= 0) {
+			c = buffer[offset];
+			if (c === '\n' || c === '\r') {
+				//we hit the start of the line so we are done
+				break;
+			} else if (/\s/.test(c)) {
+				offset--;
+			} else {
+				// a non-whitespace character, we are done
+				break;
+			}
+		}
+		return c;
+	}
+
+
 	function TemplateContentAssist() { }
 	
 	TemplateContentAssist.prototype = {
@@ -105,6 +125,12 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			if (!myTemplates) {
 				return [];
 			}
+			
+			// assume we don't want templates if previous char is '.'
+			if (findPreviousChar(buffer, invocationOffset) === '.') {
+				return [];
+			}
+			
 			// we're in business
 			var newTemplates = [];
 			var prefix = context.prefix;

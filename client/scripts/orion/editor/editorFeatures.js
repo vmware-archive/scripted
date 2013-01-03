@@ -834,12 +834,33 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			if (proposal.positions && this.linkedMode) {
 				var positionGroups = [];
 				for (var i = 0; i < proposal.positions.length; ++i) {
+					// SCRIPTED: begin
+					/*old
 					positionGroups[i] = {
 						positions: [{
 							offset: proposal.positions[i].offset,
 							length: proposal.positions[i].length
 						}]
 					};
+					*/
+					//new: handle positionGroups with more than one element
+					if (Array.isArray(proposal.positions[i])) {
+						positionGroups[i] = { positions : [] };
+						for (var j = 0; j < proposal.positions[i].length; j++) {
+							positionGroups[i].positions.push({
+								offset: proposal.positions[i][j].offset,
+								length: proposal.positions[i][j].length
+							});
+						}
+					} else {
+						positionGroups[i] = {
+							positions: [{
+								offset: proposal.positions[i].offset,
+								length: proposal.positions[i].length
+							}]
+						};
+					}
+					// SCRIPTED: end
 				}
 
 				var linkedModeModel = {
