@@ -181,8 +181,16 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
     */
 	var createDialogue = function(initialValue) {
 
-			var addResource = function(onClose) {
+			var addFile = function(onClose) {
 					modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
+
+					$('#dialog_message > p').text("Enter the name of the new file. Note that existing files in the same folder with the new name will be replaced.");
+				};
+
+			var addFolder = function(onClose) {
+					modifyResourceDialogue("#dialog_add_resource", addResourceDialogue, onClose, null);
+
+					$('#dialog_message > p').text("Enter the name of the new folder:");
 				};
 
 			var renameResource = function(onClose) {
@@ -204,7 +212,8 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 				};
 
 			return {
-				addResource: addResource,
+				addFile: addFile,
+				addFolder: addFolder,
 				renameResource: renameResource,
 				deleteResource: deleteResource
 			};

@@ -670,18 +670,22 @@ a.dialog_button:hover {
     font-family:arial;
     font-size:13px; 
     text-align:center;
-    margin:13px;
-    padding:10px; 
+    margin:5px;
     color:#666; 
+    padding:2px;
 }
 
 #dialog_error_message {
     font-family:arial;
     font-size:13px; 
     text-align:center;
-    margin:13px;
-    padding:10px; 
+    margin:5px;
     color:red; 
+    padding:2px;
+}
+
+#dialog_message_resource_to_delete {
+   font-style:italic;
 }
 
 .dialogue_text {

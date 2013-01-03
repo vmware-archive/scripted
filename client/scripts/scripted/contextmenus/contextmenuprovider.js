@@ -122,7 +122,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 					name: "New File...",
 					handler: function(contextEvent) {
 
-						resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+						resourcesDialogue.createDialogue(resourceCreationPath).addFile(function(
 						resourceName) {
 							var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
 
@@ -143,7 +143,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 						name: "New Folder...",
 						handler: function(contextEvent) {
 
-							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+							resourcesDialogue.createDialogue(resourceCreationPath).addFolder(function(
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
 								var promise = fileOperationsClient.mkdir(urlNewResource);
