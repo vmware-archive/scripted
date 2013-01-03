@@ -32,7 +32,7 @@ define(["jshint"], function () {
 			options = window.scripted.config.jshint.options;
 			if (!options) {
 				options = {};
-				window.scripted.config.jshint = { "options": options };
+				window.scripted.config.jshint.options = options;
 			}
 			for (var key in jshintrc) {
 				options[key] = jshintrc[key];
