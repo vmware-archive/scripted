@@ -25,22 +25,15 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 			window.explorer.fullRefresh(function() {
 				if (resourceToNavigate) {
 					navHistory.navigateToURL(resourceToNavigate);
-
 					window.explorer.highlight(resourceToNavigate);
-					
-					// Check if it is open in the side panel. If so, close it.
-					var targetPane = paneFactory.getPane("scripted.editor", "sub");
-					if (targetPane && targetPane.editor.getFilePath() === resourceToNavigate)	{
-					   sidePanelManager.closeSidePanel();
-					}
 				}
 			});
 
 		};
 
-    /**
-    * Wrapper call around an operation promise that performs a navigator refresh upon a promise resolve, or error logging on reject.
-    */
+	/**
+	 * Wrapper call around an operation promise that performs a navigator refresh upon a promise resolve, or error logging on reject.
+	 */
 	var navigatorRefreshHandler = function(operationPromise, resourceToSelect) {
 
 			if (operationPromise && operationPromise.then) {
@@ -54,10 +47,10 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 				var errorCallBack = function(err) {
 						scriptedLogger.error(err, loggingCategory);
 					};
-             
+
 				operationPromise.then(resolveCallBack, errorCallBack);
 			}
-	
+
 		};
 
 
@@ -125,25 +118,25 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 			var getMenusActions = function() {
 
 					addAction({
-					name: "New File...",
-					handler: function(contextEvent) {
+						name: "New File...",
+						handler: function(contextEvent) {
 
-						resourcesDialogue.createDialogue(resourceCreationPath).addFile(function(
-						resourceName) {
-							var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
+							resourcesDialogue.createDialogue(resourceCreationPath).addFile(function(
+							resourceName) {
+								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
 
-                            // pass '' as contents to avoid undefined new file
-							var promise = fileOperationsClient.createFile(urlNewResource, '');
+								// pass '' as contents to avoid undefined new file
+								var promise = fileOperationsClient.createFile(urlNewResource, '');
 
-							navigatorRefreshHandler(promise, urlNewResource);
-							
-							return promise;
-						});
-					},
-					isEnabled: function() {
-						return typeof resourceCreationPath !== "undefined";
-					}
-				});
+								navigatorRefreshHandler(promise, urlNewResource);
+
+								return promise;
+							});
+						},
+						isEnabled: function() {
+							return typeof resourceCreationPath !== "undefined";
+						}
+					});
 
 					addAction({
 						name: "New Folder...",
@@ -199,6 +192,16 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 								var promise = fileOperationsClient.deleteResource(contextResource.location);
 								// Navigate to parent folder.
 								navigatorRefreshHandler(promise, parent);
+								promise.then(function() { // Check if it is open in the side panel. If so, close it.
+									var targetPane = paneFactory.getPane("scripted.editor", "sub");
+
+									if (targetPane) {
+										var paneFilePath = targetPane.editor.getFilePath();
+										if (paneFilePath === contextResource.location) {
+											sidePanelManager.closeSidePanel();
+										}
+									}
+								});
 								return promise;
 							});
 						},
