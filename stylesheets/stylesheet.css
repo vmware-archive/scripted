@@ -234,6 +234,7 @@ hr {
   background: url('../images/bg_hr.png') repeat-x center;
 }
 
+/*
 table {
   border: 1px solid #373737;
   margin-bottom: 20px;
@@ -251,6 +252,7 @@ td {
   padding: 10px;
   border: 1px solid #373737;
  }
+*/
 
 form {
   background: #f2f2f2;
@@ -258,7 +260,9 @@ form {
 }
 
 img {
+/* asc: removed as it makes the Release Note images huge
   width: 100%;
+*/
   max-width: 100%;
 }
 

@@ -1,11 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
+<link rel="stylesheet" type="text/css" media="screen" href="../../stylesheets/stylesheet.css"/>
+<link rel="stylesheet" type="text/css" media="screen" href="../../stylesheets/stylesheet2.css"/>
 
+<style type="text/css">
+p, table, td, th { font-size: 14pt; }
+.code { 
+	font-size: 12pt;
+	font-family: Monaco, monospace; 
+}
+pre {  font-family: Monaco, monospace; font-size: 10pt}
+
+table.nan td { border-top: solid thin black; }
+table.nan tr { vertical-align: top; }
+table.nan tr td.nansection { font-size: 28px; font-weight: bold; }
+table.nan tr td.title { vertical-align: top; width: 30%; font-weight: bold; }
+table.nan tr td.description { vertical-align: top; width: 70%; }
+</style>
+<!--
 <style type="text/css">
 p, table, td, th {  font-family: verdana, arial, helvetica, geneva; font-size: 10pt}
 pre {  font-family: "Courier New", Courier, mono; font-size: 10pt}
 h2 { font-family: verdana, arial, helvetica, geneva; font-size: 18pt; font-weight: bold ; line-height: 14px}
-code {  font-family: "Courier New", Courier, mono; font-size: 10pt}
 sup {  font-family: verdana, arial, helvetica, geneva; font-size: 10px}
 h3 {  font-family: verdana, arial, helvetica, geneva; font-size: 14pt; font-weight: bold}
 li {  font-family: verdana, arial, helvetica, geneva; font-size: 10pt}
@@ -20,71 +36,107 @@ a.bar {  color: #FFFFFF}
 
 table.nan td { border-top: solid thin black; }
 table.nan tr { vertical-align: top; }
-table.nan tr td.section { font-size: 20px; font-weight: bold; }
+table.nan tr td.nansection { font-size: 20px; font-weight: bold; }
 table.nan tr td.title { vertical-align: top; width: 30%; font-weight: bold; }
 table.nan tr td.description { vertical-align: top; width: 70%; }
 .code { font-family: monospace; }
-</style><title>Scripted 0.3 - release notes</title></head><body>
-<h2>Scripted 0.3 - release notes</h2>
-<p>These are the foobars</p>
+</style>
+-->
+	<title>Scripted 0.3 - release notes</title>
+</head>
+<body>
+	<div id="header_wrap" class="outer">
+		<header class="inner">
+			<a id="forkme_banner" href="https://github.com/scripted-editor/scripted">View on GitHub</a>
+			<h1 id="project_title">Scripted 0.3</h1>
+			<h2 id="project_tagline">Release Notes</h2>
+		<section id="downloads">
+<!-- TODO need correct 0.3 tag link -->
+			<a class="tar_download_link" href="https://github.com/scripted-editor/scripted/tarball/master">Download .tar.gz of version 0.3</a>
+			<a class="zip_download_link" href="https://github.com/scripted-editor/scripted/zipball/master">Download zip of version 0.3</a>
+		</section>
+		</header>
+	</div>
 
-<table class="nan" cellpadding="10" cellspacing="0">
-<tbody><tr>
-	<td id="xyz" class="section" colspan="2"><h2>KDV</h2></td>
-</tr>
-<tr id="newlook">
+<div id="main_content_wrap" class="outer"> <section id="main_content" class="inner1024">
+<table class="nan" cellpadding="10" cellspacing="0"> <tbody> 
 
-<td class="title">
-	Keybinding UI
-</td>
+	<tr><td class="nansection" colspan="2">Installing and running Scripted</td></tr>
 
-<td class="description">
-	<p>It is now possible to redefine
-	Scripted's keybindings via a simple UI. To access this UI open the
-	<b>'Help panel'</b> by clicking the question mark icon in the toolbar or
-	pressing <b>'F1'</b>. Click any of the shortcut keys to change it.</p>
+	<tr id="long_running_server">
+		<td class="title">Long running server</td>
+		<td class="description">The Scripted server (a Node application) is now a long running process. Previously it was restarted
+		each time the command <span class="code">scr</span> or <span class="code">scripted</span> was run. Now it is started if not
+		currently running, the launch scripts support options to restart it.
+		<br>
+		The server logs are
+		now being written to the <span class="code">/tmp/scripted.log</span> on mac/linux and 
+		<span class="code">%TEMP%\scripted.log</span> on windows.
+		</td>
+	</tr>
 
-	<img src="keybinding-ui.png" alt="Screenshot of it">
+    <tr id="launch_script_updates">
+        <td class="title">Launch script updates</td>
+        <td class="description">The launch scripts have been changed to behave in a more intuitive way:<br>
+			<span class="code">scr</span> - running it with no options will open Scripted on the current directory.<br>
+			<span class="code">scr [file|directory]</span> - will open Scripted on the specified file or directory.<br>
+			<span class="code">scr -h|--help</span> - show the help options for the launch script (not yet on windows).<br>
+			<span class="code">scr -r|--restart</span> - will restart the server <b>which is now a long running process</b><br>
+			They now support being linked-to on mac/linux. The windows experience when using the launch scripts is drastically improved.
+        </td>
+    </tr>
 
-    <p>Any changes you make to the keybindings are saved in 
-    <span class="code">${user.home}/.scriptedrc/keymap-${os.name}.json</span></p>
+    <tr id="npm_installable">
+       <td class="title">npm installable</td>
+       <td class="description">This version can now be installed using <span class="code">npm install</span> on all platforms.
+		The typical install process is:<br> <span class="code">npm install -g scripted</span><br>
+		The launch scripts (scr/scripted) will then be immediately available to run Scripted.
+        </td>
+    </tr>
 
-    <p>There is no reset button yet. To reset the keybindings to their default values 
-    you can simply delete the keymap file.</p>
-</td>
+	<tr><td class="nansection" colspan="2">Keybindings</td></tr>
 
-</tr>
-
-<tr id="newlook">
-
-<td class="title">
-   Keybinding related bugfixes
-</td>
-<td class="description">
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-266">Scripted-260</a>: Some keybindings/actions are 
-	now marked as <b>Global</b> and will work even if the editor does not currently have focus. E.g. 'Open file' dialog's
-	keybinding.</p>
+	<tr id="configurable_key_bindings">
+		<td class="title">Configurable key bindings</td>
+		<td class="description">
+		It is now possible to redefine keybindings via a simple UI. To access
+		this UI open the <b>'Help panel'</b> by clicking the question mark icon in the toolbar or
+		pressing <span class="kb">F1</span>. Click the keybinding shortcut for any action to change it.<br>
 	
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-255">Scripted-255</a>: Opening help is now assigned to 
-	<b>F1</b> by default.</p>
-	
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-240">Scripted-240</a>: Fixed a bug that caused 
-	<b>SHIFT-TAB</b> keybinding to occasionally get lost.</p>
-	
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-176">Scripted-176</a>: CTRL-L "center editor on cursor" 
-	now also works in Firefox on Macs.</p>
-	
-</td>
-</tr>
+		<center><img src="keybinding-ui.png" alt="Keybinding UI screenshot"></center>
+		
+		<p>Any changes made to the keybindings are saved in</p>
+		<span class="code">${user.home}/.scriptedrc/keymap-${os.name}.json</span><p> There is
+		no reset button yet. To reset the keybindings to their default values 
+		simply delete the keymap file.</p>
+		</td>
+	</tr>
 
-<tr id="newlook">
+	<tr id="other_keybinding_changes"> 
+		<td class="title"> Other keybinding changes </td>
+		<td class="description">
+		<!--
+		<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-266">Scripted-260</a>: Some keybindings/actions are 
+		now marked as <b>Global</b> and will work even if the editor does not currently have focus. E.g. 'Open file' dialog's
+		keybinding.</p>
+		<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-240">Scripted-240</a>: Fixed a bug that caused 
+		<b>SHIFT-TAB</b> keybinding to occasionally get lost.</p>
+		-->
+		<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-255">Scripted-255</a>: Opening help is now assigned to 
+		<span class="kb">F1</span> by default.</p>
+		
+		<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-176">Scripted-176</a>: <span class="kb">CTRL-L</span> "center editor on cursor" 
+		now also works in Firefox on Macs.</p>
+		</td>
+	</tr>
 
-<td class="title">
-	Enhancements to dependency resolution and configuration discovery
-</td>
-<td class="description">
+	<tr><td id="code_comprehension" class="nansection" colspan="2">Code comprehension</td></tr>
 
-	<p>Recognize more idioms for extracting the AMD loader configuration from projects: 
+	<tr id="enhancements_to_dependency_resolution_and_configuration_discovery">
+		<td class="title">Enhancements to dependency resolution and configuration discovery</td>
+		<td class="description">
+
+	<p>Scripted now recognizes more idioms for extracting the AMD loader configuration from projects:
 	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-253">Scripted-253</a>,
 	  <a href="https://issuetracker.springsource.com/browse/SCRIPTED-239">Scripted-239</a>,
 	  <a href="https://github.com/scripted-editor/scripted/issues/38">GH-Scripted-38<a>.
@@ -112,128 +164,23 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 	relative-path commonjs module references.</p>
 	
 	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-103">Scripted-103</a>, 
-	   <a href="https://github.com/scripted-editor/scripted/issues/22">GH-Scripted-22<a>: Added hard-coded support for
+	   <a href="https://github.com/scripted-editor/scripted/issues/22">GH-Scripted-22</a>: Added hard-coded support for
 	'text!' and 'i18n!' AMD loader plugins. Other plugins are treated as 'unsupported' and errors associated with them
-	are supressed.
+	are suppressed.
 </td>
 </tr>
-
-<tr id="newlook">
-
-<td class="title">Enhancements to <b>Open File</b> and <b>Look in Files</b> search dialogs</td>
-<td class="description">
-   <p>Besides having a new look. These dialogs now perform a dynamic incremental search. A search kicks of as soon
-   as enough characters have been typed (0 characters for 'Open File' searches and 3 characters for 'Look in File' 
-   searches). As the search is still running you can continue to type and the still executing query is 
-   dynamically updated as you type. The backend optimizes dynamic query updates by using the already found results 
-   while changing the search-term for the remainder of an ongoing search.</p>
-
-   <p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">Scripted-229</a>: Searches are also automatically paused 
-   when the number of displayed results exceeds what can be visibly displayed on-screen. A paused search is 
-   automatically resumed when you scroll near the end of the visible results area.<p>
-   
-   <p>Some other minor enhancements to these search dialogs include:</p>
-   <ul>
-      <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-200">Scripted-200</a>: Prefill the search text
-      with either the current editor selection or, if the selection is empty, the last-used search-text.
-      <li><a href="https://github.com/scripted-editor/scripted/issues/77">GH-Scripted-77</a>: Fixed a bug that caused server 
-      crash when typing funny characters into open-file dialog.</li>
-      <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-270">Scripted-270</a>: Fixed a bug that caused server crashes 
-        when errors occur reading files during 'look in files' search.</li>
-   </ul>
-   
-  <img src="open-file-dialog-new-look.png" alt="Screenshot of it">
-</td>
-</tr>
-
-<tr>
-  <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scritpedrc'</span></td>
-  <td style="vertical-align: top;">
-    It is now possible to share config options across multiple projects. To do so they should be placed in a file
-    <span class="code">${user.home}/.scriptedrc/scripted.json</span> instead of a project-specific 
-    <span class="code">.scripted</span> file. The shared config options are read before the .scripted file and
-    both sets of options are merged. When there is a conflict, <span class="code">.scripted</span> takes 
-    priority.
-  </td>
-</tr>
-    
-<tr>
-  <td style="vertical-align: top;"><span style="font-weight: bold;">Parse config files using JSON5'</span><br>
-  </td>
-  <td style="vertical-align: top;">
-  	All Scripted's json-based config files are now parsed using JSON5 instead of 
-  	plain JSON. <a href="http://json5.org/">JSON5</a> is an extension of plain JSON with a more 
-  	user-friendly, forgiving syntax. For example, it allows for comments in the config files.
-  </td>
-</tr>
-    
-<tr id="newlook">
-
-<td class="title">Event-driven Shell Actions
-</td>
-<td class="description">
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-145">Scripted-145</a> added support to
-	allow user-configured shell commands to be triggered by certain editor events. Notably, you can execute
-	commands when a file is saved or when the editor first opens. </p>
-	<p>Detailed documentation on this feature can be found on the 
-	<a href="https://github.com/scripted-editor/scripted/wiki/Executing-Shell-Commands">
-	Scripted-Wiki</a>.
-</td>
-</tr>
-
-<td class="title">Console UI to display shell command results
-</td>
-<td class="description">
-	<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-110">Scripted-110</a>: A simple console-like UI
-	pops out to display the result of any executed shell commands.</p>
-	
-    <img src="scripted-console.png" alt="Screenshot of it">
-	
-</td>
-</tr>
-    
-<tr>
-		<td id="xyz" class="section" colspan="2"><h2>ADE</h2></td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Inferring object shape based on usage</td>
-		<td class="description">Inferencing will now guess the shape of an object (i.e., its valid properties) based on how it is used. For example, 
-		in the following screenshot, you can see a function with a single parameter called <tt>address</tt>.  Based on how the parameter is used, content assist is able to 
-		infer that it has three properties:<br/><br/>
-		<img src="shape.png" border="1" title="Inferring object shape through usage"/></p>
-		</td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Inferring variables before they are declared</td>
-		<td class="description">Forward referencing of functions and variables will now be recognized by the inferencer for content assist, hovers, and navigation.  For 
-		example:<br/><br/>
-		<img src="forward_ref.png" border="1" title="Inferring forward references"/<br/><br/>
-		In the screenshot above, even though <tt>addressParser</tt> is lexically defined after its usage, hovering is still able to determine the function's type.
-		</td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Type inferencing of arrays</td>
-		<td class="description">Scripted will now be able to infer the type of array elements.  It makes the simplifying assumption that all elements are of the same type.  
-		For array literals, the first element determines the parameterized type of the array.  See this screenshot as an example:<br/><br/>
-		<img src="array1.png" border="1" title="Inferring parameterization of arrays"/><br/><br/>
-		And, content assist will work as expected when dereferencing an array:<br/><br/>
-		<img src="array2.png" border="1" title="Content assist and arrays"/><br/><br/>
-		Scripted also recognizes JSDoc syntax for array parameterization:<br/><br/>
-		<img src="array3.png" border="1" title="JSDoc and array parameterization"/><br/><br/>
-		The syntax recognized by Scripted is described in the documentation for the <a 
-		href="https://developers.google.com/closure/compiler/docs/js-for-compiler">Google closure compiler</a>.
-		</td>
-	</tr>
 	<tr id="newlook">
 		<td class="title">Inferencing of global dependencies</td>
-		<td class="description">Scripted now recognizes a form of global dependencies for JavaScript files.  When a JavaScript file is not deteremined to be an AMD style module or a CommonJS syle module,
-		it is considered a global module (i.e., it doesn't use a module system).  For files that have a global module, the Scripted dependency resolver will look for other global modules that it depends on.
-		It does this by looking for references to the current JavaScript file in script tags in HTML files. And when a reference is found, Scripted will find all other JavaScript files referenced in that HTML file.
+		<td class="description">Scripted now recognizes a form of global dependencies for JavaScript files. 
+		When a JavaScript file is not determined to be an AMD style module or a CommonJS syle module, it is
+		considered a global module (i.e. it doesn't use a module system).  For files that have a global module,
+		the Scripted dependency resolver will look for other global modules that it depends on.
+		It does this by looking for references to the current JavaScript file in script tags in HTML files.
+		When a reference is found, Scripted will find all other JavaScript files referenced in that HTML file.
 		In order to avoid circular dependencies, only JavaScript files that come before the current file are considered referenced.
 		<br/><br/>
 		All global variables from referenced files will be available for content assist and navigation in the current JavaScript file.  For example:
-		<pre>
-&lt;html&gt;
+<div class="codeblockcontainer"><span class="codeblock">&lt;html&gt;
   &lt;head&gt;
     &lt;script src="scripts/foo.js"&gt;&lt;/script&gt;
     &lt;script src="scripts/bar.js"&gt;&lt;/script&gt;
@@ -241,7 +188,8 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
   &lt;/head&gt;
   &lt;body/&gt;
 &lt;/html&gt;
-		</pre>
+</span></div>
+		<br>
 		When editing in <tt>main.js</tt>, you will have access to all global variables defined in both <tt>bar.js</tt> and <tt>foo.js</tt>.  When
 		editing <tt>bar.js</tt>, you will have access only to global variables from <tt>foo.js</tt>.  And when in <tt>foo.js</tt>, you will not
 		have access to any other global variables.
@@ -253,29 +201,132 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		As you can see, <tt>bar</tt> is available in content assist.  There are two important things to keep in mind here:
 		<ol>
 		  <li>You must have an HTML file somewhere in a parent directory to gather the JavaScript files.</li>
-		  <li>References to identifiers defined in other files will be marked as an error by jshint unless you use the <tt>/*global */</tt> directive.</li>
+		  <li>References to identifiers defined in other files will be marked as an error by JSHint unless you use the <span class="code">/*global */</span> directive.</li>
 		</ol>
 		</td>
 	</tr>
-	<tr id="newlook">
-		<td class="title">Smart matching for content assist</td>
-		<td class="description">
-		Scripted now performs fuzzy matching for content assist proposals.  Typing text in all lower case will look for proposals case-insensitively. as shown in this screenshot:
-		<br/><br/>
-		<img src="content_assist_matching1.png" border="1" />
-		<br/><br/>
-		Scripted also recognizes camelCase matching.  You can shortcut each fragment in a camelCased word and the completion engine will match against each fragment portion, as shown here:
-		<br/><br/>
-		<img src="content_assist_matching2.png" border="1" />
-		<br/><br/>
-		
+
+    <tr id="move_to_jshint">
+        <td class="title">Move to JSHint</td>
+        <td class="description">Previously Scripted was using jslint as the built in linter. In this version
+		Scripted has moved to using JSHint. Configuration is still possible using the <span class="code">.scripted</span> file but 
+		Scripted will also look for a <span class="code">.jshintrc</span> file and use that to configure the linter. Fewer linter options
+		are turned on by default in this version, so it is recommended users take a moment to configure their
+		linter (through <span class="code">.scripted</span> or <span class="code">.jshintrc</span>) - a sample 
+		<span class="code">.jshintrc</span> file (the one actually used by the Scripted project itself)
+		is <a href="https://raw.github.com/scripted-editor/scripted/master/.jshintrc">here</a>.
+		<br><br>
+		Any configuration in a <span class="code">.scripted</span> file overrides the settings picked up from a
+		<span class="code">.jshintrc</span> file.  Scripted searches 'upwards' in the filesystem from the file
+		being edited to the inferred project root when trying to discover a <span class="code">.jshintrc</span> file. Using different
+		config files in different sub-directories is not yet supported. Configuring the linter via <span class="code">.scripted</span>
+		is documented <a href="https://github.com/scripted-editor/scripted/wiki/Configuration#jshint">here</a>.
+        </td>
+    </tr>
+
+<tr><td id="scripted_configuration" class="nansection" colspan="2">Scripted Configuration</td></tr>
+
+<tr id="newlook">
+  <td style="vertical-align: top;"><span style="font-weight: bold;">Global Configuration via '.scriptedrc'</span></td>
+  <td style="vertical-align: top;">
+    It is now possible to share config options across multiple projects. To do so they should be placed in a file:<br>
+    <span class="code">${user.home}/.scriptedrc/scripted.json</span><br> instead of a project-specific 
+    <span class="code">.scripted</span> file. The shared config options are read before the .scripted file and
+    both sets of options are merged. When there is a conflict, <span class="code">.scripted</span> takes 
+    priority.
+  </td>
+</tr>
+    
+<tr>
+  <td style="vertical-align: top;"><span style="font-weight: bold;">Parse config files using JSON5</span><br>
+  </td>
+  <td style="vertical-align: top;">
+  	All Scripted's json-based config files are now parsed using JSON5 instead of 
+  	plain JSON. <a href="http://json5.org/">JSON5</a> is an extension of plain JSON with a more 
+  	user-friendly, forgiving syntax. For example, it allows for comments in JSON formatted text.
+  </td>
+</tr>
+
+    <tr id="configurable_tabs_and_spaces">
+        <td class="title">Configurable tabs/spaces</td>
+        <td class="description">Previously the tab/space indentation settings for the beautifier
+		could be configured but they did not necessarily tie up with the defaults for the editor. The editor
+		configuration options are now exposed for configuration and can be set in the
+		<span class="code">.scripted</span> file:
+<div class="codeblockcontainer"><span class="codeblock">{
+	"editor": {
+		"expandtab": true,
+		"tabsize": 4
+	}
+}
+</span> </div>
+		<span class="code">expandtab</span> - determines whether tabs are expanded as spaces<br>
+		<span class="code">tabsize</span> - the number of spaces that constitute a tab<br>
+		Setting these config options will auto configure the beautifier too, there is no need to configure
+		that separately.
+    </tr>
+    
+<tr><td id="inferencing" class="nansection" colspan="2">Inferencing</td></tr>
+
+	<tr id="inferring_object_shape_based_on_usage">
+		<td class="title">Inferring object shape based on usage</td>
+		<td class="description">Inferencing will now guess the shape of an object (i.e., its valid properties) based on how it is used. For example, 
+		in the following screenshot, there is a function with a single parameter called 
+		<span class="code">address</span>.  Based on how the parameter is used, content assist is able to 
+		infer that it has three properties:<br/><br/>
+		<img src="shape.png" border="1" title="Inferring object shape through usage"/></p>
 		</td>
 	</tr>
-	<tr id="newlook">
+
+	<tr id="inferring_variables_before_they_are_declared">
+		<td class="title">Inferring variables before they are declared</td>
+		<td class="description">Forward referencing of functions and variables will now be recognized by the inferencer
+		for content assist, hovers, and navigation.  For example:<br/><br/>
+		<img src="forward_ref.png" border="1" title="Inferring forward references"/<br/><br/>
+		In the screenshot above, even though <tt>addressParser</tt> is lexically defined after its usage, hovering is
+	 	still able to determine the function's type.
+		</td>
+	</tr>
+
+	<tr id="type_inferencing_of_arrays">
+		<td class="title">Type inferencing of arrays</td>
+		<td class="description">Scripted will now be able to infer the type of array elements.  It makes
+		the simplifying assumption that all elements are of the same type.  
+		For array literals, the first element determines the parameterized type of the array.  See this screenshot as an example:<br/><br/>
+		<img src="array1.png" border="1" title="Inferring parameterization of arrays"/><br/><br/>
+		And, content assist will work as expected when dereferencing an array:<br/><br/>
+		<img src="array2.png" border="1" title="Content assist and arrays"/><br/><br/>
+		Scripted also recognizes JSDoc syntax for array parameterization:<br/><br/>
+		<img src="array3.png" border="1" title="JSDoc and array parameterization"/><br/><br/>
+		The syntax recognized by Scripted is described in the documentation for the <a 
+		href="https://developers.google.com/closure/compiler/docs/js-for-compiler">Google closure compiler</a>.
+		</td>
+	</tr>
+
+<tr id="content_assist_and_navigation"><td class="nansection" colspan="2">Content assist and navigation</td> </tr>
+
+	<tr id="smart_matching_for_content_assist">
+		<td class="title">Smart matching for content assist</td>
+		<td class="description">
+		Scripted now performs fuzzy matching for content assist proposals.  Typing text in all lower case
+		will look for proposals case-insensitively:
+		<br/><br/>
+		<img src="content_assist_matching1.png" />
+		<br/><br/>
+		Scripted also recognizes CamelCase matching.  You can shortcut each fragment in a CamelCased word 
+		and the completion engine will match against each fragment portion, as shown here:
+		<br/><br/>
+		<img src="content_assist_matching2.png"/>
+		<br/><br/>
+		</td>
+	</tr>
+
+	<tr id="completion_templates">
 		<td class="title">Completion templates</td>
 		<td class="description">
-		Scripted now has basic support for defining your own completion templates.  To use this feature, create a file called 
-		<em>anything</em>.scripted-completions and place this file inside of your <tt>.scriptedrc</tt> folder.
+		Scripted now has basic support for defining custom completion templates.  To use this feature, create a file called <span class="code">
+		<em>anything</em>.scripted-completions</span> and place this file inside of your <span class="code">.scriptedrc</span> folder (which should
+		be created in your home directory).
 		You can see examples of scripted-completions files in the scripted/completions folder of your Scripted installation.
 		<br/><br/>
 		Out of the box, we provide templates for common JavaScript, JQuery, and HTML idioms.  But, you can provide your own templates.
@@ -284,85 +335,156 @@ table.nan tr td.description { vertical-align: top; width: 70%; }
 		<a href="http://docs.sublimetext.info/en/latest/extensibility/completions.html">Sublime text documentation</a>.
 		Since many of our users will be familiar with <a href="http://www.sublimetext.com/">Sublime Text</a>, we provide compatibility
 		with their completions files.  If you want to use an existing <em>sublime-completions</em> file, then all you need to do is
-		change the file extension and move it to your <tt>.scriptedrc</tt> folder.
+		change the file extension and move it to your <span class="code">.scriptedrc</span> folder.
 		<br/><br/>
 		Note that it is possible to place your scripted-completions files in the scripted/completions folder, but this is not recommended
 		since they will be lost on upgrades or re-installs.
 		</td>
 	</tr>
-	<tr id="newlook">
+
+	<tr id="click_to_navigate">
 		<td class="title">Click to navigate</td>
-		<td class="description">Ctrl/Cmd + Click will navigate to the definition of the currently selected identifier.  Ctrl/Cmd + Shift + Click will navigate
-		to the definition in the other editor pane.  This behavior mimics that of F8 and Shift+F8.</p>
+		<td class="description"><span class="kb">Cmd/Ctrl+Click</span> will navigate to the definition of the currently selected identifier.
+  		<span class="kb">Cmd/Ctrl+Shift+Click</span> will navigate to the definition in the other editor pane.  This behavior
+		mimics that of <span class="kb">F8</span> and <span class="kb">Shift+F8</span>.</p>
 		</td>
 	</tr>
-	<tr id="newlook">
+
+	<tr id="history_and_navigation_improvements">
+		<td class="title">History and navigation improvements</td>
+		<td class="description">The complete page state of your scripted editor will be stored in browser history.
+		This includes current file, selected text, and scroll position for both the main editor and the side panel.
+		Going backwards and forwards in history will properly open or close the side panel, as well as
+		set selections and scroll positions.
+		</td>
+	</tr>
+
+<tr><td id="shell_commands" class="nansection" colspan="2">Shell commands</td></tr>
+
+	<tr id="event_driven_shell_actions"> 
+		<td class="title">Event-driven Shell Actions</td>
+		<td class="description">
+		<a href="https://issuetracker.springsource.com/browse/SCRIPTED-145">Scripted-145</a> added support to
+		allow user-configured shell commands to be triggered by certain editor events. Notably, commands can be
+		executed when a file is saved or when the editor first opens.
+		<p>Detailed documentation on this feature can be found on the 
+		<a href="https://github.com/scripted-editor/scripted/wiki/Executing-Shell-Commands">
+		Scripted-Wiki</a>.</p>
+		</td>
+	</tr>
+
+	<tr id="console_ui_to_display_shell_command_results">
+		<td class="title">Console UI to display shell command results</td>
+		<td class="description">
+		<p><a href="https://issuetracker.springsource.com/browse/SCRIPTED-110">Scripted-110</a>: A simple console-like UI
+		pops out to display the result of any executed shell commands.</p>
+    	<center><img src="scripted-console.png" alt="Screenshot of it"></center>
+		</td>
+	</tr>
+
+
+<tr><td class="nansection" colspan="2">Editor changes</td></tr>
+	
+	<tr id="mark_occurrences">
 		<td class="title">Mark occurrences</td>
-		<td class="description">Scripted now implements <em>lexical</em> mark occurrences. 	Any selected word and all occurrences of that word in the current file will be outlined.  
+		<td class="description">Scripted now implements <em>lexical</em> mark occurrences. 	Any selected word and all occurrences of
+		that word in the current file will be outlined.  
 			For example, see this screenshot:<br/><br/>
-		<img src="mark_occurrences.png" border="1" title="Mark occurrences"/><br/><br/>
+		<img src="mark_occurrences.png" title="Mark occurrences"/><br/><br/>
 		Mark Occurrences is configurable in your <tt>.scripted</tt> file using the following configuration options:
 		<ul>
-			<li><tt>interval</tt>: The amount of time between moving the caret and invoking the mark_occurrences operation. Default 500.</li> 
-			<li><tt>disable</tt>: If set to <tt>true</tt> will disable mark occurrences. Default <tt>false</tt></li>
-			<li><tt>retain</tt>: If set to <tt>true</tt> will retain the previous marks even after the caret position is moved to another (non-word) location. Default <tt>false</tt></li>
+			<li><span class="code">interval</span>: The amount of time between moving the caret and invoking 
+			the mark_occurrences operation. Default 500.</li> 
+			<li><span class="code">disable</span>: If set to <span class="code">true</span> will disable mark occurrences. 
+			Default <span class="code">false</span></li>
+			<li><span class="code">retain</span>: If set to <span class="code">true</span> will retain the previous marks even
+			after the caret position is moved to another (non-word) location. Default <span class="code">false</span></li>
 		</ul>
 		The configuration looks like this:
-		<pre>
-{
+<div class="codeblockcontainer"><span class="codeblock">{
 	mark_occurrences : {
 		interval : 500,
 		disable : false,
 		retain : false
 	}
 }
-		</pre>
+</span></div>
 		</td>
 	</tr>
-	<tr id="newlook">
-		<td class="title">History and navigation improvements</td>
-		<td class="description">The complete page state of your scripted editor will be stored in browser history.  This includes current file, 
-		selected text, and scroll position for both the main editor and the side panel.  Going backwards and forwards in history will properly open or close the side panel, as well as
-		set selections and scroll positions.
+
+	<tr><td id="dialogs" class="nansection" colspan="2">Dialogs</td></tr>
+
+	<tr id="enhancements_to_open_file_and_look_in_files_search_dialogs">
+		<td class="title">Enhancements to <b>Open File</b> and <b>Look in Files</b> search dialogs</td>
+		<td class="description">Besides having a new look. These dialogs now perform a dynamic incremental
+		search. A search kicks of as soon
+		as enough characters have been typed (0 characters for 'Open File' searches and 3 characters for 'Look in File' 
+		searches). As the search is still running you can continue to type and the still executing query is 
+		dynamically updated as you type. The backend optimizes dynamic query updates by using the already found results 
+		while changing the search-term for the remainder of an ongoing search.</p>
+		<p>
+		<!-- <a href="https://issuetracker.springsource.com/browse/SCRIPTED-229">Scripted-229</a>:--> 
+		Searches are also automatically paused 
+		when the number of displayed results exceeds what can be visibly displayed on-screen. A paused search is 
+		automatically resumed when you scroll near the end of the visible results area.<p>
+
+		<p>The search text is also now pre-filled when the dialogs are opened using the 
+		current editor selection or previously used text, if available.</p>
+   
+<!--
+   <p>Some other minor enhancements to these search dialogs include:</p>
+   <ul>
+      <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-200">Scripted-200</a>: Pre-fill the search text
+      with either the current editor selection or, if the selection is empty, the last-used search-text.
+      <li><a href="https://github.com/scripted-editor/scripted/issues/77">GH-Scripted-77</a>: Fixed a bug that caused server 
+      crash when typing funny characters into open-file dialog.</li>
+      <li><a href="https://issuetracker.springsource.com/browse/SCRIPTED-270">Scripted-270</a>: Fixed a bug that caused server crashes 
+        when errors occur reading files during 'look in files' search.</li>
+   </ul>
+-->
+		<center> <img src="open-file-dialog-new-look.png" alt="Screenshot of it" width="60%"> </center>
 		</td>
 	</tr>
-	<tr>
-		<td id="xyz" class="section" colspan="2"><h2>ASC</h2></td>
-	</tr>
-	<tr id="newlook">
-		<td class="title">Added a foobar</td>
-		<td class="description">Here is a description of foobar.
-		<p><img src="testicon.png" alt="Screenshot of it" width="20"></p>
-		</td>
-	</tr>
-	<tr>
-		<td id="xyz" class="section" colspan="2"><h2>NS</h2></td>
-	</tr>
-	<tr id="newlook">
+
+	<tr id="navigator_context_menu">
 		<td class="title">Navigator context menu</td>
-		<td class="description">It is now possible to add new files and folders, as well as delete or rename existing files and folders, from the scripted navigator through a navigator context menu.
+		<td class="description">It is now possible to add new files and folders, as well as delete or rename existing
+		files and folders, from the scripted navigator through a navigator context menu.
 		<br/><br/>
-		The context menu is invoked anywhere in the navigator area by right-clicking on a navigator element like a file or folder. The four context menu options are:
+		The context menu is invoked anywhere in the navigator area by right-clicking on a navigator element like a
+		file or folder. The four context menu options are:
 		 <ul><li>
-		<b>New File</b>: Creates a new file in either a selected folder, or if a file was selected, in the same parent folder containing that file.
+		<em>New File</em>: Creates a new file in either a selected folder, or if a file was selected, in the same parent folder containing that file.
 		</li><li>
-		<b>New Folder</b>: Creates a new folder in either a selected folder, or if a file was selected, in the same parent folder containing that file.
+		<em>New Folder</em>: Creates a new folder in either a selected folder, or if a file was selected, in the same parent folder containing that file.
 		</li><li>
-		<b>Rename</b>: Renames an existing file or folder. If another resource already exists with the new name, the existing resource will be replaced.
+		<em>Rename</em>: Renames an existing file or folder. If another resource already exists with the new name, the existing resource will be replaced.
 		</li><li>
-		<b>Delete</b>: Deletes a file or folder. For folders, all content of the folders are also deleted.
+		<em>Delete</em>: Deletes a file or folder. For folders, all content of the folders are also deleted.
 		</li></ul>
-		<p><img src="navigator_context_menu.png" border="1" title="Navigator Context Menu"/></p>
-		If right-clicking in an empty space in the navigator, <b>Rename</b> and <b>Delete</b> are disabled, and creating a new file or folder will add the resource at root level.
+		<p><center><img src="navigator_context_menu.png" title="Navigator Context Menu"/></center></p>
+		If right-clicking in an empty space in the navigator, <b>Rename</b> and <b>Delete</b> are disabled, and creating a new file or folder will
+		add the resource at root level.
 		<br/><br/>
-		Each context menu action opens a modal dialogue that either prompts the user to confirm the operation, as in the case of deleting a resource, or asks the user for input. If an error
-		occurs during the resource operation, for example, renaming a folder, an error message is displayed to the user and the dialogue remains open.
+		Each context menu action opens a modal dialog that either prompts the user to confirm the operation, as in
+		the case of deleting a resource, or asks the user for input. If an error occurs during the resource operation, for
+		example, renaming a folder, an error message is displayed to the user and the dialog remains open.
 		<br/><br/> 
-		Closing the dialogues can be done by either clicking the Cancel button, pressing Esc, or clicking outside the dialogues.
-		<p><img src="rename_dialogue_with_error.png" border="1" title="Rename Dialogue With Error"/></p>
-		
+		Closing the dialogs can be done by either clicking the Cancel button, pressing Esc, or clicking outside the dialogs.
+		<p><center><img src="rename_dialogue_with_error.png" title="Rename Dialog With Error"/></center></p>
 		</td>
 	</tr>
+
+
+
 </tbody></table>
+</section></div>
+
+<div id="footer_wrap" class="outer">
+	<footer class="inner">
+		<p class="copyright">Scripted maintained by <a href="https://github.com/scripted-editor">scripted-editor</a></p>
+		<p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+	</footer>
+</div>
 
 </body></html>

@@ -1,0 +1,43 @@
+/* based on .inner, just wider */
+.inner1024 { 
+	position: relative;
+	max-width: 1024px;
+	padding: 20px 10px;
+	margin: 0 auto;
+}
+
+/* override image config in default stylesheet.css */
+img {
+	padding: 0px;
+	margin: 2px;
+	border: 1px solid #111;
+}
+
+/* key binding highlight box */
+.kb {
+	font-size: 11pt;
+	margin: 0;
+	padding: 0px 1px;
+	min-width: 8px;
+	background: #333;
+	color: #eee;
+	border-radius: 2px;
+	text-align: center;
+	font-family: Monaco, monospace;
+/*
+	text-shadow: 1px 1px 0 black;
+*/
+}
+
+.codeblockcontainer {
+	width: 60%;
+	background: #ddd;
+	border: 1px solid #888;
+	padding: 2px;
+}
+
+.codeblock {
+	white-space:pre;
+	font-size: 10pt;
+	font-family: Monaco, monospace;
+}
