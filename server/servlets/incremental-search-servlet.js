@@ -215,7 +215,7 @@ exports.install = function (server) {
 			more: function () {
 				if (activeWalker) {
 					maxResults = Math.max(maxResults, resultCount * 1.1);
-					console.log('maxResults = '+maxResults);
+					//console.log('maxResults = '+maxResults);
 					activeWalker.resume();
 				}
 			},
