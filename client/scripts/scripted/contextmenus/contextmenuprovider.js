@@ -12,9 +12,9 @@
 /*global define window $*/
 
 define(
-['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'jquery'],
+['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'jquery'],
 
-function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
+function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager) {
 
 
 	var loggingCategory = "CONTEXT_MENU";
@@ -27,6 +27,12 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 					navHistory.navigateToURL(resourceToNavigate);
 
 					window.explorer.highlight(resourceToNavigate);
+					
+					// Check if it is open in the side panel. If so, close it.
+					var targetPane = paneFactory.getPane("scripted.editor", "sub");
+					if (targetPane && targetPane.editor.getFilePath() === resourceToNavigate)	{
+					   sidePanelManager.closeSidePanel();
+					}
 				}
 			});
 
