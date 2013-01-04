@@ -115,7 +115,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		paramsStr = paramsOffset > 0 ? type.substring(paramsOffset+1) : "";
 		params = paramsStr.split(",");
 		if (!paramsStr || params.length === 0) {
-			return {completion: name + "()", positions:[]};
+			return {completion: name + "()", positions:null};
 		}
 		var positions = [];
 		var completion = name + '(';
