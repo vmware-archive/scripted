@@ -190,10 +190,12 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 							var resourceNameToDelete = pathUtils.getLastSegmentFromPath(contextResource.location);
 							resourcesDialogue.createDialogue(resourceNameToDelete).deleteResource(function(value) {
 								var promise = fileOperationsClient.deleteResource(contextResource.location);
-								// Navigate to parent folder.
-								navigatorRefreshHandler(promise, parent);
-								promise.then(function() { // Check if it is open in the side panel. If so, close it.
-									var targetPane = paneFactory.getPane("scripted.editor", "sub");
+								// Navigate to parent folder, if and only if the main editor is the file that is being deleted
+
+								promise.then(function() {
+
+									// Check if it is open in the side panel. If so, close it.
+									var targetPane = paneFactory.getPane("scripted.editor", false);
 
 									if (targetPane) {
 										var paneFilePath = targetPane.editor.getFilePath();
@@ -201,6 +203,20 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 											sidePanelManager.closeSidePanel();
 										}
 									}
+
+									targetPane = paneFactory.getPane("scripted.editor", true);
+									var pathToNavigate = null;
+									if (targetPane) {
+										var mainEditorPath = targetPane.editor.getFilePath();
+										if (mainEditorPath === contextResource.location) {
+
+											// navigate to the parent if the main editor is the file that got deleted
+											pathToNavigate = parent;
+										}
+									}
+									navigatorRefreshHandler(promise, pathToNavigate);
+
+
 								});
 								return promise;
 							});
