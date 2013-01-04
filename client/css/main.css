@@ -72,12 +72,12 @@ header{
 #side_panel{
 	right:0px;
 	position:absolute;
-	top:28px;
+	top:59px;
 	bottom:16px;
 	
 	width:38%;
 	display:none;
-	background-color:#A4A4A4;
+	background-color:#323232;
 	overflow:hidden;
 }
 
