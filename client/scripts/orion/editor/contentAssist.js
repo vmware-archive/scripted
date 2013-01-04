@@ -12,7 +12,8 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'scripted/keybindings/keybinder'], 
+function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 
 	/**
 	 * Set of styles available for proposals.  The key corresponds to the value of the 'style'
@@ -176,6 +177,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		 * @returns {Boolean} <code>true</code> if a proposal could be accepted; <code>false</code> if none was selected or available.
 		 */
 		accept: function() {
+		
 			var proposal = this.getSelectedProposal();
 			if (proposal === null) {
 				return false;
@@ -276,6 +278,10 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
 				this.contentAssistPanel.onclick = null;
+
+				// SCRIPTED start: remove extra keybindings for enter
+				this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), this.oldTabBinding);
+				// SCRIPTED end
 			} else {
 				var offset = this.textView.getCaretOffset();
 				this.getProposals(offset).then(
@@ -318,6 +324,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
 						this.active = true;
+
+						// SCRIPTED start: add extra keybindings for enter
+						var kbs = mKeybinder.getKeyBindings(this.editor);
+						this.oldTabBinding = kbs['Tab'];
+						this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), "enter");
+						// SCRIPTED end
+						
 					}.bind(this));
 			}
 		},
