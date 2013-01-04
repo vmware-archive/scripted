@@ -305,7 +305,7 @@ exports.install = function (server) {
 							}
 						}
 					}
-					if (resultCount<maxResults) {
+					if (activeWalker && resultCount<maxResults) {
 						//console.log("Resume walking");
 						activeWalker.resume();
 					} else {
