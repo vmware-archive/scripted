@@ -170,7 +170,24 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 										var promise = fileOperationsClient.rename(
 										contextResource.location,
 										urlNewResource);
-										navigatorRefreshHandler(promise, urlNewResource);
+
+										// only refresh the main editor IF the renamed file is in the main editor
+										promise.then(function() {
+											var targetPane = paneFactory.getPane("scripted.editor", true);
+											var pathToNavigate = null;
+
+											if (targetPane) {
+												var mainEditorPath = targetPane.editor.getFilePath();
+												
+												if (mainEditorPath === contextResource.location) {
+
+													// navigate to the renamed resource if the main editor was showing the old file
+													pathToNavigate = urlNewResource;
+												}
+											}
+											navigatorRefreshHandler(promise, pathToNavigate);
+										});
+
 										return promise;
 									}
 								});
