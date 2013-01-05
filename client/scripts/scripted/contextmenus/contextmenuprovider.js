@@ -21,10 +21,14 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 
 	var pathSeparator = pathUtils.getPathSeparator();
 
-	var doNavigatorRefresh = function(resourceToNavigate) {
+	/**
+	 * Pass in the URL to the resource to navigate as well as optionally the editor type to open the resource (main or sub). 
+	 * If no editor type is specified, it will open in main editor by default
+	 */
+	var doNavigatorRefresh = function(resourceToNavigate, editorType) {
 			window.explorer.fullRefresh(function() {
 				if (resourceToNavigate) {
-					navHistory.navigateToURL(resourceToNavigate);
+					navHistory.navigateToURL(resourceToNavigate, editorType);
 					window.explorer.highlight(resourceToNavigate);
 				}
 			});
@@ -34,7 +38,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 	/**
 	 * Wrapper call around an operation promise that performs a navigator refresh upon a promise resolve, or error logging on reject.
 	 */
-	var navigatorRefreshHandler = function(operationPromise, resourceToSelect) {
+	var navigatorRefreshHandler = function(operationPromise, resourceToSelect, editorType) {
 
 			if (operationPromise && operationPromise.then) {
 
@@ -146,6 +150,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
 								var promise = fileOperationsClient.mkdir(urlNewResource);
+								// Do not navigate to the new folder as to not close existing editors. Just refresh the navigator
 								navigatorRefreshHandler(promise, urlNewResource);
 								return promise;
 							});
@@ -171,21 +176,33 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 										contextResource.location,
 										urlNewResource);
 
-										// only refresh the main editor IF the renamed file is in the main editor
+
 										promise.then(function() {
+											// only refresh the main editor IF the renamed file is in the main editor
 											var targetPane = paneFactory.getPane("scripted.editor", true);
-											var pathToNavigate = null;
+											var mainEditorPathToNavigate = null;
 
 											if (targetPane) {
 												var mainEditorPath = targetPane.editor.getFilePath();
-												
+
 												if (mainEditorPath === contextResource.location) {
 
 													// navigate to the renamed resource if the main editor was showing the old file
-													pathToNavigate = urlNewResource;
+													mainEditorPathToNavigate = urlNewResource;
 												}
 											}
-											navigatorRefreshHandler(promise, pathToNavigate);
+
+											// Also check the side panel. Refresh it if the renamed file was opened in the side panel
+											targetPane = paneFactory.getPane("scripted.editor", false);
+
+											if (targetPane) {
+												var paneFilePath = targetPane.editor.getFilePath();
+												if (paneFilePath === contextResource.location) {
+													navHistory.navigateToURL(urlNewResource, "sub");
+												}
+											}
+
+											navigatorRefreshHandler(promise, mainEditorPathToNavigate);
 										});
 
 										return promise;
