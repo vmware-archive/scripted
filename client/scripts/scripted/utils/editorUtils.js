@@ -55,6 +55,22 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		getSubEditor : function() {
 			var sub = mPaneFactory.getPane("scripted.editor");
 			return sub ? sub.editor : null;
+		},
+		
+		/**
+		 * Sets the focus on an editor
+		 * @param Boolean isSub if truthy, set focus on sub editor if one exists.  If falsy, set focus to main editor
+		 */
+		setFocus : function(isSub) {
+			var editorPane;
+			if (isSub) {
+				editorPane = mPaneFactory.getPane("scripted.editor");
+			} else {
+				editorPane = mPaneFactory.getMainPane();
+			}
+			if (editorPane) {
+				editorPane.setFocus();
+			}
 		}
 	};
 });

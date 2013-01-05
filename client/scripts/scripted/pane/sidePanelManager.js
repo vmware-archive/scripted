@@ -15,7 +15,7 @@
 
 /*global confirm */
 
-define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils/storage", 'jquery'], function(mPageState, mPaneFactory, storage) {
+define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils/storage", "scripted/utils/editorUtils", 'jquery'], function(mPageState, mPaneFactory, storage, editorUtils) {
 
 	var sidePanel = $('#side_panel');
 	
@@ -34,6 +34,7 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils
 			destroyed = destroyed && mPaneFactory.destroyPane(sidePanes[i], true);
 		}
 		$(window).resize();
+		editorUtils.setFocus(false);
 		
 		return destroyed;
 	};
@@ -52,7 +53,7 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils
 		sidePanel.trigger('open');
 		$(document).trigger('sidePanelShown', sidePanel);
 		$(window).resize();
-		
+		editorUtils.setFocus(true);
 		return true;
 	};
 	

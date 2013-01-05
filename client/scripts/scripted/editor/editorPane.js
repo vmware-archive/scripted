@@ -328,8 +328,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		editor.cursorFix();
 		
 		if (kind === EDITOR_TARGET.main) {
+			var self = this;
 			setTimeout(function() {
-				editor.getTextView().focus();
+				self.setFocus();
 			}, 5);
 		}
 		
@@ -377,6 +378,10 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			} else {
 				initializeHistoryMenu();
 			}
+		},
+		
+		setFocus : function() {
+			this.editor.getTextView().focus();
 		}
 	};
 
