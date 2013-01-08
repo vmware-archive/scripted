@@ -15,7 +15,7 @@ What are the key features?
 - Fast startup, lightweight.
 - Syntax highlighting for JavaScript, HTML and CSS.
 - Errors and warnings: 
-	- JSLint is integrated to provide error/warning markers on JavaScript code.
+	- JSHint is integrated to provide error/warning markers on JavaScript code.
 	- AMD and CommonJS module resolution: there is basic resolution where unresolved references will be marked as errors.
 - Content assist:
 	- Basic content assist for HTML, CSS
@@ -40,11 +40,17 @@ Many of these are covered in this introductory screencast:<br>
 
 The only pre-req for trying it out is that you have Node.js installed. Grab it from here: [http://nodejs.org/](http://nodejs.org).
 The team has been testing with a range of versions from 0.6 to 0.8 but haven't tested all of them exhaustively. It is recommended
-that you try to use the latest (0.8.11 at time of writing).
+that you try to use the latest (0.8.16 at time of writing).
 
-Then you can grab the most recent packaged release from here:
+Using the Node Package Manager (`npm`) the very easiest way to try it out is:
 
-[Version 0.2.0](http://dist.springsource.org/release/SCRIPTED/scripted_v0.2.0.zip)
+    npm install -g scripted
+
+(possibly with a `sudo` prefix on linux/mac). There are no further steps if installing via this route and `scr` command will immediately be available to launch Scripted.
+
+Or you can grab the most recent packaged release from here:
+
+[Version 0.3.0](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip)
 
 OR you can live on the bleeding edge by either cloning the repository:
 
@@ -54,11 +60,11 @@ or grabbing the latest repo contents as a zip:
 
 	https://github.com/scripted-editor/scripted/zipball/master
 
-Unpack whatever you have and then make sure the files in the bin folder are executable on mac/linux:
+If unpacking an archive make sure the files in the bin folder are executable on mac/linux:
 
 	chmod 755 bin/*
 
-Then add the bin folder to your path:
+And finally add the bin folder to your path:
 
 Mac/Linux:
 
@@ -79,7 +85,7 @@ can launch Scripted and start editing a file.
 
 Launching scripted will cause the Node.js server to start in the background.
 
-Here are some of the more vital key bindings to use once the editor is open:
+Here are some of the more vital key bindings to use once the editor is open. Where `Cmd/Ctrl` is specified it means `Cmd` on Mac and `Ctrl` on Linux/Windows:
 
 - `F1` - open help to show all key bindings (or press '?' in the top right)
 - `Cmd/Ctrl+s` - save!
@@ -110,7 +116,7 @@ you don't have one of these markers for the root, you can create an empty `.scri
 
 # Current status
 
-As of Oct 2012 the project is at version 0.2. There is a long way to go but the team have been using Scripted to develop Scripted for a while now.
+As of Jan 2013 the project is at version 0.3. There is a long way to go but the team have been using Scripted to develop Scripted for a while now.
 
 # Further reading
 
@@ -134,8 +140,9 @@ to the task at hand.
 - Simple plugin system. 
 - Debugging. Exploring integration with tools like Chrome Dev Tools and node inspector.
 
-If you have more ideas for what you'd like to see, let us know via [Jira](https://issuetracker.springsource.com/browse/scripted) or 
-our [scripted-dev](https://groups.google.com/forum/#!forum/scripted-dev) group.
+If you have more ideas for what you'd like to see, let us know via
+a [Github issue](https://github.com/scripted-editor/scripted/issues) or 
+our [scripted-dev](https://groups.google.com/forum/#!forum/scripted-dev) discussion group.
 
 # Can I contribute?
 
@@ -145,7 +152,8 @@ Pull requests should ideally reference a JIRA ticket in the [issuetracker](https
 
 The codebase is entirely JavaScript/HTML/CSS.
 
-If you are keen to contribute but aren't sure what to work on, take a look at the [public issuetracker](https://issuetracker.springsource.com/browse/SCRIPTED) for inspiration.
-The codebase is very new in places and isn't that tricky to get to grips with. Some of the simpler issues that might provide an easy way to get started with the codebase are tagged with the label help-wanted, see [here](https://issuetracker.springsource.com/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+SCRIPTED+AND+labels+%3D+help-wanted+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+ORDER+BY+key+ASC%2C+priority+DESC).
+If you are keen to contribute but aren't sure what to work on, take a look at
+the [github issues](https://github.com/scripted-editor/scripted/issues) for inspiration.
+The codebase is very new in places and isn't that tricky to get to grips with.
 
-If you don't feel like coding but still want to contribute, please join the discussion on the issuetracker and scripted-dev group.
+If you don't feel like coding but still want to contribute, please join the discussion on the issues and scripted-dev group.
