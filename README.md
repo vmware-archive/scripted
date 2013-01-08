@@ -50,7 +50,8 @@ Using the Node Package Manager (`npm`) the very easiest way to try it out is:
 
 Or you can grab the most recent packaged release from here:
 
-[Version 0.3.0](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip) [Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_3_0/scripted_0_3_0.html)
+[Version 0.3.0 zip](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip)<br>
+[Version 0.3.0 Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_3_0/scripted_0_3_0.html)
 
 OR you can live on the bleeding edge by either cloning the repository:
 
