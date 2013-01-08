@@ -22,10 +22,11 @@ var when = require('when');
 
 function configure(conf) {
 
-	var ignore = conf.ignore || require('./filesystem').ignore;
+	var ignoreName = conf.ignore || require('./filesystem').ignore;
+	var ignorePath = conf.ignorePath || function () { return false; };
 	var listFiles = conf.listFiles;
 	var isDirectory = conf.isDirectory;
-
+	
 	// Walk the FILESYSTEM
 	//A walk function written in callback style. Calls the function f on each file (excluding directories)
 	//The function f is a non-callbacky function.
@@ -33,6 +34,9 @@ function configure(conf) {
 	//call will be called.
 	function fswalk(node, f, k, exit) {
 		exit = exit || k; //Grabs the 'toplevel' k
+		if (ignorePath(node)) {
+			return k();
+		}
 		isDirectory(node, function(isDir) {
 			if (isDir) {
 				listFiles(node,
@@ -40,7 +44,7 @@ function configure(conf) {
 						eachk(names,
 
 						function(name, k) {
-							if (ignore(name)) {
+							if (ignoreName(name)) {
 								k();
 							} else {
 								var file = pathResolve(node, name);
@@ -86,6 +90,9 @@ function configure(conf) {
 	 */
 	function asynchWalk(node, f, k, exit) {
 		exit = exit || k; //Grabs the 'toplevel' k
+		if (ignorePath(node)) {
+			return k();
+		}
 		isDirectory(node, function(isDir) {
 			if (isDir) {
 				listFiles(node,
@@ -93,7 +100,7 @@ function configure(conf) {
 				function(names) {
 					eachk(names,
 						function(name, k) {
-							if (ignore(name)) {
+							if (ignoreName(name)) {
 								k();
 							} else {
 								var file = pathResolve(node, name);

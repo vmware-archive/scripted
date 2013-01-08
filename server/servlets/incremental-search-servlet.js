@@ -24,11 +24,9 @@ var SERVICE_NAME = 'isearch';
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
 var websockets = require('./websockets-servlet');
-var conf = require('../jsdepend/filesystem').withBaseDir(null);
-var extend = require('../jsdepend/utils').extend;
 var toRegexp = require('../jsdepend/utils').toRegexp;
 var getFileName = require('../jsdepend/utils').getFileName;
-var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
+var mFswalk = require('../utils/fswalk-filtered');
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -57,12 +55,16 @@ exports.install = function (server) {
 		var query = null; //The thing we are searching for... set once received via the socket.
 		var regexp = null; //the query as a regexp.
 		var searchRoot = null; //Set when we have determined/received the search context.
+		var fswalk = null; //Walk function. Needs to be configured based on searchRoot. Set once
+		                   //when configured.
 		var options = {};
 		
 		var results = {}; //The 'keys' of this map are the results we have already sent to the client.
 		var activeWalker = null; //the current walker, allows cancelation if we need to start a brand new walker.
 		var resultCount = 0; // Tracks number of results. Used to limit the number of results sent to the client.
-		
+	
+	
+	
 		/**
 		 * send data to the client. The data sent must be something that can be 'JSON.stringified'.
 		 */
@@ -97,6 +99,10 @@ exports.install = function (server) {
 			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
 			}
+			if (!fswalk) {
+				console.error('Can not start search: the fswalk function is not yet configured');
+			}
+			
 			var canceled = false;
 			var paused = false; // Intially, set to true when pause is requested. Then when
 			                    // work is actually suspended, a 'work' function will be
@@ -204,7 +210,10 @@ exports.install = function (server) {
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('search options: '+JSON.stringify(options));
-					activeWalker = startSearch();
+					mFswalk.forPath(searchRoot, function (configured) {
+						fswalk = configured.asynchWalk;
+						activeWalker = startSearch();
+					});
 				} else {
 					console.error("multiple queries received on the same /isearch connection");
 				}

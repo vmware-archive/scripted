@@ -15,7 +15,7 @@
 
 var SERVICE_NAME = 'ifsearch';
 
-//This servlet is 'special' and doesn't get registered in the same 
+//This servlet is 'special' and doesn't get registered in the same
 //way/place that other servlets do.
 
 //See server.js to find where this 'servlet' handlers gets registered.
@@ -24,11 +24,10 @@ var SERVICE_NAME = 'ifsearch';
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
 var websockets = require('./websockets-servlet');
-var conf = require('../jsdepend/filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
 var searchFile = require('../textsearch/searcher').searchFile;
-var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
+var mFswalk = require('../utils/fswalk-filtered');
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -64,6 +63,7 @@ exports.install = function (server) {
 		var results = {}; // The 'keys' of this map are the results we have already sent to the client.
 		var searchRoot = null; //The file system path in which to start the search
 							   //Set when we have determined/received the search context.
+		var fswalk = null; // fswalk function configured based on search root. Set once when configured.
 		var options = {};
 		
 		/**
@@ -137,6 +137,9 @@ exports.install = function (server) {
 		function startSearch() {
 			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
+			}
+			if (!fswalk) {
+				console.error('Can not start search: the fswalk function is not configured');
 			}
 			var canceled = false;
 			var paused = false; // Intially, set to true when pause is requested. Then when 
@@ -250,21 +253,17 @@ exports.install = function (server) {
 		
 		var handlers = {
 			//initial query and other info needed to setup a search
-			query: function (cf, q, opts) {
+			query: function (sr, q, opts) {
 				if (!query) {
-					searchRoot = cf;
-//					if (searchRoot.substring(searchRoot.length-1)!=='/') {
-//						searchRoot = searchRoot+"/";
-//					}
+					searchRoot = sr;
 					query = q;
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('maxResults = '+maxResults);
-					activeWalker = startSearch();
-//					fileindexer.getIndexer(currentFile, function (ixr) {
-//						indexer = ixr;
-//						activeWalker = startSearch();
-//					});
+					mFswalk.forPath(sr, function (configured) {
+						fswalk = configured.asynchWalk;
+						activeWalker = startSearch();
+					});
 				} else {
 					console.error("multiple queries received on the same /ifsearch connection");
 				}
