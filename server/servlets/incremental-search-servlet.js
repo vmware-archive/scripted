@@ -11,7 +11,7 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
  
-/*global require exports console*/
+/*global process require exports console*/
 
 var SERVICE_NAME = 'isearch';
 
@@ -29,7 +29,6 @@ var extend = require('../jsdepend/utils').extend;
 var toRegexp = require('../jsdepend/utils').toRegexp;
 var getFileName = require('../jsdepend/utils').getFileName;
 var fswalk = require('../jsdepend/fswalk').configure(conf).asynchWalk;
-var fileindexer = require('../jsdepend/file-indexer').configure(conf);
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -216,7 +215,7 @@ exports.install = function (server) {
 			more: function () {
 				if (activeWalker) {
 					maxResults = Math.max(maxResults, resultCount * 1.1);
-					console.log('maxResults = '+maxResults);
+					//console.log('maxResults = '+maxResults);
 					activeWalker.resume();
 				}
 			},

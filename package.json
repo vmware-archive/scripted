@@ -1,6 +1,6 @@
 {
 	"name": "scripted",
-	"version": "0.2.93",
+	"version": "0.3.0",
 	"description": "A fast and lightweight browser based code editor",
 	"keywords": [ "javascript", "browser", "code", "editor" ],
 	"repository": {

@@ -424,7 +424,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
-				e.stopPropagation();
+				return false;
 			}
 		});
 

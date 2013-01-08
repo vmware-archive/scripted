@@ -29,7 +29,6 @@
 // A way to run in debug mode (not tried yet)?
 // node --debug `which nodeunit` test/run.js
 
-
 //Hack Alert! so we can see where a log message is from:
 //console.log = console.trace;
 //This hack seriously messes up the log output. don't keep it on all the time!
@@ -126,7 +125,7 @@ exports.resolveInScriptsFolder = function (test) {
 			}])
 		);
 		test.done();
-	});	
+	});
 };
 
 exports.resolveSubToSiblingInScriptsFolder = function (test) {
@@ -144,7 +143,7 @@ exports.resolveSubToSiblingInScriptsFolder = function (test) {
 			}])
 		);
 		test.done();
-	});	
+	});
 };
 
 exports.requireCallWithBaseDir = function (test) {
@@ -162,7 +161,7 @@ exports.requireCallWithBaseDir = function (test) {
 			})
 		);
 		test.done();
-	});	
+	});
 };
 
 exports.commonjsRefs = function (test) {

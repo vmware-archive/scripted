@@ -28,6 +28,7 @@ var oneCache = require('./one-cache');
 var utils = require('./utils');
 
 var pathNormalize = utils.pathNormalize;
+var pathResolve = utils.pathResolve;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -123,8 +124,9 @@ function withBaseDir(baseDir) {
 		var newname = handle2file(handleRename);
 		console.log("Requesting resource rename for: " + original + " into " + newname);
 		var deferred = when.defer();
-		if (original && newname) {
-
+		if (original === newname) {
+			deferred.reject("Both original and new names are the same. Please enter a different name.");
+		} else if (original && newname) {
 			fs.rename(original, newname, function(err) {
 				if (err) {
 					deferred.reject(err);
@@ -132,7 +134,6 @@ function withBaseDir(baseDir) {
 					deferred.resolve();
 				}
 			});
-
 		} else {
 			var message = !original ? "No resource specified to rename" : "No new name specified when renaming " + original;
 			deferred.reject(message);
@@ -157,7 +158,7 @@ function withBaseDir(baseDir) {
 			if (stats.isDirectory) {
 				var deleteChildren = when.map(listFiles(handle), function (name) {
 //					console.log('mapped: '+name);
-					return deleteResource(path.resolve(handle, name));
+					return deleteResource(pathResolve(handle, name));
 				});
 				return deleteChildren.then(function () {
 					return rmDir(handle);

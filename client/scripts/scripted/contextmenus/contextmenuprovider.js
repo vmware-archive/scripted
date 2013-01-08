@@ -9,30 +9,38 @@
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
 
-define(
-['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'jquery'],
+/*global define window $*/
 
-function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
+define(
+['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'jquery'],
+
+function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager) {
 
 
 	var loggingCategory = "CONTEXT_MENU";
 
 	var pathSeparator = pathUtils.getPathSeparator();
 
-	var doNavigatorRefresh = function(resourceToNavigate) {
+	/**
+	 * Pass in the URL to the resource to navigate as well as optionally the editor type to open the resource (main or sub). 
+	 * If no editor type is specified, it will open in main editor by default
+	 */
+	var doNavigatorRefresh = function(resourceToNavigate, editorType) {
 			window.explorer.fullRefresh(function() {
 				if (resourceToNavigate) {
-					navHistory.navigateToURL(resourceToNavigate);
-
+					navHistory.navigateToURL(resourceToNavigate, editorType);
 					window.explorer.highlight(resourceToNavigate);
 				}
 			});
 
 		};
 
-	var performNavigatorRefreshOperation = function(operationPromise, resourceToSelect) {
+	/**
+	 * Wrapper call around an operation promise that performs a navigator refresh upon a promise resolve, or error logging on reject.
+	 */
+	var navigatorRefreshHandler = function(operationPromise, resourceToSelect, editorType) {
 
-			if (operationPromise) {
+			if (operationPromise && operationPromise.then) {
 
 				// On a successful promise result, refresh navigator, and if specified, highlight and navigate
 				// to a resource
@@ -46,6 +54,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 				operationPromise.then(resolveCallBack, errorCallBack);
 			}
+
 		};
 
 
@@ -114,14 +123,18 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "New File...",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 
-							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+							resourcesDialogue.createDialogue(resourceCreationPath).addFile(function(
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitled");
-								// pass '' as contents
-								var promise = fileOperationsClient.createFile(urlNewResource,'');
-								performNavigatorRefreshOperation(promise, urlNewResource);
+
+								// pass '' as contents to avoid undefined new file
+								var promise = fileOperationsClient.createFile(urlNewResource, '');
+
+								navigatorRefreshHandler(promise, urlNewResource);
+
+								return promise;
 							});
 						},
 						isEnabled: function() {
@@ -131,13 +144,15 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "New Folder...",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 
-							resourcesDialogue.createDialogue(resourceCreationPath).addResource(function(
+							resourcesDialogue.createDialogue(resourceCreationPath).addFolder(function(
 							resourceName) {
 								var urlNewResource = resourceCreationPath + pathSeparator + (resourceName ? resourceName : "untitledFolder");
 								var promise = fileOperationsClient.mkdir(urlNewResource);
-								performNavigatorRefreshOperation(promise, urlNewResource);
+								// Do not navigate to the new folder as to not close existing editors. Just refresh the navigator
+								navigatorRefreshHandler(promise, urlNewResource);
+								return promise;
 							});
 						},
 						isEnabled: function() {
@@ -147,7 +162,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "Rename...",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 							var toRename = pathUtils.getLastSegmentFromPath(contextResource.location);
 
 							if (toRename) {
@@ -160,7 +175,37 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 										var promise = fileOperationsClient.rename(
 										contextResource.location,
 										urlNewResource);
-										performNavigatorRefreshOperation(promise, urlNewResource);
+
+
+										promise.then(function() {
+											// only refresh the main editor IF the renamed file is in the main editor
+											var targetPane = paneFactory.getPane("scripted.editor", true);
+											var mainEditorPathToNavigate = null;
+
+											if (targetPane) {
+												var mainEditorPath = targetPane.editor.getFilePath();
+
+												if (mainEditorPath === contextResource.location) {
+
+													// navigate to the renamed resource if the main editor was showing the old file
+													mainEditorPathToNavigate = urlNewResource;
+												}
+											}
+
+											// Also check the side panel. Refresh it if the renamed file was opened in the side panel
+											targetPane = paneFactory.getPane("scripted.editor", false);
+
+											if (targetPane) {
+												var paneFilePath = targetPane.editor.getFilePath();
+												if (paneFilePath === contextResource.location) {
+													navHistory.navigateToURL(urlNewResource, "sub");
+												}
+											}
+
+											navigatorRefreshHandler(promise, mainEditorPathToNavigate);
+										});
+
+										return promise;
 									}
 								});
 							}
@@ -173,14 +218,41 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils) {
 
 					addAction({
 						name: "Delete",
-						handler: function(selectionContext) {
+						handler: function(contextEvent) {
 
 							var parent = pathUtils.getDirectory(contextResource.location);
 							var resourceNameToDelete = pathUtils.getLastSegmentFromPath(contextResource.location);
 							resourcesDialogue.createDialogue(resourceNameToDelete).deleteResource(function(value) {
 								var promise = fileOperationsClient.deleteResource(contextResource.location);
-								// Navigate to parent folder.
-								performNavigatorRefreshOperation(promise, parent);
+								// Navigate to parent folder, if and only if the main editor is the file that is being deleted
+
+								promise.then(function() {
+
+									// Check if it is open in the side panel. If so, close it.
+									var targetPane = paneFactory.getPane("scripted.editor", false);
+
+									if (targetPane) {
+										var paneFilePath = targetPane.editor.getFilePath();
+										if (paneFilePath === contextResource.location) {
+											sidePanelManager.closeSidePanel();
+										}
+									}
+
+									targetPane = paneFactory.getPane("scripted.editor", true);
+									var pathToNavigate = null;
+									if (targetPane) {
+										var mainEditorPath = targetPane.editor.getFilePath();
+										if (mainEditorPath === contextResource.location) {
+
+											// navigate to the parent if the main editor is the file that got deleted
+											pathToNavigate = parent;
+										}
+									}
+									navigatorRefreshHandler(promise, pathToNavigate);
+
+
+								});
+								return promise;
 							});
 						},
 						isEnabled: function() {

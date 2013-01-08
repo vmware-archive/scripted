@@ -55,11 +55,11 @@ define(['when'], function(when) {
 				var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
 				// console.log("url is "+url);
 				xhrobj.onreadystatechange= function() {
-			        if(xhrobj.readyState === 4) { // 4 means content has finished loading
+			        if(xhrobj.readyState === 4) { // 4 means content has finished loading, TODO use XMLHttpRequest.DONE
 						if (xhrobj.status===200) {
 							callback(JSON.parse(xhrobj.responseText));
 						} else if (xhrobj.status===500) {
-							errback("Error: xhr request status = "+xhrobj.responseText);
+							errback(xhrobj.responseText);
 						}
 					}
 				};

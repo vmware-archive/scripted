@@ -305,7 +305,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		//Make sure the keyhelp UI is setup. We do this asynchronously since its initially
 		//invisible and its not necessary to hold up the editor for this.
 		require(['scripted/keybindings/keyhelp'], function (mKeyHelp) {
-			console.log('Keybindings help-panel is ready');
+			//console.log('Keybindings help-panel is ready');
 		});
 		
 		/*Side panel open/close*/

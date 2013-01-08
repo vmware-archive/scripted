@@ -43,19 +43,8 @@ function configure(conf) {
 	var handle2file = conf.handle2file;
 	var file2handle = conf.file2handle;
 
-	//Note: 
+	//Note:
 	//   conf = the 'global' configuration for the api, provides file system type operations
-	//   resolverConf = configuration information for the resolver, varies based on the context
-	//                  of where a reference came from.
-
-	//var nodeModulesResolver = require('./node-modules-resolver').configure(conf);
-	
-//	function getNodeConfig(context, callback) {
-//		callback({}); 
-//		//For now don't need any config, we only support resolving of './' references.
-//		//and that only require access to the location of the current file.
-//	}
-
 
 	function resolver(context, dep, callback) {
 		if (nodeNatives.isNativeNodeModule(dep.name)) {
@@ -69,7 +58,7 @@ function configure(conf) {
 			//2: enhanced resolver expects a directory as the 'context' not a file.
 			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {
 				if (err) {
-					dep.error = err; 
+					dep.error = err;
 				} else {
 					dep.path = file2handle(result);
 				}

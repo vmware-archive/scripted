@@ -106,6 +106,11 @@ define(['jquery'], function() {
 		 * null if doesn't exist.  If isMain, then returns only the main
 		 * pane if it matches the id.  Else ignores the main pane and
 		 * only looks at side panes.
+		 *
+		 * @param {String} id the id of the pane to retrieve
+		 * @param {Boolean} isMain (optional).  If true, then only look for the main pane, if false, then only look for sub panes.
+		 * @return {{id:String,isMain:Boolean,isDirty:function():Boolean,confirm:function():Boolean,destroy:function()}} the pane matching the id and the isMain setting.  Will return null if no panes are found.  If multiple panes of same
+		 * id exist, will only return one of them.
 		 */
 		getPane : function(id, isMain) {
 			for (var i = 0; i < panes.length; i++) {

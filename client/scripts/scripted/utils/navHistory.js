@@ -367,11 +367,16 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		return false;
 	};
 	
-	var navigateToURL = function(url) {
-		navigate({
-			path: url
-		}, EDITOR_TARGET.main, true);
-	};
+	/**
+	* Navigates to the given resource URL, opening it in the specified editor (main or sub). If no editor type is specified, it will open
+	* it in the main editor by default.
+	*/
+	var navigateToURL = function(url, editorType) {
+			var editorToOpen = !editorType ? EDITOR_TARGET.main : editorType;
+			navigate({
+				path: url
+			}, editorToOpen, true);
+		};
 	
 	return {
 		navigateToURL: navigateToURL,

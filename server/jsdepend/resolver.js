@@ -32,10 +32,14 @@ function configure(conf) {
 		console.trace('WARNING: sloppy mode is undefined. Assuming it will be disabled');
 	}
 
-	//in 'sloppy' mode we use a searchByName resolver as a last resort 
+	//in 'sloppy' mode we use a searchByName resolver as a last resort
 	//if the more precise strategies have failed.
 
-	var fileIndexer = require('./file-indexer').configure(conf);
+	var fileIndexer = null;
+	if (sloppy) {
+		//Don't load unless we actually need it.
+		fileIndexer = require('./file-indexer').configure(conf);
+	}
 	var utils = require('./utils');
 
 	var isFile = conf.isFile;
