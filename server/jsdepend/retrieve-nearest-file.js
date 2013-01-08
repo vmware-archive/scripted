@@ -35,22 +35,23 @@ function configure(filesystem) {
 	 * file is found in any folder on the way up, that is the file to return.
 	 */
 	function getRootDir(context, wheretostop, searchName, callback) {
-		if (context===wheretostop) {
-			return callback(false);
-		}
 		var dir = getDirectory(context);
+//		console.log("getRootDir dir="+dir+" context="+context);
 		if (dir) {
-			listFiles(dir, 
+			listFiles(dir,
 				function (names) {
 					var fileFound = orMap(names, function(name) {
 						if (name===searchName) {
 							return name;
 						}
-					}); 
-					console.log("fileFound? "+fileFound);
-					if (fileFound) { 
+					});
+//					console.log("fileFound? "+fileFound);
+					if (fileFound) {
 						callback(dir);
 					} else {
+						if (context===wheretostop) {
+							return callback(false);
+						}
 						getRootDir(dir, wheretostop, searchName, callback);
 					}
 				}
@@ -65,7 +66,7 @@ function configure(filesystem) {
 	 * Tries to read data from a file and parse it as JSON data.
 	 * Call the callback with the resulting data.
 	 * If any part of this operation fails, the callback will be still be
-	 * called with at least an empty object. All errors will be logged 
+	 * called with at least an empty object. All errors will be logged
 	 * to the console.
 	 * <p>
 	 * Errors deemed serious enough to be brought to the user's attention
@@ -73,7 +74,7 @@ function configure(filesystem) {
 	 * by adding an explanation to the object in a property called 'error'.
 	 */
 	function parseJsonFile(handle, callback) {
-		getContents(handle, 
+		getContents(handle,
 			function (contents) {
 				var data = null;
 				try {
@@ -89,9 +90,9 @@ function configure(filesystem) {
 			function (err) {
 				console.log(err);
 				callback({
-					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc 
+					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc
 					//so this error is expected.
-					//error: "Could not get contents of file '"+handle+"'" 
+					//error: "Could not get contents of file '"+handle+"'"
 				});
 			}
 		);
@@ -127,7 +128,11 @@ function configure(filesystem) {
 	 * problem reading/parsing some or all of the configuration data.
 	 */
 	function retrieveNearestFile(handle, wheretostop, name, callback) {
-		findAndParseFile(handle, wheretostop, name, function (parsedFile) {
+		// By adding a slash we will cope with the user opening scripted on the root directory.
+		// We will still find any .jshintrc in there.  This seems 'quicker/neater' than
+		// stat'ing to see if the handle is for a file or a dir then blah blah blah (but it is
+		// a bit naughty as it will add a rogue slash to a filename reference)
+		findAndParseFile(handle+"/", wheretostop, name, function (parsedFile) {
 			callback(parsedFile);
 		});
 	}

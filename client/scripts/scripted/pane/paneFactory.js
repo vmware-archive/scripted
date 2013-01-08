@@ -104,6 +104,11 @@ define(['jquery'], function() {
 		/**
 		 * Shortcut for getting the first pane of the given kind
 		 * null if doesn't exist
+		 *
+		 * @param {String} id the id of the pane to retrieve
+		 * @param {Boolean} isMain (optional).  If true, then only look for the main pane, if false, then only look for sub panes.
+		 * @return {{id:String,isMain:Boolean,isDirty:function():Boolean,confirm:function():Boolean,destroy:function()}} the pane matching the id and the isMain setting.  Will return null if no panes are found.  If multiple panes of same
+		 * id exist, will only return one of them.
 		 */
 		getPane : function(id, isMain) {
 			for (var i = 0; i < panes.length; i++) {
