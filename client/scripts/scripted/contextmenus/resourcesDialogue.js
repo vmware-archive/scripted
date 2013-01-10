@@ -17,8 +17,8 @@
  * This module is responsible for dialogs - creating them, positioning them,
  * showing/hiding them.
  */
-define(['text!scripted/contextmenus/addResourceDialogue.html', 'text!scripted/contextmenus/renameResourceDialogue.html', 'text!scripted/contextmenus/deleteResourceDialogue.html'], function(
-addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
+define(['text!scripted/contextmenus/addResourceDialogue.html', 'text!scripted/contextmenus/renameResourceDialogue.html', 'text!scripted/contextmenus/deleteResourceDialogue.html', 'when'], function(
+addResourceDialogue, renameResourceDialogue, deleteResourceDialogue, when) {
 
 	/**
 	 * Show (or resize) the mask and a particular dialog. The sizes are computed
@@ -110,18 +110,12 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue) {
 				displayError(null);
 
 				if (operations.onClose) {
-					var promise = operations.onClose(value);
-					if (promise && promise.then) {
-						// Defer closing only on success, otherwise display the error
-						promise.then(function() {
-							removeDialogue(dialogueID);
-						}, function(err) {
-							displayError(err);
-						});
-					} else {
-						// Close the dialogue right away
+
+					when(operations.onClose(value)).then(function() {
 						removeDialogue(dialogueID);
-					}
+					}, function(err) {
+						displayError(err);
+					});
 				}
 
 				$(activeElement).focus();
