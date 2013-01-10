@@ -14,9 +14,7 @@
 /*global exports require console __dirname */
 
 var fs = require('fs');
-var rootdir = require("path").normalize(__dirname+"../../..")+"/";
-var term = "readdirSync";
-var matches = [];
+var eachLine = require('../utils/line-by-line').eachLine;
 
 var isBinary = function(buffer){
 	for (var i = 0; i < buffer.length; i++){
@@ -116,6 +114,9 @@ function searchFile(term, fullpath, matchFn, doneFn){
 
 exports.searchFile = searchFile;
 /*
+var rootdir = require("path").normalize(__dirname+"../../..")+"/";
+var term = "readdirSync";
+var matches = [];
 var startTime = (new Date).getTime();
 fs_list(rootdir, 0);
 var perf = (new Date).getTime() - startTime;
