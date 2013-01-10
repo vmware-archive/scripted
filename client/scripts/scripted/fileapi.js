@@ -44,7 +44,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 		//TODO: XMLHttpRequest may not be defined in all environments.
 	var xhrobj = new XMLHttpRequest();
 		try {
-			var url = 'http://localhost:7261/get?file='+handle;
+			var url = '/get?file='+handle;
 			// console.log("url is "+url);
 			xhrobj.open("GET",url,true);
 			xhrobj.send();
@@ -69,7 +69,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 	function getContentsSync(handle) {
 		//TODO: XMLHttpRequest may not be defined in all environments.
 		var xhrobj = new XMLHttpRequest();
-		var url = 'http://localhost:7261/get?file='+handle;
+		var url = '/get?file='+handle;
 		// console.log("url is "+url);
 		xhrobj.open("GET",url,false);
 		xhrobj.send();
@@ -87,7 +87,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 		//TODO: XMLHttpRequest may not be defined in all environments.
 		var xhrobj = new XMLHttpRequest();
 		try {
-			var url = 'http://localhost:7261/ls?file='+handle;
+			var url = '/ls?file='+handle;
 			// console.log("ls url is "+url);
 			xhrobj.open("GET",url,true);
 			xhrobj.send();
