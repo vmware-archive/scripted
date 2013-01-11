@@ -31,6 +31,7 @@ require("./servlets/jsdepend-servlet");
 require("./servlets/exec-servlet");
 require("./servlets/config-servlet");
 require("./servlets/kill");
+require("./servlets/status");
 require("./servlets/filesystem-servlet");
 
 // Request to read a file (returns contents)

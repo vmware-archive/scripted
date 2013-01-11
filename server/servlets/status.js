@@ -11,21 +11,22 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
-/*global console require*/ 
+/*global console require*/
 
 //
-// A Sample 'hello world' servlet. The servlet registers itself at path '/hello' (this assumes someone
-// at least requires the servlet. 
+// A status servlet. The servlet registers itself at path '/status' (this assumes someone
+// at least requires the servlet.
 //
 
 var servlets = require('../servlets');
 
-function helloHandler(response, request) {
-	console.log('handling hello');
-  response.writeHead(200, {"Content-Type": "text/plain"});
-  response.write("Hello World");
-  response.write("\n");
-  response.end();
+function statusHandler(response, request) {
+	response.writeHead(200, {
+		"Content-Type": "text/plain"
+	});
+	response.write("Hello from Scripted!");
+	response.write("\n");
+	response.end();
 }
 
-servlets.register('/hello', helloHandler);
+servlets.register('/status', statusHandler);
