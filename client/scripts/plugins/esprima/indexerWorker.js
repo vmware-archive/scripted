@@ -16,7 +16,7 @@
  * This file should be run as a web-worker so that files can be indexed in the background
  */
 
-importScripts('../../lib/requirejs/require.js');
+importScripts('../../../components/requirejs/require.js');
 require.config({
 	packages:	[
 		{ name: 'when', location: 'lib/when', main: 'when' }
@@ -24,12 +24,13 @@ require.config({
     baseUrl: "../../",
 	packages:	[{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
     paths: {
-        i18n: 'lib/requirejs/i18n',
-        text: 'lib/requirejs/text',
+        i18n: '../components/requirejs/i18n',
+        text: '../components/requirejs/text',
         fileapi: 'scripted/fileapi',
         jsrender: 'lib/jsrender',
+		'lib/json5' : '../components/json5/lib/json5',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine'
+		'doctrine/doctrine' : '../components/doctrine/doctrine'
     }
 });
 

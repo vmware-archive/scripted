@@ -17,7 +17,42 @@ fswalk(__dirname,
 		}
 	},
 	function () {
-		reporter.run(testFiles);
+		process.chdir(__dirname);
+		reporter.run(testFiles, undefined, function () {
+			try {
+				var scripted = require('../../server/scripted');
+			} catch (e) {
+				//ignore (already a server running?)
+			}
+			var problem = null;
+			eachk(['http://localhost:7261/clientTests'
+				 //'http://localhost:7261/clientServerTests'
+			],
+				/* called on each url */
+				function (url, k) {
+					console.log(url);
+					exec('phantomjs ../client/common/phantom-runner.js '+url,
+						function (err, stdout, stderr) {
+							problem = problem || err;
+							console.log('Exec finished');
+							console.log(stdout.toString());
+							console.error(stderr.toString());
+							k();
+						}
+					);
+				},
+				/* done */
+				function () {
+					if (problem) {
+						console.error(problem);
+					}
+					process.exit(problem ? 1 : 0);
+				}
+			);
+			//TODO: scripted.kill();
+			//exec('phantomjs ../../client/scripts/lib/qunit/phantom-runner.js http://localhost:7261/clientServerTests' );
+			//console.log('Are we done?');
+		});
 	}
 );
 

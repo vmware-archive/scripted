@@ -13,23 +13,28 @@
 var config = {
 	baseUrl: '../scripts',
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.' },
-				{ name: 'when', location: 'lib/when', main: 'when' },
-				{ name: 'meld', location: 'lib/meld', main: 'meld' },
-				{ name: 'wire', location: 'lib/wire', main: 'wire' }],
+				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
+				{ name: 'when', location: '../components/when', main:'when', lib: '.'},
+				{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
+				{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'}
+				],
 	paths: {
 		'orion/assert' : '../tests/client/assert',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine',
-		i18n: 'lib/requirejs/i18n',
-		text: 'lib/requirejs/text',
-		jquery_ui: 'lib/jquery-ui-custom',
+		i18n: '../components/requirejs/i18n',
+		text: '../components/requirejs/text',
 		jsbeautify: 'lib/beautify',
 		jsrender: 'lib/jsrender',
+		jshint: 'lib/jshint-r12-80277ef',
 		qunit: 'lib/qunit/qunit-1.10.0',
 		jquery: 'lib/jquery-1.7.2.min',
 		sockjs:'lib/sockjs-592774a-0.3.1.min',
 		fileapi: 'scripted/fileapi',
+<<<<<<< HEAD
+=======
+		'doctrine/doctrine' : '../components/doctrine/doctrine',
+		'lib/json5' : '../components/json5/lib/json5',
+>>>>>>> 73d2021... more packages using bower
 		
 		tests: '../tests'
 	}
