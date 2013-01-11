@@ -52,7 +52,7 @@ define(['when'], function(when) {
 			});
 			var xhrobj = new XMLHttpRequest();
 			try {
-				var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+				var url = path+'?args='+ encodeURIComponent(args);
 				// console.log("url is "+url);
 				xhrobj.onreadystatechange= function() {
 			        if(xhrobj.readyState === 4) { // 4 means content has finished loading, TODO use XMLHttpRequest.DONE
@@ -88,7 +88,7 @@ define(['when'], function(when) {
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var args = JSON.stringify([handle]);
-					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					var url = path+'?args='+ encodeURIComponent(args);
 					// console.log("url is "+url);
 					xhrobj.onreadystatechange= function() {
 				        if(xhrobj.readyState === 4) { // 4 means content has finished loading
@@ -115,7 +115,7 @@ define(['when'], function(when) {
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var args = JSON.stringify([arg1, arg2]);
-					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					var url = path+'?args='+ encodeURIComponent(args);
 					// console.log("url is "+url);
 					xhrobj.open("GET",url,true);
 					xhrobj.send();
@@ -138,7 +138,7 @@ define(['when'], function(when) {
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var args = JSON.stringify([arg1]);
-					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					var url = path+'?args='+ encodeURIComponent(args);
 					// console.log("url is "+url);
 					xhrobj.open("GET",url,true);
 					xhrobj.send();
@@ -161,7 +161,7 @@ define(['when'], function(when) {
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var args = JSON.stringify([arg1, arg2]);
-					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					var url = path+'?args='+ encodeURIComponent(args);
 					// console.log("url is "+url);
 					xhrobj.open("GET",url,true);
 					xhrobj.send();
@@ -184,7 +184,7 @@ define(['when'], function(when) {
 				var xhrobj = new XMLHttpRequest();
 				try {
 					var args = JSON.stringify([arg1, arg2, arg3]);
-					var url = 'http://localhost:7261'+path+'?args='+ encodeURIComponent(args);
+					var url = path+'?args='+ encodeURIComponent(args);
 					// console.log("url is "+url);
 					xhrobj.open("GET",url,true);
 					xhrobj.send();
