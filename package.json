@@ -23,7 +23,8 @@
 		"scripted": "./bin/scripted"
 	},
 	"scripts": {
-		"test": "node tests/server/run-all.js"
+		"test": "node tests/server/run-all.js",
+		"postinstall": "cd client;bower install"
 	},
 	"dependencies": {
         "amdefine": "0.0.2",
@@ -36,6 +37,9 @@
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "1.6.1"
+	},
+	"devDependencies": {
+		"bower": "0.6.8"
 	},
 	"license": "EPL",
 	"readmeFilename": "README.md"
