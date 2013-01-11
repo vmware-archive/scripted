@@ -22,6 +22,7 @@ require.config({
 		{ name: 'when', location: 'lib/when', main: 'when' }
 	],
     baseUrl: "../../",
+	packages:	[{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
     paths: {
         i18n: 'lib/requirejs/i18n',
         text: 'lib/requirejs/text',

@@ -24,9 +24,9 @@
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
 				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.' },
-				{ name: 'when', location: 'lib/when', main: 'when' },
-				{ name: 'meld', location: 'lib/meld', main: 'meld' },
-				{ name: 'wire', location: 'lib/wire', main: 'wire' }],
+				{ name: 'when', location: '../component/when', main: 'when' },
+				{ name: 'meld', location: '../component/meld', main: 'meld' },
+				{ name: 'wire', location: '../components/when', main: 'wire' }],
 	paths: {
 	//require: 'lib/requirejs/require',
 		i18n: 'lib/requirejs/i18n',
