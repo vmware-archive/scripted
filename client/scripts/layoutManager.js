@@ -1,4 +1,17 @@
-define(['require', "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "scripted/utils/editorUtils", "scripted/utils/storage", 
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Andrew Eisenberg
+ *     Brian Cavalier
+ ******************************************************************************/
+define(['require', "jquery", "scripted/utils/navHistory", "scripted/utils/pageState", "scripted/utils/editorUtils", "scripted/utils/storage",
 "scripted/exec/exec-on-load"],
 
 function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) {

@@ -13,13 +13,14 @@
  *     Kris De Volder
  *     Christopher Johnson
  *     Scott Andrews
+ *     Brian Cavalier
  ******************************************************************************/
 
 /*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
 
 
-
+// Scripted starting point
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
 				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.' },

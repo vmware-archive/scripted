@@ -1,53 +1,65 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Andrew Eisenberg
+ *     Brian Cavalier
+ ******************************************************************************/
 define([
-		 "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client",
+		 "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
 		 "scripted/contextmenus/contextmenu", "scripted/utils/editorUtils"],
  
 function(
-	mNavHistory, mPageState, mJsdepend,
-	mExecConsole, mWhen, mJshintDriver, storage, contextMenu, editorUtils) {
-	
+	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, editorUtils) {
+
+	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
+	var deferred;
 	return {
 	
 		init: function() {
-			var d = when.defer();
-			mJsdepend.getConf(pageState.main.path, d.resolve);
-			
-			return d.promise;
-		}
+			deferred = when.defer();
+			mJsdepend.getConf(pageState.main.path, deferred.resolve);
+		},
 		
 		ready : function(sLogger, fileExplorer, layoutManager) {
-
-			var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
-			window.scripted = {};
-			// Start the search for .jshintrc
+			deferred.then(function() {
+				window.scripted = {};
+				// Start the search for .jshintrc
 			
-			// TODO why is getConf on jsdepend?
-			mJsdepend.getConf(pageState.main.path, function (dotScripted) {
-				window.fsroot = dotScripted.fsroot;
-				window.scripted.config = dotScripted;
+				// TODO why is getConf on jsdepend?
+				mJsdepend.getConf(pageState.main.path, function (dotScripted) {
+					window.fsroot = dotScripted.fsroot;
+					window.scripted.config = dotScripted;
 
-				// must be called inside of getConf since jshint relies on dotScripted
-				window.scripted.promises = { "loadJshintrc": loadJshintrc(pageState)};
+					// must be called inside of getConf since jshint relies on dotScripted
+					window.scripted.promises = { "loadJshintrc": loadJshintrc(pageState)};
 				
-				layoutManager.setNavigatorHidden(
-					dotScripted &&
-					dotScripted.ui &&
-					dotScripted.ui.navigator===false, fileExplorer);
+					layoutManager.setNavigatorHidden(
+						dotScripted &&
+						dotScripted.ui &&
+						dotScripted.ui.navigator===false, fileExplorer);
 				
-				processConfiguration(dotScripted);
+					processConfiguration(dotScripted);
 				
-				// Perform navigator context menu hook-up
-				contextMenu.initContextMenus('#navigator-wrapper');
+					// Perform navigator context menu hook-up
+					contextMenu.initContextMenus('#navigator-wrapper');
 
-				/*Side panel open/close*/
-				layoutManager.doLayout(fileExplorer, pageState);
+					/*Side panel open/close*/
+					layoutManager.doLayout(fileExplorer, pageState);
 				
-				//Report any errors getting the dotScripte configuration. This must be done near the end of setup
-				//so we are sure that the various ui widgetry is already there.
-				if (dotScripted.error) {
-					mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
-				}
+					//Report any errors getting the dotScripte configuration. This must be done near the end of setup
+					//so we are sure that the various ui widgetry is already there.
+					if (dotScripted.error) {
+						mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
+					}
+				});
 			});
 
 			/* Locate the nearest .jshintrc. It will look relative to the initially opened
@@ -60,7 +72,7 @@ function(
 				// which the config is a member.
 				// TODO a timing window problem does exist here - where if the .jshintrc file isn't
 				// found quickly enough the first linting will not respect it. fix it!
-				var deferred = mWhen.defer();
+				var deferred = when.defer();
 				mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
 					if (jshintrc && jshintrc.fsroot) {
 						// it was found at that location
