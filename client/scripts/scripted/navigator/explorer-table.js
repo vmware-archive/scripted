@@ -40,22 +40,6 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 			var child = children[e];
 			child.parent = parent;
 		}
-/*
-		// not ideal, but for now, sort here so it's done in one place.
-		// this should really be something pluggable that the UI defines
-		parent.children.sort(function(a, b) {
-			var isDir1 = a.Directory;
-			var isDir2 = b.Directory;
-			if (isDir1 !== isDir2) {
-				return isDir1 ? -1 : 1;
-			}
-			var n1 = a.Name && a.Name.toLowerCase();
-			var n2 = b.Name && b.Name.toLowerCase();
-			if (n1 < n2) { return -1; }
-			if (n1 > n2) { return 1; }
-			return 0;
-		});
-*/
 	}
 
 
@@ -66,14 +50,6 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 		} else if (parentItem.Directory !== undefined && parentItem.Directory === false) {
 			onComplete([]);
 		} else if (parentItem.Location) {
-/*
-			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then(
-				dojo.hitch(this, function(children) {
-					mUtil.processNavigatorParent(parentItem, children);
-					onComplete(children);
-				})
-			);
-*/
 			if (parentItem.ChildrenLocation) {
 				var xhrobj = new XMLHttpRequest();
 				try {
@@ -93,13 +69,6 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 									if (kid.name[0]!=='.' || !(kid.name==='.git' || kid.name==='.svn')) {
 										newchildren.push(kid);
 									}
-//									if (kid.name.lastIndexOf('.',0)!==0) {
-//										newchildren.push(kid);
-//									} else {
-//										if (kid.name !== '.git' && kid.name !== '.svn') {
-//											newchildren.push(kid);
-//										}
-//									}
 								}
 								children = newchildren;
 								children = children.sort(function (a,b) {
@@ -108,16 +77,6 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 							}
 							processNavigatorParent(parentItem, children);
 							onComplete(children);
-	/*
-	place.treeRoot=JSON.parse(xhrobj.responseText);
-	  place.model = new Model(place.registry, place.treeRoot, null);
-	  place.createTree(place.parentId,place.model,{onCollapse: function(model) {
-	    if (self.navHandler) {
-	      self.navHandler.onCollapse(model);
-	    }
-	  }
-	  });
-	*/
 						}
 					};
 					xhrobj.send();
@@ -237,53 +196,8 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 				dojo.addClass(fileIcon1, "core-sprite-blank_model modelDecorationSprite2");
 			} else {
 				var fileIcon = dojo.create("span", null, span, "last");
-				//link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameColumn", href: href, target:this.target}, span, "last");
 				dojo.addClass(fileIcon, "core-sprite-blank_model modelDecorationSprite2");
-				//               dojo.addClass(fileIcon, "core-sprite-file_model modelDecorationSprite");
 			}
-/*
-			if (item.Directory) {
-				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
-				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
-				dojo.place(document.createTextNode(item.Name), link, "last");
-			} else {
-				var i;
-				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
-				// otherwise use default editor.
-				if (!this.openWithCommands) {
-if (mExtensionCommands) {
-					this.openWithCommands = mExtensionCommands.getOpenWithCommands(this.commandService);
-					for (i=0; i < this.openWithCommands.length; i++) {
-						if (this.openWithCommands[i].isEditor === "default") {
-							this.defaultEditor = this.openWithCommands[i];
-						}
-					}
-}
-				}
-				var href = item.Location, foundEditor = false;
-				for (i=0; i < this.openWithCommands.length; i++) {
-					var openWithCommand = this.openWithCommands[i];
-					if (openWithCommand.visibleWhen(item)) {
-						href = openWithCommand.hrefCallback({items: item});
-						foundEditor = true;
-						break; // use the first one
-					}
-				}
-				var contentType = this.contentTypeService.getFileContentType(item);
-				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
-					href = this.defaultEditor.hrefCallback({items: item});
-				}
-
-				link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameColumn", href: href, target:this.target}, span, "last");
-				addImageToLink(contentType, link);
-				dojo.place(document.createTextNode(item.Name), link, "last");
-			}
-			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
-*/
-			//link = dojo.create("a", {className:"navlinkonpage",id:tableRow.id+"NameColumn", href:"#"+item.ChildrenLocation},span,"last");
-
-			//var span2 = dojo.create("span", null, span, "last");
 			var span2;
 			var path = mPageState.generateUrl(item.Location);
 			if (item.directory) {
@@ -307,39 +221,6 @@ if (mExtensionCommands) {
 			}
 
 			return col;
-
-//		case 1:
-//			var dateColumn = document.createElement('td');
-//			dojo.addClass(dateColumn, "arrowoff");
-//			return dateColumn;
-/*
-//			if (item.LocalTimeStamp) {
-//				var fileDate = new Date(item.LocalTimeStamp);
-//				dateColumn.innerHTML = dojo.date.locale.format(fileDate);
-//			}
-//			var that = this;
-//			if(this.onRowIterate){
-//				dojo.connect(dateColumn, "onclick", dateColumn, function() {
-//					that.onRowIterate(item);
-//				});
-//				dojo.connect(dateColumn, "onmouseover", dateColumn, function() {
-//					dateColumn.style.cursor ="pointer";
-//				});
-//				dojo.connect(dateColumn, "onmouseout", dateColumn, function() {
-//					dateColumn.style.cursor ="default";
-//				});
-//			}
-			return dateColumn;
-*/
-			//		case 2:
-			//			var sizeColumn = document.createElement('td');
-			//			if (!item.Directory && typeof item.Length === "number") {
-			//				var length = parseInt(item.Length, 10),
-			//					kb = length / 1024;
-			//				sizeColumn.innerHTML = dojo.number.format(Math.ceil(kb)) + " KB";
-			//			}
-			//			dojo.style(sizeColumn, "textAlign", "right");
-			//			return sizeColumn;
 		}
 	};
 	FileRenderer.prototype.constructor = FileRenderer;
@@ -386,6 +267,8 @@ if (mExtensionCommands) {
 		if (this.preferences) {
 			this.storageKey = this.preferences.listenForChangedSettings(dojo.hitch(this, 'onStorage'));
 		}
+		// TODO bad!!!
+		window.explorer = this;
 	}
 
 	FileExplorer.prototype = new mExplorer.Explorer();
@@ -491,16 +374,12 @@ if (mExtensionCommands) {
 					var element = dojo.byId(id);
 					if (element) {
 						$(element).addClass("highlightrow");
-	//					$(element.lastChild).addClass("arrow");
-	//					$(element.lastChild).removeClass("arrowoff");
 						$(element).removeClass("lightTreeTableRow");
 						$(element).removeClass("darkTreeTableRow");
 						if (element.childNodes) {
 							$(element.childNodes[1]).removeClass("secondaryColumn");
 							$(element.childNodes[1]).addClass("secondaryColumnDark");
 						}
-						//				element.style.fontWeight="bold";
-						// call expand in case the element being highlighted is a folder
 						self.renderer.expand(stringid);
 					}
 				}
@@ -518,10 +397,6 @@ if (mExtensionCommands) {
 			$(element).removeClass("darkTreeTableRow");
 			$(element.childNodes[1]).removeClass("secondaryColumn");
 			$(element.childNodes[1]).addClass("secondaryColumnDark");
-//			$(element.lastChild).addClass("arrow");
-//			$(element.lastChild).removeClass("arrowoff");
-			//			element.style.fontWeight="bold";
-			// call expand in case the element being highlighted is a folder
 			this.renderer.expand(id);
 		}
 	};
@@ -634,60 +509,11 @@ if (mExtensionCommands) {
 			} catch (e) {
 				scriptedLogger.error("xhr failed " + e, "EXPLORER_TABLE");
 			}
-
-
-/*
-			this.fileClient.loadWorkspace(path).then(
-				//do we really need hitch - could just refer to self rather than this
-				dojo.hitch(self, function(loadedWorkspace) {
-					clearTimeout(progressTimeout);
-					//copy fields of resulting object into the tree root
-					for (var i in loadedWorkspace) {
-						this.treeRoot[i] = loadedWorkspace[i];
-					}
-					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
-					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
-					//If current location is not the root, set the search location in the searcher
-					this.searcher.setLocationByMetaData(this.treeRoot);
-					// erase any old page title
-					var breadcrumb = dojo.byId(this.breadcrumbId);
-					if (breadcrumb) {
-						dojo.empty(breadcrumb);
-						new mBreadcrumbs.BreadCrumbs({
-							container: breadcrumb,
-							resource: this.treeRoot,
-							firstSegmentName: this.fileClient.fileServiceName(this.treeRoot.Path)
-						});
-					}
-					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
-					if (typeof postLoad === "function") {
-						postLoad();
-					}
-					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
-					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){
-																							 self.navHandler.onCollapse(model);}}});
-					//Hook up iterator
-					if(!this.navHandler){
-						this.navHandler = new mNavHandler.ExplorerNavHandler(this);
-					}
-					this.navHandler.refreshModel(this.model);
-					this.navHandler.cursorOn();
-					this.onchange && this.onchange(this.treeRoot);
-				}),
-				dojo.hitch(self, function(error) {
-					clearTimeout(progressTimeout);
-					// Show an error message when a problem happens during getting the workspace
-					if (error.status !== null && error.status !== 401){
-						dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
-					}
-				})
-			);
-*/
 		}
 	};
 	
 	FileExplorer.prototype.fullRefresh = function(postRefresh) {
-		explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
+		window.explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
 	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
@@ -697,7 +523,5 @@ if (mExtensionCommands) {
 	FileExplorer.prototype.constructor = FileExplorer;
 
 	//return module exports
-	return {
-		FileExplorer: FileExplorer
-	};
+	return FileExplorer;
 });

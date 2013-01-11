@@ -18,6 +18,9 @@
 
 importScripts('../../lib/requirejs/require.js');
 require.config({
+	packages:	[
+		{ name: 'when', location: 'lib/when', main: 'when' }
+	],
     baseUrl: "../../",
     paths: {
         i18n: 'lib/requirejs/i18n',
@@ -25,8 +28,7 @@ require.config({
         fileapi: 'scripted/fileapi',
         jsrender: 'lib/jsrender',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine',
-        when: 'lib/when-aaa0898-1.6.1'
+		'doctrine/doctrine' : 'lib/doctrine/doctrine'
     }
 });
 
