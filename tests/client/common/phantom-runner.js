@@ -16,6 +16,7 @@
 
 (function() {
 	'use strict';
+	
 
 	var args = require('system').args;
 
@@ -41,6 +42,7 @@
 		var result,
 			failed;
 
+		
 		if (message) {
 			if (message.name === 'QUnit.done') {
 				result = message.data;

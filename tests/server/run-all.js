@@ -35,7 +35,7 @@ fswalk(__dirname,
 				/* called on each url */
 				function (url, k) {
 					console.log(url);
-					exec('phantomjs ../../client/scripts/lib/qunit/phantom-runner.js '+url,
+					exec('phantomjs ../client/common/phantom-runner.js '+url,
 						function (err, stdout, stderr) {
 							problem = problem || err;
 							console.log('Exec finished');

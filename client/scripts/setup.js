@@ -84,11 +84,14 @@ var scriptedLogger = {
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
 				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
-				{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
+				{ name: 'when', location: '../components/when', main:'when', lib: '.'},
+				{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
+				{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'}
+				],
 	paths: {
 	//require: 'lib/requirejs/require',
-		i18n: 'lib/requirejs/i18n',
-		text: 'lib/requirejs/text',
+		i18n: '../components/requirejs/i18n',
+		text: '../components/requirejs/text',
 		jquery_ui: 'lib/jquery-ui-custom',
 		jsbeautify: 'lib/beautify',
 		jsrender: 'lib/jsrender',
@@ -96,7 +99,8 @@ requirejs.config({
 		sockjs:'lib/sockjs-592774a-0.3.1.min',
 		fileapi: 'scripted/fileapi',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		'doctrine/doctrine' : 'lib/doctrine/doctrine',
+		'doctrine/doctrine' : '../components/doctrine/doctrine',
+		'lib/json5' : '../components/json5/lib/json5',
 		jshint: 'lib/jshint-r12-80277ef',
 		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
 	}
