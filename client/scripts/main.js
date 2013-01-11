@@ -1,13 +1,16 @@
 define({
 	scripted : {
 		module : 'scripted',
-		init : { 'init' : [ // calls the init() method during the init lifecycle, other lifecycle steps possible and omore complex ways of calling
+		init: 'init',
+		ready : {
+			ready: [ // calls the init() method during the init lifecycle, other lifecycle steps possible and omore complex ways of calling
 				{ $ref : 'scriptedLogger' },
 				{ $ref : 'fileExplorer' },
 				{ $ref : 'layoutManager' }
 			]
 		}
 	},
+
 	scriptedLogger : {
 		module : 'scriptedLogger'
 	},
@@ -30,10 +33,8 @@ define({
 		}
 	},
 	
-	plugins : [ {
-		module : 'wire/debug'
-	},
-	{
-		module : 'wire/jquery/dom'
-	}]
+	plugins : [
+		{ module : 'wire/debug' },
+		{ module : 'wire/jquery/dom' }
+	]
 });

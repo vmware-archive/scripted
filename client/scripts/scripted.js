@@ -1,39 +1,50 @@
 define([
 		 "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
-		 "scripted/contextmenus/contextmenu", "scripted/utils/editorUtils"],
+		 "scripted/contextmenus/contextmenu"],
  
 function(
 	mNavHistory, mPageState, mJsdepend,
-	mExecConsole, mWhen, mJshintDriver, storage, contextMenu, editorUtils) {
+	mExecConsole, mWhen, mJshintDriver, storage, contextMenu) {
 	
 	return {
 	
 		init: function() {
-			var d = when.defer();
-			mJsdepend.getConf(pageState.main.path, d.resolve);
+			window.scripted = {};
+
+			var d, pageState;
+
+			pageState = mPageState.extractPageStateFromUrl(window.location.toString());
+
+			d = mWhen.defer();
+			// TODO why is getConf on jsdepend?
+			mJsdepend.getConf(pageState.main.path, function(dotScripted) {
+				// Fulfill the promise with both pageState and dotScripted
+				d.resolve({
+					pageState: pageState,
+					dotScripted: dotScripted
+				});
+			});
 			
-			return d.promise;
-		}
+			this.configReady = d.promise;
+		},
 		
 		ready : function(sLogger, fileExplorer, layoutManager) {
 
-			var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
-			window.scripted = {};
-			// Start the search for .jshintrc
-			
-			// TODO why is getConf on jsdepend?
-			mJsdepend.getConf(pageState.main.path, function (dotScripted) {
-				window.fsroot = dotScripted.fsroot;
-				window.scripted.config = dotScripted;
+			this.configReady.then(function (config) {
+				var dotScripted, pageState;
 
+				dotScripted = config.dotScripted;
+				window.scripted.config = dotScripted;
+				window.fsroot = dotScripted.fsroot;
+
+				pageState = config.pageState;
+
+				// Start the search for .jshintrc
 				// must be called inside of getConf since jshint relies on dotScripted
-				window.scripted.promises = { "loadJshintrc": loadJshintrc(pageState)};
+				window.scripted.promises = { "loadJshintrc": loadJshintrc(pageState) };
 				
-				layoutManager.setNavigatorHidden(
-					dotScripted &&
-					dotScripted.ui &&
-					dotScripted.ui.navigator===false, fileExplorer);
+				layoutManager.setNavigatorHidden(hasNavigator(dotScripted), fileExplorer);
 				
 				processConfiguration(dotScripted);
 				
@@ -49,6 +60,14 @@ function(
 					mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
 				}
 			});
+
+			// Detach configReady so that it and its fulfillment value
+			// can be garbage collected;
+			delete this.configReady;
+
+			function hasNavigator(dotScripted) {
+				return dotScripted && dotScripted.ui && dotScripted.ui.navigator===false;
+			}
 
 			/* Locate the nearest .jshintrc. It will look relative to the initially opened
 			 * location - so ok if the .jshintrc is at the project root. But if the file is

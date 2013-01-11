@@ -18,8 +18,6 @@
 /*global location confirm requirejs $ console window require XMLHttpRequest SockJS setTimeout document*/
 /*jslint browser:true */
 
-
-
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
 				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.' },
