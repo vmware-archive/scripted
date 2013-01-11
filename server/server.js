@@ -46,7 +46,8 @@ function start(route, handle) {
 		}));
 	});
 
-	require('./routes/fileRoutes').install(app);
+	require('./routes/editorRoutes').install(app);
+	require('./routes/testRoutes').install(app);
 	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);

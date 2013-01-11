@@ -15,19 +15,13 @@
 var fs = require('fs');
 var path = require('path');
 
-var EDITOR_HTML = path.resolve(__dirname, '../../client/editor.html');
 var CLIENT_TESTS_HTML = path.resolve(__dirname, '../../tests/client/scriptedClientTests.html');
 var CLIENT_SERVER_TESTS_HTML = path.resolve(__dirname, '../../tests/client/scriptedClientServerTests.html');
 var TEST_FILE = path.resolve(__dirname, '../../');
 
-
 exports.install = function (app) {
 
-	function sendEditor(req, res) {
-		res.header('Content-Type', 'text/html');
-		fs.createReadStream(EDITOR_HTML).pipe(res);
-	}
-	function sendClientTests(req, res) {
+	app.get('/clientTests', function (req, res) {
 		try {
 			console.log ("Handling client tests");
 			res.header('Content-Type', 'text/html');
@@ -35,8 +29,9 @@ exports.install = function (app) {
 		} catch (e) {
 			console.trace(e);
 		}
-	}
-	function sendClientServerTests(req, res) {
+	});
+	
+	app.get('/clientServerTests', function (req, res) {
 		try {
 			console.log ("Handling client server tests");
 			res.header('Content-Type', 'text/html');
@@ -44,8 +39,9 @@ exports.install = function (app) {
 		} catch (e) {
 			console.trace(e);
 		}
-	}
-	function sendTestFile(req, res) {
+	});
+	
+	app.get('/tests/:path(*)', function (req, res) {
 		try {
 			console.log ("Handling test file: " + req.path);
 			res.header('Content-Type', 'text/javascript');
@@ -53,16 +49,5 @@ exports.install = function (app) {
 		} catch (e) {
 			console.trace(e);
 		}
-	}
-
-
-
-	app.get('/editor', sendEditor);
-	app.get('/editor/:path(*)', sendEditor);
-
-	app.get('/clientTests', sendClientTests);
-	app.get('/clientServerTests', sendClientServerTests);
-	app.get('/tests/:path(*)', sendTestFile);
-
-
+	});
 };
