@@ -20,6 +20,12 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 	'setup', 'jquery'],
 function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os) {
 	
+	// TODO remove globals
+	window.scripted = window.scripted || {};
+	window.scripted.config = window.scripted.config || {};
+	window.explorer = window.explorer || {};
+	
+	
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
 	var testResourcesRootNoClosingSlash = testResourceRootClosingSlash.substring(0, testResourcesRootOpeningSlash.length-1);

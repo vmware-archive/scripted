@@ -13,7 +13,10 @@
 var config = {
 	baseUrl: '../scripts',
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}],
+				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.' },
+				{ name: 'when', location: 'lib/when', main: 'when' },
+				{ name: 'meld', location: 'lib/meld', main: 'meld' },
+				{ name: 'wire', location: 'lib/wire', main: 'wire' }],
 	paths: {
 		'orion/assert' : '../tests/client/assert',
 		'esprima/esprima' : 'lib/esprima/esprima',
@@ -27,7 +30,6 @@ var config = {
 		jquery: 'lib/jquery-1.7.2.min',
 		sockjs:'lib/sockjs-592774a-0.3.1.min',
 		fileapi: 'scripted/fileapi',
-		when: 'lib/when-aaa0898-1.6.1',
 		
 		tests: '../tests'
 	}

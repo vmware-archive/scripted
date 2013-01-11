@@ -37,7 +37,8 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		if (mOsUtils.isCtrlOrMeta(event)) {
 			target = EDITOR_TARGET.tab;
 		} else {
-			var subNavigationDisabled = (editorUtils.getMainEditor().loadResponse === 'error') ? true : false;
+			var mainEditor = editorUtils.getMainEditor();
+			var subNavigationDisabled = !mainEditor || mainEditor.loadResponse === 'error';
 			target = (event.shiftKey || event.makeShift) && !subNavigationDisabled ? EDITOR_TARGET.sub : EDITOR_TARGET.main;
 		}
 		return target;
