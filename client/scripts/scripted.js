@@ -14,10 +14,11 @@
 define([
 		 "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
-		 "scripted/contextmenus/contextmenu", "scripted/utils/editorUtils"],
+		 "scripted/contextmenus/contextmenu"],
  
 function(
-	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, editorUtils) {
+
+	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu) {
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 	var deferred;
@@ -61,6 +62,14 @@ function(
 					}
 				});
 			});
+
+			// Detach configReady so that it and its fulfillment value
+			// can be garbage collected;
+			delete this.configReady;
+
+			function hasNavigator(dotScripted) {
+				return dotScripted && dotScripted.ui && dotScripted.ui.navigator===false;
+			}
 
 			/* Locate the nearest .jshintrc. It will look relative to the initially opened
 			 * location - so ok if the .jshintrc is at the project root. But if the file is

@@ -18,16 +18,16 @@ define({
 	// starting point for app
 	scripted : {
 		module : 'scripted',
-		init : { 'init' : [ ]
-		},
-		ready : { 'ready' : [
+		init: 'init',
+		ready : {
+			ready: [
 				{ $ref : 'scriptedLogger' },
 				{ $ref : 'fileExplorer' },
 				{ $ref : 'layoutManager' }
 			]
 		}
 	},
-	
+
 	// provides configurable logging
 	// currently also a global, but needs to change
 	scriptedLogger : {
@@ -55,11 +55,8 @@ define({
 		}
 	},
 	
-	
-	plugins : [ {
-		module : 'wire/debug'
-	},
-	{
-		module : 'wire/jquery/dom'
-	}]
+	plugins : [
+		{ module : 'wire/debug' },
+		{ module : 'wire/jquery/dom' }
+	]
 });
