@@ -3,7 +3,7 @@ var fs = require('fs'),
 	errorCode = require('rest/interceptor/errorCode'),
 	timeout = require('rest/interceptor/timeout'),
 	retry = require('rest/interceptor/retry'),
-	client = timeout(errorCode(), {timeout: 1000}),
+	client = timeout(errorCode(), {timeout: 2000}),
 	retryClient = retry(client, {initial: 20, max: 200}),
 	childExec = require('child_process').exec,
 	spawn = require('child_process').spawn,
@@ -38,12 +38,17 @@ function open(options) {
 		}
 	}
 	
+	url += "/editor" + (process.platform == 'win32' ? "/" : "");
+	
+	console.log(url);
+	
 	if (options._) {
-		url += "/editor" + path.resolve(process.cwd(), options._[0]);
+		url += path.resolve(process.cwd(), options._[0]);
 	} else {
-		url += "/editor" + process.cwd();
+		url += process.cwd();
 	}
 
+	console.log("Opening %s", url);
 	childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
 }
 
