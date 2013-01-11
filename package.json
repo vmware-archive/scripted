@@ -19,9 +19,8 @@
 		"Scott Andrews <andrewss@vmware.com>"
 	],
 	"bin": {
-		"scr": "./bin/scr",
-		"scripted": "./bin/scripted",
-		"scrjs": "./bin/scr.js"
+		"scr": "./bin/scr.js",
+		"scripted": "./bin/scr.js"
 	},
 	"scripts": {
 		"test": "node tests/server/run-all.js"
