@@ -83,7 +83,8 @@ var scriptedLogger = {
 
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}],
+				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
+				{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
 	paths: {
 	//require: 'lib/requirejs/require',
 		i18n: 'lib/requirejs/i18n',
@@ -97,7 +98,6 @@ requirejs.config({
 		'esprima/esprima' : 'lib/esprima/esprima',
 		'doctrine/doctrine' : 'lib/doctrine/doctrine',
 		jshint: 'lib/jshint-r12-80277ef',
-		when: 'lib/when-aaa0898-1.6.1',
 		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
 	}
 });
