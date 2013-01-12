@@ -34,9 +34,15 @@ function start(route, handle) {
 		route(handle, path, res, req, next);
 	}
 
-	var app = express.createServer();
+	var app = express();
+	//This weirdness below is because of
+	//https://github.com/sockjs/sockjs-node/issues/78
+	//So we need to allow socket servlet access to the
+	//naked nodejs http server to workarond.
+	app.server = require('http').createServer(app);
 
 	app.configure(function() {
+		app.use(express.json());
 		app.use(app.router);
 		app.use(onRequest); // bridge to 'servlets', we should remove over time
 		app.use(express['static'](pathResolve(__dirname, '../client')), { maxAge: 6e5 });
@@ -46,13 +52,15 @@ function start(route, handle) {
 		}));
 	});
 
-	require('./routes/editorRoutes').install(app);
-	require('./routes/testRoutes').install(app);
+	require('./routes/editor-routes').install(app);
+	require('./routes/test-routes').install(app);
+	require('./routes/config-routes').install(app);
 	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);
 
-	app.listen(7261, "127.0.0.1" /* only accepting connections from localhost */);
+	console.log('app.server = ' + app.server);
+	app.server.listen(7261, "127.0.0.1" /* only accepting connections from localhost */);
 	console.log("Server has started.");
 }
 
