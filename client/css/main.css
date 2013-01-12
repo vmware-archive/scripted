@@ -183,6 +183,23 @@ footer{
 	float:right;
 }
 
+
+#run {
+	margin:4px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/run.png);
+	width:16px;
+	height:16px;
+}
+
+#stop {
+	margin:4px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/stop.png);
+	width:16px;
+	height:16px;
+}
+
 #help_open{
 	margin:4px 5px 0 0;
 	cursor:pointer;

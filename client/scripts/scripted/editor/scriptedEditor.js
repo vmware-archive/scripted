@@ -212,6 +212,8 @@ define([
 		 */
 		function afterSaveSuccess(filePath) {
 			editor.dispatchEvent({type: "afterSave", file: filePath});
+			$(document).trigger('afterEditorSave',[filePath]);
+//			window.dispatchEvent({type: "afterEditorSave", file: filePath, editor: editor});
 		}
 		
 		var textViewFactory = function() {

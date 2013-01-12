@@ -83,7 +83,8 @@ var scriptedLogger = {
 
 requirejs.config({
 	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}],
+				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
+				{ name: 'rest', location: 'lib/rest', main:'rest'}],
 	paths: {
 	//require: 'lib/requirejs/require',
 		i18n: 'lib/requirejs/i18n',
@@ -306,6 +307,9 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 		//invisible and its not necessary to hold up the editor for this.
 		require(['scripted/keybindings/keyhelp'], function (mKeyHelp) {
 			//console.log('Keybindings help-panel is ready');
+		});
+		
+		require(['scripted/appmanager'], function() {
 		});
 		
 		/*Side panel open/close*/
