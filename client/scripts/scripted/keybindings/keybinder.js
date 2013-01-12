@@ -22,7 +22,7 @@ define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-cl
 ], function (mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
 
 function debug_log(msg) {
-	//console.log(msg);
+	console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
@@ -34,6 +34,7 @@ var putScriptedRcFile = mConfig.putScriptedRcFile;
 var event2keystroke = mKeystroke.fromKeyDownEvent;
 
 var isGlobalAction = mActionInfo.isGlobalAction;
+var eachEditor = editorUtils.eachEditor;
 
 /**
  * Information about the default keybindings. These are not statically known. They
@@ -48,28 +49,6 @@ var defaults = {
 	keybindings: null,
 	unboundNames: null
 };
-
-/**
- * Do something with each editor (the main editor and all subeditors).
- * The 'iteration' can be aborted prematurely by return a true value
- * from the doFun. If so, then the true value will be returned as
- * a result of the iteration as well.
- *
- * TODO: it would be good to place this somewhere else (where others
- * can use it to iterate editors. Maybe should be grouped with
- * other high-level-ish functions to obtain editor instances.
- */
-function eachEditor(doFun) {
-	var abort = doFun(editorUtils.getMainEditor());
-	if (abort) {
-		return abort;
-	}
-	var subeditor = editorUtils.getSubEditor();
-	abort = doFun(subeditor);
-	if (abort) {
-		return abort;
-	}
-}
 
 /**
  * Set (or unset) a keybinding on a specific editor.
