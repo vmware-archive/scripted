@@ -82,8 +82,11 @@ var scriptedLogger = {
 
 
 requirejs.config({
-	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'}],
+	packages: [
+	    { name: 'dojo', location: 'lib/dojo',  main: 'lib/main-browser', lib:'.'},
+		{ name: 'dijit',location: 'lib/dijit', main: 'lib/main',lib: '.'},
+		{ name: 'rest', location: 'lib/rest-d7c94f9',  main: 'rest'}
+	],
 	paths: {
 	//require: 'lib/requirejs/require',
 		i18n: 'lib/requirejs/i18n',
