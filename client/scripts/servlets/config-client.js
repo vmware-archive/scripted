@@ -40,10 +40,6 @@ define(function(require, exports, module) {
 	var putClient = unreject(baseClient);
 	var getClient = unreject(baseClient, {});
 
-	var makePromisedServletStub = require('./stub-maker').makePromisedServletStub;
-	var basePath = '/conf/';
-
-//	exports.getScriptedRcFile = makePromisedServletStub(basePath + 'get/scriptedrc');
 	exports.getScriptedRcFile = function (name) {
 		return getClient({
 			path: '/config/{name}',
@@ -66,7 +62,4 @@ define(function(require, exports, module) {
 			entity: contents
 		});
 	};
-	
-	//exports.putScriptedRcFile = makePromisedServletStub(basePath + 'put/scriptedrc');
-	
 });

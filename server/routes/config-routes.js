@@ -21,13 +21,6 @@ var putScriptedRcFile = dotscripted.putScriptedRcFile;
 
 var makePromisedRequestHandler = require('../servlets/servlet-utils').makePromisedRequestHandler;
 
-function swapper(f) {
-	return function(a,b) {
-		return f.call(this, b,a);
-	};
-}
-
-
 function getData(req) {
 	var d = when.defer();
 	var buffer = '';
@@ -41,9 +34,6 @@ function getData(req) {
 }
 
 exports.install = function (app) {
-	app.get('/conf/get/scriptedrc', swapper(makePromisedRequestHandler(getScriptedRcFile)));
-	app.get('/conf/put/scriptedrc', swapper(makePromisedRequestHandler(putScriptedRcFile)));
-	
 	app.get('/config/:name', function (req, res) {
 		getScriptedRcFile(req.params.name).then(
 			function (jsonObj) {
@@ -63,27 +53,19 @@ exports.install = function (app) {
 		);
 	});
 	app.put('/config/:name', function (req, res) {
-		console.log('Received a put request for config '+req.param.name);
-		console.log('>>>>>>>>>>>>>>>>');
-		console.log(req.body);
-//		for (var property in object) {
-//			if (object.hasOwnProperty(property)) {
-//				console.log();
-//			}
-//		}
-		//console.log(JSON.stringify(req, null, '  '));
-		console.log('<<<<<<<<<<<<<<<<');
-		res.status(204);
-		res.end();
-//		return putScriptedRcFile(req.params.name, req.body).then(function () {
-//			res.status(204);
-//			res.end();
-//		}).otherwise(function (err) {
-//			console.error("Error in request for '%s': %s", req.url, err);
-//			res.writeHead(500, {"Content-Type": "text/plain"});
-//			res.write(err + "\n");
-//		});
-//		putScriptedRcFile(req.params.name, req.
-//
+//		console.log('Received a put request for config '+req.param.name);
+//		console.log('>>>>>>>>>>>>>>>>');
+//		console.log(req.body);
+//		console.log('<<<<<<<<<<<<<<<<');
+//		res.status(204);
+//		res.end();
+		return putScriptedRcFile(req.params.name, req.body).then(function () {
+			res.status(204);
+			res.end();
+		}).otherwise(function (err) {
+			console.error("Error in request for '%s': %s", req.url, err);
+			res.writeHead(500, {"Content-Type": "text/plain"});
+			res.write(err + "\n");
+		});
 	});
 };
