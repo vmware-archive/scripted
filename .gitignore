@@ -2,3 +2,5 @@
 *~
 .DS_Store
 scripted.log
+node_modules
+/client/components

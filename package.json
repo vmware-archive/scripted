@@ -23,7 +23,8 @@
 		"scripted": "./bin/scripted"
 	},
 	"scripts": {
-		"test": "node tests/server/run-all.js"
+		"test": "node tests/server/run-all.js",
+		"postinstall": "cd client;bower install"
 	},
 	"dependencies": {
         "amdefine": "0.0.2",
@@ -37,6 +38,10 @@
         "when": "1.6.1",
         "rest": "0.8.4",
         "express": "3.0.6"
+	},
+	"devDependencies": {
+		"bower": "0.6.8",
+		"nodeunit": "0.7.4"
 	},
 	"license": "EPL",
 	"readmeFilename": "README.md"

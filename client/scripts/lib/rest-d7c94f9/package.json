@@ -1,0 +1,48 @@
+{
+	"name": "rest",
+	"version": "0.8.4",
+	"description": "HTTP client library inspired by the Spring Framework's RestTemplate",
+	"keywords": ["rest", "http", "client", "rest-template", "spring", "s2js"],
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://opensource.org/licenses/MIT"
+		}
+	],
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/s2js/rest"
+		}
+	],
+	"bugs": "https://github.com/s2js/rest/issues",
+	"maintainers": [
+		{
+			"name": "Scott Andrews",
+			"email": "andrewss@vmware.com",
+			"web": "http://twitter.com/scothis"
+		}
+	],
+	"contributors": [
+		{
+			"name": "Jeremy Grelle",
+			"email": "jgrelle@vmware.com"
+		}
+	],
+	"dependencies": {
+		"when": "~1"
+	},
+	"devDependencies": {
+		"curl": "https://github.com/cujojs/curl/tarball/0.7.2",
+		"dojo": "https://github.com/dojo/dojo/tarball/1.7.2",
+		"poly": "https://github.com/cujojs/poly/tarball/0.5.1",
+		"wire": "https://github.com/cujojs/wire/tarball/0.8.0",
+		"buster": "",
+		"jshint": ""
+	},
+	"main": "./rest",
+	"scripts": {
+		"test": "jshint . && buster test -e node --color none --reporter specification",
+		"start": "buster static -e browser"
+	}
+}

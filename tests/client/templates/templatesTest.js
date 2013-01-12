@@ -65,7 +65,7 @@ function(assert, mTemplates, mTestutils) {
 				assert.equal(templates.length, 7, "Should have found 7 templates for json files");
 				assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 7 templates for json files");
 				assert.ok(!mTemplates._getAllTemplates()['html'], "Should have not have any html templates");
-				templateCA.install('html', testResourcesRoot).then(
+				templateCA.install(null, 'html', testResourcesRoot).then(
 					function(templates) {
 						assert.equal(templates.length, 5, "Should have found 7 templates for html files");
 						assert.equal(mTemplates._getAllTemplates()['json'].length, 7, "Should have found 9 templates for json files");
@@ -93,19 +93,20 @@ function(assert, mTemplates, mTestutils) {
 				var buffer = "acronym1";
 				var completions = templateCA.computeProposals(buffer, buffer.length, { prefix : buffer } );
 				var compl = "bar<acronym></acronym>fooarg3";
-				assert.equal(completions[2].description, "acronym12 : " + compl);
-				assert.equal(completions[2].proposal, compl);
-				assert.equal(completions[2].positions.length, 3, "Should have 3 positions");
-				assert.deepEqual(completions[2].positions[0], {length : "foo".length, offset: compl.indexOf("foo") }, "Should have 2 positions");
-				assert.deepEqual(completions[2].positions[1], {length : "bar".length, offset : compl.indexOf("bar") }, "Should have 2 positions");
-				assert.deepEqual(completions[2].positions[2], {length : "arg3".length, offset : compl.indexOf("arg3") }, "Should have 2 positions");
-				assert.equal(completions[2].escapePosition, compl.indexOf('</'));
-				console.log(completions[2]);
+				var comp = completions[2]();
+				assert.equal(comp.description, "acronym12 : " + compl);
+				assert.equal(comp.proposal, compl);
+				assert.equal(comp.positions.length, 3, "Should have 3 positions");
+				assert.deepEqual(comp.positions[0], {length : "foo".length, offset: compl.indexOf("foo") }, "Should have 2 positions");
+				assert.deepEqual(comp.positions[1], {length : "bar".length, offset : compl.indexOf("bar") }, "Should have 2 positions");
+				assert.deepEqual(comp.positions[2], {length : "arg3".length, offset : compl.indexOf("arg3") }, "Should have 2 positions");
+				assert.equal(comp.escapePosition, compl.indexOf('</'));
 				
+				comp = completions[4]();
 				assert.equal(completions.length, 5, "Find 5 completions");
-				assert.equal(completions[4].description, "acronym14 : $bar");
-				assert.equal(completions[4].proposal, "$bar");
-				assert.equal(completions[4].positions, null, "Should have no positions array");
+				assert.equal(comp.description, "acronym14 : $bar");
+				assert.equal(comp.proposal, "$bar");
+				assert.equal(comp.positions, null, "Should have no positions array");
 				
 				assert.start();
 			}
