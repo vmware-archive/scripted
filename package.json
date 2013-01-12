@@ -39,7 +39,8 @@
         "when": "1.6.1"
 	},
 	"devDependencies": {
-		"bower": "0.6.8"
+		"bower": "0.6.8",
+		"nodeunit": "0.7.4"
 	},
 	"license": "EPL",
 	"readmeFilename": "README.md"
