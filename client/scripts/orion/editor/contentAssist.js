@@ -321,16 +321,19 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 							this.textView.addEventListener("Selection", this.contentAssistListener.onSelection);
 							this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll);
 						}
+						// SCRIPTED start: add extra keybindings for enter
+						if (!this.active) {
+							// don't set if already active
+							var kbs = mKeybinder.getKeyBindings(this.editor);
+							this.oldTabBinding = kbs['Tab'];
+							this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), "enter");
+						}
+						// SCRIPTED end
+
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
 						this.active = true;
 
-						// SCRIPTED start: add extra keybindings for enter
-						var kbs = mKeybinder.getKeyBindings(this.editor);
-						this.oldTabBinding = kbs['Tab'];
-						this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), "enter");
-						// SCRIPTED end
-						
 					}.bind(this));
 			}
 		},
