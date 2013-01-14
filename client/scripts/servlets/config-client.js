@@ -37,23 +37,20 @@ define(function(require, exports, module) {
 		)
 	);
 	
-	var putClient = unreject(baseClient);
-	var getClient = unreject(baseClient, {});
+	var put = unreject(baseClient);
+	var get = unreject(baseClient, {});
 
 	exports.getScriptedRcFile = function (name) {
-		return getClient({
+		return get({
 			path: '/config/{name}',
 			params: {
 				name: name
 			}
-		}).otherwise(function (err) {
-			console.error(err);
-			return {};
 		});
 	};
 	
 	exports.putScriptedRcFile = function (name, contents) {
-		return putClient({
+		return put({
 			path: '/config/{name}',
 			method: 'put',
 			params: {
