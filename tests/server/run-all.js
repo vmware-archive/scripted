@@ -29,8 +29,8 @@ fswalk(__dirname,
 				//ignore (already a server running?)
 			}
 			var problem = null;
-			eachk(['http://localhost:7261/clientTests'
-				 //'http://localhost:7261/clientServerTests'
+			eachk(['http://localhost:7261/clientTests',
+				 'http://localhost:7261/clientServerTests'
 			],
 				/* called on each url */
 				function (url, k) {
