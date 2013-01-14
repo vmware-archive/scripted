@@ -24,7 +24,7 @@
 	},
 	"scripts": {
 		"test": "node tests/server/run-all.js",
-		"postinstall": "cd client;bower install"
+		"postinstall": "cd client && bower install"
 	},
 	"dependencies": {
         "amdefine": "0.0.2",
