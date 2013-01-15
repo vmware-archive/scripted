@@ -28,7 +28,7 @@ function(
 
 				var d;
 
-				d = mWhen.defer();
+				d = when.defer();
 				// TODO why is getConf on jsdepend?
 				mJsdepend.getConf(pageState.main.path, function(dotScripted) {
 					// Fulfill the promise with both pageState and dotScripted
@@ -86,7 +86,7 @@ function(
 					// which the config is a member.
 					// TODO a timing window problem does exist here - where if the .jshintrc file isn't
 					// found quickly enough the first linting will not respect it. fix it!
-					var deferred = mWhen.defer();
+					var deferred = when.defer();
 					mJsdepend.retrieveNearestFile(pageState.main.path, window.fsroot, '.jshintrc', function(jshintrc) {
 						if (jshintrc && jshintrc.fsroot) {
 							// it was found at that location
