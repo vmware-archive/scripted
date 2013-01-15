@@ -25,10 +25,12 @@ function exec(options) {
 	ping(options).then(
 		function(response){
 			if (!options.suppressOpen) {
+console.log("opening");
 				open(options);
 			}
 		},
 		function(error){
+console.log("starting");
 			start(options);
 		}
 	);
@@ -68,6 +70,7 @@ function ping(options) {
 	if (options.withRetry) {
 		return retryClient({ path: url+"/status" });
 	} else {
+console.log("no retry ping");
 		return client({ path: url+"/status" });
 	}
 }
@@ -78,6 +81,19 @@ function start(options) {
 		err = fs.openSync(tmp + '/scripted.log', 'a'),
 		child;
 
+	console.log("calling launcher.js");
+	var file = options._;
+	var suppressOpen = options.suppressOpen?'true':'false';
+
+	child = spawn('node', [ 'launchAndOpen.js', suppressOpen, file ],{
+		detached:true,
+		stdio: ['ignore', out, err]
+	});
+	child.unref();
+
+	console.log("returning");
+/*
+	var server = require('../server/scripted.js');
 		child = spawn('node', [path.resolve(path.dirname(module.filename), '../server/scripted.js')], {
 			detached: true,
 			stdio: ['ignore', out, err]
@@ -96,6 +112,7 @@ function start(options) {
 			console.log("Server failed to start - check " + tmp + "/scripted.log for more information.");
 		}
 	);
+*/
 }
 
 module.exports.exec = exec;
