@@ -17,6 +17,7 @@ function exec(options) {
 	kill.exec(options).always(
 		function() {
 			options.suppressOpen = true;
+			console.log("Restarting server...");
 			start.exec(options);
 		}
 	);
