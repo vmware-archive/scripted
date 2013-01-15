@@ -25,7 +25,8 @@ function killHandler(response, request) {
   response.write("Server will stop shortly");
   response.write("\n");
   response.end();
-  throw 'Goobye cruel world!'; // TODO: find a more elegant way to do this.
+  console.log("Scripted is exiting...");
+  process.exit();
 }
 
 servlets.register('/kill', killHandler);
