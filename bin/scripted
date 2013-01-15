@@ -1,186 +1,41 @@
-# no hashbang as it disturbs npm install on windows!
-# Launch script for Scripted 
- 
-# Does the following:
-# 1. Provide help if requested
-# 2. Chase down any links through which this script is being referenced 
-# 3. Start the server if it isn't running (or restart it if requested)
-# 4. Opens a URL that loads the editor - the url encodes the file we want to edit
+#!/usr/bin/env node
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ * Andy Clement, Jeremy Grelle - initial version
+ ******************************************************************************/
+var optimist = require('optimist');
+var	options;
+var cmd;
+	
+options = optimist
+	.alias('h', 'help')
+	.alias('r', 'restart')
+	.alias('k', 'kill')
+	.usage('Usage: scr [-hrk] [file/directory]')
+	.describe('r','restart the server')
+	.describe('k','kill the server')
+	.describe('h','this help info')
+	.argv;
 
-if [ "$1" == "--help" ] || [ "$1" == "-h" ]
-then
-  echo "usage: scr [-hr] [file/directory]"
-  echo "The scr/scripted command launches the Scripted code editor in a web browser."
-  echo "If nothing is specified it will open the current directory, equivalent to 'scr .'"
-  echo "Options:"
-  echo "  -h/--help    : show the command help"
-  echo "  -r/--restart : restart the server, this does not open Scripted"
-  exit 0
-fi
-
-# Discover pid for server process
-pid=`ps axu | grep "node scripted.js" | grep -v grep | awk '{print $2}'`
-# echo "server pid = " $pid
-
-# If it is not running, remember we need to start it
-if [ -z "$pid" ]
-then
-  startserver=true
-fi
-
-# Here is the linux equivalent of the code block below *sigh*
-#DIRNAME=`dirname $(readlink -f "$0")`
-
-# Assume the path 
-realScriptLocation=$0
-
-option=$1
-file=$1
-
-# If $0 is really a link, chase it down to the real location
-linked=`ls -l "$0" | grep " -> "`
-while [ ! -z "$linked" ]
-do
-    # echo "realScriptLocation currently $realScriptLocation"
-	linkedLocation=`echo $linked | sed 's/^.* -> \(.*\)$/\1/'`
-	# echo "linked location is $linkedLocation"
-
-	# cope with links to './foo' '../foo' 'foo'
-    firstchar=`echo $linkedLocation | head -c1`
-    if [ $firstchar == '/' ]
-    then
-    	# starts with slash, absolute location
-    	realScriptLocation=$linkedLocation
-    else
-    	# no slash, is there a dot?
-    	if [ $firstchar == '.' ]
-    	then
-			if [ `echo $linkedLocation | head -c2` == '..' ]
-			then
-				# echo "starts with dotdot"
-				# this does not cope with:
-				# - multiple '..' are not dereferenced
-				# - invoking from a non absolute path
-				dir=`dirname $realScriptLocation`
-				dir=`dirname $dir`
-				realScriptLocation=${dir}/`echo $linkedLocation | cut -c4-`
-			else
-				# echo "it is *probably* ./ then something"
-				dir=`dirname $realScriptLocation`
-				realScriptLocation=${dir}/`echo $linkedLocation | cut -c3-`
-			fi
-    	else
-			# echo "no dots so it is another relative to this directory"
-			dir=`dirname $realScriptLocation`
-			realScriptLocation=${dir}/$linkedLocation
-    	fi
-    fi
-
-	linked=`ls -l "$realScriptLocation" | grep " -> "`
-done;
-
-# Now realScriptLocation points at the real scripted executable.
-# The other support scripts can be referenced relative to this known location
-# echo $realScriptLocation
-
-DIRNAME=`dirname $realScriptLocation`
-# echo "dirname is $DIRNAME"
-
-LOGDIR="/tmp"
-
-# If restart requested, kill any existing server
-if [ "$option" == "-r" ] || [ "$option" == "--restart" ]
-then
-	# kill the server process if it is running
-	if [ ! -z "$pid" ]
-	then
-		# echo "killing node"
-		kill -9 $pid
-	fi
-    startserver=true
-fi
-
-if [ "$startserver" == "true" ]
-then
-	# Log truncation - if > 2Meg then delete it
-	LOG_TOO_LONG=`find ${LOGDIR}/* -name "scripted.log" -size +2000000c 2>/dev/null`
-	if [ ! -z "$LOG_TOO_LONG" ]
-	then
-	  echo "${LOGDIR}/scripted.log is too large, emptying it..."
-	  rm $LOG_TOO_LONG
-	fi
-
-	echo "===" >> $LOGDIR/scripted.log
-	echo "launching node again: `date`" >> $LOGDIR/scripted.log
-	# echo $DIRNAME/launchnode
-
-	$DIRNAME/launchnode >> $LOGDIR/scripted.log 2>&1 &
-fi
-
-dir=`pwd`
-
-if [ "$file" == "--restart" ] || [ "$file" == "-r" ]
-then
-  echo "Server has been restarted."
-  exit 0
-fi
-
-# 'scr' is equivalent to 'scr .'
-if [ -z "$file" ]
-then
-  file="."
-fi
-
-
-if [ "$file" == "." ]
-then
-  URL=http://localhost:7261/editor$dir
-else
-  # does it start with a slash or is it relative?
-  if [ `echo "$file " | cut -c1` == '/' ]
-  then
-    URL=http://localhost:7261/editor/$file
-  else
-    URL=http://localhost:7261/editor$dir/$file
-  fi
-fi
-
-
-if [ "$startserver" == "true" ]
-then
-	# No need to wait if server hasn't been started
-	sleep 0.20
-fi
-
-# some code to add an extra wait if the server hasn't started yet, work in progress
-#serverUp=`curl http://localhost:7261/helo 2>&1`
-#curlErrored=`echo $serverUp | grep "(7)"`
-#echo "errored: $curlErrored"
-#if [ ! -z "$curlErrored" ]
-#then
-#	sleep 0.20
-#	serverUp=`curl http://localhost:7261/helo 2>&1`
-#	curlErrored=`echo $serverUp | grep "(7)"`
-#	echo "errored2: $curlErrored"
-#fi
-
-
-# echo "opening $dir/$file"
-if [ -z "$SCRIPTED_BROWSER" ]
-then
-  if which gnome-open > /dev/null; then
-    gnome-open "$URL" > /dev/null
-  elif which xdg-open > /dev/null; then
-    xdg-open "$URL" > /dev/null
-  elif which open > /dev/null; then
-    open "$URL" > /dev/null
-  else
-    echo "Could not detect the web browser to use."
-  fi
-elif which "$SCRIPTED_BROWSER" > /dev/null; then
-  # if SCRIPTED_BROWSER is indeed executable...
-  ( $SCRIPTED_BROWSER "$URL" & ) > /dev/null
-else
-  echo "Could not detect the web browser to use."
-  echo "Try setting \$SCRIPTED_BROWSER in your env."
-fi
+if (options.h) {
+	optimist.showHelp();
+	process.exit();
+} else {
+	if (options.r) {
+		cmd = '../commands/restart';
+	} else if (options.k) {
+		cmd = '../commands/kill';
+	} else {
+		cmd = '../commands/start';
+	}
+}
+			
+require(cmd).exec(options);
