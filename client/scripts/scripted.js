@@ -1,12 +1,18 @@
-define([
-		 "scripted/utils/navHistory", "scripted/utils/pageState", "servlets/jsdepend-client",
-		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
-		 "scripted/contextmenus/contextmenu"],
- 
-function(
-	mNavHistory, mPageState, mJsdepend,
-	mExecConsole, mWhen, mJshintDriver, storage, contextMenu) {
-	
+define(function(require) {
+
+	var mNavHistory, mPageState, mJsdepend, mExecConsole, mWhen,
+		mJshintDriver, contextMenu, processConfiguration;
+
+	mWhen = require('when');
+
+	mNavHistory = require('scripted/utils/navHistory');
+	mPageState = require('scripted/utils/pageState');
+	mJsdepend = require('servlets/jsdepend-client');
+	mExecConsole = require('scripted/exec/exec-console');
+	mJshintDriver = require('scripted/editor/jshintdriver');
+	contextMenu = require('scripted/contextmenus/contextmenu');
+	processConfiguration = require('scripted/processConfiguration');
+
 	return {
 	
 		init: function() {
@@ -42,8 +48,11 @@ function(
 
 				// Start the search for .jshintrc
 				// must be called inside of getConf since jshint relies on dotScripted
-				window.scripted.promises = { "loadJshintrc": loadJshintrc(pageState) };
-				
+
+				window.scripted.promises = {
+					"loadJshintrc": loadJshintrc(dotScripted.jshint, pageState)
+				};
+
 				layoutManager.setNavigatorHidden(hasNavigator(dotScripted), fileExplorer);
 				
 				processConfiguration(dotScripted);
@@ -73,7 +82,7 @@ function(
 			 * location - so ok if the .jshintrc is at the project root. But if the file is
 			 * elsewhere in the tree it sometimes won't find it depending on what is opened.
 			 */
-			function loadJshintrc(pageState) {
+			function loadJshintrc(jshintConfig, pageState) {
 				// TODO fix it up to do a better job of finding it
 				// TODO return value shouldn't be trampling on the config object itself, should be an object in
 				// which the config is a member.
@@ -87,101 +96,19 @@ function(
 						if (jshintrc.error) {
 							sLogger.error(jshintrc.error);
 						} else {
-							mJshintDriver.resolveConfiguration(jshintrc);
+							mJshintDriver.resolveConfiguration(jshintrc, jshintConfig);
 						}
 					} else {
 						sLogger.info("No .jshintrc found");
 						mJshintDriver.resolveConfiguration({});
 					}
+					// FIXME: Add a call to deferred.reject() *somewhere*
+					// Perhaps wrap the guts of this function in a try/catch?
+					// If an exception occurs in this function, the promise
+					// will remain pending forever.
 					deferred.resolve();
 				});
 				return deferred.promise;
-			}
-			
-			/**
-			 * This function will perform checks on the configuration and where appropriate ensure options are consistent.
-			 * Currently, it:
-			 * 1) ensures if formatter indentation is configured, it sets editor indentation options, and vice versa
-			 */
-			function processConfiguration(dotScripted) {
-
-				// 1. Ensuring consistency of options across formatter and editor configuration
-				// formatter configuration options:
-				//  formatter.js.indent_size (number)
-				//  formatter.js.indent_char (string)
-				// editor configuration options:
-				//  editor.expandtab (boolean)
-				//  editor.tabsize (number)
-				// rule: if possible (compatible), copy one config to the other
-				var editor_expandtab_set = dotScripted.editor && dotScripted.editor.expandtab !== null;
-				var editor_tabsize_set = dotScripted.editor && dotScripted.editor.tabsize !== null;
-				var formatter_js_indent_size_set = dotScripted.formatter && dotScripted.formatter.js && dotScripted.formatter.js.indent_size !== null;
-				var formatter_js_indent_char_set = dotScripted.formatter && dotScripted.formatter.js && dotScripted.formatter.js.indent_char !== null;
-
-				// Just do the common cases for now:
-				if (editor_expandtab_set || editor_tabsize_set) {
-					if (!(formatter_js_indent_size_set || formatter_js_indent_char_set)) {
-						if (editor_expandtab_set && dotScripted.editor.expandtab && !formatter_js_indent_char_set) {
-							// Set the indent char to space
-							if (!dotScripted.formatter) {
-								dotScripted.formatter = {
-									"js": {
-										"indent_char": " "
-									}
-								};
-							} else if (!dotScripted.formatter.js) {
-								dotScripted.formatter.js = {
-									"indent_char": " "
-								};
-							} else {
-								dotScripted.formatter.js.indent_char = " ";
-							}
-						}
-						if (editor_tabsize_set && !formatter_js_indent_size_set) {
-							// Set the indent size to match the tabsize
-							var tabsize = dotScripted.editor.tabsize;
-							if (!dotScripted.formatter) {
-								dotScripted.formatter = {
-									"js": {
-										"indent_size": tabsize
-									}
-								};
-							} else if (!dotScripted.formatter.js) {
-								dotScripted.formatter.js = {
-									"indent_size": tabsize
-								};
-							} else {
-								dotScripted.formatter.js.indent_size = tabsize;
-							}
-						}
-					}
-				} else {
-					if (formatter_js_indent_size_set || formatter_js_indent_char_set) {
-						var indent_char_isspace = formatter_js_indent_char_set && dotScripted.formatter.js.indent_char === " ";
-						if (indent_char_isspace) {
-							// Set the expandtab if we can
-							if (!dotScripted.editor) {
-								dotScripted.editor = {
-									"expandtab": true
-								};
-							} else {
-								dotScripted.editor.expandtab = true;
-							}
-							if (formatter_js_indent_size_set) {
-								// Set the tabsize to match the indent size
-								var indentsize = dotScripted.formatter.js.indent_size;
-								if (!dotScripted.editor) {
-									dotScripted.editor = {
-										"tabsize": indentsize
-									};
-								} else {
-									dotScripted.editor.tabsize = indentsize;
-								}
-							}
-						}
-					}
-				}
-
 			}
 		}
 	};
