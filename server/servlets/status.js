@@ -9,23 +9,27 @@
  *
  * Contributors:
  *     Kris De Volder - initial API and implementation
+ *     Andy Clement - overhaul
  ******************************************************************************/
 
-/*global require*/ 
+exports.install = function (app) {
 
-//
-// A Sample 'hello world' servlet. The servlet registers itself at path '/hello' (this assumes someone
-// at least requires the servlet. 
-//
-
-var servlets = require('../servlets');
-
-function killHandler(response, request) {
-  response.writeHead(200, {"Content-Type": "text/plain"});
-  response.write("Server will stop shortly");
-  response.write("\n");
-  response.end();
-  throw 'Goobye cruel world!'; // TODO: find a more elegant way to do this.
-}
-
-servlets.register('/kill', killHandler);
+	app.get("/status",function(request, response) {
+		response.writeHead(200, {
+			"Content-Type": "text/plain"
+		});
+		response.write("Hello from Scripted!");
+		response.write("\n");
+		response.end();
+	});
+	
+	app.del("/status",function(request, response) {
+		response.writeHead(200, {"Content-Type": "text/plain"});
+		response.write("Server will stop shortly");
+		response.write("\n");
+		response.end();
+		console.log("Scripted is exiting...");
+		process.exit();
+		// this might be better: app.close();
+	});
+};

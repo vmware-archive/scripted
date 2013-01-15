@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /*******************************************************************************
  * @license
  * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
@@ -11,31 +10,16 @@
  * Contributors:
  * Andy Clement, Jeremy Grelle - initial version
  ******************************************************************************/
-var optimist = require('optimist');
-var	options;
-var cmd;
-	
-options = optimist
-	.alias('h', 'help')
-	.alias('r', 'restart')
-	.alias('k', 'kill')
-	.usage('Usage: scr [-hrk] [file/directory]')
-	.describe('r','restart the server')
-	.describe('k','kill the server')
-	.describe('h','this help info')
-	.argv;
+var kill = require('./kill'),
+	start = require('./start');
 
-if (options.h) {
-	optimist.showHelp();
-	process.exit();
-} else {
-	if (options.r) {
-		cmd = '../commands/restart';
-	} else if (options.k) {
-		cmd = '../commands/kill';
-	} else {
-		cmd = '../commands/start';
-	}
+function exec(options) {
+	kill.exec(options).always(
+		function() {
+			options.suppressOpen = true;
+			start.exec(options);
+		}
+	);
 }
-			
-require(cmd).exec(options);
+	
+module.exports.exec = exec;

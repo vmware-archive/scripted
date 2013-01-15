@@ -1,2 +1,2 @@
 scripted.log
-server/jsdepend/test-resources/node-with-bad-data
+tests/server/test-resources/node-with-bad-data
