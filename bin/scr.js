@@ -19,7 +19,10 @@ options = optimist
 	.alias('h', 'help')
 	.alias('r', 'restart')
 	.alias('k', 'kill')
-	.usage('Usage: scr [-hr] [file/directory]')
+	.usage('Usage: scr [-hrk] [file/directory]')
+	.describe('r','restart the server')
+	.describe('k','kill the server')
+	.describe('h','this help info')
 	.argv;
 
 if (options.h) {
