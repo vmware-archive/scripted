@@ -9,6 +9,9 @@ var exec = require('child_process').exec;
 
 var eachk = require('../../server/jsdepend/utils').eachk;
 
+var problem = null; //remembers the first error. So if any errors we can
+					// fail the build.
+
 fswalk(__dirname,
 	function (file) {
 		//console.log("Visiting: "+file);
@@ -22,13 +25,13 @@ fswalk(__dirname,
 	},
 	function () {
 		process.chdir(__dirname);
-		reporter.run(testFiles, undefined, function () {
+		reporter.run(testFiles, undefined, function (err) {
+			problem = problem || err;
 			try {
 				var scripted = require('../../server/scripted');
 			} catch (e) {
 				//ignore (already a server running?)
 			}
-			var problem = null;
 			eachk(['http://localhost:7261/clientTests',
 				 'http://localhost:7261/clientServerTests'
 			],
