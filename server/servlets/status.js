@@ -9,24 +9,27 @@
  *
  * Contributors:
  *     Kris De Volder - initial API and implementation
+ *     Andy Clement - overhaul
  ******************************************************************************/
 
-/*global console require*/
+exports.install = function (app) {
 
-//
-// A status servlet. The servlet registers itself at path '/status' (this assumes someone
-// at least requires the servlet.
-//
-
-var servlets = require('../servlets');
-
-function statusHandler(response, request) {
-	response.writeHead(200, {
-		"Content-Type": "text/plain"
+	app.get("/status",function(request, response) {
+		response.writeHead(200, {
+			"Content-Type": "text/plain"
+		});
+		response.write("Hello from Scripted!");
+		response.write("\n");
+		response.end();
 	});
-	response.write("Hello from Scripted!");
-	response.write("\n");
-	response.end();
-}
-
-servlets.register('/status', statusHandler);
+	
+	app.del("/status",function(request, response) {
+		response.writeHead(200, {"Content-Type": "text/plain"});
+		response.write("Server will stop shortly");
+		response.write("\n");
+		response.end();
+		console.log("Scripted is exiting...");
+		process.exit();
+		// this might be better: app.close();
+	});
+};

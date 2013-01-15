@@ -52,7 +52,7 @@ function open(options) {
 	
 	url += "/editor" + (process.platform == 'win32' ? "/" : "");
 	
-	console.log(url);
+	// console.log(url);
 	
 	if (options._) {
 		url += path.resolve(process.cwd(), options._[0]);
@@ -60,7 +60,7 @@ function open(options) {
 		url += process.cwd();
 	}
 
-	console.log("Opening %s", url);
+	// console.log("Opening %s", url);
 	childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
 }
 

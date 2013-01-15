@@ -11,10 +11,10 @@
  * Andy Clement, Jeremy Grelle - initial version
  ******************************************************************************/
 var client = require('rest'),
-	url = "http://localhost:7261/kill";
+	url = "http://localhost:7261/status";
 
 function exec(options) {
-	return client({path: url});
+	return client({path: url,method:"DELETE"});
 }
 
 module.exports.exec = exec;

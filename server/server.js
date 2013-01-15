@@ -51,6 +51,8 @@ function start(route, handle) {
 			showStack: true
 		}));
 	});
+	
+	require('./servlets/status').install(app);
 
 	require('./routes/editor-routes').install(app);
 	require('./routes/test-routes').install(app);
