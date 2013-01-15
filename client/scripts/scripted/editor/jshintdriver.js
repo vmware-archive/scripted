@@ -28,7 +28,7 @@ define(["jshint"], function () {
 	warnings = [
 		["Expected '{'", "Statement body should be inside '{ }' braces."]
 	];
-
+	
 	errors = [
 		"Missing semicolon",
 		"Extra comma",
@@ -148,20 +148,19 @@ define(["jshint"], function () {
 			? (localConfig.indent - 1) : defaultIndent;
 
 		if (result.errors) {
-			problems = problems.concat(parseErrors(result.errors, positionalAdjustment));
+			parseErrors(result.errors, positionalAdjustment, problems);
 		}
 
 		if (result.functions) {
-			lines = contents.split(/\r?\n/);
-			problems = problems.concat(parseFunctions(result.functions, lines));
+			parseFunctions(result.functions, lines, problems);
 		}
 		return { problems: problems };
 	}
 
-	function parseErrors(errors, positionalAdjustment) {
-		return errors.reduce(reduceErrors, []);
+	function parseErrors(errors, positionalAdjustment, problems) {
+		return errors.reduce(reduceErrors, problems);
 
-		function reduceErrors(parsed, error) {
+		function reduceErrors(problems, error) {
 			if(error) {
 				var linetabpositions, index;
 
@@ -213,45 +212,55 @@ define(["jshint"], function () {
 				error = cleanup(error);
 
 				if (error) {
-					parsed.push(error);
+					problems.push(error);
 				}
 			}
 
-			return parsed;
+			return problems;
 		}
 	}
 
-	function parseFunctions(functions, lines) {
-		return functions.reduce(reduceFunctions, []);
+	function parseFunctions(functions, contents, problems) {
+		// Cache the per-line contents if necessary, see below.
+		var lines;
 
-		function reduceFunctions(parsed, func) {
+		return functions.reduce(reduceFunctions, problems);
+
+		function reduceFunctions(problems, func) {
 			var unused = func.unused;
-			if (!unused || unused.length === 0) {
-				return parsed;
-			}
-			var nameGuessed = func.name[0] === '"';
-			var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
-			var line = lines[func.line - 1];
 
-			unused.forEach(function(unused) {
-				// Find "function" token in line based on where fName appears.
-				// nameGuessed implies "foo:function()" or "foo = function()",
-				// and !nameGuessed implies "function foo()"
-				var nameIndex = line.indexOf(name);
-				var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
-				if (funcIndex !== -1) {
-					parsed.push({
-						description: "Function declares unused variable '" + unused + "'.",
-						line: func.line,
-						character: funcIndex + 1,
-						start: funcIndex+1,
-						end: funcIndex + "function".length,
-						severity: "warning"
-					});
+			if(unused && unused.length) {
+
+				// Delay the split until here so that we don't do it until we know it's
+				// absolutely necessary.
+				if(!lines) {
+					lines = contents.split(/\r?\n/);
 				}
-			});
 
-			return parsed;
+				var nameGuessed = func.name[0] === '"';
+				var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
+				var line = lines[func.line - 1];
+
+				unused.forEach(function(unused) {
+					// Find "function" token in line based on where fName appears.
+					// nameGuessed implies "foo:function()" or "foo = function()",
+					// and !nameGuessed implies "function foo()"
+					var nameIndex = line.indexOf(name);
+					var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
+					if (funcIndex !== -1) {
+						problems.push({
+							description: "Function declares unused variable '" + unused + "'.",
+							line: func.line,
+							character: funcIndex + 1,
+							start: funcIndex+1,
+							end: funcIndex + "function".length,
+							severity: "warning"
+						});
+					}
+				});
+			}
+
+			return problems;
 		}
 	}
 
