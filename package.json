@@ -19,8 +19,8 @@
 		"Scott Andrews <andrewss@vmware.com>"
 	],
 	"bin": {
-		"scr": "./bin/scr",
-		"scripted": "./bin/scripted"
+		"scr": "./bin/scr.js",
+		"scripted": "./bin/scr.js"
 	},
 	"scripts": {
 		"test": "node tests/server/run-all.js",
@@ -33,6 +33,8 @@
         "htmlparser": "1.7.6",
         "json5": "0.1.0",
         "node-static": "0.5.9",
+        "optimist": "~0.3",
+        "rest": "~0.8",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "1.6.1",
