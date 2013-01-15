@@ -328,7 +328,7 @@ function configure(filesystem) {
 			var conf = {};
 			var baseDir = getDirectory(datamain);
 			conf.baseDir = baseDir;
-			if (!endsWith(datamain, ',js')) {
+			if (!endsWith(datamain, '.js')) {
 				//https://github.com/scripted-editor/scripted/issues/132
 				datamain = datamain+'.js';
 			}
