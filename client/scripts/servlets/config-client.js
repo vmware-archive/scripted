@@ -15,10 +15,51 @@ if (typeof define !== 'function') {
 }
 define(function(require, exports, module) {
 
-	var makePromisedServletStub = require('./stub-maker').makePromisedServletStub;
-	var basePath = '/conf/';
-
-	exports.getScriptedRcFile = makePromisedServletStub(basePath + 'get/scriptedrc');
-	exports.putScriptedRcFile = makePromisedServletStub(basePath + 'put/scriptedrc');
+	var mime = require('rest/interceptor/mime');
+	var errorCode = require('rest/interceptor/errorCode');
+	var entity = require('rest/interceptor/entity');
 	
+	function unreject(client, value) {
+		return function (x) {
+			return client(x).otherwise(function (err) {
+				console.error(err);
+				return value;
+			});
+		};
+	}
+	
+	var baseClient = entity(
+		mime(
+			errorCode(),
+			{
+				mime: 'application/json'
+			}
+		)
+	);
+	
+	var putClient = unreject(baseClient);
+	var getClient = unreject(baseClient, {});
+
+	exports.getScriptedRcFile = function (name) {
+		return getClient({
+			path: '/config/{name}',
+			params: {
+				name: name
+			}
+		}).otherwise(function (err) {
+			console.error(err);
+			return {};
+		});
+	};
+	
+	exports.putScriptedRcFile = function (name, contents) {
+		return putClient({
+			path: '/config/{name}',
+			method: 'put',
+			params: {
+				name: name
+			},
+			entity: contents
+		});
+	};
 });

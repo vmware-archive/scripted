@@ -24,19 +24,24 @@
 	},
 	"scripts": {
 		"test": "node tests/server/run-all.js",
-		"postinstall": "cd client;bower install"
+		"postinstall": "cd client && bower install"
 	},
 	"dependencies": {
         "amdefine": "0.0.2",
 		"enhanced-resolve": "0.4.5",
-        "express": "2.5.11",
         "formidable": "1.0.9",
         "htmlparser": "1.7.6",
         "json5": "0.1.0",
         "node-static": "0.5.9",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
-        "when": "1.6.1"
+        "when": "1.6.1",
+        "rest": "0.8.4",
+        "express": "3.0.6"
+	},
+	"devDependencies": {
+		"bower": "0.6.8",
+		"nodeunit": "0.7.4"
 	},
 	"devDependencies": {
 		"bower": "0.6.8"

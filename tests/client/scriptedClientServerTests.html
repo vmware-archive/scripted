@@ -9,6 +9,8 @@
   <script src="components/requirejs/require.js"></script>
   <script src="tests/client/testsetup.js"></script>
   <script type="text/javascript">
+    QUnit.config.autostart = false;
+
 	function fixUrl() {
 		var xhrobj = new XMLHttpRequest();
 		xhrobj.open("GET", '/test-api/server-root', false);
@@ -29,7 +31,7 @@
 	}
 	
 	require(config);
-	require(["jquery","qunit"],function() {
+	require(["jquery"],function() {
 		$('document').ready(function() {
 			// first ensure that the url is correct
 			window.setTimeout(function() {
@@ -46,6 +48,8 @@
 						testutils.runTests(templatesTest);
 						module('Nav History tests');
 						testutils.runTests(navHistoryTests);
+						
+						QUnit.start();
 				});
 			});
 		});

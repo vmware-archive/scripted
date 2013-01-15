@@ -1,5 +1,7 @@
 # Welcome to Scripted
 
+[![Build Status](https://travis-ci.org/scripted-editor/scripted.png?branch=master)](https://travis-ci.org/scripted-editor/scripted)
+
 ## What is Scripted?
 
 Scripted is a fast and lightweight code editor with an initial focus on JavaScript editing.

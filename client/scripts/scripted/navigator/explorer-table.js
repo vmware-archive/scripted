@@ -53,7 +53,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 			if (parentItem.ChildrenLocation) {
 				var xhrobj = new XMLHttpRequest();
 				try {
-					var url = 'http://localhost:7261/fs_list/' + parentItem.ChildrenLocation;
+					var url = '/fs_list/' + parentItem.ChildrenLocation;
 //					scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
 					xhrobj.open("GET", url, true);
 					xhrobj.onreadystatechange = function() {
@@ -465,7 +465,7 @@ define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/naviga
 
 			var xhrobj = new XMLHttpRequest();
 			try {
-				var url = 'http://localhost:7261/fs_list/' + path;
+				var url = '/fs_list/' + path;
 //				scriptedLogger.debug("url is " + url, "EXPLORER_TABLE");
 				xhrobj.open("GET", url, true);
 				xhrobj.onreadystatechange = function() {

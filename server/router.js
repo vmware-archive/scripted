@@ -39,12 +39,7 @@ function route(handle, pathname, response, request, next) {
     if (typeof handle(pathname) === 'function') {
         handle(pathname)(response, request);
     } else {
-        if (pathname === '/' || pathname === '/editor.html') {
-            // for a '/' reference, give them the editor
-            file.serveFile('/editor.html', 200, {
-                'content-type': 'text/html'
-            }, request, response);
-        } else if (pathname === '/helo') {
+        if (pathname === '/helo') {
             // this is the 'aliveness' test url - just returns 'helo'
             response.writeHead(200, {
                 "Content-Type": "text/plain"

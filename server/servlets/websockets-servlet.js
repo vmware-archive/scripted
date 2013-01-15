@@ -27,12 +27,15 @@ var multiplexer;
  *  install the multiplexing websocket onto an app server.
  */
 function install(app) {
+
+	var httpServer = app.server; /*create a nodejs http server */
+
 	//This method will be called by 'client' servlets that depend on the multiplexer.
 	//Ensure that we do not install ourselves more than once.
 	if (!multiplexer) {
 		var service = sockjs.createServer();
 		multiplexer = new ws_multiplex.MultiplexServer(service);
-		service.installHandlers(app, {prefix: '/websockets'});
+		service.installHandlers(httpServer, {prefix: '/websockets'});
 	}
 }
 

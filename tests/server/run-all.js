@@ -5,6 +5,10 @@ var endsWith = require('../../server/jsdepend/utils').endsWith;
 var testFiles = [];
 var path = require('path');
 
+var exec = require('child_process').exec;
+
+var eachk = require('../../server/jsdepend/utils').eachk;
+
 fswalk(__dirname,
 	function (file) {
 		//console.log("Visiting: "+file);
@@ -25,8 +29,8 @@ fswalk(__dirname,
 				//ignore (already a server running?)
 			}
 			var problem = null;
-			eachk(['http://localhost:7261/clientTests'
-				 //'http://localhost:7261/clientServerTests'
+			eachk(['http://localhost:7261/clientTests',
+				 'http://localhost:7261/clientServerTests'
 			],
 				/* called on each url */
 				function (url, k) {
@@ -56,6 +60,4 @@ fswalk(__dirname,
 	}
 );
 
-
-process.chdir(__dirname);
-reporter.run(testFiles);
+//var scripted = require('../../server/scripted');

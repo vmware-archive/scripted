@@ -21,7 +21,7 @@ define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scr
 function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOutlineDialog,
 	mLookInFilesDialog, mOsUtils) {
 
-	var FS_LIST_URL = "http://localhost:7261/fs_list/";
+	var FS_LIST_URL = "/fs_list/";
 	// FIXADE copied from navhistory
 	var EDITOR_TARGET = {
 		main : "main",

@@ -27,7 +27,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
 		tab : "tab"
 	};
 	var LINE_SCROLL_OFFSET = 5;
-	var GET_URL = "http://localhost:7261/get?file=";
+	var GET_URL = "/get?file=";
 	
 	// define as forward reference
 	var navigate;

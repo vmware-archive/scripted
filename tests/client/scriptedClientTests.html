@@ -9,9 +9,10 @@
   <script src="components/requirejs/require.js"></script>
   <script src="tests/client/testsetup.js"></script>
   <script type="text/javascript">
+  	QUnit.config.autostart = false;
 	config.paths['servlets/jsdepend-client'] = '../tests/client/indexer/stub-jsdepend';
 	require(config);
-	require(["jquery","qunit"],function() {
+	require(["jquery"],function() {
 		$('document').ready(function() {
 			// stub out the jsdepend server calls
 			require(["tests/client/nodeunit-shim", 
@@ -61,6 +62,8 @@
 					testShim(indexerTests);
 					module("Mark occurrences tests");
 					testShim(markOccurrencesTests);
+					
+					QUnit.start();
 			});
 		});
 	});

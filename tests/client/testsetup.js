@@ -12,12 +12,14 @@
 /*global window require test module asyncTest */
 var config = {
 	baseUrl: '../scripts',
-	packages:	[{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-				{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
-				{ name: 'when', location: '../components/when', main:'when', lib: '.'},
-				{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
-				{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'}
-				],
+	packages: [
+		{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
+		{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
+		{ name: 'probes', location: '../components/probes', main:'probe', lib: '.'},
+		{ name: 'when', location: '../components/when', main:'when', lib: '.'},
+		{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
+		{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'}
+	],
 	paths: {
 		'orion/assert' : '../tests/client/assert',
 		'esprima/esprima' : 'lib/esprima/esprima',
@@ -30,11 +32,8 @@ var config = {
 		jquery: 'lib/jquery-1.7.2.min',
 		sockjs:'lib/sockjs-592774a-0.3.1.min',
 		fileapi: 'scripted/fileapi',
-<<<<<<< HEAD
-=======
 		'doctrine/doctrine' : '../components/doctrine/doctrine',
 		'lib/json5' : '../components/json5/lib/json5',
->>>>>>> 73d2021... more packages using bower
 		
 		tests: '../tests'
 	}
