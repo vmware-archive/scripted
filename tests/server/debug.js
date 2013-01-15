@@ -17,8 +17,8 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
-var testCase = require('./path-glob-test')
-	.win_match;
+//var testCase = require('./path-glob-test')
+//	.win_match;
 
 //var testCase = require('./api-test')
 //	.nodePlain;
@@ -36,7 +36,8 @@ var testCase = require('./path-glob-test')
 //	.getAmdConfig2;
 //	.simpleRequireJsProject;
 
-//var testCase = require('./resolver-test')
+var testCase = require('./resolver-test')
+	.voloSample;
 //	.resolveNodeModule;
 //	.commonsJsWrappedModuleInAmdEnabledContext;
 //	.usePlugins;

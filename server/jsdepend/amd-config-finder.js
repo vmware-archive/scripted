@@ -296,7 +296,7 @@ function configure(filesystem) {
 		var value;
 		literalPat(exp)(
 			function () {
-				value = stringVar.value;				
+				value = stringVar.value;
 			},
 			/*fail*/
 			function () {
@@ -313,7 +313,7 @@ function configure(filesystem) {
 				var tree = parser.parseAndThrow(code);
 				//console.log('------------------------------------------------------');
 				//console.log(JSON.stringify(tree, null, "  "));
-				return analyzeObjectExp(findRequireConfigBlock(tree) || 
+				return analyzeObjectExp(findRequireConfigBlock(tree) ||
 					findIndirectConfigBlock(tree)
 				);
 			} catch (err) {
@@ -328,20 +328,20 @@ function configure(filesystem) {
 			var conf = {};
 			var baseDir = getDirectory(datamain);
 			conf.baseDir = baseDir;
-			if (endsWith(datamain, '.js')) {
-				// the tag points to a js file relative to the html file in which the tag was found.
-				var jsFile = pathResolve(getDirectory(htmlFile), datamain);
-				getContents(jsFile, function (jsCode) {
-					conf = getAmdConfigFromCode(jsCode) || conf;
-					conf.baseDir = conf.baseDir || conf.baseUrl || baseDir; //ensure we always have a baseDir set.
-					//console.log("conf.baseDir = "+baseDir);
-					callback(conf);
-				});
-			} else {
-				callback(conf);
+			if (!endsWith(datamain, ',js')) {
+				//https://github.com/scripted-editor/scripted/issues/132
+				datamain = datamain+'.js';
 			}
+			// the tag points to a js file relative to the html file in which the tag was found.
+			var jsFile = pathResolve(getDirectory(htmlFile), datamain);
+			getContents(jsFile, function (jsCode) {
+				conf = getAmdConfigFromCode(jsCode) || conf;
+				conf.baseDir = conf.baseDir || conf.baseUrl || baseDir; //ensure we always have a baseDir set.
+				//console.log("conf.baseDir = "+baseDir);
+				return callback(conf);
+			});
 		} else {
-			callback(undefined);
+			return callback(undefined);
 		}
 	}
 	
@@ -398,7 +398,7 @@ function configure(filesystem) {
 				//a tag loading the loader was found...
 				//now look in the remaining tags for a config.
 				scriptTags = scriptTags.slice(pos);
-				return orMap(scriptTags, 
+				return orMap(scriptTags,
 					//Called on each tag, must call 'callback' to pass result
 					function (tag, callback) {
 						var appJsPath = deref(tag, ["attribs", "src"]);
@@ -419,7 +419,7 @@ function configure(filesystem) {
 	}
 	
 	
-	//determine basedir setting from a given html file by looking for 
+	//determine basedir setting from a given html file by looking for
 	// amd config blocks in the html file, or ... in some specific idioms.
 	// looking in the .js files that get loaded by the script tags.
 	//If the required information isn't found then
@@ -432,7 +432,7 @@ function configure(filesystem) {
 						getConfigFromTagIndirectly(file, scriptTags, callback);
 					},
 					function (callback) {
-						orMap(scriptTags, 
+						orMap(scriptTags,
 							function (scriptTag, callback) {
 								getAmdConfigFromDataMain(file, scriptTag, function (config) {
 									callback(config || getAmdConfigFromScriptTag(scriptTag));
@@ -452,21 +452,34 @@ function configure(filesystem) {
 	}
 	
 	/**
-	 * To resolve a reference that was found in a given context, we need to 
+	 * wraps a callback function so that is logs the value passed to the callback
+	 * in JSON.stringified form.
+	 */
+	function logBack(msg, callback) {
+		return function (result) {
+			console.log(msg);
+			console.log(JSON.stringify(result, null, "  "));
+			callback(result);
+		};
+	}
+	
+	/**
+	 * To resolve a reference that was found in a given context, we need to
 	 * determine some configuration information associated with that context.
 	 * This function is responsible for fetching, computing or searching for
 	 * that information. If found the information is passed to the callback.
 	 * If not found, a 'falsy' value is passed to the callback.
 	 */
 	function getAmdConfig(context, callback) {
+		//callback = logBack("amdConfig '"+context+"' => ", callback);
 		var dir = getDirectory(context);
 		if (dir) {
-			listFiles(dir, 
+			listFiles(dir,
 				function (names) {
 					var files = map(names, function (name) {
 						return isHtml(name) && pathResolve(dir, name);
 					});
-					orMap(files, getAmdConfigFromHtmlFile, 
+					orMap(files, getAmdConfigFromHtmlFile,
 						function (conf) {
 							if (conf) {
 								callback(conf);
