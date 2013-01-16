@@ -82,7 +82,8 @@ function start(options) {
 
 	var file = options._;
 	var suppressOpen = options.suppressOpen?'true':'false';
-	child = spawn('node', [ 'scripted.js', suppressOpen, file ],{
+	// console.log("path is "+path.resolve(path.dirname(module.filename),'../commands/scripted.js'));
+	child = spawn('node', [ path.resolve(path.dirname(module.filename),'../commands/scripted.js'), suppressOpen, file ],{
 		detached:true,
 		stdio: ['ignore', out, err]
 	});

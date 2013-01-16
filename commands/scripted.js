@@ -40,7 +40,7 @@ function open() {
 
     url += "/editor" + (process.platform == 'win32' ? "/" : "");
 
-    if (file.length !== 0) {
+    if (file && file.length !== 0) {
         url += path.resolve(process.cwd(), file);
     } else {
         url += process.cwd();
