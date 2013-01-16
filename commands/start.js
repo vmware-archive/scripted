@@ -10,12 +10,16 @@
  * Contributors:
  * Andy Clement, Jeremy Grelle - initial version
  ******************************************************************************/
+
+// This script will ping the server, if it isn't running it will start it. If it
+// is running it will simply open the URL.
+
 var fs = require('fs'),
 	path = require('path'),
 	errorCode = require('rest/interceptor/errorCode'),
 	timeout = require('rest/interceptor/timeout'),
 	retry = require('rest/interceptor/retry'),
-	client = timeout(errorCode(), {timeout: 2000}),
+	client = timeout(errorCode(), {timeout: 150}),
 	retryClient = retry(client, {initial: 20, max: 200}),
 	childExec = require('child_process').exec,
 	spawn = require('child_process').spawn,
@@ -52,8 +56,6 @@ function open(options) {
 	
 	url += "/editor" + (process.platform == 'win32' ? "/" : "");
 	
-	// console.log(url);
-	
 	if (options._) {
 		url += path.resolve(process.cwd(), options._[0]);
 	} else {
@@ -78,24 +80,14 @@ function start(options) {
 		err = fs.openSync(tmp + '/scripted.log', 'a'),
 		child;
 
-		child = spawn('node', [path.resolve(path.dirname(module.filename), '../server/scripted.js')], {
-			detached: true,
-			stdio: ['ignore', out, err]
-		});
-
+	var file = options._;
+	var suppressOpen = options.suppressOpen?'true':'false';
+	// console.log("path is "+path.resolve(path.dirname(module.filename),'../commands/scripted.js'));
+	child = spawn('node', [ path.resolve(path.dirname(module.filename),'../commands/scripted.js'), suppressOpen, file ],{
+		detached:true,
+		stdio: ['ignore', out, err]
+	});
 	child.unref();
-	
-	options.withRetry = true;
-	ping(options).then(
-		function(response){
-			if (!options.suppressOpen) {
-				open(options);
-			}
-		},
-		function(error){
-			console.log("Server failed to start - check " + tmp + "/scripted.log for more information.");
-		}
-	);
 }
 
 module.exports.exec = exec;

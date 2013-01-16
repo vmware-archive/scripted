@@ -14,29 +14,43 @@
 /*global exports resolve require define esprima console module*/
 
 var pathResolve = require('./utils').pathResolve;
+var startsWith = require('./utils').startsWith;
+var pathNormalize = require('path').normalize;
 
 function configure(resolverConf) {
 
 	/**
 	 * Dummy map function. It maps nothing. (i.e. it returns undefined regardless of
 	 * what is passed into it.
-	 */ 
+	 */
 	function nullMap() {}
 
 	function getPackageMap(resolverConf) {
 		var packages = resolverConf && resolverConf.packages;
 		
 		function map(name) {
+			//TODO: cache this function?
 			for (var i=0; i<packages.length; i++) {
 				var p = packages[i];
+				var location = p.location || '.';
 				if (p.name === name) {
-					var location = p.location || '.';
 					if (typeof(location)==='string') {
 						var main = p.main || 'main';
 						return pathResolve(
-							pathResolve(resolverConf.baseDir, location), 
+							pathResolve(resolverConf.baseDir, location),
 							main
 						);
+					}
+				} else {
+					var nameSlashed = p.name + '/';
+					if (startsWith(name, nameSlashed)) {
+						var nameRest = name.substring(nameSlashed.length);
+						if (nameRest) {
+							return pathResolve(
+								pathResolve(resolverConf.baseDir, p.location),
+								nameRest
+							);
+						}
 					}
 				}
 			}
@@ -68,8 +82,8 @@ function configure(resolverConf) {
 	var packageMap = getPackageMap(resolverConf);
 
 	function mapPaths(depName) {
-		return packageMap(depName) || 
-			pathMap(depName) || 
+		return packageMap(depName) ||
+			pathMap(depName) ||
 			pathResolve(resolverConf.baseDir, depName);
 	}
 
