@@ -22,7 +22,7 @@ define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-cl
 ], function (mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
 
 function debug_log(msg) {
-	console.log(msg);
+//	console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
