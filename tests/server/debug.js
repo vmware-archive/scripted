@@ -37,7 +37,8 @@
 //	.simpleRequireJsProject;
 
 var testCase = require('./resolver-test')
-	.voloSample;
+	.subPackageImport;
+//	.voloSample;
 //	.resolveNodeModule;
 //	.commonsJsWrappedModuleInAmdEnabledContext;
 //	.usePlugins;
