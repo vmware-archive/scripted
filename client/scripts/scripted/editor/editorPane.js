@@ -28,7 +28,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		sub : "sub",
 		tab : "tab"
 	};
-
+	
 	function openOnClick(event, editor) {
 		if (mOsUtils.isCtrlOrMeta(event)) {
 			var rect = editor.getTextView().convert({x:event.pageX, y:event.pageY}, "page", "document");
@@ -75,6 +75,12 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	};
 
 	var initializeBreadcrumbs = function(path) {
+		var autoActivation = (window.scripted &&
+			window.scripted.config &&
+			window.scripted.config.ui &&
+			window.scripted.config.ui.history_drop_down_auto_activation)
+			|| 500;
+
 		var root = window.fsroot;
 
 		$('.breadcrumb_menu').remove();
@@ -124,23 +130,51 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			}
 		}
 
-		var id;
-
+		var openRequests = {};
+		var closeRequests = {};
 		$('#breadcrumb > li').on('mouseenter', function(evt) {
-			id = $(this).attr('data-id');
-			$('.breadcrumb_menu[data-id='+id+']').css('left', $(this).position().left);
-			$('.breadcrumb_menu[data-id='+id+']').show();
+			var self = this;
+			var id = $(self).attr('data-id');
+			if (closeRequests[id]) {
+				window.clearTimeout(closeRequests[id]);
+				delete closeRequests[id];
+			} else {
+				openRequests[id] = setTimeout(function() {
+					$('.breadcrumb_menu[data-id='+id+']').css('left', $(self).position().left);
+					$('.breadcrumb_menu[data-id='+id+']').show();
+					delete openRequests[id];
+				}, autoActivation);
+			}
 		});
 
 		$('#breadcrumb > li').on('mouseleave', function(evt) {
-			id = $(this).attr('data-id');
-			if (evt.pageY < this.offsetTop + $(this).outerHeight()) {
-				$('.breadcrumb_menu[data-id='+id+']').hide();
+			var self = this;
+			var id = $(self).attr('data-id');
+			if (openRequests[id]) {
+				window.clearTimeout(openRequests[id]);
+				delete openRequests[id];
+			} else {
+				closeRequests[id] = setTimeout(function() {
+					if (evt.pageY < self.offsetTop + $(self).outerHeight()) {
+						$('.breadcrumb_menu[data-id='+id+']').hide();
+					}
+					delete closeRequests[id];
+				}, autoActivation);
 			}
 		});
 
 		$('.breadcrumb_menu').on('mouseleave', function(evt) {
-			$(this).hide();
+			var self = this;
+			var id = $(self).attr('data-id');
+			if (openRequests[id]) {
+				window.clearTimeout(openRequests[id]);
+				delete openRequests[id];
+			} else {
+				closeRequests[id] = setTimeout(function() {
+					$(self).hide();
+					delete closeRequests[id];
+				}, autoActivation);
+			}
 		});
 
 		$('.breadcrumb_menu > li').hover(function() {

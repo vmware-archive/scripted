@@ -1371,8 +1371,9 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				//   foo[at] = bar;
 				if (node.left.computed) {
 					rightMost = findRightMost(node.left.object);
-					if (rightMost) {
+					if (rightMost && !(rightMost.type === 'Identifier' && rightMost.name === 'prototype')) {
 						// yep...now go and update the type of the array
+						// (also don't turn refs to prototype into an array. this breaks things)
 						var arrayType = parameterizeArray(inferredType);
 						node.left.extras.inferredType = inferredType;
 						node.left.object.extras.inferredType = arrayType;
@@ -2568,6 +2569,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 				this._doVisit(root, environment);
 			} catch (e) {
 				if (typeof scriptedLogger !== "undefined") {
+					scriptedLogger.error("Problem with: " + fileName, "CONTENT_ASSIST");
 					scriptedLogger.error(e.message, "CONTENT_ASSIST");
 					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
 				}

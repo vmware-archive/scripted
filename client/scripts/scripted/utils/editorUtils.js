@@ -33,6 +33,17 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		return tv && !tv.isDestroyed();
 	}
 
+	function getMainEditor() {
+		var main = mPaneFactory.getMainPane();
+		return main ? main.editor : null;
+	}
+	
+	function getSubEditors() {
+		return mPaneFactory.getPanes("scripted.editor").map(function (pane) {
+			return pane.editor;
+		});
+	}
+	
 	return {
 		/**
 		 * Get a reference to the 'current' editor. This is the last editor that got focus.
@@ -46,15 +57,33 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		getCurrentEditor : function() {
 			return isOk(lastEditor) && lastEditor || this.getMainEditor();
 		},
-		
-		getMainEditor : function() {
-			var main = mPaneFactory.getMainPane();
-			return main ? main.editor : null;
-		},
-	
+		getMainEditor :getMainEditor,
 		getSubEditor : function() {
 			var sub = mPaneFactory.getPane("scripted.editor");
 			return sub ? sub.editor : null;
+		},
+		getSubEditors : getSubEditors,
+		/**
+		 * Do something with each editor (the main editor and all subeditors).
+		 * The 'iteration' can be aborted prematurely by returning a true value
+		 * from the doFun. If so, then the true value will be returned as
+		 * a result of the iteration as well.
+		 */
+		eachEditor: function (doFun) {
+			var abort = doFun(getMainEditor());
+			if (abort) {
+				return abort;
+			}
+			var subeditors = getSubEditors();
+			if (subeditors) {
+				for (var i = 0; i < subeditors.length; i++) {
+					abort = doFun(subeditors[i]);
+					if (abort) {
+						return abort;
+					}
+				}
+			}
+			return abort;
 		},
 		
 		/**

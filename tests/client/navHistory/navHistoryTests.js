@@ -17,9 +17,12 @@
 
 define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'tests/client/common/testutils',
 	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'scripted/utils/editorUtils', 'scripted/utils/os', 
-	'setup', 'jquery'],
-function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os) {
+	'when', 'setup', 'jquery'],
+function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os, when) {
 	
+	// TODO hack... scrolling tests behave differently when on firefox
+	var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
+
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
 	var testResourcesRootNoClosingSlash = testResourceRootClosingSlash.substring(0, testResourcesRootOpeningSlash.length-1);
@@ -38,6 +41,26 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		editorUtils.getMainEditor().setSelection(0,0);
 		localStorage.removeItem("scripted.recentFileHistory");
 		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
+	}
+	
+	function testLocation(mainPath, mainSel, subPath, subSel) {
+		assert.equal(editorUtils.getMainEditor().getFilePath(), testResourceRootClosingSlash +  mainPath);
+		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start: mainSel[0], end: mainSel[1]});
+		if (subPath) {
+			if (!editorUtils.getSubEditor()) {
+				assert.fail('Expected a subeditor');
+			} else {
+				assert.equal(editorUtils.getSubEditor().getFilePath(), testResourceRootClosingSlash + subPath);
+				assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start: subSel[0], end: subSel[1]});
+			}
+		} else {
+			assert.ok(!editorUtils.getSubEditor(), "expected no sub-editor");
+		}
+	}
+
+	function changeLocation(url) {
+		var state = mPageState.extractPageStateFromUrl("http://localhost:7261/clientServerTests" + url);
+		mNavHistory.setupPage(state, true);
 	}
 	
 	function createEditor(path, kind) {
@@ -84,7 +107,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 						assert.start();
 					});
 				});
-		}, 500);
+		});
 	};
 	tests.asyncTestToggleSidePanel = function() {
 		setup();
@@ -99,8 +122,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			setTimeout(function() {
 				assert.ok(!editorUtils.getSubEditor());
 				assert.start();
-			}, 500);
-		}, 500);
+			});
+		});
 	};
 	
 	tests.testBreadcrumb = function() {
@@ -243,31 +266,24 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		// TODO the scroll positions are a bit brittle and don't seem to work on firefox at all.
 		assert.equal(historyMenu.children().length, 3);
 		assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-		var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
 		var menuUrl = historyMenu.children()[0].children[0].attributes[0].value;
-		if (isFirefox) {
+//		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":15}}");
-		} else if (menuUrl.indexOf('#6,7') > 0) {
-			// handle situation where scroll hasn't occurred
 			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#6,7");
-		} else {
-			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
-		}
+//		} else {
+//			assert.equal(menuUrl, urlPathPrefix + "foo.js" + "#{\"main\":{\"range\":[6,7],\"scroll\":18}}");
+//		}
 		assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
 		assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
 		assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
 
 		menuUrl = historyMenu.children()[2].children[0].attributes[0].value;
-		if (isFirefox) {
+//		if (isFirefox) {
 			// scrollTop not working on firefox
-			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":30}}");
-		} else if (menuUrl.indexOf('#15,25') > 0) {
-			// handle situation where scroll hasn't occurred
 			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#15,25");
-		} else {
-			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
-		}
+//		} else {
+//			assert.equal(menuUrl, urlPathPrefix + "bar.js" + "#{\"main\":{\"range\":[15,25],\"scroll\":36}}");
+//		}
 	};
 	
 	tests.asyncTestGetContentsSubEditor = function() {
@@ -290,7 +306,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 						assert.start();
 					});
 				});
-		}, 500);
+		});
 	};
 	
 	tests.testEditorNavigation1 = function() {
@@ -315,13 +331,13 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start:20,end:30});
 	};
 	
-//	tests.testEditorNavigation4 = function() {
-//		setup();
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN" });
-//		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start:0,end:0});
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
-//		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start:20,end:30});
-//	};
+	tests.testEditorNavigation4 = function() {
+		setup();
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN" });
+		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start:0,end:0});
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30" });
+		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start:20,end:30});
+	};
 	
 	tests.testSubeditorNavigation1 = function() {
 		setup();
@@ -345,13 +361,13 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start:20,end:30});
 	};
 	
-//	tests.testSubeditorNavigation4 = function() {
-//		setup();
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN", shiftKey:true });
-//		assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start:0,end:0});
-//		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
-//		assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start:20,end:30});
-//	};
+	tests.testSubeditorNavigation4 = function() {
+		setup();
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#NaN,NaN", shiftKey:true });
+		assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start:0,end:0});
+		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js#20,30", shiftKey:true });
+		assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start:20,end:30});
+	};
 	
 	tests.testNavigateUsingImplicitHistory = function() {
 		setup();
@@ -536,26 +552,6 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js#{main:{range:[10,20]}}", [10,20]);
 	};
 	
-	function changeLocation(url) {
-		var state = mPageState.extractPageStateFromUrl("http://localhost:7261/clientServerTests" + url);
-		mNavHistory.setupPage(state, true);
-	}
-	
-	function testLocation(mainPath, mainSel, subPath, subSel) {
-		assert.equal(editorUtils.getMainEditor().getFilePath(), testResourceRootClosingSlash +  mainPath);
-		assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start: mainSel[0], end: mainSel[1]});
-		if (subPath) {
-			if (!editorUtils.getSubEditor()) {
-				assert.fail('Expected a subeditor');
-			} else {
-				assert.equal(editorUtils.getSubEditor().getFilePath(), testResourceRootClosingSlash + subPath);
-				assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start: subSel[0], end: subSel[1]});
-			}
-		} else {
-			assert.ok(!editorUtils.getSubEditor(), "expected no sub-editor");
-		}
-	}
-	
 	tests.testPageSetup1 = function() {
 		setup();
 		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
@@ -564,18 +560,23 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 	tests.asyncTestPageSetup2 = function() {
 		setup();
-		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
-		changeLocation("?" + testResourceRootClosingSlash + "foo.js");
-		testLocation("foo.js", [0,0]);
-		history.back();
+		
+		// need to add a timeout here in order to ensure that the
+		// pop state handler from navHistory is added before running this test.
 		setTimeout(function() {
-			testLocation("bar.js", [0,0]);
-			history.forward();
-			setTimeout(function() {
-				testLocation("foo.js", [0,0]);
-				assert.start();
-			}, 1000);
-		}, 1000);
+			changeLocation("?" + testResourceRootClosingSlash + "bar.js");
+			changeLocation("?" + testResourceRootClosingSlash + "foo.js");
+			testLocation("foo.js", [0,0]);
+			history.back();
+			$(window).one('popstate', function() {
+				testLocation("bar.js", [0,0]);
+				history.forward();
+				$(window).one('popstate', function() {
+					testLocation("foo.js", [0,0]);
+					assert.start();
+				});
+			});
+		});
 	};
 
 	tests.asyncTestPageSetup3 = function() {
@@ -584,14 +585,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		changeLocation("?" + testResourceRootClosingSlash + "foo.js");
 		testLocation("foo.js", [0,0]);
 		history.back();
-		setTimeout(function() {
+		$(window).one('popstate', function() {
 			testLocation("bar.js", [0,0]);
 			history.back();
-			setTimeout(function() {
+			$(window).one('popstate', function() {
 				testLocation("foo.js", [0,0]);
 				assert.start();
-			}, 1000);
-		}, 1000);
+			});
+		});
 	};
 
 	tests.asyncTestPageSetup4 = function() {
@@ -600,14 +601,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
-		setTimeout(function() {
+		$(window).one('popstate', function() {
 			testLocation("bar.js", [20,21]);
 			history.back();
-			setTimeout(function() {
+			$(window).one('popstate', function() {
 				testLocation("foo.js", [0,0]);
 				assert.start();
-			}, 1000);
-		}, 1000);
+			});
+		});
 	};
 
 	tests.asyncTestPageSetup5 = function() {
@@ -617,14 +618,14 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		changeLocation("?" + testResourceRootClosingSlash + "bar.js#8,10");
 		testLocation("bar.js", [8,10]);
 		history.back();
-		setTimeout(function() {
+		$(window).one('popstate', function() {
 			testLocation("bar.js", [5,7]);
 			history.back();
-			setTimeout(function() {
+			$(window).one('popstate', function() {
 				testLocation("bar.js", [20,21]);
 				assert.start();
-			}, 1000);
-		}, 1000);
+			});
+		});
 	};
 
 	// with sub editor
@@ -634,20 +635,19 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
 		testLocation("foo.js", [5,7]);
 		history.back();
-		setTimeout(function() {
+		$(window).one('popstate', function() {
 			testLocation("bar.js", [20,21], "baz.js", [9,10]);
 			history.back();
-			setTimeout(function() {
+			$(window).one('popstate', function() {
 				testLocation("foo.js", [0,0]);
 				history.forward();
-				setTimeout(function() {
+				$(window).one('popstate', function() {
 					testLocation("bar.js", [20,21], "baz.js", [9,10]);
 					assert.start();
-				}, 1000);
-			}, 1000);
-		}, 1000);
+				});
+			});
+		});
 	};
-
 	
 	tests.asyncTestToggleSide = function() {
 		setup();
@@ -658,15 +658,15 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		mNavHistory.toggleSidePanel();
 		testLocation("foo.js", [5,7]);
 		history.back();
-		setTimeout(function() {
+		$(window).one('popstate', function() {
 			testLocation("foo.js", [5,7], "foo.js", [5,7]);
 			history.back();
-			setTimeout(function() {
+			$(window).one('popstate', function() {
 				testLocation("foo.js", [5,7]);
 				history.forward();
 				assert.start();
-			}, 1000);
-		}, 1000);
+			});
+		});
 	};
 	
 	return tests;

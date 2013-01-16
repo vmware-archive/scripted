@@ -275,13 +275,15 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll);
 					this.listenerAdded = false;
 				}
+				// SCRIPTED start: remove extra keybindings for enter
+				if (this.active) {
+					this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), this.oldTabBinding);
+				}
+				// SCRIPTED end
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
 				this.contentAssistPanel.onclick = null;
 
-				// SCRIPTED start: remove extra keybindings for enter
-				this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), this.oldTabBinding);
-				// SCRIPTED end
 			} else {
 				var offset = this.textView.getCaretOffset();
 				this.getProposals(offset).then(
@@ -323,14 +325,16 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 						}
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
+						// SCRIPTED start: add extra keybindings for enter
+						if (!this.active) {
+							var kbs = mKeybinder.getKeyBindings(this.editor);
+							this.oldTabBinding = kbs['Tab'];
+							this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), "enter");
+						}
+						// SCRIPTED end
+
 						this.active = true;
 
-						// SCRIPTED start: add extra keybindings for enter
-						var kbs = mKeybinder.getKeyBindings(this.editor);
-						this.oldTabBinding = kbs['Tab'];
-						this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9 /* TAB */, false, false, false, false), "enter");
-						// SCRIPTED end
-						
 					}.bind(this));
 			}
 		},

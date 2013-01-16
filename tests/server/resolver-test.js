@@ -651,6 +651,22 @@ exports.usePlugins = function (test) {
 			});
 		});
 	});
-	
+};
+
+exports.voloSample = function (test) {
+	var api = makeApi('volo-sample');
+	var file = 'www/js/app/main.js';
+	var dep = {
+		kind: 'AMD',
+		name: 'one'
+	};
+	api.resolve(file, dep, function (dep) {
+		test.equals(toCompareString(dep), toCompareString({
+			"kind": "AMD",
+			"name": "one",
+			"path": "www/js/lib/one.js"
+		}));
+		test.done();
+	});
 };
 

@@ -17,10 +17,13 @@
  * when required.
  */
 define({
+
+// TODO turn into an array
 	twoDays : 1000 * 60 * 60 * 24 * 2,
 	oneDay : 1000 * 60 * 60 * 24,
 	sixHours : 1000 * 60 * 60 * 6,
 	oneHour : 1000 * 60 * 60,
+	twoMinutes : 1000 * 60 * 2,
 
 
 	/**
@@ -30,7 +33,7 @@ define({
 	safeStore: function(key, value, includeTimestamp, depth) {
 		try {
 			depth = depth ? depth : 0;
-			if (depth < 4) {
+			if (depth < 5) {
 				localStorage.setItem(key, value);
 			} else {
 				scriptedLogger.warn("Tried to add to local storage: " + key + " : " + value, "STORAGE");
@@ -43,16 +46,24 @@ define({
 				var threshold;
 				switch (depth) {
 					case 0:
+						scriptedLogger.warn("Purging keys that are 2 days old or later", "STORAGE");
 						threshold = this.twoDays;
 						break;
 					case 1:
+						scriptedLogger.warn("Purging keys that are 1 day old or later", "STORAGE");
 						threshold = this.oneDay;
 						break;
 					case 2:
+						scriptedLogger.warn("Purging keys that are 6 hours old or later", "STORAGE");
 						threshold = this.sixHours;
 						break;
-					default:
+					case 3:
+						scriptedLogger.warn("Purging keys that are 1 hour old or later", "STORAGE");
 						threshold = this.oneHour;
+						break;
+					default:
+						scriptedLogger.warn("Purging keys that are 2 minutes old or later", "STORAGE");
+						threshold = this.twoMinutes;
 						break;
 				}
 				this.purgeByTimestamp(threshold);

@@ -35,8 +35,8 @@ var FAKE = true; //Set to true to supress creating any real file system watchers
 
 function makeWatcher(path, listener) {
 
-	console.log('Creating a dirwatch instance'); // Grep for this is in scripted-log to see
-												// if dirwatch is active.
+//	console.log('Creating a dirwatch instance'); // Grep for this is in scripted-log to see
+//												// if dirwatch is active.
 
 	//BEGIN Configuration options
 
