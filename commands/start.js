@@ -15,7 +15,7 @@ var fs = require('fs'),
 	errorCode = require('rest/interceptor/errorCode'),
 	timeout = require('rest/interceptor/timeout'),
 	retry = require('rest/interceptor/retry'),
-	client = timeout(errorCode(), {timeout: 2000}),
+	client = timeout(errorCode(), {timeout: 100}),
 	retryClient = retry(client, {initial: 20, max: 200}),
 	childExec = require('child_process').exec,
 	spawn = require('child_process').spawn,
@@ -25,12 +25,12 @@ function exec(options) {
 	ping(options).then(
 		function(response){
 			if (!options.suppressOpen) {
-console.log("opening");
+				console.log("start: ping complete, opening...");
 				open(options);
 			}
 		},
 		function(error){
-console.log("starting");
+			console.log("start: ping failed, starting...");
 			start(options);
 		}
 	);
@@ -68,6 +68,7 @@ function open(options) {
 
 function ping(options) {
 	if (options.withRetry) {
+console.log("retry ping");
 		return retryClient({ path: url+"/status" });
 	} else {
 console.log("no retry ping");
@@ -81,17 +82,17 @@ function start(options) {
 		err = fs.openSync(tmp + '/scripted.log', 'a'),
 		child;
 
-	console.log("calling launcher.js");
+	console.log("start.start(): spawning launch...");
 	var file = options._;
 	var suppressOpen = options.suppressOpen?'true':'false';
 
-	child = spawn('node', [ 'launchAndOpen.js', suppressOpen, file ],{
+	child = spawn('node', [ 'launch.js', suppressOpen, file ],{
 		detached:true,
 		stdio: ['ignore', out, err]
 	});
 	child.unref();
 
-	console.log("returning");
+	console.log("start.start(): exiting");
 /*
 	var server = require('../server/scripted.js');
 		child = spawn('node', [path.resolve(path.dirname(module.filename), '../server/scripted.js')], {
