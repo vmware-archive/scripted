@@ -154,18 +154,37 @@ define([], function () {
 		return descriptions[actionName] || actionName;
 	}
 	
+	
 	/**
-	 * Determine if an action registered with the editor
-	 * is 'global' which means we would expect it to work even when the
-	 * editor does not have focus.
+	 * Fetch 'Set' of global actions associated with an editor. The properties of the map
+	 * are all action names registered with the editor that are marked as global actions.
+	 * Note that an action can be
+	 * marked as global either by setting a 'global' property on the action handler
+	 * or by having its name configured in the 'globalActions' constant defined above.
 	 */
-	function isGlobalAction(actionName) {
-		return globalActions[actionName] || false;
+	function getGlobalActions(editor) {
+		var result = {};
+		var actions = editor.getTextView()._actions;
+		for (var i = 0; i < actions.length; i++) {
+			var a = actions[i];
+			if (a.name) {
+				//Two ways to mark actions global, either in the 'globalActions' table
+				//or by having a 'global' property on the action's userHandler.
+				if (globalActions[a.name] || a.userHandler && a.userHandler.global) {
+					result[a.name] = a; // We only need 'true' but maybe the action object
+					                    // may be useful somehow.
+				}
+			}
+		}
+
+		return result;
 	}
+	
 	
 	return {
 		getActionDescription: getActionDescription,
-		isGlobalAction: isGlobalAction
+		getGlobalActions: getGlobalActions
+		//isGlobalAction: isGlobalAction
 	};
 
 });

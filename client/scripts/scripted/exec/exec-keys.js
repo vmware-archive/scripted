@@ -60,10 +60,12 @@ define(["require", "orion/textview/keyBinding",
 				keystroke2keybinding(keySpec),
 				commandName
 			);
-			tv.setAction(commandName, function() {
+			var action = function() {
 				cmdExec(replaceParams);
 				return true; //stop event propagation.
-			});
+			};
+			action.global = true;
+			tv.setAction(commandName, action);
 		}
 		
 		//BEGIN installOn function body
