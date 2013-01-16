@@ -39,4 +39,3 @@ if (options.h) {
 }
 			
 require(cmd).exec(options);
-console.log("leaving scr");

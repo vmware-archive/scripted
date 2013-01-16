@@ -10,12 +10,16 @@
  * Contributors:
  * Andy Clement, Jeremy Grelle - initial version
  ******************************************************************************/
+
+// This script will ping the server, if it isn't running it will start it. If it
+// is running it will simply open the URL.
+
 var fs = require('fs'),
 	path = require('path'),
 	errorCode = require('rest/interceptor/errorCode'),
 	timeout = require('rest/interceptor/timeout'),
 	retry = require('rest/interceptor/retry'),
-	client = timeout(errorCode(), {timeout: 100}),
+	client = timeout(errorCode(), {timeout: 150}),
 	retryClient = retry(client, {initial: 20, max: 200}),
 	childExec = require('child_process').exec,
 	spawn = require('child_process').spawn,
@@ -25,12 +29,10 @@ function exec(options) {
 	ping(options).then(
 		function(response){
 			if (!options.suppressOpen) {
-				console.log("start: ping complete, opening...");
 				open(options);
 			}
 		},
 		function(error){
-			console.log("start: ping failed, starting...");
 			start(options);
 		}
 	);
@@ -54,8 +56,6 @@ function open(options) {
 	
 	url += "/editor" + (process.platform == 'win32' ? "/" : "");
 	
-	// console.log(url);
-	
 	if (options._) {
 		url += path.resolve(process.cwd(), options._[0]);
 	} else {
@@ -68,10 +68,8 @@ function open(options) {
 
 function ping(options) {
 	if (options.withRetry) {
-console.log("retry ping");
 		return retryClient({ path: url+"/status" });
 	} else {
-console.log("no retry ping");
 		return client({ path: url+"/status" });
 	}
 }
@@ -82,38 +80,13 @@ function start(options) {
 		err = fs.openSync(tmp + '/scripted.log', 'a'),
 		child;
 
-	console.log("start.start(): spawning launch...");
 	var file = options._;
 	var suppressOpen = options.suppressOpen?'true':'false';
-
-	child = spawn('node', [ 'launch.js', suppressOpen, file ],{
+	child = spawn('node', [ 'scripted.js', suppressOpen, file ],{
 		detached:true,
 		stdio: ['ignore', out, err]
 	});
 	child.unref();
-
-	console.log("start.start(): exiting");
-/*
-	var server = require('../server/scripted.js');
-		child = spawn('node', [path.resolve(path.dirname(module.filename), '../server/scripted.js')], {
-			detached: true,
-			stdio: ['ignore', out, err]
-		});
-
-	child.unref();
-	
-	options.withRetry = true;
-	ping(options).then(
-		function(response){
-			if (!options.suppressOpen) {
-				open(options);
-			}
-		},
-		function(error){
-			console.log("Server failed to start - check " + tmp + "/scripted.log for more information.");
-		}
-	);
-*/
 }
 
 module.exports.exec = exec;
