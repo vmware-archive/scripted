@@ -19,7 +19,7 @@
 //
 // We also want to
 //   - avoid processing of binary files
-//   - avoid processing minified files that are basically just one huge lines of text without 
+//   - avoid processing minified files that are basically just one huge line of text without
 //     any linebreaks.
 
 // Because we do not want to read the file multiple times we will compromise:
@@ -53,6 +53,8 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 	 * or MAX_LINE_LEN is exceeded.
 	 */
 	var buffer = "";
+	var bufferOffset = 0; // The offset in the file that corresponds to the beginning
+						//of the buffer.
 	var started = false;
 	var lineNumber = 0;
 
@@ -96,12 +98,14 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 			while (newline>=0 && newline-start < MAX_LINE_LEN) {
 				//found a valid newline
 				var line = buffer.substring(start,newline);
+				var lineStart = bufferOffset + start;
 				start = newline+1;
 				newline = buffer.indexOf('\n', start);
-				lineFun(line, lineNumber++);
+				lineFun(line, lineNumber++, lineStart);
 			}
 			if (start>0) {
 				buffer = buffer.substring(start);
+				bufferOffset += start;
 			}
 			if (buffer.length>MAX_LINE_LEN) {
 				destroy('minified');
@@ -129,6 +133,9 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 }
 
 //Ad hoc testing code below
+// Beware don't leave this code in when actually using this module
+// it takes a rather long time to execute and will 'hang' the scripted
+// server!
 
 //eachLine(__filename,
 //	function (line, ln) {
@@ -147,8 +154,9 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 
 ////eachLine('/bin/bash', //Should end with 'binary' message
 //eachLine(__dirname+'/test.dat', // large file, should be processed in chunks!
-//	function (line, ln) {
+//	function (line, ln, ofs) {
 //		console.log(ln + " : " +line);
+//		console.log(ln + " : " +testData.substring(ofs, ofs+15+'...'));
 //	},
 //	function (reason) {
 //		console.log('Done: ' +reason);
