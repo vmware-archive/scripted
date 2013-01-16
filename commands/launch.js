@@ -11,8 +11,9 @@
  * Andy Clement - initial version
  ******************************************************************************/
 var path = require('path');
-var childExec = require('child_process').spawn;
+var childExec = require('child_process').exec;
 
+var url = "http://localhost:7261";
 var suppressOpen = process.argv[2]=='true';
 var file = process.argv[3];
 console.dir(process.argv);
@@ -45,15 +46,19 @@ function open() {
         url += process.cwd();
     }
 
-    // console.log("Opening %s", url);
-    childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
+    console.log("Opening %s with command %s", url,cmd);
+
+    var rc = childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
+    console.log(rc);
 }
 
 // Launch the server
+console.log("launch:Launching server");
 var server=require('../server/scripted.js');
 
 // on return, assume it is up and open the browser
 if (!suppressOpen) {
+    console.log("launch: opening file");
 	open();
 }
 console.log("returning from launch");
