@@ -12,51 +12,61 @@
  *     Brian Cavalier
  ******************************************************************************/
 
+/*jslint browser:true */
 
-// Wire spec for scripted
-define({
-	// starting point for app
-	scripted : {
-		module : 'scripted',
-		init: 'init',
-		ready : {
-			ready: [
-				{ $ref : 'scriptedLogger' },
-				{ $ref : 'fileExplorer' },
-				{ $ref : 'layoutManager' }
-			]
-		}
-	},
-
-	// provides configurable logging
-	// currently also a global, but needs to change
-	scriptedLogger : {
-		module : 'scriptedLogger'
-	},
-	
-	// module needs to be loaded, but doesn't need to be referenced
-	editorPane : {
-		module : "scripted/editor/editorPane"
-	},
-	
-	// does the layout and resizes dom nodes on window resize and when vertical bars move
-	layoutManager : {
-		module : "layoutManager",
-		properties : {
-			editorNode : { $ref : "dom!editor"} // TODO more dom nodes
-		}
-	},
-	
-	// the left-hand navigator
-	fileExplorer : {
-		create : {
-			module : "scripted/navigator/explorer-table",
-			args : [{ parentId: "explorer-tree" }]
-		}
-	},
-	
-	plugins : [
-		{ module : 'wire/debug' },
-		{ module : 'wire/jquery/dom' }
-	]
+define(['scripted', 'scriptedLogger', "layoutManager", "scripted/navigator/explorer-table", "scripted/editor/editorPane"], 
+	function(scripted, scriptedLogger, layoutManager, FileExplorer) {
+	scripted.init();
+	// doing this in the layout manager itself
+//	layoutManager.editorNode = document.getElementById("editor");
+	var fileExplorer = new FileExplorer({parentId : 'explorer-tree'});
+	scripted.ready(scriptedLogger, fileExplorer, layoutManager);
 });
+
+//// Wire spec for scripted
+//define({
+//	// starting point for app
+//	scripted : {
+//		module : 'scripted',
+//		init: 'init',
+//		ready : {
+//			ready: [
+//				{ $ref : 'scriptedLogger' },
+//				{ $ref : 'fileExplorer' },
+//				{ $ref : 'layoutManager' }
+//			]
+//		}
+//	},
+//
+//	// provides configurable logging
+//	// currently also a global, but needs to change
+//	scriptedLogger : {
+//		module : 'scriptedLogger'
+//	},
+//	
+//	// module needs to be loaded, but doesn't need to be referenced
+//	editorPane : {
+//		module : "scripted/editor/editorPane"
+//	},
+//	
+//	// does the layout and resizes dom nodes on window resize and when vertical bars move
+//	layoutManager : {
+//		module : "layoutManager",
+//		properties : {
+//			editorNode : { $ref : "dom!editor"} // TODO more dom nodes
+//		}
+//	},
+//	
+//	// the left-hand navigator
+//	fileExplorer : {
+//		create : {
+//			module : "scripted/navigator/explorer-table",
+//			args : [{ parentId: "explorer-tree" }]
+//		}
+//	},
+//	
+//	plugins : [
+//		{ module : 'wire/debug' },
+//		{ module : 'wire/jquery/dom' }
+//	]
+//});

@@ -19,8 +19,9 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 	return {
 
 		doLayout: function(fileExplorer, pageState) {
-			// TODO do the same for other dom nodes
-			var editorNode = $(this.editorNode);
+			// when using wire
+//			var editorNode = $(this.editorNode);
+			var editorNode = $('#editor');
 			mNavHistory.setupPage(pageState, false);
 
 //			require(['jquery_ui'], function() {
@@ -165,8 +166,11 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			if (doit) {
 				window.scripted.navigator=false; // default is true
 				$('#navigator-wrapper').hide();
-				this.editorNode.css('margin-left', 0);
-				this.editorNode.css("left", "0px");
+				// when using wire
+//				var editorNode = $(this.editorNode);
+				var editorNode = $('#editor');
+				editorNode.css('margin-left', 0);
+				editorNode.css("left", "0px");
 				$('#explorer-tree').remove();
 			} else {
 				var pageState = mPageState.extractPageStateFromUrl(window.location.toString());

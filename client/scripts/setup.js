@@ -49,4 +49,4 @@ requirejs.config({
 		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
 	}
 });
-require(['wire!main']);
+require(['main']);
