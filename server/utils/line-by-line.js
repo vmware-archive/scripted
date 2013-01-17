@@ -84,7 +84,7 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 		return doneFun(e);
 	}
 	stream.on('data', function (data) {
-		console.log('DATA');
+		//console.log('DATA');
 		if (!started) {
 			started = true;
 			if (isBinary(data)) {
