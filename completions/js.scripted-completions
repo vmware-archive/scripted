@@ -20,17 +20,20 @@
 		"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
 		"var", "void", "while", "with",
 		
-		{ "trigger" : "if statement", "contents" : "if (${1:condition}) {\n\t$0\n}" },
-		{ "trigger" : "ifelse statement", "contents" : "if (${1:condition}) {\n\t$0\n} else {\n\t\n}" },
-		{ "trigger" : "for (array iterator)", "contents" : "for (var ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {\n\t$0\n}" },
-		{ "trigger" : "for (property iterator)", "contents" : "for (var ${1:property} in ${2:object}) {\n\tif (${2:object}.hasOwnProperty(${1:property})) {\n\t\t$0\n\t}\n}" },
-		{ "trigger" : "while loop", "contents" : "while (${1:condition}) {\n\t$0\n}" },
-		{ "trigger" : "do while loop", "contents" : "do {\n\t$0\n} while (${1:condition};" },
-		{ "trigger" : "switch", "contents" : "switch (expression) {\n\tcase ${1:val}:\n\t\t${2:expr}\n\t\tbreak;\n\tdefault:\n\t\t\n}" },
-		{ "trigger" : "try..catch", "contents" : "try {\n\t$0\n} catch (${1:err}) {\n\t\n}" },
-		{ "trigger" : "try..catch..finally", "contents" : "try {\n\t$0\n} catch (${1:err}) {\n\t\n} finally {\n\t\n}" },
-		{ "trigger" : "try..finally", "contents" : "try {\n\t$0\n} finally {\n\t\n}" },
-		{ "trigger" : "function (named)", "contents" : "function ${1:name}(${2:args}) {\n\t$0\n}" },
-		{ "trigger" : "function (anon)", "contents" : "function(${1:args}) {\n\t$0\n}" }
+		{ "trigger" : "if statement", "contents" : "if (${1:condition}) {\n\t${selection}$0\n}", isTemplate: true },
+		{ "trigger" : "ifelse statement", "contents" : "if (${1:condition}) {\n\t${selection}$0\n} else {\n\t\n}", isTemplate: true },
+		{ "trigger" : "for (array iterator)", "contents" : "for (var ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {\n\t${selection}$0\n}", isTemplate: true },
+		{ "trigger" : "for (property iterator)", "contents" : "for (var ${1:property} in ${2:object}) {\n\tif (${2:object}.hasOwnProperty(${1:property})) {\n\t\t${selection}$0\n\t}\n}", isTemplate: true },
+		{ "trigger" : "while loop", "contents" : "while (${1:condition}) {\n\t${selection}$0\n}", isTemplate: true },
+		{ "trigger" : "do while loop", "contents" : "do {\n\t${selection}$0\n} while (${1:condition};", isTemplate: true },
+		{ "trigger" : "switch", "contents" : "switch (expression) {\n\tcase ${1:val}:\n\t\t${2:expr}\n\t\tbreak;\n\tdefault:\n\t\t\n}", isTemplate: true },
+		{ "trigger" : "try..catch", "contents" : "try {\n\t${selection}$0\n} catch (${1:err}) {\n\t\n}", isTemplate: true },
+		{ "trigger" : "try..catch..finally", "contents" : "try {\n\t${selection}$0\n} catch (${1:err}) {\n\t\n} finally {\n\t\n}", isTemplate: true },
+		{ "trigger" : "try..finally", "contents" : "try {\n\t${selection}$0\n} finally {\n\t\n}", isTemplate: true },
+		{ "trigger" : "function (named)", "contents" : "function ${1:name}(${2:args}) {\n\t${selection}$0\n}", isTemplate: true },
+		{ "trigger" : "function (anon)", "contents" : "function(${1:args}) {\n\t${selection}$0\n}", isTemplate: true },
+
+		{ "trigger" : "test", "contents" : "{${selection}$1}$0", isTemplate: true },
+		
 	]
 }

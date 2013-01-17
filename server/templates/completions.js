@@ -125,6 +125,7 @@ exports.CompletionsProcessor.prototype = {
 		rawContents = rawContents.replace(/\t/g, "${indent}");
 		
 		var trigger = rawCompletion.trigger;
+		var isTemplate = rawCompletion.isTemplate;
 		var contents = "";
 		var positions = [];
 		var escapePosition = null;
@@ -218,7 +219,8 @@ exports.CompletionsProcessor.prototype = {
 			description : trigger + " : " + contents,
 			trigger: trigger,
 			positions : positions.length === 0 ? null : positions,
-			escapePosition : escapePosition ? escapePosition : null
+			escapePosition : escapePosition ? escapePosition : null,
+			isTemplate : isTemplate
 		};
 	},
 

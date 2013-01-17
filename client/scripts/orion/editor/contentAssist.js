@@ -191,12 +191,21 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 				proposal = proposal();
 			}
 			// SCRTIPED end
-
-			var offset = this.textView.getCaretOffset();
-			var start = offset;
-			var end = offset;
-			if( proposal.replace ) {
-			   start = this.getPrefixStart(offset);
+			
+			var start;
+			var end;
+			var selection = this.textView.getSelection();
+			if (selection.start === selection.end) {
+				var offset = this.textView.getCaretOffset();
+				start = offset;
+				end = offset;
+				if( proposal.replace ) {
+				   start = this.getPrefixStart(offset);
+				}
+			} else {
+				// if a non-empty selection, then use the entire selection as the prefix
+				start = Math.min(selection.start, selection.end);
+				end = Math.max(selection.start, selection.end);
 			}
 			var data = {
 				proposal: proposal,

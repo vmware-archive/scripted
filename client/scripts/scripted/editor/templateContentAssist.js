@@ -118,6 +118,8 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			return deferred.promise;
 		},
 		computeProposals: function(buffer, invocationOffset, context) {
+			var templatesOnly = context.selection && (context.selection.start !== context.selection.end);
+			invocationOffset = context.selection ? Math.min(context.selection.start, context.selection.end) : invocationOffset;
 			if (!allTemplates) {
 				return [];
 			}
@@ -139,7 +141,9 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			// find offset of the start of the word
 			var replaceStart = invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
-				if (template.trigger.substr(0,prefix.length) === prefix) {
+				if ((templatesOnly && template.isTemplate) ||
+					(!templatesOnly && template.trigger.substr(0,prefix.length) === prefix)) {
+					
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
 						var actualText = replaceParams(template.proposal);
