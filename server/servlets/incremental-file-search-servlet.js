@@ -35,6 +35,10 @@ var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker wi
 					  // just yet (the contents of the file is not walked in a pausable way)
 					  // So the number of results may still exceed this limit.
 					  
+function debug_log(msg, obj) {
+//	console.log(msg + JSON.stringify(obj));
+}
+					  
 exports.install = function (server) {
 
 	websockets.install(server);
@@ -70,6 +74,7 @@ exports.install = function (server) {
 		 * send data to the client. The data sent must be something that can be 'JSON.stringified'.
 		 */
 		function send(json) {
+			debug_log('ifsearch >> ', json);
 			conn.write(JSON.stringify(json));
 		}
 
@@ -142,7 +147,7 @@ exports.install = function (server) {
 				console.error('Can not start search: the fswalk function is not configured');
 			}
 			var canceled = false;
-			var paused = false; // Intially, set to true when pause is requested. Then when 
+			var paused = false; // Intially, set to true when pause is requested. Then when
 			                    // work is actually suspended, a 'work' function will be
 			                    // stored in here. To resume the work, this function is
 			                    // called with no params.
@@ -241,7 +246,12 @@ exports.install = function (server) {
 		 * @return true if and only if results of oldQ include should at least include the results of newQ.
 		 */
 		function isMoreSpecificThan(newQ, oldQ) {
-			return newQ.indexOf(oldQ)>=0;
+			//Note: we only count a query as 'more specific' if it is extended by adding chars to the end.
+			// This is because the 'isMatch' function used to recheck old query results only handles that
+			// case correctly. The issue is that the start positions of the match has to line up.
+			// A more complex implementation may handle this case but this case is uncommon so just
+			// restarting the whole query seems acceptable.
+			return newQ.indexOf(oldQ)===0;
 		}
 		
 		function cancelActiveWalker() {
@@ -319,6 +329,7 @@ exports.install = function (server) {
 		 * data object once it gets here.
 		 */
 		function receive(json) {
+			debug_log('ifsearch << ', json);
 			for (var p in json) {
 				if (json.hasOwnProperty(p)) {
 					if (!handlers[p]) {
