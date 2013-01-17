@@ -89,7 +89,7 @@ requirejs.config({
 		{ name: 'when', location: '../components/when', main:'when', lib: '.'},
 		{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
 		{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'},
-		{ name: 'rest', location: 'lib/rest-d7c94f9',  main: 'rest'}
+		{ name: 'rest', location: '../components/rest',  main: 'rest'}
 	],
 	paths: {
 	//require: 'lib/requirejs/require',
