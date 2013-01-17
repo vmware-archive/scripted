@@ -12,6 +12,8 @@
  *     Scott Andrews
  ******************************************************************************/
 
+define(function(require, exports) {
+
 var mime = require('rest/interceptor/mime');
 var errorCode = require('rest/interceptor/errorCode');
 var entity = require('rest/interceptor/entity');
@@ -53,8 +55,8 @@ var baseClient = unreject(entity(
 ));
 
 /**
- * Create an interceptor that inserst a default 'method' option into
- * the request config if it is not already.
+ * Create an interceptor that inserts a default 'method' option into
+ * the request config.
  *
  * @param {Client} [client]
  * @param {String} config.prefix
@@ -67,7 +69,8 @@ var defaultMethod = interceptor({
 });
 
 /**
- * Basic rest client suitable to get requests.
+ * Basic rest client suitable for 'get' requests. This client handles all
+ * errors by logging them and returns at least undefined in such cases.
  */
 var get = baseClient;
 var put = defaultMethod(baseClient, { method: 'put' });
@@ -76,3 +79,5 @@ exports.baseClient = baseClient;
 exports.defaultValue = defaultValue;
 exports.get = get;
 exports.put = put;
+
+});
