@@ -396,12 +396,12 @@ define([
 			// save binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
-				var text = editor.getTextView().getText();
 				if (editor.getTextView().isReadonly()) {
 					return true;
 				}
 				when(mSaveHooks.preSaveHook(editor, filePath),
 					function() {
+						var text = editor.getTextView().getText();
 						//All pre save handlers executed and have 'ok-ed' the save
 						var xhr = new XMLHttpRequest();
 						try {
