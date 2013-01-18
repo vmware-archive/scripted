@@ -17,7 +17,8 @@
 /*jslint browser:true devel:true */
 
 define([
-	"require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
+	"require", "scripted/editor/save-hooks", "when",
+	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
@@ -27,7 +28,8 @@ define([
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
-	require, mTextView, mKeyBinding, mEditor, mKeystroke,
+	require, mSaveHooks, when,
+	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
@@ -398,52 +400,63 @@ define([
 				if (editor.getTextView().isReadonly()) {
 					return true;
 				}
-				var xhr = new XMLHttpRequest();
-				try {
-					// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
-					// As described here: http://www.w3.org/TR/html4/interact/forms.html - may need to add some content
-					// type settings to dispositions, for funky charsets
-					var boundary = Math.random().toString().substr(2);
-					//var url = '/put?file=' + window.location.search.substr(1);
-					var url = '/put?file=' + filePath;
-					//				console.log("url is "+url);
-					//				console.log("Saving file, length is "+text.length);
-					xhr.open("POST", url, true);
-					xhr.setRequestHeader('Content-Type', 'multipart/form-data;charset=utf-8; boundary=' + boundary);
-					var payload = '';
-					payload += '--' + boundary + '\r\n';
-					payload += 'Content-Disposition: form-data; name="data"\r\n\r\n';
-					payload += text;
-					payload += '\r\n';
-					payload += '--' + boundary + '\r\n';
-					payload += 'Content-Disposition: form-data; name="length"\r\n\r\n';
-					payload += text.length;
-					payload += '\r\n';
-					payload += '--' + boundary + '--';
-					// console.log("payload is "+payload);
-	/*
-					xhrobj.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-					xhrobj.setRequestHeader('Connection','close');
-					*/
-					//var params = "file="+filePath+"&"text=";
-					xhr.onreadystatechange = function() {
-						if (xhr.readyState === 4) {
-							if (xhr.status === 200) {
-								// console.log("Saved OK I think: "+xhr.status);
-								editor.setInput(null, null, null, true);
-								afterSaveSuccess(filePath);
-							} else {
-								var message = "Failed to save the file. RC:" + xhr.status + " Details:" + xhr.responseText;
-								statusReporter(message, true);
-								console.error(message);
-							}
-							postSave(text);
+				when(mSaveHooks.preSaveHook(editor, filePath),
+					function() {
+						//All pre save handlers executed and have 'ok-ed' the save
+						var xhr = new XMLHttpRequest();
+						try {
+							// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
+							// As described here: http://www.w3.org/TR/html4/interact/forms.html - may need to add some content
+							// type settings to dispositions, for funky charsets
+							var boundary = Math.random().toString().substr(2);
+							//var url = '/put?file=' + window.location.search.substr(1);
+							var url = '/put?file=' + filePath;
+							//				console.log("url is "+url);
+							//				console.log("Saving file, length is "+text.length);
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader('Content-Type', 'multipart/form-data;charset=utf-8; boundary=' + boundary);
+							var payload = '';
+							payload += '--' + boundary + '\r\n';
+							payload += 'Content-Disposition: form-data; name="data"\r\n\r\n';
+							payload += text;
+							payload += '\r\n';
+							payload += '--' + boundary + '\r\n';
+							payload += 'Content-Disposition: form-data; name="length"\r\n\r\n';
+							payload += text.length;
+							payload += '\r\n';
+							payload += '--' + boundary + '--';
+							// console.log("payload is "+payload);
+			/*
+							xhrobj.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+							xhrobj.setRequestHeader('Connection','close');
+							*/
+							//var params = "file="+filePath+"&"text=";
+							xhr.onreadystatechange = function() {
+								if (xhr.readyState === 4) {
+									if (xhr.status === 200) {
+										// console.log("Saved OK I think: "+xhr.status);
+										editor.setInput(null, null, null, true);
+										afterSaveSuccess(filePath);
+									} else {
+										var message = "Failed to save the file. RC:" + xhr.status + " Details:" + xhr.responseText;
+										statusReporter(message, true);
+										console.error(message);
+									}
+									postSave(text);
+								}
+							};
+							xhr.send(payload);
+						} catch (e) {
+							console.log("xhr failed " + e);
 						}
-					};
-					xhr.send(payload);
-				} catch (e) {
-					console.log("xhr failed " + e);
-				}
+					},
+					function (err) {
+						//One of the save hooks errorred or rejected the save
+						
+						statusReporter(err, true);
+						console.error(err);
+					}
+				);
 				return true;
 			});
 			

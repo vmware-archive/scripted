@@ -14,10 +14,16 @@
 var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
 var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
-var pathResolve = require('path').resolve;
+var pathResolve = require('../jsdepend/utils').pathResolve;
 var endsWith = require('../jsdepend/utils').endsWith;
 
-var pluginDir = pathResolve(getScriptedRcDirLocation(), 'plugins');
+//var pluginDir = pathResolve(getScriptedRcDirLocation(), 'plugins');
+
+//For now it's easier to place the plugins inside of scripted code base
+// So I can put my 'sample' plugin in our codebase and commit it to git.
+//TODO: Support plugins in both .scriptedrc and scripted codebase at the same time.
+
+var pluginDir = pathResolve(__dirname, '../../plugins');
 
 /**
  * Get a list of plugins installed into this instance of scripted.
@@ -31,7 +37,7 @@ function getPlugins() {
 		return names.filter(function (name) {
 			return endsWith(name, '.js');
 		}).map(function (name) {
-			return 'scripted/plugins/'+name.substring(0, name.length-3);
+			return name.substring(0, name.length-3); // strip off '.js'
 		});
 	});
 }

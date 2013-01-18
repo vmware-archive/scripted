@@ -19,8 +19,11 @@ define(function(require) {
 	console.log('Requesting list of plugins from server...');
 	
 	getPlugins().then(function (plugins) {
-		console.log('Plugins found: '+JSON.stringify(plugins, null, '  '));
-		require(plugins, function () {
+		var pluginPaths = plugins.map(function (name) {
+			return 'scripted/plugins/'+name;
+		});
+		console.log('Plugins found: '+JSON.stringify(pluginPaths, null, '  '));
+		require(pluginPaths, function () {
 			console.log('All plugins succesfully loaded!');
 		});
 	});
