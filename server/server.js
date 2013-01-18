@@ -59,6 +59,7 @@ function start(route, handle) {
 	require('./routes/editor-routes').install(app);
 	require('./routes/test-routes').install(app);
 	require('./routes/config-routes').install(app);
+	require('./routes/plugin-routes').install(app);
 	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);

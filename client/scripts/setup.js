@@ -114,7 +114,7 @@ require(["scripted/editor/scriptedEditor", "scripted/navigator/explorer-table", 
 		 "scripted/exec/exec-console", "scripted/exec/exec-on-load", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
 		 "scripted/contextmenus/contextmenu", "scripted/utils/editorUtils",
 		 // need to load this module in order to have it register with paneFactory
-		 "scripted/editor/editorPane" //, 'scripted/utils/probeDefs'
+		 "scripted/editor/editorPane", 'scripted/utils/probeDefs', 'scripted/plugin-loader'
 		 ],
 
 function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
