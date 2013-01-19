@@ -18,6 +18,8 @@
 var express = require('express');
 var pathResolve = require('path').resolve;
 
+var FAVICO = pathResolve();
+
 function start(route, handle) {
 	function onRequest(req, res, next) {
 		var path = req.path;

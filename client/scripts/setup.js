@@ -83,13 +83,13 @@ var scriptedLogger = {
 
 requirejs.config({
 	packages: [
-		{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser', lib:'.'},
-		{ name: 'dijit',location: 'lib/dijit',main:'lib/main',lib: '.'},
-		{ name: 'probes', location: '../components/probes', main:'probe', lib: '.'},
-		{ name: 'when', location: '../components/when', main:'when', lib: '.'},
-		{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
-		{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'},
-		{ name: 'rest', location: 'lib/rest-d7c94f9',  main: 'rest'}
+		{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser'},
+		{ name: 'dijit',location: 'lib/dijit',main:'lib/main'},
+		{ name: 'probes', location: '../components/probes', main:'probe'},
+		{ name: 'when', location: '../components/when', main:'when'},
+		{ name: 'wire', location: '../components/wire', main:'wire'},
+		{ name: 'meld', location: '../components/meld', main:'meld'},
+		{ name: 'rest', location: '../components/rest',  main: 'rest'}
 	],
 	paths: {
 	//require: 'lib/requirejs/require',

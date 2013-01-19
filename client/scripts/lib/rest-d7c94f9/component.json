@@ -1,8 +1,0 @@
-{
-	"name": "rest",
-	"version": "0.8.4",
-	"main": "./rest.js",
-	"dependencies": {
-		"when": "~1"
-	}
-}
