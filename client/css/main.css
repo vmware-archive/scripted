@@ -179,20 +179,20 @@ footer{
 }
 
 
-#run {
-	margin:4px 5px 0 0;
+.start {
+	margin:5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/run.png);
-	width:16px;
-	height:16px;
+	width:20px;
+	height:20px;
 }
 
-#stop {
-	margin:4px 5px 0 0;
+.stop {
+	margin:5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/stop.png);
-	width:16px;
-	height:16px;
+	width:20px;
+	height:20px;
 }
 
 #help_open{

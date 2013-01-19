@@ -16,7 +16,8 @@
 		"Kris De Volder <kdvolder@vmware.com>",
 		"Alain Kalker <a.c.kalker@gmail.com>",
 		"Nieraj Singh <nierajsingh@vmware.com>",
-		"Scott Andrews <andrewss@vmware.com>"
+		"Scott Andrews <andrewss@vmware.com>",
+		"Jeremy Grelle <jgrelle@vmware.com>"
 	],
 	"bin": {
 		"scr": "./bin/scr",
@@ -35,7 +36,7 @@
         "node-static": "0.5.9",
         "optimist": "0.3.5",
         "rest": "0.8.4",
-		"serv": "git+https://github.com/jeremyg484/serv.git#livereload",
+		"serv": "git+https://github.com/aclement/serv.git#livereload",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "1.6.1",

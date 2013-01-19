@@ -316,8 +316,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			//console.log('Keybindings help-panel is ready');
 		});
 		
-		require(['scripted/appmanager'], function() {
-		});
+		require(['scripted/application-manager']);
 		
 		/*Side panel open/close*/
 		
