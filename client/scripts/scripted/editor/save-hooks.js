@@ -15,7 +15,7 @@
 // This module plays as an intermediary between 'scriptedEditor' and 'scripted/api/editor'
 // So we don't have to expose low-level api to scripted/api/editor.
 //
-// Both api/editor and scripted require this module. The api registers hook functions and
+// Both api/editor and scriptedEditor require this module. The api registers hook functions and
 // the editor calls the hook function.
 //
 
@@ -35,21 +35,24 @@ define(function(require) {
 	 */
 	function preSaveHook(editor, filePath) {
 		console.log('preSaveHook called');
-		//TODO: To keep simple for now, assume there's at most 1 preSaveHandler
-		if (preSaveHandlers[0]) {
-			return preSaveHandlers[0](editor, filePath);
-		}
-	
-//		//Call each of the handlers one by one in sequence until one of them
-//		//rejects. The preSaveHook returns a promise that rejects if any
-//		//of the promises where rejected.
-//		return when.reduce(preSaveHandlers,
-//			function (acc, handler) {
-//				return when(acc, function () {
-//					return handler(editor);
-//				});
-//			}
-//		);
+//		//TODO: To keep simple for now, assume there's at most 1 preSaveHandler
+//		if (preSaveHandlers[0]) {
+//			return preSaveHandlers[0](editor, filePath);
+//		}
+
+		//Call each of the handlers one by one in sequence until one of them
+		//rejects. The preSaveHook returns a promise that rejects if any
+		//of the promises where rejected.
+		return when.reduce(preSaveHandlers,
+			function (acc, handler, i) {
+				return when(acc, function () {
+					console.log('handle index: '+i);
+					return handler(editor, filePath);
+				});
+			},
+			true //IMPORTANT: may be anything except undefined...
+				// because reduce behaves differently if no inital value is suplied!
+		);
 	}
 
 	function onPreSave(handler) {
