@@ -1,9 +1,27 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *     Kris De Volder (VMWare) - initial API and implementation
+ ******************************************************************************/
+
+//
+// This is meant to be or become a 'nice' and easy to use
+// api for contributing functionality to the scripted editor.
+//
+
 define(function (require) {
 
 	var when = require('when');
 
 	console.log('Editor api loaded!');
-	
+
 	var saveHooks = require('scripted/editor/save-hooks');
 
 	return {
@@ -29,6 +47,11 @@ define(function (require) {
 					}
 				});
 			});
+		},
+		action: function (spec) {
+			console.log('Someone is trying to define a custom action:');
+			console.log(JSON.stringify(spec, null, '  '));
+
 		}
 	};
 

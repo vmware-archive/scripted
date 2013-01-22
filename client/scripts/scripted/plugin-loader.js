@@ -13,10 +13,18 @@
  ******************************************************************************/
 define(function(require) {
 	
+	var when = require('when');
+	
 //	var console = require('./exec/exec-console');
 	var getPlugins = require('../servlets/plugin-client').getPlugins;
 
 	console.log('Requesting list of plugins from server...');
+	
+	var ready = when.defer(); 
+		//This promise resolves when all plugins have been loaded.
+		//TODO: errors in loading? Can we make these reject the promise?
+		// At the least we can add some timeout logic to ensure 
+		// the promise eventually rejects or resolves.
 	
 	getPlugins().then(function (plugins) {
 		var pluginPaths = plugins.map(function (name) {
@@ -25,8 +33,15 @@ define(function(require) {
 		console.log('Plugins found: '+JSON.stringify(pluginPaths, null, '  '));
 		require(pluginPaths, function () {
 			console.log('All plugins succesfully loaded!');
+			ready.resolve(plugins);
 		});
 	});
 	
+	
+	return {
+		//Export this so that anyone who cares about this can synch up
+		// and ensure they execute some code only after all plugins have been loaded.
+		ready: ready.promise
+	};
 	
 });
