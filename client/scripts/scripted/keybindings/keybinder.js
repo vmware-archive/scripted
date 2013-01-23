@@ -22,7 +22,7 @@ define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-cl
 ], function (mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
 
 function debug_log(msg) {
-	console.log(msg);
+//	console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
@@ -33,7 +33,6 @@ var getScriptedRcFile = mConfig.getScriptedRcFile;
 var putScriptedRcFile = mConfig.putScriptedRcFile;
 var event2keystroke = mKeystroke.fromKeyDownEvent;
 
-var isGlobalAction = mActionInfo.isGlobalAction;
 var eachEditor = editorUtils.eachEditor;
 
 /**
@@ -128,16 +127,17 @@ function captureDefaults(editor) {
 var installKeyEventTrap = (function () {
 
 	var listener; //set only on first call to installKeyEventTrap
-	var boundKeys = null; // set and updated on every call to installKeyEventTrap
+	var globalKeys = null; // set and updated on every call to installKeyEventTrap
 	                      // This is a map from keystroke strings to action names.
 	                      // Thus the keys of this map are the events that we should trap.
+	                      
+
 
 	/**
-	 * @return the corresponding global action or something falsy if there is no such action.
+	 * @return the corresponding global action(name) or something falsy if there is no such action.
 	 */
 	function getGlobalAction(keystroke) {
-		var action = boundKeys[keystroke];
-		return action && isGlobalAction(action) && action;
+		return globalKeys[keystroke];
 	}
 
 	/**
@@ -149,7 +149,11 @@ var installKeyEventTrap = (function () {
 			listener = function (e) {
 				var keystroke = event2keystroke(e);
 				debug_log('Seeing: '+keystroke);
-				if (e.ctrlKey || e.altKey || e.metaKey) {
+				//if (e.ctrlKey || e.altKey || e.metaKey) {
+					// THe if above is no longer needed because we only trap select keys
+					// bound to global actions see comment below why this was needed
+					// and may be needed again if a broad event trap policy is ever reinstated.
+					////
 					//prefilter: only trap if some modifier key other than shift is pressed.
 					//This is to prevent trapping keys like enter, and arrow keys as
 					//it seems to break dialogs (presumably because the dialogs are
@@ -169,14 +173,33 @@ var installKeyEventTrap = (function () {
 					} else {
 						debug_log('Ignore: '+keystroke);
 					}
-				}
+//				}
 			};
 			document.body.addEventListener('keydown', listener);
 		}
 	}
 
+	/**
+	 * Fetch a copy of an editors keybindings (scripted json format) filtered
+	 * down to only the bindings associated with global actions.
+	 */
+	function getGlobalKeyBindings(editor) {
+		var result = {};
+		var allKbs = getKeyBindings(editor);
+		var globalActions = mActionInfo.getGlobalActions(editor);
+		for (var keystroke in allKbs) {
+			if (allKbs.hasOwnProperty(keystroke)) {
+				var actionName = allKbs[keystroke];
+				if (globalActions[actionName]) {
+					result[keystroke] = actionName;
+				}
+			}
+		}
+		return result;
+	}
+
 	return function /*installKeyEventTrap*/(editor) {
-		boundKeys = getKeyBindings(editor);
+		globalKeys = getGlobalKeyBindings(editor);
 		installListener();
 	};
 

@@ -10,56 +10,31 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
-define(function(require, exports, module) {
+define(['./rest-utils'], function(rest) {
 
-	var mime = require('rest/interceptor/mime');
-	var errorCode = require('rest/interceptor/errorCode');
-	var entity = require('rest/interceptor/entity');
+	var defaultValue = rest.defaultValue;
+	var get = defaultValue(rest.get, {});
+	var put = rest.put;
 	
-	function unreject(client, value) {
-		return function (x) {
-			return client(x).otherwise(function (err) {
-				console.error(err);
-				return value;
+	return {
+		getScriptedRcFile: function (name) {
+			return get({
+				path: '/config/{name}',
+				params: {
+					name: name
+				}
 			});
-		};
-	}
-	
-	var baseClient = entity(
-		mime(
-			errorCode(),
-			{
-				mime: 'application/json'
-			}
-		)
-	);
-	
-	var putClient = unreject(baseClient);
-	var getClient = unreject(baseClient, {});
-
-	exports.getScriptedRcFile = function (name) {
-		return getClient({
-			path: '/config/{name}',
-			params: {
-				name: name
-			}
-		}).otherwise(function (err) {
-			console.error(err);
-			return {};
-		});
+		},
+		putScriptedRcFile: function (name, contents) {
+			return put({
+				path: '/config/{name}',
+				method: 'put',
+				params: {
+					name: name
+				},
+				entity: contents
+			});
+		}
 	};
 	
-	exports.putScriptedRcFile = function (name, contents) {
-		return putClient({
-			path: '/config/{name}',
-			method: 'put',
-			params: {
-				name: name
-			},
-			entity: contents
-		});
-	};
 });

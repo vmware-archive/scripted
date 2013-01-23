@@ -261,7 +261,7 @@ exports.preciseModeMissing = function (test) {
 				name: 'magic/missing',
 				kind: 'AMD'
 				//It is now a requirement that we don't return 'path' if the file doesn't exist!!
-				//path: 'web-app/scripts/magic/missing.js' 
+				//path: 'web-app/scripts/magic/missing.js'
 			}])
 		);
 		test.done();
@@ -364,7 +364,7 @@ exports.resolveNodeModule = function(test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -394,7 +394,7 @@ exports.resolveNodeModulesInParentDir = function(test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -421,7 +421,7 @@ exports.resolveNodeModulesWithProblem3 = function(test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -434,7 +434,7 @@ exports.resolveNodeModulesWithProblems = function(test) {
 	var depNames = ['foo', 'foo2', 'foo3', 'foo4', 'bar', 'zor', 'booger'];
 	var expectedPaths = [
 		undefined, //won't be found because the file name is misspelled
-		undefined, //won't be found because json contains bad type of data ' "main" : 88 
+		undefined, //won't be found because json contains bad type of data ' "main" : 88
 		undefined, //won't be found because json is unparsable
 		undefined, //won't be found because dir has neither index.js nor package.json
 		//Despite above problems, the rest of the modules should be found still:
@@ -455,7 +455,7 @@ exports.resolveNodeModulesWithProblems = function(test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -502,7 +502,7 @@ exports.resolveDifferentStyleRelativeDotRefs = function (test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -532,7 +532,7 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
 			for (var i = 0; i < expectedPaths.length; i++) {
-				test.equals(expectedPaths[i], resolveds[i].path); 
+				test.equals(expectedPaths[i], resolveds[i].path);
 			}
 			//console.log(resolveds);
 			test.done();
@@ -651,6 +651,63 @@ exports.usePlugins = function (test) {
 			});
 		});
 	});
-	
+};
+
+exports.voloSample = function (test) {
+	var api = makeApi('volo-sample');
+	var file = 'www/js/app/main.js';
+	var dep = {
+		kind: 'AMD',
+		name: 'one'
+	};
+	api.resolve(file, dep, function (dep) {
+		test.equals(toCompareString(dep), toCompareString({
+			"kind": "AMD",
+			"name": "one",
+			"path": "www/js/lib/one.js"
+		}));
+		test.done();
+	});
+};
+
+//exports.subPackageImport = function (test) {
+//	var api = makeApi('with-sub-package-imports');
+//	var file = 'client/js/app/main.js';
+//	var deps = [{
+//		kind: 'AMD',
+//		name: 'rest'
+//	}, {
+//		kind: 'AMD',
+//		name: 'rest/interceptors'
+//	}];
+//	api.resolve(file, deps, function (deps) {
+//		test.equals(toCompareString(deps), toCompareString([{
+//			kind: 'AMD',
+//			name: 'rest',
+//			path: 'client/js/components/rest/rest.js'
+//		}, {
+//			kind: 'AMD',
+//			name: 'rest/interceptors',
+//			path: 'client/js/components/rest/interceptors.js'
+//		}]));
+//		test.done();
+//	});
+//};
+
+exports.subPackageImport = function (test) {
+	var api = makeApi('with-sub-package-imports');
+	var file = 'client/js/app/main.js';
+	var dep = {
+		kind: 'AMD',
+		name: 'rest/interceptors'
+	};
+	api.resolve(file, dep, function (dep) {
+		test.equals(toCompareString(dep), toCompareString({
+			kind: 'AMD',
+			name: 'rest/interceptors',
+			path: 'client/js/components/rest/interceptors.js'
+		}));
+		test.done();
+	});
 };
 

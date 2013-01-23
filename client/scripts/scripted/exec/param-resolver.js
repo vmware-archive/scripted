@@ -31,23 +31,49 @@ function createParamReplacer(paramDefs) {
 		return resolverDef; //Assuming it's just a literal value
 	}
 
-	function replaceParams(target) {
+	var PARAM_START = "${";
+	var PARAM_END = "}";
+	
+
+	function internalDoit(target, calcInitialValue, doitFunc) {
+		paramDefs.extraIndentLevel = 0;
+		
 		if (typeof(target)==='string') {
-			var string = target;
-			for (var param in paramDefs) {
-				if (paramDefs.hasOwnProperty(param)) {
-					while (string.indexOf(param)>=0) {
-						var value = resolve(param);
-						string = string.replace(param, value);
+			var res = calcInitialValue(target);
+			var curr = 0;
+			// must replace parameters sequentially
+			// because ${selection} requires it
+			while (curr >= 0) {
+				var next = target.indexOf(PARAM_START, curr);
+				var param = null;
+				if (next >= 0) {
+					var nextEnd = target.indexOf(PARAM_END, next);
+					if (nextEnd >= 0) {
+						param = target.substring(next, nextEnd+1);
+						curr = nextEnd + 1;
+					} else {
+						curr = next + 1;
 					}
+
+					if (param && paramDefs.hasOwnProperty(param)) {
+						var value = resolve(param);
+						res = doitFunc(res, param, value, next, nextEnd + 1);
+					} else {
+						// didn't find a param
+						curr = next + 1;
+					}
+				} else {
+					// we're done
+					curr = -1;
 				}
 			}
-			return string;
+			
+			return res;
 		} else if (typeof(target)==='object') {
 			var copied = Array.isArray(target)?[]:{};
 			for (var property in target) {
 				if (target.hasOwnProperty(property)) {
-					copied[property] = replaceParams(target[property]);
+					copied[property] = internalDoit(target[property], calcInitialValue, doitFunc);
 				}
 			}
 			return copied;
@@ -56,39 +82,29 @@ function createParamReplacer(paramDefs) {
 		}
 	}
 	
-	var PARAM_START = "${";
-	var PARAM_END = "}";
+	function replaceParams(target) {
+		return internalDoit(target,
+			function(target) { return target; },
+			function(string, param, value, start, end) {
+				return string.replace(param, value);
+			});
+	}
 	
 	/**
 	 * Finds the replacements for a given target string.  Does not apply the replacements.
 	 * Instead, returns an array of replacements that would be applied.
-	 * @param String target the target text to determine replacements for
+	 * @param {String} target the target text to determine replacements for
 	 * @return {Array.<{start:Number,end:Number,text:String,lengthAdded:Number}>} an array of replacements that
 	 * would be applied if the replaceParams function is called.  the lengthAdded property
 	 * is the number of chars added minus the number of chars removed
 	 */
 	function findReplacements(target) {
-		var curr = 0;
-		var res = [];
-		while ((curr = target.indexOf(PARAM_START, curr)) >= 0) {
-			var end = target.indexOf(PARAM_END, curr);
-			if (end >= 0) {
-				var param = target.substring(curr, end+1);
-				for (var paramDef in paramDefs) {
-					if (paramDefs.hasOwnProperty(paramDef)) {
-						while (param === paramDef) {
-							var value = resolve(param);
-							res.push({start:curr, end: end, text:value, lengthAdded:(value.length - end + curr-1)});
-							break;
-						}
-					}
-				}
-				curr = end+1;
-			} else {
-				break;
-			}
-		}
-		return res;
+		return internalDoit(target,
+			function(target) { return []; },
+			function(res, param, value, start, end) {
+				res.push({start:start, end: end-1, text:value, lengthAdded:(value.length - end + start)});
+				return res;
+			});
 	}
 	
 	return {
@@ -152,8 +168,10 @@ var getDirectory = require('scripted/utils/pathUtils').getDirectory;
 //a given editor context.
 function forEditor(editor) {
 
-	var paramDefs = {
-	};
+	var paramDefs = {};
+	
+	// used to ensure that selection is transformed according to extra indents
+	paramDefs.extraIndentLevel = 0;
 	
 	function getDir() {
 		return getDirectory(editor.getFilePath());
@@ -180,6 +198,7 @@ function forEditor(editor) {
 	def("${lineStart}", function() {
 		var offset = editor.getTextView().getSelection().start;
 		var buffer = editor.getText();
+		paramDefs.extraIndentLevel = 0;
 		return leadingWhitespace(buffer, offset);
 	});
 	
@@ -188,13 +207,31 @@ function forEditor(editor) {
 		if (!indentText) {
 			indentText = indent();
 		}
+		paramDefs.extraIndentLevel++;
 		return indentText;
 	});
 	
 	def("${selection}", function() {
 		var selection = editor.getTextView().getSelection();
-		return editor.getText(selection.start, selection.end);
+		var text = editor.getText(selection.start, selection.end);
+		
+		// now add extra indents after each newline
+		// find index of previous lineStart call
+		var indentText = "";
+		for (var i = 0; i < paramDefs.extraIndentLevel; i++) {
+			indentText += paramDefs["${indent}"]();
+			paramDefs.extraIndentLevel--;
+		}
+		var regex = new RegExp('\n', "g");
+		text = text.replace(regex, "\n" + indentText);
+		return text;
 	});
+	
+	def("${year}", function() {
+		return new Date().getFullYear();
+	});
+	
+	
 	
 	
 	// Other possible parameters

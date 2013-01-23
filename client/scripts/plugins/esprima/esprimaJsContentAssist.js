@@ -2429,6 +2429,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		 * implements the Orion content assist API
 		 */
 		computeProposals: function(buffer, offset, context) {
+			if (context.selection && context.selection.start !== context.selection.end) {
+				// only propose if an empty selection.
+				return null;
+			}
+		
 			try {
 				var root = mVisitor.parse(buffer);
 				if (!root) {

@@ -19,7 +19,12 @@ function(assert, resolver, mTestutils) {
 	var createMockEditor = function(text, path, selStart, selEnd) {
 		return {
 			getFilePath : function() { return path; },
-			getText : function() { return text; },
+			getText : function(start, end) {
+				if (end) {
+					return text.substring(start, end);
+				}
+				return text;
+			},
 			getTextView : function() {
 				return {
 					getSelection : function() {
@@ -115,6 +120,68 @@ function(assert, resolver, mTestutils) {
 		assert.equal(doReplaceParams("${indent}${indent}${indent}"), "         ");
 	};
 	
+	tests["test param-resolver nuthin1"] = function() {
+		formatterPrefs.expandtab = false;
+		formatterPrefs.tabsize = 4;
+		assert.equal(doReplaceParams("${i-aint-a-param}"), "${i-aint-a-param}");
+	};
+	tests["test param-resolver nuthin2"] = function() {
+		formatterPrefs.expandtab = false;
+		formatterPrefs.tabsize = 3;
+		assert.equal(doReplaceParams("${i-aint-a-param}${indent}"), "${i-aint-a-param}\t");
+	};
+	tests["test param-resolver nuthin3"] = function() {
+		formatterPrefs.expandtab = false;
+		formatterPrefs.tabsize = 3;
+		assert.equal(doReplaceParams("${i-aint-a-param${indent}}${indent}"), "${i-aint-a-param\t}\t");
+	};
+	
+	tests["test selection 0"] = function() {
+		var contents = "foo bar";
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf('foo'), contents.indexOf('foo') + 3, "${selection}"), "foo");
+	};
+	
+	tests["test selection 1"] = function() {
+		var contents = "foo bar";
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf('bar'), contents.indexOf('bar') + 3, "${selection}"), "bar");
+	};
+	
+	tests["test selection 2"] = function() {
+		var contents = "baz foo bar";
+		var newContents = "{foo}";
+		var sel = 'foo';
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf(sel), contents.indexOf(sel) + sel.length, "{${selection}}"), newContents);
+	};
+	
+	tests["test selection 3"] = function() {
+		var contents = "baz\n\t\tfoo bar";
+		var newContents = "{\n\t\tfoo}";
+		var sel = '\n\t\tfoo';
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf(sel), contents.indexOf(sel) + sel.length, "{${selection}}"), newContents);
+	};
+	
+	tests["test selection 4"] = function() {
+		var contents = "baz\n\tfoo\n\t\tfoo bar";
+		var newContents = "{\t\n\tfoo\n\t\tfoo}";
+		var sel = "\n\tfoo\n\t\tfoo";
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf(sel), contents.indexOf(sel) + sel.length, "{\t${selection}}"), newContents);
+	};
+	
+	tests["test selection 5"] = function() {
+		var contents = "baz\n\tfoo\n\t\tfoo bar";
+		var newContents = "{\t\n\t\tfoo\n\t\t\tfoo}";
+		var sel = "\n\tfoo\n\t\tfoo";
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf(sel), contents.indexOf(sel) + sel.length, "{${indent}${selection}}"), newContents);
+	};
+	
+	// ${indent} and ${lineStart} have special meanings to #{selection}
+	tests["test selection 6"] = function() {
+		var contents = "baz\nfoo\nfoo\n\tfoo bar";
+		var newContents = "{\tfoo\n\tfoo\n\t\tfoo}\t\tfoo\n\t\tfoo\n\t\t\tfoo";
+		var sel = "foo\nfoo\n\tfoo";
+		assert.equal(doReplaceParams(contents, '/b', contents.indexOf(sel), contents.indexOf(sel) + sel.length, "{${indent}${selection}}${lineStart}${indent}${indent}${selection}"), newContents);
+	};
+	
 	tests["test find replacements 1"] = function() {
 		var proposal = "${indent}";
 		assert.deepEqual(doFindReplacements(proposal), [
@@ -143,6 +210,58 @@ function(assert, resolver, mTestutils) {
 				text: '\t',
 				lengthAdded: 1 - "${indent}".length
 			}
+		]);
+	};
+	
+	tests["test find replacements 3"] = function() {
+		var proposal = "${lineStart}${indent}${selection}here";
+		var buffer = "\n  foo xxx";
+		assert.deepEqual(doFindReplacements(buffer, "", buffer.indexOf("foo"), buffer.indexOf("foo")+3, proposal), [
+			{
+				start: 0,
+				end: "${lineStart}".length-1,
+				text: '  ',
+				lengthAdded: 2 - "${lineStart}".length
+			},
+			{
+				start: "${lineStart}".length,
+				end: "${lineStart}".length + "${indent}".length-1,
+				text: '\t',
+				lengthAdded: 1 - "${indent}".length
+			},
+			{
+				start: "${lineStart}${indent}".length,
+				end: "${lineStart}${indent}${selection}".length-1,
+				text: 'foo',
+				lengthAdded: 'foo'.length - "${selection}".length
+			}
+			
+		]);
+	};
+	
+	tests["test find replacements 4"] = function() {
+		var proposal = "${lineStart}${${indent}${selection}here";
+		var buffer = "\n  foo xxx";
+		assert.deepEqual(doFindReplacements(buffer, "", buffer.indexOf("foo"), buffer.indexOf("foo")+3, proposal), [
+			{
+				start: 0,
+				end: "${lineStart}".length-1,
+				text: '  ',
+				lengthAdded: 2 - "${lineStart}".length
+			},
+			{
+				start: "${lineStart}${".length,
+				end: "${lineStart}${".length + "${indent}".length-1,
+				text: '\t',
+				lengthAdded: 1 - "${indent}".length
+			},
+			{
+				start: "${lineStart}${${indent}".length,
+				end: "${lineStart}${${indent}${selection}".length-1,
+				text: 'foo',
+				lengthAdded: 'foo'.length - "${selection}".length
+			}
+			
 		]);
 	};
 	

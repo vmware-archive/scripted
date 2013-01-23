@@ -1,0 +1,5 @@
+{
+	"jshint" : {
+		"global" : ["console", "define", "exports", "require", "requirejs"]
+	}
+}

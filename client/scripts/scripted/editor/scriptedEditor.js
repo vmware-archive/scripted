@@ -209,6 +209,9 @@ define([
 		 */
 		function afterSaveSuccess(filePath) {
 			editor.dispatchEvent({type: "afterSave", file: filePath});
+			// Dispatch a wider event that a save occurred, rather than just one on the editor in question.
+			// TODO pass editor on the event? Migrate afterSave handlers to use this one?
+			$(document).trigger('afterEditorSave',[filePath]);
 		}
 		
 		var textViewFactory = function() {

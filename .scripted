@@ -43,7 +43,9 @@
 		"font":"Ubuntu Mono",
 		"font_size":18,
 		"content_assist_font_size":14,
-		"navigator": false
+		"navigator": false,
+		// time in ms before history menu drops down (default 500ms)
+		"history_drop_down_auto_activation": 500
     }
     
     EXEC configuration examples:
@@ -115,10 +117,16 @@
 		]
 	},
 
+
 	/* Configuring the mark occurrences behavior */
 	mark_occurrences : {
 		interval :500,  // interval between requests. set to 0 for instantaneous, or higher numbers for more of a delay
 		disable : false,  // set to true to disable mark occurrences
 		retain : false  // set to true to retain marks if current caret location is not over a word
 	}
+/*
+	application : {
+		webroot:"client" // the folder to 'serve' in the server instance that scripted can launch, relative to inferred project root
+	}
+*/
 }

@@ -18,6 +18,8 @@
 var express = require('express');
 var pathResolve = require('path').resolve;
 
+var FAVICO = pathResolve();
+
 function start(route, handle) {
 	function onRequest(req, res, next) {
 		var path = req.path;
@@ -51,6 +53,8 @@ function start(route, handle) {
 			showStack: true
 		}));
 	});
+	
+	require('./servlets/status').install(app);
 
 	require('./routes/editor-routes').install(app);
 	require('./routes/test-routes').install(app);
@@ -58,6 +62,8 @@ function start(route, handle) {
 	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);
+	
+	require('./servlets/application-servlet').install(app);
 
 	console.log('app.server = ' + app.server);
 	app.server.listen(7261, "127.0.0.1" /* only accepting connections from localhost */);
