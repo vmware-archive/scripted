@@ -40,7 +40,8 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 
 	var editorPrefix, windowsPathRE;
 
-	editorPrefix = "/editor";
+	// TODO FIXADE Should inject this value
+	editorPrefix = window.isTest ? "/clientServerTests?" : "/editor";
 	windowsPathRE = /^\/?.+:/;
 
 	return {
