@@ -25,7 +25,7 @@ define([
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
-	"scripted/exec/exec-after-save", "jshint", "jquery"
+	"scripted/exec/exec-after-save", "jshint", "jquery", "scripted/editor/zenCodingPlugin"
 ], function (
 	require, mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
