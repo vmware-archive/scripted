@@ -40,7 +40,8 @@ define(["jshint"], function () {
 		"Stopping, unable to continue"
 	];
 
-	forEachChar = Array.prototype.forEach.call.bind(Array.prototype.forEach);
+	// uggh.  phantomjs does not like this.
+//	forEachChar = Array.prototype.forEach.call.bind(Array.prototype.forEach);
 
 	/**
 	 * Merge the jshintrc file into any values loaded from .scripted, together with the defaults we want for jshint.
@@ -178,7 +179,9 @@ define(["jshint"], function () {
 					if (!tabpositions) {
 						var evidence = error.evidence;
 						tabpositions = [];
-						forEachChar(evidence, function(item, index) {
+						// ugggh phantomjs does not like this
+//						forEachChar(evidence, function(item, index) {
+						Array.prototype.forEach.call(evidence, function(item, index) {
 							if (item === '\t') {
 								// First col is 1 (not 0) to match error positions
 								tabpositions.push(index+1);
