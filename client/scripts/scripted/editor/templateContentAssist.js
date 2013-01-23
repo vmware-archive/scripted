@@ -24,7 +24,7 @@ if(!Array.isArray) {
  * This module provides content assist gathered from .scripted-completion files
  */
 
-define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], function(getTemplates, when, resolver) {
+define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugins/esprima/proposalUtils"], function(getTemplates, when, resolver, proposalUtils) {
 
 	/**
 	 * shared templates
@@ -142,7 +142,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver'], funct
 			var replaceStart = invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
 				if ((templatesOnly && template.isTemplate) ||
-					(!templatesOnly && template.trigger.substr(0,prefix.length) === prefix)) {
+					(!templatesOnly && proposalUtils.looselyMatches(prefix, template.trigger))) {
 					
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
