@@ -35,10 +35,6 @@ define(function(require) {
 	 */
 	function preSaveHook(editor, filePath) {
 		console.log('preSaveHook called');
-//		//TODO: To keep simple for now, assume there's at most 1 preSaveHandler
-//		if (preSaveHandlers[0]) {
-//			return preSaveHandlers[0](editor, filePath);
-//		}
 
 		//Call each of the handlers one by one in sequence until one of them
 		//rejects. The preSaveHook returns a promise that rejects if any
