@@ -76,7 +76,9 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				require(['scripted/keybindings/keyhelp'], function(mKeyHelp) {
 					//console.log('Keybindings help-panel is ready');
 				});
-
+				
+				// add live reloading support
+				require(['scripted/application-manager']);
 
 				$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
 
