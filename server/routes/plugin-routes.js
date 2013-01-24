@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Kris De Volder - initial API and implementation
+ *     Kris De Volder (VMWare) - initial API and implementation
  ******************************************************************************/
 
 /*global console require*/
@@ -16,11 +16,8 @@
 var when = require('when');
 var express = require('express');
 
-var createReadStream = require('fs').createReadStream;
-//var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var pluginDiscovery = require('../plugin-support/plugin-discovery');
 var getPlugins = pluginDiscovery.getPlugins;
-var getPluginPath = pluginDiscovery.getPluginPath;
 
 exports.install = function (app) {
 	app.get('/config/plugins/list', function (req, res) {
@@ -41,16 +38,12 @@ exports.install = function (app) {
 			}
 		);
 	});
-	//Requests for plugin code will end up in this path because of how their 'names'
-	//get resolved by requirejs.
-//	app.get('/scripts/scripted/plugins/:name(*)', function (req, res) {
-//		var stream = createReadStream(getPluginPath(req.params.name));
-//		res.header('Content-Type', 'text/javascript');
-//		stream.pipe(res);
-//	});
 
-	//console.log('pluginPath = ' +getPluginPath());
-
-	app.use('/scripts/scripted/plugins', express.static(pluginDiscovery.pluginDir));
+	var pluginDirs = pluginDiscovery.pluginDirs;
+	for (var i = 0; i < pluginDirs.length; i++) {
+		var dir = pluginDirs[i];
+		app.use('/scripts/scripted/plugins', express.static(dir));
+	}
 
 };
+
