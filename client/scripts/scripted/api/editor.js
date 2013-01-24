@@ -35,15 +35,20 @@ define(function (require) {
 					//If something went wrong with this transform
 					//don't reject the save. Just ignore that transform.
 					if (err) {
-						console.log(err);
 						if (err.stack) {
 							console.log(err.stack);
+						} else {
+							console.error(err);
 						}
 					}
 					return when.resolve();
 				}).then(function(newText) {
 					if (typeof(newText)==='string') {
+						//TODO: work harder at preserving selection even if text has shifted ?
+						var oldSelection = editor.getSelection();
+						//console.dir(oldSelection);
 						editor.setText(newText);
+						editor.setSelection(oldSelection.start, oldSelection.end);
 					}
 				});
 			});
