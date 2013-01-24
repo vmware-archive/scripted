@@ -214,9 +214,13 @@ exports.CompletionsProcessor.prototype = {
 			trigger = contents;
 		}
 		
+		// now remove ugly variables from the description
+		var descContents = contents.replace(/\n\$\{lineStart\}/g, "\n");
+		descContents = descContents.replace(/\$\{indent\}/g, "\t");
+		
 		return {
 			proposal : contents,
-			description : trigger + " : " + contents,
+			description : trigger + " : " + descContents,
 			trigger: trigger,
 			positions : positions.length === 0 ? null : positions,
 			escapePosition : escapePosition ? escapePosition : null,
@@ -258,7 +262,6 @@ exports.CompletionsProcessor.prototype = {
 						console.warn("Invalid completion: " + JSON5.stringify(completionsArr[i]) + " ...ignoring");
 					}
 				}
-				console.log("Finished finding completions in " + fName);
 				deferred.resolve({scope : scope, completions : realCompletions });
 			} catch (e) {
 				console.warn("Invalid completions file " + fName + "...ignoring");

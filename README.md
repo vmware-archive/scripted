@@ -58,6 +58,8 @@ Or you can grab the most recent packaged release from here:
 OR you can live on the bleeding edge by either cloning the repository:
 
 	git clone https://github.com/scripted-editor/scripted
+	cd scripted
+	npm install
 
 or grabbing the latest repo contents as a zip:
 

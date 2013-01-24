@@ -10,7 +10,8 @@
   <script src="tests/client/testsetup.js"></script>
   <script type="text/javascript">
     QUnit.config.autostart = false;
-
+	window.isTest = true;
+	
 	function fixUrl() {
 		var xhrobj = new XMLHttpRequest();
 		xhrobj.open("GET", '/test-api/server-root', false);

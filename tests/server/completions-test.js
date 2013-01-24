@@ -256,8 +256,9 @@ exports.findCompletions4 = function(test) {
 
 			// var origCompletion = '<dl>\n${lineStart}${indent}<dt>${1:First definition}</dt> <dd>${2:First explanation}</dd>\n${lineStart}${indent}<dt>${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n${lineStart}</dl>';
 			var completion = '<dl>\n${lineStart}${indent}<dt>First definition</dt> <dd>First explanation</dd>\n${lineStart}${indent}<dt>Second definition</dt> <dd>Second explanation</dd>\n${lineStart}</dl>';
+			var completionDesc = '<dl>\n\t<dt>First definition</dt> <dd>First explanation</dd>\n\t<dt>Second definition</dt> <dd>Second explanation</dd>\n</dl>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
 			test.equals(completions[i].trigger, "dl");
 			test.deepEqual(completions[i].positions, [
 				{offset: completion.indexOf("First definition"), length:"First definition".length },
@@ -269,8 +270,9 @@ exports.findCompletions4 = function(test) {
 			i++;
 
 			completion = '<table>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<th>Column 1 Heading</th>\n${lineStart}${indent}${indent}<th>Column 2 Heading</th>\n${lineStart}${indent}</tr>\n${lineStart}${indent}<tr>\n${lineStart}${indent}${indent}<td>R1C1</td>\n${lineStart}${indent}${indent}<td>R1C2</td>\n${lineStart}${indent}</tr>\n${lineStart}</table>';
+			completionDesc = '<table>\n\t<tr>\n\t\t<th>Column 1 Heading</th>\n\t\t<th>Column 2 Heading</th>\n\t</tr>\n\t<tr>\n\t\t<td>R1C1</td>\n\t\t<td>R1C2</td>\n\t</tr>\n</table>';
 			test.equals(completions[i].proposal, completion);
-			test.equals(completions[i].description, completions[i].trigger + " : " + completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
 			test.equals(completions[i].trigger, "table");
 			test.deepEqual(completions[i].positions, [
 				{offset: completion.indexOf("Column 1 Heading"), length:"Column 1 Heading".length },

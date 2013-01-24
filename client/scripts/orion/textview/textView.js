@@ -2220,6 +2220,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
+			
+			// SCRIPTED 
+			// feature on mac-chrome: 
+			// prevent left scrolling on swipe
+			// otherwise history back navigation will happen
+			if (isChrome && isMac) {
+				e.preventDefault();
+			}
+			// SCRIPTED end
 		},
 		_handlePaste: function (e) {
 			if (this._ignorePaste) { return; }

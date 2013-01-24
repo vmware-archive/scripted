@@ -63,6 +63,8 @@ function start(route, handle) {
 	
 	require('./servlets/incremental-search-servlet').install(app);
 	require('./servlets/incremental-file-search-servlet').install(app);
+	
+	require('./servlets/application-servlet').install(app);
 
 	console.log('app.server = ' + app.server);
 	app.server.listen(7261, "127.0.0.1" /* only accepting connections from localhost */);

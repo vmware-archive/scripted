@@ -38,7 +38,6 @@ define([
 	mMarkoccurrences, tHelptext
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
-		window.foo = 1;
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
 		var previousLine = model.getLine( previousLineIndex );
@@ -50,11 +49,11 @@ define([
 		
 		if (previousLine) {
 			var i = 0;
-			var char = previousLine.charAt(0);
+			var ch = previousLine.charAt(0);
  
-			while (char === options.indent_char) {
+			while (ch === options.indent_char) {
 				i = i + options.indent_size;
-				char = previousLine.charAt(i);
+				ch = previousLine.charAt(i);
 			}
 		
 			var lastChar = previousLine.charAt(previousLine.length - 1);
@@ -78,14 +77,12 @@ define([
 				}
 			}
 		}
-		
-		var checkedResult = {
-				toFormat: selection,
-				start: startPosition,
-				end: endPosition
+
+		return {
+			toFormat: selection,
+			start: startPosition,
+			end: endPosition
 		};
-		
-		return checkedResult;
 	};
 
 	//Recompute and set the given editor's title.
@@ -214,6 +211,9 @@ define([
 		 */
 		function afterSaveSuccess(filePath) {
 			editor.dispatchEvent({type: "afterSave", file: filePath});
+			// Dispatch a wider event that a save occurred, rather than just one on the editor in question.
+			// TODO pass editor on the event? Migrate afterSave handlers to use this one?
+			$(document).trigger('afterEditorSave',[filePath]);
 		}
 		
 		var textViewFactory = function() {
@@ -378,17 +378,19 @@ define([
 
 				$('#closebox').click(textSearcher._commandService.closeParameterCollector);
 	
-				$('.scriptededitor').off('keydown');
-				$('.scriptededitor').on('keydown', function(e){
-					if (e.keyCode === 27){
-						textSearcher._commandService.closeParameterCollector();
-					}
-				});
+				$('.scriptededitor')
+					.off('keydown')
+					.on('keydown', function(e){
+						if (e.keyCode === 27){
+							textSearcher._commandService.closeParameterCollector();
+						}
+					});
 				
-				 $('#localSearchFindWith').off('keyup');
-				 $('#localSearchFindWith').on('keyup', function(e){
-					editor.lastSearchTerm = $('#localSearchFindWith').val();
-				 });
+				 $('#localSearchFindWith')
+					.off('keyup')
+					.on('keyup', function(){
+						editor.lastSearchTerm = $('#localSearchFindWith').val();
+					});
 
 				return true;
 			});

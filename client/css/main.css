@@ -178,6 +178,23 @@ footer{
 	float:right;
 }
 
+
+.start {
+	margin:5px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/run.png);
+	width:20px;
+	height:20px;
+}
+
+.stop {
+	margin:5px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/stop.png);
+	width:20px;
+	height:20px;
+}
+
 #help_open{
 	margin:5px 5px 0 0;
 	cursor:pointer;

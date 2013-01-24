@@ -18,6 +18,9 @@
 
 importScripts('../../../components/requirejs/require.js');
 require.config({
+	packages:	[
+		{ name: 'when', location: 'lib/when', main: 'when' }
+	],
     baseUrl: "../../",
 	packages:	[{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
     paths: {

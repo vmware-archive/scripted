@@ -227,6 +227,12 @@ function forEditor(editor) {
 		return text;
 	});
 	
+	def("${year}", function() {
+		return new Date().getFullYear();
+	});
+	
+	
+	
 	
 	// Other possible parameters
 	// current line
