@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
 var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
@@ -31,9 +31,9 @@ var pluginDir = pathResolve(__dirname, '../../plugins');
  */
 function getPlugins() {
 	console.log('pluginDir = ' + pluginDir);
-	
+
 	return filesystem.listFiles(pluginDir).then(function (names) {
-		console.dir(names);
+		//console.dir(names);
 		return names.filter(function (name) {
 			return endsWith(name, '.js');
 		}).map(function (name) {
@@ -48,6 +48,7 @@ function getPlugins() {
 function getPluginPath(name) {
 	return pathResolve(pluginDir, name);
 }
- 
+
 exports.getPlugins = getPlugins;
-exports.getPluginPath = getPluginPath;
+//exports.getPluginPath = getPluginPath;
+exports.pluginDir = pluginDir;

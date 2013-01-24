@@ -10,12 +10,14 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global console require*/
 
 var when = require('when');
+var express = require('express');
+
 var createReadStream = require('fs').createReadStream;
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+//var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var pluginDiscovery = require('../plugin-support/plugin-discovery');
 var getPlugins = pluginDiscovery.getPlugins;
 var getPluginPath = pluginDiscovery.getPluginPath;
@@ -41,9 +43,14 @@ exports.install = function (app) {
 	});
 	//Requests for plugin code will end up in this path because of how their 'names'
 	//get resolved by requirejs.
-	app.get('/scripts/scripted/plugins/:name(*)', function (req, res) {
-		var stream = createReadStream(getPluginPath(req.params.name));
-		res.header('Content-Type', 'text/javascript');
-		stream.pipe(res);
-	});
+//	app.get('/scripts/scripted/plugins/:name(*)', function (req, res) {
+//		var stream = createReadStream(getPluginPath(req.params.name));
+//		res.header('Content-Type', 'text/javascript');
+//		stream.pipe(res);
+//	});
+
+	//console.log('pluginPath = ' +getPluginPath());
+
+	app.use('/scripts/scripted/plugins', express.static(pluginDiscovery.pluginDir));
+
 };
