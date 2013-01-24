@@ -78,7 +78,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		var autoActivation = (window.scripted &&
 			window.scripted.config &&
 			window.scripted.config.ui &&
-			window.scripted.config.ui.history_drop_down_auto_activation)
+			window.scripted.config.ui.auto_activation)
 			|| 500;
 
 		var root = window.fsroot;

@@ -511,6 +511,10 @@ define([
 			domNode: domNode
 		});
 
+		editor.getFilePath = function(){
+			return filePath;
+		};
+		
 		editor.jsContentAssistant = jsContentAssistant;
 		
 		editor.addEventListener("DirtyChanged", function(evt) {
@@ -542,10 +546,6 @@ define([
 			syntaxHighlighter.highlight(filePath, editor);
 			editor.highlightAnnotations();
 			postSave(text);
-		};
-		
-		editor.getFilePath = function(){
-			return filePath;
 		};
 		
 		editor.findDefinition = function(offset) {

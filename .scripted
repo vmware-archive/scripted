@@ -44,8 +44,8 @@
 		"font_size":18,
 		"content_assist_font_size":14,
 		"navigator": false,
-		// time in ms before history menu drops down (default 500ms)
-		"history_drop_down_auto_activation": 500
+		// time in ms before content assist auto activates and history menu drops down (default 500ms)
+		"auto_activation": 500
     }
     
     EXEC configuration examples:
