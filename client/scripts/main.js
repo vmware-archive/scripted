@@ -14,12 +14,20 @@
 
 /*jslint browser:true */
 
-define(['scripted', 'scriptedLogger', "layoutManager", "scripted/navigator/explorer-table", "scripted/editor/editorPane"], 
-	function(scripted, scriptedLogger, layoutManager, FileExplorer) {
+define(function (require) {
+
+	var scripted = require('scripted');
+	var scriptedLogger = require('scriptedLogger');
+	var layoutManager = require('layoutManager');
+	var FileExplorer = require('scripted/navigator/explorer-table');
+	require('scripted/editor/editorPane');
+	
 	scripted.init();
+	
 	// doing this in the layout manager itself
 //	layoutManager.editorNode = document.getElementById("editor");
 	var fileExplorer = new FileExplorer({parentId : 'explorer-tree'});
+	
 	scripted.ready(scriptedLogger, fileExplorer, layoutManager);
 });
 
@@ -43,12 +51,12 @@ define(['scripted', 'scriptedLogger', "layoutManager", "scripted/navigator/explo
 //	scriptedLogger : {
 //		module : 'scriptedLogger'
 //	},
-//	
+//
 //	// module needs to be loaded, but doesn't need to be referenced
 //	editorPane : {
 //		module : "scripted/editor/editorPane"
 //	},
-//	
+//
 //	// does the layout and resizes dom nodes on window resize and when vertical bars move
 //	layoutManager : {
 //		module : "layoutManager",
@@ -56,7 +64,7 @@ define(['scripted', 'scriptedLogger', "layoutManager", "scripted/navigator/explo
 //			editorNode : { $ref : "dom!editor"} // TODO more dom nodes
 //		}
 //	},
-//	
+//
 //	// the left-hand navigator
 //	fileExplorer : {
 //		create : {
@@ -64,7 +72,7 @@ define(['scripted', 'scriptedLogger', "layoutManager", "scripted/navigator/explo
 //			args : [{ parentId: "explorer-tree" }]
 //		}
 //	},
-//	
+//
 //	plugins : [
 //		{ module : 'wire/debug' },
 //		{ module : 'wire/jquery/dom' }
