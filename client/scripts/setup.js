@@ -47,8 +47,11 @@ requirejs.config({
 		'doctrine/doctrine' : '../components/doctrine/doctrine',
 		'lib/json5' : '../components/json5/lib/json5',
 		jshint: 'lib/jshint-r12-80277ef',
-		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client'
+		'websocket-multiplex': 'lib/websocket-multiplex/multiplex_client',
+		zen: 'lib/zen/emmet-full'
+//		zen: 'lib/zen/emmet-full.min' // use minified form for distributions
 	}
 });
 
 require(['main', 'scripted/plugin-loader']);
+

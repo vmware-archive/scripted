@@ -78,7 +78,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		var autoActivation = (window.scripted &&
 			window.scripted.config &&
 			window.scripted.config.ui &&
-			window.scripted.config.ui.history_drop_down_auto_activation)
+			window.scripted.config.ui.auto_activation)
 			|| 500;
 
 		var root = window.fsroot;
@@ -132,6 +132,8 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 
 		var openRequests = {};
 		var closeRequests = {};
+		
+		// breadcrumb enter will open drop-down after auto-activation time
 		$('#breadcrumb > li').on('mouseenter', function(evt) {
 			var self = this;
 			var id = $(self).attr('data-id');
@@ -147,6 +149,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			}
 		});
 
+		// breadcrumb leave will close drop-down after auto-activation time
 		$('#breadcrumb > li').on('mouseleave', function(evt) {
 			var self = this;
 			var id = $(self).attr('data-id');
@@ -163,6 +166,17 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			}
 		});
 
+		// breadcrumb drop-down enter will stop the auto-close of drop-down
+		$('.breadcrumb_menu').on('mouseenter', function(evt) {
+			var self = this;
+			var id = $(self).attr('data-id');
+			if (closeRequests[id]) {
+				window.clearTimeout(closeRequests[id]);
+				delete closeRequests[id];
+			}
+		});
+
+		// breadcrumb drop-down leave will auto-close the drop-down after auto-activation time
 		$('.breadcrumb_menu').on('mouseleave', function(evt) {
 			var self = this;
 			var id = $(self).attr('data-id');

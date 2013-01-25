@@ -656,7 +656,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 								result.rturn = rawtags[i].type;
 								break;
 							case "param":
-								result.params[rawtags[i].name] = rawtags[i].type;
+								// remove square brackets
+								var name = rawtags[i].name;
+								if (name.charAt(0) === '[' && name.charAt(name.length -1) === ']') {
+									name = name.substring(1, name.length-1);
+								}
+								result.params[name] = rawtags[i].type;
 								break;
 						}
 					}

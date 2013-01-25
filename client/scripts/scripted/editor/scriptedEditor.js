@@ -26,7 +26,7 @@ define([
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
-	"scripted/exec/exec-after-save", "jshint", "jquery"
+	"scripted/exec/exec-after-save", "jshint", "jquery", "scripted/editor/zenCodingPlugin"
 ], function (
 	require, mSaveHooks, when,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
@@ -524,6 +524,15 @@ define([
 			domNode: domNode
 		});
 
+		editor.getFilePath = function() {
+			return filePath;
+		};
+		
+		// just returns file extension for now
+		editor.getContentType = function() {
+			return extension;
+		};
+		
 		editor.jsContentAssistant = jsContentAssistant;
 		
 		editor.addEventListener("DirtyChanged", function(evt) {
@@ -555,10 +564,6 @@ define([
 			syntaxHighlighter.highlight(filePath, editor);
 			editor.highlightAnnotations();
 			postSave(text);
-		};
-		
-		editor.getFilePath = function(){
-			return filePath;
 		};
 		
 		editor.findDefinition = function(offset) {
