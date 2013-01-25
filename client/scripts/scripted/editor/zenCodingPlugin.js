@@ -32,14 +32,14 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 		},
 		createProxy: function(editor) {
 			return emmet.exec(function(req, _) {
+				// TODO shouldn't have to do this twice
 				var res = req('resources');
 				var utils = req('utils');
 				res.setVariable('indentation', textUtils.indent());
 				utils.setNewline('\n');
-				console.log("in editor proxy");
 				return {
 					setContext: function(context) {
-						// TODO indentation not working
+						// TODO shouldn't have to do this twice
 						var res = req('resources');
 						var utils = req('utils');
 						res.setVariable('indentation', textUtils.indent());
@@ -196,7 +196,6 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 						if (sel) {
 							return editor.getText(sel.start, sel.end);
 						}
-
 						return '';
 					},
 
@@ -213,7 +212,6 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 		},
 		
 		runEmmetAction : function(name, args) {
-			console.log("Running emmet action: " + name);
 			try {
 				return emmet.require('actions').run(name, [this.editorProxy]);
 			} catch (e) {
@@ -224,7 +222,6 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 		},
 		
 		registerEmmetAction : function(name, key) {
-			console.log("Registering emmet command " + name + " to " + key);
 			this.editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(key.toString(), /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Zen " + name);
 			this.editor.getTextView().setAction("Zen " + name, function() {
 				this.runEmmetAction(name);
