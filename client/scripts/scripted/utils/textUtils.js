@@ -67,6 +67,11 @@ define([], function() {
 				}
 			}
 			return whitespace;
+		},
+		
+		/** for testing only */
+		_flushCache : function() {
+			indentText = null;
 		}
 	};
 
