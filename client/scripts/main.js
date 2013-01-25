@@ -21,13 +21,14 @@ define(function (require) {
 	var layoutManager = require('layoutManager');
 	var FileExplorer = require('scripted/navigator/explorer-table');
 	require('scripted/editor/editorPane');
-	
+	require('scripted/plugin-loader');
+
 	scripted.init();
-	
+
 	// doing this in the layout manager itself
 //	layoutManager.editorNode = document.getElementById("editor");
 	var fileExplorer = new FileExplorer({parentId : 'explorer-tree'});
-	
+
 	scripted.ready(scriptedLogger, fileExplorer, layoutManager);
 });
 

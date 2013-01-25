@@ -53,5 +53,5 @@ requirejs.config({
 	}
 });
 
-require(['main', 'scripted/plugin-loader']);
+require(['main']);
 
