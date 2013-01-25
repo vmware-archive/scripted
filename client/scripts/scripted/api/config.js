@@ -12,7 +12,9 @@
  ******************************************************************************/
 define(function(require) {
 
-	var rest = require('servlets/rest-utils');
+	var when = require('when');
+
+	//var rest = require('servlets/rest-utils');
 
 	var deref = require('scripted/utils/deref');
 	var getDotScripted = require('servlets/jsdepend-client').getConf;
@@ -47,14 +49,21 @@ define(function(require) {
 	 * @param {String} configPath
 	 * @param {String} [contextPath]
 	 */
-	function getConfig(configPath, contextPath) {
-		return rest({
-			path: '/config/{configPath}?context={contextPath}',
-			params: {
-				configPath: configPath,
-				contextPath: configPath
-			}
+	function getConfig(contextPath) {
+		var d = when.defer();
+		getDotScripted(configPath, function (config) {
+			d.resolve(deref(config, segments(configPath)));
 		});
+		return d.promise;
+
+// Ideally something like below should work but we aren't there yet.
+//		return rest.get({
+//			path: '/config/{configPath}?context={contextPath}',
+//			params: {
+//				configPath: configPath,
+//				contextPath: configPath
+//			}
+//		});
 	}
 
 	console.log('Config api loaded');

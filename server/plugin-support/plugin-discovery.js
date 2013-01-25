@@ -22,7 +22,6 @@ var endsWith = require('../jsdepend/utils').endsWith;
 
 //For now it's easier to place the plugins inside of scripted code base
 // So I can put my 'sample' plugin in our codebase and commit it to git.
-//TODO: Support plugins in both .scriptedrc and scripted codebase at the same time.
 
 /**
  * Promise aware array iterator. Loops over elements of an array from left to right
