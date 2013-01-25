@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require define console module setTimeout XMLHttpRequest */
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
@@ -18,19 +18,19 @@ if (typeof define !== 'function') {
 define(function(require, exports, module) {
 
 	var basePath = '/jsdepend';
-	
+
 	var makeServletStub = require('./stub-maker').makeServletStub;
-	
+
 	//TODO: This information is repeated between client and server code...
 	// it shouldn't be.
 	var signatures = {
 		getDependencies: ['JSON', 'callback'],
 		getContents: ['JSON', 'callback', 'errback'],
 		getDGraph: ['JSON', 'callback'],
-		getConf: ['JSON', 'callback'],
+		getConf: ['JSON', 'callback'], //TODO: This doesn't belong here.
 		retrieveNearestFile: ['JSON', 'JSON', 'JSON', 'callback']
 	};
-	
+
 	for (var functionName in signatures) {
 		if (signatures.hasOwnProperty(functionName)) {
 			exports[functionName] = makeServletStub(basePath+'/'+functionName, signatures[functionName]);

@@ -35,9 +35,9 @@ define(function() {
 
 	var scriptedLogger = {
 		SHOW_CALLER : false,
-		INFO : true,
-		DEBUG : true,
-		WARN : true,
+		INFO : false,
+		DEBUG : false,
+		WARN : false,
 		ERROR : true,  // I don't know why we'd want to disable error handling, but I'll keep it here
 		info : function(msg, category) {
 			if (this.INFO && this.isEnabled(category)) {
@@ -63,7 +63,7 @@ define(function() {
 				console.error(msg);
 			}
 		},
-		
+
 		// A message is
 		isEnabled : function(catName) {
 			if (!scriptedLoggerCategories.ALL) {
@@ -74,7 +74,7 @@ define(function() {
 				scriptedLoggerCategories[catName];
 		}
 	};
-	
+
 	// TODO Global BAD!
 	window.scriptedLogger = scriptedLogger;
 	return scriptedLogger;

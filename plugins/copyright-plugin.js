@@ -10,6 +10,7 @@ define(function (require) {
 	var jsFile = /.*\.js$/;
 
 	var editorApi = require('scripted/api/editor');
+	var configApi = require('scripted/api/config');
 	
 	editorApi.onSaveTransform(function (text, path) {
 		console.log('Checking for copyright header in '+path);
