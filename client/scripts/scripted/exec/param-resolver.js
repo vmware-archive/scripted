@@ -14,7 +14,7 @@
 /*global require define window scripted */
 /*jslint browser:true devel:true*/
 
-define(['scripted/utils/pathUtils'], function () {
+define(['scripted/utils/textUtils', 'scripted/utils/pathUtils'], function (textUtils) {
 
 // This module provides a mechanism to replace 'parameters' of the form ${name}
 // inside of data objects. It walks the data object creating a copy of it, replacing
@@ -113,54 +113,6 @@ function createParamReplacer(paramDefs) {
 	};
 }
 
-/**
- * Returns a string of all the whitespace at the start of the current line.
- * @param {String} buffer The document
- * @param {Integer} offset The current selection offset
- */
-function leadingWhitespace(buffer, offset) {
-	var whitespace = "";
-	offset = offset-1;
-	while (offset >= 0) {
-		var c = buffer.charAt(offset--);
-		if (c === '\n' || c === '\r') {
-			//we hit the start of the line so we are done
-			break;
-		}
-		if (/\s/.test(c)) {
-			//we found whitespace to add it to our result
-			whitespace = c.concat(whitespace);
-		} else {
-			//we found non-whitespace, so reset our result
-			whitespace = "";
-		}
-	}
-	return whitespace;
-}
-
-/**
- * @return {String} indentation preferences for current project
- */
-function indent() {
-	var formatterPrefs = scripted && scripted.config && scripted.config.editor;
-	if (!formatterPrefs) {
-		return '\t';
-	}
-	
-	var expandtab = formatterPrefs.expandtab;
-	var tabsize = formatterPrefs.tabsize ? formatterPrefs.tabsize : 4;
-	
-	var indentText = '';
-	if (expandtab) {
-		for (var i = 0; i < tabsize; i++) {
-			indentText += " ";
-		}
-	} else {
-		indentText = '\t';
-	}
-	return indentText;
-}
-
 
 var getDirectory = require('scripted/utils/pathUtils').getDirectory;
 
@@ -199,13 +151,13 @@ function forEditor(editor) {
 		var offset = editor.getTextView().getSelection().start;
 		var buffer = editor.getText();
 		paramDefs.extraIndentLevel = 0;
-		return leadingWhitespace(buffer, offset);
+		return textUtils.leadingWhitespace(buffer, offset);
 	});
 	
 	var indentText;
 	def("${indent}", function() {
 		if (!indentText) {
-			indentText = indent();
+			indentText = textUtils.indent();
 		}
 		paramDefs.extraIndentLevel++;
 		return indentText;
@@ -231,13 +183,9 @@ function forEditor(editor) {
 		return new Date().getFullYear();
 	});
 	
-	
-	
-	
 	// Other possible parameters
 	// current line
 	// current user name (requires server call)
-	// year
 	// time
 	// date (but how to format???)
 	

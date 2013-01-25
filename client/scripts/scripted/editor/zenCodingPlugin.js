@@ -16,33 +16,33 @@
 /*jslint browser:true */
 /*global define emmet prompt scripted */
 
-define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'zen'],
-	function(mKeyBinding,  editorUtils, $) {
+define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/editorFeatures',
+	'jquery', 'zen'],
+	function(mKeyBinding, textUtils, editorFeatures, $) {
 	function ZenEditorProxy(editor) {
 		this.editor = editor;
 	}
 
+	var TAB_POS = "${0}";
 
 	ZenEditorProxy.prototype = {
 		init : function() {
-			this.proxy = this.createProxy(this.editor);
+			this.editorProxy = this.createProxy(this.editor);
 			this.attach(this.editor);
 		},
 		createProxy: function(editor) {
-			this.editorProxy = emmet.exec(function(req, _) {
+			return emmet.exec(function(req, _) {
+				var res = req('resources');
+				var utils = req('utils');
+				res.setVariable('indentation', textUtils.indent());
+				utils.setNewline('\n');
 				console.log("in editor proxy");
 				return {
 					setContext: function(context) {
-						// fix tab size
+						// TODO indentation not working
 						var res = req('resources');
 						var utils = req('utils');
-						var indentation;
-						if (!context.expandtab) {
-							indentation = '\t';
-						} else {
-							indentation = utils.repeatString(' ', context.tabsize);
-						}
-						res.setVariable('indentation', indentation);
+						res.setVariable('indentation', textUtils.indent());
 						utils.setNewline('\n');
 					},
 
@@ -76,10 +76,6 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 					 * editor.createSelection(15);
 					 */
 					createSelection: function(start, end) {
-						var editor = editorUtils.geteditor();
-						if (!editor) {
-							return null;
-						}
 						editor.setSelection(start, end);
 					},
 
@@ -150,8 +146,27 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 					 */
 					replaceContent: function(value, start, end, noIndent) {
 
-						// TODO not handling indent
+						if (!noIndent) {
+							var leading = textUtils.leadingWhitespace(editor.getTextView().getText(), start);
+							var regex = new RegExp('\n', "g");
+							value = value.replace(regex, "\n" + leading);
+						}
 						editor.getTextView().setText(value, start, end);
+						
+						var pos = value.indexOf(TAB_POS);
+						if (pos !== -1) {
+							var linkedMode = new editorFeatures.LinkedMode(editor);
+							var linkedModeModel = { groups : [] };
+							while (pos !== -1) {
+								linkedModeModel.groups.push({
+									positions : [{
+										offset: pos + start,
+										length: TAB_POS.length
+									}]});
+								pos = value.indexOf(TAB_POS, pos + TAB_POS.length);
+							}
+							linkedMode.enterLinkedMode(linkedModeModel);
+						}
 					},
 
 					/**
@@ -162,16 +177,15 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 						return editor.getText();
 					},
 
-					// TODO This doesn't work!!!
 					getSyntax: function() {
-						return "html";
+						return editor.getContentType();
 					},
 
 
-					// TODO This doesn't work!!!
 					getProfileName: function() {
-						return null;
+						return this.getSyntax();
 					},
+					
 					// TODO uhhhh...we can do better
 					prompt: function(title) {
 						return prompt(title);
@@ -198,22 +212,39 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 			});
 		},
 		
-		attach : function(editor) {
-			function runEmmetAction(name, args) {
-				return emmet.require('actions').run(name, args);
+		runEmmetAction : function(name, args) {
+			console.log("Running emmet action: " + name);
+			try {
+				return emmet.require('actions').run(name, [this.editorProxy]);
+			} catch (e) {
+				console.warn(e.message);
+				console.warn(e.stack);
+				return false;
 			}
+		},
 		
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("1", /*command/ctrl*/ false, /*shift*/ false, /*alt*/ true), "Zen merge_lines");
-			editor.getTextView().setAction("Zen merge_lines", function() {
-				console.log("Running emmet action");
-				try {
-					runEmmetAction("merge_lines");
-				} catch (e) {
-					console.log(e);
-				}
-				console.log("Running emmet action");
-				return true;
-			});
+		registerEmmetAction : function(name, key) {
+			console.log("Registering emmet command " + name + " to " + key);
+			this.editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(key.toString(), /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Zen " + name);
+			this.editor.getTextView().setAction("Zen " + name, function() {
+				this.runEmmetAction(name);
+				return false;
+			}.bind(this));
+		},
+
+		
+		attach : function(editor) {
+			
+			var i = 0;
+			this.registerEmmetAction("expand_abbreviation", ++i);
+			this.registerEmmetAction("match_pair_inward", ++i);
+			this.registerEmmetAction("match_pair_outward", ++i);
+			this.registerEmmetAction("matching_pair", ++i);
+			this.registerEmmetAction("merge_lines", ++i);
+			this.registerEmmetAction("remove_tag", ++i);
+			this.registerEmmetAction("select_next_item", ++i);
+			this.registerEmmetAction("select_previous_item", ++i);
+			this.registerEmmetAction("split_join_tag", ++i);
 		},
 		
 		detach : function() {
@@ -221,7 +252,7 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 				if (pane.editor === this.editor) {
 					
 					this.editor = null;
-					this.proxy = null;
+					this.editorProxy = null;
 				}
 			});
 		}
@@ -233,7 +264,4 @@ define(["orion/textview/keyBinding", 'scripted/utils/editorUtils', 'jquery', 'ze
 			proxy.init();
 		}
 	});
-	
-	// probably don't need to return anything
-//	return ZenEditorProxy;
 });

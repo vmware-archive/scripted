@@ -511,8 +511,13 @@ define([
 			domNode: domNode
 		});
 
-		editor.getFilePath = function(){
+		editor.getFilePath = function() {
 			return filePath;
+		};
+		
+		// just returns file extension for now
+		editor.getContentType = function() {
+			return extension;
 		};
 		
 		editor.jsContentAssistant = jsContentAssistant;
