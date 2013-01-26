@@ -22,6 +22,7 @@ var parser = require("./parser");
 var treeMatcher = require('./tree-matcher');
 var map = require('./utils').map;
 var eachk = require('./utils').eachk;
+var when = require('when');
 
 function configure(filesystem) {
 
@@ -451,14 +452,16 @@ function configure(filesystem) {
 		);
 	}
 	
+	var logLine = 0;
+	
 	/**
 	 * wraps a callback function so that is logs the value passed to the callback
 	 * in JSON.stringified form.
 	 */
 	function logBack(msg, callback) {
 		return function (result) {
-			console.log(msg);
-			console.log(JSON.stringify(result, null, "  "));
+			console.log(++logLine + " : " + msg);
+			//console.log(JSON.stringify(result, null, "  "));
 			callback(result);
 		};
 	}
@@ -471,7 +474,7 @@ function configure(filesystem) {
 	 * If not found, a 'falsy' value is passed to the callback.
 	 */
 	function getAmdConfig(context, callback) {
-		//callback = logBack("amdConfig '"+context+"' => ", callback);
+		callback = logBack("amd-config '"+context+"' => ", callback);
 		var dir = getDirectory(context);
 		if (dir) {
 			listFiles(dir,
@@ -498,8 +501,42 @@ function configure(filesystem) {
 		}
 	}
 
+	var cacheCounter = 0;
+	
+	function makeCached(f, timeout) {
+		console.log("Instance of amd-config-finder created: "+(++cacheCounter));
+		var cache = {};
+		var touchedAt = Date.now();
+		function cachedFun(param, callback) {
+			touchedAt = Date.now();
+			var d = cache[param];
+			if (!d) {
+				//Not yet in the cache
+				d = when.defer();
+				cache[param] = d;
+				f(param, function (r) {
+					return d.resolve(r);
+				});
+			}
+			return d.then(callback);
+		}
+		if (timeout) {
+			setInterval(function() {
+				var inactive = Date.now() - touchedAt;
+				if (inactive>timeout) {
+					console.log('amd-config-finder-cache CLEARED');
+					cache = {};
+				}
+			}, timeout);
+		}
+		return cachedFun;
+	}
+
+	getAmdConfig = makeCached(getAmdConfig, 10000);
+
 	return {
 		getAmdConfig: getAmdConfig,
+			//getAmdConfig,
 		forTesting: {
 			configBlockPat: configBlockPat
 		}
