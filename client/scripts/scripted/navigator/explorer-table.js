@@ -11,11 +11,11 @@
  *     Andy Clement - hacked to support our needs in scripted (needs more work)
  ******************************************************************************/
 
-/*global define window uri scriptedLogger alert $ */
+/*global define window uri alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer-table', ['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory"], 
-	function(require, dojo, mExplorer, mJquery, mPageState, mNavHistory) {
+define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory", "scriptedLogger"],
+	function(require, dojo, mExplorer, mJquery, mPageState, mNavHistory, scriptedLogger) {
 
 	/**
 	 * Tree model used by the FileExplorer

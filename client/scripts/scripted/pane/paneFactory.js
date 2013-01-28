@@ -27,9 +27,9 @@
 //    paneDestroyed
 
 /*jslint browser:true */
-/*global define scriptedLogger confirm */
+/*global define confirm */
 
-define(['jquery'], function() {
+define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 	var paneRegistry = {};
 	
 	var panes = [];
