@@ -33,6 +33,9 @@ define(function() {
 		STORAGE : true
 	};
 
+	/**
+	 * false means that the message kind will not be displayed
+	 */
 	var scriptedLogger = {
 		SHOW_CALLER : false,
 		INFO : true,
@@ -75,7 +78,5 @@ define(function() {
 		}
 	};
 	
-	// TODO Global BAD!
-	window.scriptedLogger = scriptedLogger;
 	return scriptedLogger;
 });

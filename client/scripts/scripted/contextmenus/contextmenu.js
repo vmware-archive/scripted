@@ -5,16 +5,16 @@
  *          CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT. You can obtain a
  *          current copy of the Eclipse Public License from
  *          http://www.opensource.org/licenses/eclipse-1.0.php
- * 
+ *
  * Contributors: Nieraj Singh - initial implementation
  ******************************************************************************/
 /*global define window $*/
 /*jslint browser:true jquery:true */
 
 define(
-['scripted/contextmenus/contextmenuprovider', 'jquery'],
+['scripted/contextmenus/contextmenuprovider', "scriptedLogger", 'jquery'],
 
-function(contextMenuProvider) {
+function(contextMenuProvider, scriptedLogger) {
 
 	var loggingCategory = "CONTEXT_MENU";
 

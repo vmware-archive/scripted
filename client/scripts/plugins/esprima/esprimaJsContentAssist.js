@@ -12,9 +12,9 @@
  *     Andrew Eisenberg (VMware) - implemented visitor pattern
  ******************************************************************************/
 
-/*global define require eclipse esprima window scriptedLogger doctrine */
-define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "esprima/esprima", "doctrine/doctrine"],
-		function(mVisitor, mTypes, proposalUtils) {
+/*global define require eclipse esprima window doctrine */
+define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "scriptedLogger", "esprima/esprima", "doctrine/doctrine"],
+		function(mVisitor, mTypes, proposalUtils, scriptedLogger) {
 	
 	/** @type {function(obj):Boolean} a safe way of checking for arrays */
 	var isArray = Array.isArray;
