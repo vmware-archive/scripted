@@ -61,6 +61,15 @@ OR you can live on the bleeding edge by either cloning the repository:
 	cd scripted
 	npm install
 
+If you already have a clone of the scripted repo and want to update to the latest master, don't 
+forget that you also need to update external dependencies that may have changed. Run the following
+commands from the root of your clone.
+
+    git checkout master
+    git pull
+    git clean -fxd
+    npm install   
+
 or grabbing the latest repo contents as a zip:
 
 	https://github.com/scripted-editor/scripted/zipball/master

@@ -11,8 +11,8 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define esprima scriptedLogger*/
-define("plugins/esprima/esprimaVisitor", [], function() {
+/*global define esprima */
+define(["scriptedLogger"], function(scriptedLogger) {
 
 
 

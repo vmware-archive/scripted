@@ -12,9 +12,9 @@
 /*global define window $*/
 
 define(
-['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'jquery'],
+['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'scriptedLogger', 'jquery'],
 
-function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager) {
+function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager, scriptedLogger) {
 
 
 	var loggingCategory = "CONTEXT_MENU";
@@ -22,7 +22,7 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 	var pathSeparator = pathUtils.getPathSeparator();
 
 	/**
-	 * Pass in the URL to the resource to navigate as well as optionally the editor type to open the resource (main or sub). 
+	 * Pass in the URL to the resource to navigate as well as optionally the editor type to open the resource (main or sub).
 	 * If no editor type is specified, it will open in main editor by default
 	 */
 	var doNavigatorRefresh = function(resourceToNavigate, editorType) {

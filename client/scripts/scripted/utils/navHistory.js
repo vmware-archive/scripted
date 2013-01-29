@@ -13,13 +13,13 @@
  *    Andrew Eisenberg - refactoring for a more consistent approach to navigation
  ******************************************************************************/
 /*jslint browser:true */
-/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage JSON5 scriptedLogger */
+/*global window setTimeout define explorer document console location XMLHttpRequest alert confirm orion scripted dojo $ localStorage JSON5 */
 
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/utils/editorUtils", 'lib/json5'],
-function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils) {
+define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/utils/editorUtils", 'scriptedLogger', 'lib/json5'],
+function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scriptedLogger) {
 	
 	var EDITOR_TARGET = {
 		main : "main",

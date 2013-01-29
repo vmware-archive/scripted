@@ -36,7 +36,7 @@ side : { // side panel can be specified as an array for multiple side panels
 </pre>
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
-define(['scripted/utils/storage', 'lib/json5'], function(storage) {
+define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(storage, scriptedLogger) {
 
 	var editorPrefix, windowsPathRE;
 
@@ -99,8 +99,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				var state = JSON5.parse(hash);
 				if (typeof state !== "object") {
 					// assume invalid
-					// TOD use scriptedLogger
-					console.warn("Invalid hash: " + hash);
+					scriptedLogger.warn("Invalid hash: " + hash, "STORAGE");
 					state = {main:{}};
 				}
 				if (!state.main) {
@@ -112,8 +111,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				}
 				return state;
 			} catch (e) {
-				// TOD use scriptedLogger
-				console.warn("Invalid hash: " + hash);
+				scriptedLogger.warn("Invalid hash: " + hash, "STORAGE");
 				// return empty state.  use path if exists
 				return {main: {path : (path ? path : "") } };
 			}
@@ -296,7 +294,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 					window.history.pushState(histItem, name, url);
 				}
 			} catch (e) {
-				console.log(e);
+				scriptedLogger.error(e, "STORAGE");
 			}
 		}
 	};

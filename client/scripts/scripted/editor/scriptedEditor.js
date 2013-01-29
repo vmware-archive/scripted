@@ -50,7 +50,7 @@ define([
 		if (previousLine) {
 			var i = 0;
 			var ch = previousLine.charAt(0);
- 
+
 			while (ch === options.indent_char) {
 				i = i + options.indent_size;
 				ch = previousLine.charAt(i);
@@ -664,7 +664,7 @@ define([
 			if (editorUpdateRequired) {
 				editor.getTextView().update(true);
 			}
-		}
+		} 
 		
 		// TODO should we persist the instance of mark occurrences?
 		new mMarkoccurrences.SelectionMatcher().install(editor);
