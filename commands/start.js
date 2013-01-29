@@ -39,20 +39,23 @@ function exec(options) {
 }
 
 function open(options) {
-	var cmd = process.env.SCRIPTED_BROWSER;
+	var cmd;
+    var browser = process.env.SCRIPTED_BROWSER;
 		
-	if (!cmd) {
-		switch (process.platform) {
-			case 'darwin':
-				cmd = 'open';
-				break;
-			case 'win32':
-				cmd = 'start ""';
-				break;
-			default:
-				cmd = 'xdg-open';
-		}
+	switch (process.platform) {
+		case 'darwin':
+			cmd = 'open';
+			break;
+		case 'win32':
+			cmd = 'start ""';
+			break;
+		default:
+			cmd = 'xdg-open';
 	}
+
+    if (browser) {
+	  cmd+=' "'+browser+'"';
+    }
 	
 	url += "/editor" + (process.platform == 'win32' ? "/" : "");
 	
