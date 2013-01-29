@@ -61,16 +61,16 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				// create empty page state to be filled later
 				return {main: {path: ""}};
 			}
-		
+
 			if (hash.charAt(0) === '#') {
 				hash = hash.substring(1);
 			}
-		
+
 			if (!isNaN(parseInt(hash.charAt(0), 10))) {
 				// http://localhost:7261/editor/path.js#10,20
 				hash = "main:{range:[" + hash + "]}";
 			}
-		
+
 			if (hash.charAt(0) !== '{') {
 				// http://localhost:7261/editor/path.js#main:{range:10,20}
 				hash = '{' + hash +'}';
@@ -105,7 +105,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				if (!state.main) {
 					state.main = {};
 				}
-			
+
 				if (path && !state.main.path) {
 					state.main.path = path;
 				}
@@ -116,7 +116,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				return {main: {path : (path ? path : "") } };
 			}
 		},
-	
+
 		extractPageStateFromUrl : function(url) {
 			if (url.substring(0, "http://".length) !== "http://" && url.substring(0, editorPrefix.length) !== editorPrefix) {
 				// assume path, not a url
@@ -129,7 +129,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				}
 				return this.extractPageState(hash, splits[0]);
 			}
-		
+
 			var path = url.replace(/^https?:\/\/[^\/]+/, '');
 			var hashIndex = url.indexOf('#');
 			if (hashIndex < 0) {
@@ -141,7 +141,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 			}
 			return this.extractPageState(url, path);
 		},
-		
+
 		/**
 		 * Retrieves the history from local storage
 		 * @return {Array.<{path:String,range:Array,scroll:Number}>}
@@ -160,7 +160,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 			}
 			return arr;
 		},
-	
+
 		getHistoryAsObject : function() {
 			var histArr = this.getHistory();
 			var histObj = {};
@@ -171,11 +171,11 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 			}
 			return histObj;
 		},
-	
+
 		setHistory : function(history) {
 			storage.safeStore("scripted.recentFileHistory", JSON5.stringify(history));
 		},
-	
+
 		/**
 		 * generates an item to be stored in scripted.recentFileHistory as well as browser state
 		 */
@@ -184,7 +184,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				return { path : "", range : [0,0] };
 			}
 			var path = editor.getFilePath();
-			var scrollPos = $(editor._domNode).find('.textview').scrollTop();
+			var scrollPos = editor.getScroll();
 			var selection = editor.getSelection();
 			return {
 				path: path,
@@ -192,7 +192,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				scroll: scrollPos
 			};
 		},
-	
+
 		generateHash : function(histItem, editorKind) {
 			// check to see if we should shortcut and have a simple range as the hash
 			if (!histItem.side) {
@@ -206,20 +206,20 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 					}
 				}
 			}
-		
+
 			if (histItem.main || histItem.side) {
 				return JSON5.stringify(histItem);
 			}
-		
+
 			if (!editorKind) {
 				editorKind = "main";
 			}
-			
+
 			var newItem = {};
 			newItem[editorKind] = histItem;
 			return JSON5.stringify(newItem);
 		},
-	
+
 		/**
 		 * Generates a url to open a file on a given file path or
 		 * history object
@@ -259,7 +259,7 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 		_setEditorPrefix : function(prefix) {
 			editorPrefix = prefix;
 		},
-	
+
 		storeScriptedHistory : function(histItem) {
 			var scriptedHistory = this.getHistory();
 			for (var i = 0; i < scriptedHistory.length; i++) {
@@ -268,16 +268,16 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 				}
 			}
 			scriptedHistory.push(histItem);
-		
+
 			// arbitrarily keep track of 8 scriptedHistory items
 			// TODO should we have a .scripted setting to customize this?
 			while (scriptedHistory.length > 8) {
 				scriptedHistory.shift();
 			}
-		
+
 			this.setHistory(scriptedHistory);
 		},
-	
+
 		storeBrowserState : function(mainItem, subItem, doReplace) {
 			try {
 				var name = mainItem.path.split('/').pop();

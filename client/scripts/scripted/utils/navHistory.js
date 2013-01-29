@@ -20,7 +20,7 @@
  */
 define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/utils/editorUtils", 'scriptedLogger', 'lib/json5'],
 function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scriptedLogger) {
-	
+
 	var EDITOR_TARGET = {
 		main : "main",
 		sub : "sub",
@@ -28,10 +28,10 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 	};
 	var LINE_SCROLL_OFFSET = 5;
 	var GET_URL = "/get?file=";
-	
+
 	// define as forward reference
 	var navigate;
-	
+
 	var findTarget = function(event) {
 		var target;
 		if (mOsUtils.isCtrlOrMeta(event)) {
@@ -57,7 +57,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		}
 		tv.setTopIndex(line);
 	};
-		
+
 	/**
 	 * Handles navigation requests from clicking on links
 	 */
@@ -106,36 +106,36 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		}
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
-		
+
 		var main_path = mainEditor.getFilePath();
-		var main_scrollpos = $(mainEditor._domNode).find('.textview').scrollTop();
+		var main_scrollpos = mainEditor.getScroll();
 		var main_sel = mainEditor.getTextView().getSelection();
 		var main_text = mainEditor.getText();
 		var main_dirty = mainEditor.isDirty();
-		
+
 		var sub_path = subEditor.getFilePath();
-		var sub_scrollpos = $(subEditor._domNode).find('.textview').scrollTop();
+		var sub_scrollpos = subEditor.getScroll();
 		var sub_sel = subEditor.getTextView().getSelection();
 		var sub_text = subEditor.getText();
 		var sub_dirty = subEditor.isDirty();
-		
+
 		// TODO This is not working when using the button to switch since
 		// clicking on the button will call a blur() on the active editor
 		var main_active = mainEditor.getTextView().hasFocus();
-		
+
 		navigate({path:main_path, range:[main_sel.start, main_sel.end], scroll:main_scrollpos}, EDITOR_TARGET.sub, true);
 		navigate({path:sub_path, range:[sub_sel.start, sub_sel.end], scroll:sub_scrollpos}, EDITOR_TARGET.main, true);
-		
-		$(mainEditor._domNode).find('.textview').scrollTop(sub_scrollpos);
-		$(subEditor._domNode).find('.textview').scrollTop(main_scrollpos);
-		
+
+		mainEditor.setScroll(sub_scrollpos);
+		subEditor.setScroll(main_scrollpos);
+
 		if (sub_dirty) {
 			mainEditor.setText(sub_text);
 		}
 		if (main_dirty) {
 			subEditor.setText(main_text);
 		}
-		
+
 		setTimeout(function() {
 			if (main_active) {
 				subEditor.getTextView().focus();
@@ -144,39 +144,39 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			}
 		}, 200);
 	};
-	
+
 	var toggleSidePanel = function() {
 		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
-	
+
 		storeAllState(true);
 		if (sidePanelOpen) {
 			mSidePanelManager.closeSidePanel();
 		} else {
 			// first, open side panel
 			mSidePanelManager.showSidePanel();
-			
+
 			if (!mainEditor.getFilePath) {
 				// no main editor, so nothing else to do
 				return;
 			}
-			
+
 			// now open file of main editor in side panel
 			var sel = mainEditor.getSelection();
 			navigate({
 				path:mainEditor.getFilePath(),
 				range:[sel.start, sel.end],
-				scroll: $(mainEditor._domNode).find('.textview').scrollTop()
+				scroll: mainEditor.getScroll()
 			}, "sub");
 			subEditor = editorUtils.getSubEditor();
 			subEditor.getTextView().focus();
 		}
-		
+
 		storeAllState(false);
 		return true;
 	};
-	
+
 	/**
 	 * Opens the given editor on the given definition
 	 * @param {{String|Object}} modifier either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab
@@ -189,7 +189,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		}
 		var defnrange = definition.range ? definition.range : [0,0];
 		var filepath = definition.path ? definition.path : editor.getFilePath();
-		
+
 		var target;
 		if (typeof modifier === "object") {
 			target = findTarget(modifier);
@@ -210,7 +210,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			navigate({path:filepath, range:defnrange}, target, true);
 		}
 	};
-	
+
 	var setupPage = function(state, doSaveState) {
 		if (doSaveState) {
 			storeAllState(doSaveState);
@@ -221,7 +221,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				mSidePanelManager.closeSidePanel();
 			}
 		}
-		
+
 		// when navigating, don't store browser state, since that
 		// is taken care of in this function
 		if (state.main) {
@@ -238,7 +238,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			mPageState.storeBrowserState(mainItem, subItem);
 		}
 	};
-	
+
 	var storeAllState = function(doReplace) {
 		var mainItem;
 		var subItem;
@@ -264,7 +264,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			return true;
 		}
 	};
-		
+
 	/**
 	 * Navigates to a new editor
 	 * @param {{path:String,range:Array.<Number>,scroll:Number}} editorDesc A description of the editor to open, including file path, selected range and scroll position
@@ -288,7 +288,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				sideItem = mPageState.generateHistoryItem(subEditor);
 				mPageState.storeScriptedHistory(sideItem);
 			}
-			
+
 			// replace existing history with current page state (ie- update selection ranges and scroll pos
 			if (doSaveState) {
 				mPageState.storeBrowserState(mainItem, sideItem, true);
@@ -302,7 +302,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				// user chose not to move from existing editor
 				return false;
 			}
-			
+
 			if (target === EDITOR_TARGET.sub && !mSidePanelManager.isSidePanelOpen()) {
 				mSidePanelManager.showSidePanel();
 			}
@@ -325,14 +325,14 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 					targetEditor.getTextView().setSelection(range[0], range[1], true);
 				}
 			}
-			
+
 			if (scroll) {
 				if (isNaN(range[0])) {
 					scriptedLogger.warn("invalid scroll, ignoring", scriptedLogger.SETUP);
 					scriptedLogger.warn(scroll, scriptedLogger.SETUP);
 					scrollToSelection(targetEditor);
 				} else {
-					$(targetEditor._domNode).find('.textview').scrollTop(scroll);
+					targetEditor.setScroll(scroll);
 				}
 			} else {
 				scrollToSelection(targetEditor);
@@ -349,7 +349,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				}
 			}
 			targetPane.updateContents(targetEditor);
-			
+
 			// now add a history entry for the new page state
 			if (doSaveState) {
 				mainEditor = editorUtils.getMainEditor();
@@ -367,7 +367,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 
 		return false;
 	};
-	
+
 	/**
 	* Navigates to the given resource URL, opening it in the specified editor (main or sub). If no editor type is specified, it will open
 	* it in the main editor by default.
@@ -378,7 +378,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				path: url
 			}, editorToOpen, true);
 		};
-	
+
 	return {
 		navigateToURL: navigateToURL,
 		handleNavigationEvent: handleNavigationEvent,
