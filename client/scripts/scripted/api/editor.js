@@ -46,9 +46,11 @@ define(function (require) {
 					if (typeof(newText)==='string') {
 						//TODO: work harder at preserving selection even if text has shifted ?
 						var oldSelection = editor.getSelection();
-						//console.dir(oldSelection);
+						var oldScroll = editor.getScroll();
+
 						editor.setText(newText);
 						editor.setSelection(oldSelection.start, oldSelection.end);
+						editor.setScroll(oldScroll);
 					}
 				});
 			});
