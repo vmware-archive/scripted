@@ -152,7 +152,7 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 							value = value.replace(regex, "\n" + leading);
 						}
 						editor.getTextView().setText(value, start, end);
-						
+
 						var pos = value.indexOf(TAB_POS);
 						if (pos !== -1) {
 							var linkedMode = new editorFeatures.LinkedMode(editor);
@@ -185,7 +185,7 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 					getProfileName: function() {
 						return this.getSyntax();
 					},
-					
+
 					// TODO uhhhh...we can do better
 					prompt: function(title) {
 						return prompt(title);
@@ -210,7 +210,7 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 				};
 			});
 		},
-		
+
 		runEmmetAction : function(name, args) {
 			try {
 				return emmet.require('actions').run(name, [this.editorProxy]);
@@ -220,7 +220,7 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 				return false;
 			}
 		},
-		
+
 		registerEmmetAction : function(name, key) {
 			this.editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(key.toString(), /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Zen " + name);
 			this.editor.getTextView().setAction("Zen " + name, function() {
@@ -229,9 +229,9 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 			}.bind(this));
 		},
 
-		
+
 		attach : function(editor) {
-			
+
 			var i = 0;
 			this.registerEmmetAction("expand_abbreviation", ++i);
 			this.registerEmmetAction("match_pair_inward", ++i);
@@ -242,19 +242,20 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 			this.registerEmmetAction("select_next_item", ++i);
 			this.registerEmmetAction("select_previous_item", ++i);
 			this.registerEmmetAction("split_join_tag", ++i);
-		},
-		
-		detach : function() {
-			$(document).on('paneDestroyed', function(event, pane) {
+			var func = function(event, pane) {
 				if (pane.editor === this.editor) {
-					
+
 					this.editor = null;
 					this.editorProxy = null;
+					$(document).off('paneDestroyed', func);
 				}
-			});
+			};
+			$(document).on('paneDestroyed', func);
 		}
 	};
-	
+
+	// get the zenCoding plugin attached for each new editor
+
 	$(document).on('paneCreated', function(event, pane) {
 		if (pane.editor) {
 			var proxy = new ZenEditorProxy(pane.editor);
