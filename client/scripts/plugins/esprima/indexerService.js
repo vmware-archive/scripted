@@ -56,12 +56,12 @@ function each(array, fun) {
 			}
 		}
 	} else {
-		if (this.console) {
+		if (this.window) {
 			if (this.window.isTest) {
 				this.console.warn("Not using webworker since in a test");
 			} else {
 				// TODO temporarily add the popup for debugging on firefox
-				this.alert("Webworker not found");
+				this.alert("Web worker not available for background indexing.  Falling back to in-browser indexing.");
 				this.console.warn("Web worker not available for background indexing.  Falling back to in-browser indexing.");
 			}
 		}

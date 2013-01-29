@@ -11,8 +11,31 @@
  *     Andrew Eisenberg
  *     Brian Cavalier
  ******************************************************************************/
+/*global onmessage */
 
 define(function() {
+	var handler;
+	// handle situations where console is not defined,
+	// eg- in a webworker
+	if (typeof console === "undefined") {
+		var delegate;
+		if (typeof status === "function") {
+			delegate = status;
+		} else if (typeof onmessage === "function") {
+			delegate = onmessage;
+		} else {
+			// logging is a no-op
+			delegate = function() {};
+		}
+		handler = {
+			info : delegate,
+			debug : delegate,
+			warn : delegate,
+			error : delegate
+		};
+	} else {
+		handler = console;
+	}
 	/**
 	 * Set to false to disable a category
 	 *
@@ -45,25 +68,25 @@ define(function() {
 		info : function(msg, category) {
 			if (this.INFO && this.isEnabled(category)) {
 				msg = this.SHOW_CALLER ? msg + " --- " + this.info.caller : msg;
-				console.info(msg);
+				handler.info(msg);
 			}
 		},
 		debug : function(msg, category) {
 			if (this.DEBUG && this.isEnabled(category)) {
 				msg = this.SHOW_CALLER ? msg + " --- " + this.debug.caller : msg;
-				console.debug(msg);
+				handler.debug(msg);
 			}
 		},
 		warn : function(msg, category) {
 			if (this.WARN && this.isEnabled(category)) {
 				msg = this.SHOW_CALLER ? msg + " --- " + this.warn.caller : msg;
-				console.warn(msg);
+				handler.warn(msg);
 			}
 		},
 		error : function(msg, category) {
 			if (this.ERROR && this.isEnabled(category)) {
 				msg = this.SHOW_CALLER ? msg + " --- " + this.error.caller : msg;
-				console.error(msg);
+				handler.error(msg);
 			}
 		},
 		
