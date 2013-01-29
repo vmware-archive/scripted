@@ -8,6 +8,6 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Kris De Volder (VMWare) - initial API and implementation
+ *   <add your name here>
  ******************************************************************************/
 
