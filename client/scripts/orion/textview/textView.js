@@ -1,12 +1,12 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2011 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
- * Contributors: 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312 Bug#370584
@@ -50,10 +50,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
 	var platformDelimiter = isWindows ? "\r\n" : "\n";
 	var scrollButtonHeight = isPad ? 0 : 17;
-	
-	/** 
+
+	/**
 	 * Constructs a new Selection object.
-	 * 
+	 *
 	 * @class A Selection represents a range of selected text in the view.
 	 * @name orion.textview.Selection
 	 */
@@ -129,8 +129,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * <b>See:</b><br/>
 	 * {@link orion.textview.TextView}<br/>
 	 * {@link orion.textview.TextView#setOptions}
-	 * {@link orion.textview.TextView#getOptions}	 
-	 * </p>		 
+	 * {@link orion.textview.TextView#getOptions}
+	 * </p>
 	 * @name orion.textview.TextViewOptions
 	 *
 	 * @property {String|DOMElement} parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
@@ -143,9 +143,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 */
 	/**
 	 * Constructs a new text view.
-	 * 
+	 *
 	 * @param {orion.textview.TextViewOptions} options the view options.
-	 * 
+	 *
 	 * @class A TextView is a user interface for editing text.
 	 * @name orion.textview.TextView
 	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
@@ -155,7 +155,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	function TextView (options) {
 		this._init(options);
 	}
-	
+
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
 		/**
 		 * Adds a ruler to the text view.
@@ -251,7 +251,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return rect;
 		},
 		/**
-		 * Destroys the text view. 
+		 * Destroys the text view.
 		 * <p>
 		 * Removes the view from the page and frees all resources created by the view.
 		 * Calling this function causes the "Destroy" event to be fire so that all components
@@ -266,7 +266,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._rulers[i].setView(null);
 			}
 			this.rulers = null;
-			
+
 			this._destroyView();
 
 			var e = {type: "Destroy"};
@@ -286,8 +286,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!this._clientDiv) { return; }
 			/*
 			* Feature in Chrome. When focus is called in the clientDiv without
-			* setting selection the browser will set the selection to the first dom 
-			* element, which can be above the client area. When this happen the 
+			* setting selection the browser will set the selection to the first dom
+			* element, which can be above the client area. When this happen the
 			* browser also scrolls the window to show that element.
 			* The fix is to call _updateDOMSelection() before calling focus().
 			*/
@@ -311,7 +311,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Returns all action names defined in the text view.
 		 * <p>
-		 * There are two types of actions, the predefined actions of the view 
+		 * There are two types of actions, the predefined actions of the view
 		 * and the actions added by application code.
 		 * </p>
 		 * <p>
@@ -388,7 +388,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <p>
 		 * The bottom index is the line that is currently at the bottom of the view.  This
 		 * line may be partially visible depending on the vertical scroll of the view. The parameter
-		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
+		 * <code>fullyVisible</code> determines whether to return only fully visible lines.
 		 * </p>
 		 *
 		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the last fully visible line. This
@@ -628,7 +628,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * The selection is defined by a start and end character offset relative to the
 		 * document. The character at end offset is not included in the selection.
 		 * </p>
-		 * 
+		 *
 		 * @returns {orion.textview.Selection} the view selection
 		 *
 		 * @see #setSelection
@@ -657,7 +657,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <p>
 		 * The top index is the line that is currently at the top of the view.  This
 		 * line may be partially visible depending on the vertical scroll of the view. The parameter
-		 * <code>fullyVisible</code> determines whether to return only fully visible lines. 
+		 * <code>fullyVisible</code> determines whether to return only fully visible lines.
 		 * </p>
 		 *
 		 * @param {Boolean} [fullyVisible=false] if <code>true</code>, returns the index of the first fully visible line. This
@@ -730,30 +730,30 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		isDestroyed: function () {
 			return !this._clientDiv;
 		},
-		/** 
-		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view. 
-		 * <p> 
-		 * <b>See:</b><br/> 
-		 * {@link orion.textview.TextView}<br/> 
-		 * {@link orion.textview.TextView#event:onContextMenu} 
-		 * </p> 
-		 * 
-		 * @name orion.textview.ContextMenuEvent 
-		 * 
-		 * @property {Number} x The pointer location on the x axis, relative to the document the user is editing. 
-		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
-		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property. 
-		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property. 
-		 */ 
-		/** 
-		 * This event is sent when the user invokes the view context menu. 
-		 * 
-		 * @event 
-		 * @param {orion.textview.ContextMenuEvent} contextMenuEvent the event 
-		 */ 
+		/**
+		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view.
+		 * <p>
+		 * <b>See:</b><br/>
+		 * {@link orion.textview.TextView}<br/>
+		 * {@link orion.textview.TextView#event:onContextMenu}
+		 * </p>
+		 *
+		 * @name orion.textview.ContextMenuEvent
+		 *
+		 * @property {Number} x The pointer location on the x axis, relative to the document the user is editing.
+		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing.
+		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property.
+		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property.
+		 */
+		/**
+		 * This event is sent when the user invokes the view context menu.
+		 *
+		 * @event
+		 * @param {orion.textview.ContextMenuEvent} contextMenuEvent the event
+		 */
 		onContextMenu: function(contextMenuEvent) {
-			return this.dispatchEvent(contextMenuEvent); 
-		}, 
+			return this.dispatchEvent(contextMenuEvent);
+		},
 		onDragStart: function(dragEvent) {
 			return this.dispatchEvent(dragEvent);
 		},
@@ -801,9 +801,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#event:onLineStyle}
-		 * </p>		 
+		 * </p>
 		 * @name orion.textview.Style
-		 * 
+		 *
 		 * @property {String} styleClass A CSS class name.
 		 * @property {Object} style An object with CSS properties.
 		 * @property {String} tagName A DOM tag name.
@@ -815,9 +815,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#event:onLineStyle}
-		 * </p>		 
+		 * </p>
 		 * @name orion.textview.StyleRange
-		 * 
+		 *
 		 * @property {Number} start The start character offset, relative to the document, where the style should be applied.
 		 * @property {Number} end The end character offset (exclusive), relative to the document, where the style should be applied.
 		 * @property {orion.textview.Style} style The style for the range.
@@ -828,15 +828,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#event:onLineStyle}
-		 * </p>		 
+		 * </p>
 		 * @name orion.textview.LineStyleEvent
-		 * 
-		 * @property {orion.textview.TextView} textView The text view.		 
+		 *
+		 * @property {orion.textview.TextView} textView The text view.
 		 * @property {Number} lineIndex The line index.
 		 * @property {String} lineText The line text.
 		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
 		 * @property {orion.textview.Style} style The style for the entire line (output argument).
-		 * @property {orion.textview.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
+		 * @property {orion.textview.StyleRange[]} ranges An array of style ranges for the line (output argument).
 		 */
 		/**
 		 * This event is sent when the text view needs the style information for a line.
@@ -856,7 +856,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * {@link orion.textview.TextModel#onChanged}
 		 * </p>
 		 * @name orion.textview.ModelChangedEvent
-		 * 
+		 *
 		 * @property {Number} start The character offset in the model where the change has occurred.
 		 * @property {Number} removedCharCount The number of characters removed from the model.
 		 * @property {Number} addedCharCount The number of characters added to the model.
@@ -881,7 +881,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * {@link orion.textview.TextModel#onChanging}
 		 * </p>
 		 * @name orion.textview.ModelChangingEvent
-		 * 
+		 *
 		 * @property {String} text The text that is about to be inserted in the model.
 		 * @property {Number} start The character offset in the model where the change will occur.
 		 * @property {Number} removedCharCount The number of characters being removed from the model.
@@ -941,9 +941,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#event:onSelection}
-		 * </p>		 
+		 * </p>
 		 * @name orion.textview.SelectionEvent
-		 * 
+		 *
 		 * @property {orion.textview.Selection} oldValue The old selection.
 		 * @property {orion.textview.Selection} newValue The new selection.
 		 */
@@ -962,9 +962,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <b>See:</b><br/>
 		 * {@link orion.textview.TextView}<br/>
 		 * {@link orion.textview.TextView#event:onScroll}
-		 * </p>		 
+		 * </p>
 		 * @name orion.textview.ScrollEvent
-		 * 
+		 *
 		 * @property oldValue The old scroll {x,y}.
 		 * @property newValue The new scroll {x,y}.
 		 */
@@ -985,7 +985,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * {@link orion.textview.TextView#event:onVerify}
 		 * </p>
 		 * @name orion.textview.VerifyEvent
-		 * 
+		 *
 		 * @property {String} text The text being inserted.
 		 * @property {Number} start The start offset of the text range to be replaced.
 		 * @property {Number} end The end offset (exclusive) of the text range to be replaced.
@@ -1057,7 +1057,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			for (var i = 0; i < rulers.length; i++) {
 				this.redrawLines(0, lineCount, rulers[i]);
 			}
-			this.redrawLines(0, lineCount); 
+			this.redrawLines(0, lineCount);
 		},
 		/**
 		 * Redraws the text in the given line range.
@@ -1185,14 +1185,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * Associates a key binding with the given action name. Any previous
 		 * association with the specified key binding is overwriten. If the
 		 * action name is <code>null</code>, the association is removed.
-		 * 
+		 *
 		 * @param {orion.textview.KeyBinding} keyBinding the key binding
 		 * @param {String} name the action
 		 */
 		setKeyBinding: function(keyBinding, name, keepUnusedActions) {
 			var keyBindings = this._keyBindings;
 			for (var i = 0; i < keyBindings.length; i++) {
-				var kb = keyBindings[i]; 
+				var kb = keyBindings[i];
 				if (kb.keyBinding.equals(keyBinding)) {
 					if (name) {
 						kb.name = name;
@@ -1200,7 +1200,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						if (kb.predefined) {
 							kb.name = null;
 						} else {
-							var oldName = kb.name; 
+							var oldName = kb.name;
 							keyBindings.splice(i, 1);
 							if (!keepUnusedActions) {
 								var index = 0;
@@ -1211,7 +1211,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 									/* <p>
 									 * Removing all the key bindings associated to an user action will cause
 									 * the user action to be removed. TextView predefined actions are never
-									 * removed (so they can be reinstalled in the future). 
+									 * removed (so they can be reinstalled in the future).
 									 * </p>
 									 */
 									var actions = this._actions;
@@ -1273,12 +1273,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * This can be used to improve the performance.
 		 * </p><p>
 		 * When the flag is set to <code>true</code>,
-		 * the entire view is marked as needing to be redrawn. 
+		 * the entire view is marked as needing to be redrawn.
 		 * Nested calls to this method are stacked.
 		 * </p>
 		 *
 		 * @param {Boolean} redraw the new redraw state
-		 * 
+		 *
 		 * @see #redraw
 		 */
 		setRedraw: function(redraw) {
@@ -1324,7 +1324,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				removedLineCount: oldLineCount,
 				addedLineCount: newLineCount
 			};
-			this.onModelChanged(e); 
+			this.onModelChanged(e);
 			this._model.addEventListener("Changing", this._modelListener.onChanging);
 			this._model.addEventListener("Changed", this._modelListener.onChanged);
 			this._reset();
@@ -1334,7 +1334,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * Sets the view options for the view.
 		 *
 		 * @param {orion.textview.TextViewOptions} options the view options.
-		 * 
+		 *
 		 * @see #getOptions
 		 */
 		setOptions: function (options) {
@@ -1366,7 +1366,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <p>
 		 * Clamps out of range offsets.
 		 * </p>
-		 * 
+		 *
 		 * @param {Number} start the start offset of the selection
 		 * @param {Number} end the end offset of the selection
 		 * @param {Boolean} [show=true] if <code>true</code>, the view will scroll if needed to show the caret location.
@@ -1411,7 +1411,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (reset) {
 				this._columnX = -1;
 				this._setSelection(new Selection (0, 0, false), true);
-				
+
 				/*
 				* Bug in Firefox.  For some reason, the caret does not show after the
 				* view is refreshed.  The fix is to toggle the contentEditable state and
@@ -1482,7 +1482,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Scrolls the selection into view if needed.
 		 *
-		 * @returns true if the view was scrolled. 
+		 * @returns true if the view was scrolled.
 		 *
 		 * @see #getSelection
 		 * @see #setSelection
@@ -1501,7 +1501,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._queueUpdatePage();
 			}
 		},
-		
+
 		/**************************************** Event handlers *********************************/
 		_handleRootMouseDown: function (e) {
 			if (!e) { e = window.event; }
@@ -1510,7 +1510,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				(this._overlayDiv || this._clientDiv).draggable = true;
 				this._ignoreBlur = true;
 			}
-			
+
 			/* Prevent clicks outside of the client div from taking focus away. */
 			var topNode = this._overlayDiv || this._clientDiv;
 			/* Use view div on IE 8 otherwise it is not possible to scroll. */
@@ -1529,7 +1529,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* In IE 8 is not possible to prevent the default handler from running
 				* during mouse down event using usual API. The workaround is to give
 				* focus back to the client div.
-				*/ 
+				*/
 				var self = this;
 				setTimeout(function() {
 					self._clientDiv.focus();
@@ -1541,10 +1541,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isFirefox && e.which === 1) {
 				this._clientDiv.contentEditable = true;
 				(this._overlayDiv || this._clientDiv).draggable = false;
-				
+
 				/*
 				* Bug in Firefox.  For some reason, Firefox stops showing the caret
-				* in some cases. For example when the user cancels a drag operation 
+				* in some cases. For example when the user cancels a drag operation
 				* by pressing ESC.  The fix is to detect that the drag operation was
 				* cancelled,  toggle the contentEditable state and force the clientDiv
 				* to loose and receive focus if it is focused.
@@ -1668,8 +1668,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isFirefox) {
 				this._fixCaret();
 				/*
-				* Bug in Firefox.  For some reason, Firefox stops showing the caret when the 
-				* selection is dropped onto itself. The fix is to detected the case and 
+				* Bug in Firefox.  For some reason, Firefox stops showing the caret when the
+				* selection is dropped onto itself. The fix is to detected the case and
 				* call fixCaret() a second time.
 				*/
 				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) {
@@ -1687,7 +1687,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
-			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this 
+			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this
 			* event will result is loss of functionality (insertion mark, etc).
 			*/
 			if (isWebkit || prevent) {
@@ -1704,7 +1704,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
-			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this 
+			* Firefox and IE do not follow this spec for contentEditable. Note that preventing this
 			* event will result is loss of functionality (insertion mark, etc).
 			*/
 			if (isWebkit || prevent) {
@@ -1729,7 +1729,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			/*
 			* This event must be prevented otherwise the user agent will modify
 			* the DOM. Note that preventing the event on some user agents (i.e. IE)
-			* indicates that the operation is cancelled. This causes the dropEffect to 
+			* indicates that the operation is cancelled. This causes the dropEffect to
 			* be set to none  in the dragend event causing the implementor to not execute
 			* the code responsible by the move effect.
 			*/
@@ -1774,7 +1774,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					return false;
 				}
 				var startIME = true;
-				
+
 				/*
 				* Bug in Safari. Some Control+key combinations send key events
 				* with keyCode equals to 229. This is unexpected and causes the
@@ -1793,10 +1793,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._commitIME();
 			}
 			/*
-			* Feature in Firefox. When a key is held down the browser sends 
+			* Feature in Firefox. When a key is held down the browser sends
 			* right number of keypress events but only one keydown. This is
 			* unexpected and causes the view to only execute an action
-			* just one time. The fix is to ignore the keydown event and 
+			* just one time. The fix is to ignore the keydown event and
 			* execute the actions from the keypress handler.
 			* Note: This only happens on the Mac and Linux (Firefox 3.6).
 			*
@@ -1807,11 +1807,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._keyDownEvent = e;
 				return true;
 			}
-			
+
 			if (this._doAction(e)) {
 				if (e.preventDefault) {
-					e.preventDefault(); 
-					e.stopPropagation(); 
+					e.preventDefault();
+					e.stopPropagation();
 				} else {
 					e.cancelBubble = true;
 					e.returnValue = false;
@@ -1882,7 +1882,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!ctrlKey) {
 				this._setLinksVisible(false);
 			}
-			// don't commit for space (it happens during JP composition)  
+			// don't commit for space (it happens during JP composition)
 			if (e.keyCode === 13) {
 				this._commitIME();
 			}
@@ -1927,7 +1927,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* mouse down and ungrab on mouse move when the button 1 is not set.
 				*/
 				if (isW3CEvents) { this._setGrab(target); }
-				
+
 				this._doubleClickSelection = null;
 				this._setSelectionTo(e.clientX, e.clientY, e.shiftKey);
 				this._doubleClickSelection = this._getSelection();
@@ -1950,7 +1950,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._commitIME();
 
 			var button = e.which; // 1 - left, 2 - middle, 3 - right
-			if (!button) { 
+			if (!button) {
 				// if IE 8 or older
 				if (e.button === 4) { button = 2; }
 				if (e.button === 2) { button = 3; }
@@ -2048,7 +2048,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!this._isMouseDown || this._dragOffset !== -1) {
 				return;
 			}
-			
+
 			var x = e.clientX;
 			var y = e.clientY;
 			var viewPad = this._getViewPadding();
@@ -2118,7 +2118,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				this._isMouseDown = false;
 				this._endAutoScroll();
-				
+
 				/*
 				* Feature in IE8 and older, the sequence of events in the IE8 event model
 				* for a doule-click is:
@@ -2178,7 +2178,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					* mouse. In general, it is the pixel value for Mac mice and track pads,
 					* but it is a multiple of 120 for other mice. There is no presise
 					* way to determine if it is pixel value or a multiple of 120.
-					* 
+					*
 					* Note that the current approach does not calculate the correct
 					* pixel value for Mac mice when the delta is a multiple of 120.
 					*/
@@ -2197,10 +2197,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					pixelY = (-e.wheelDeltaY / 120 * linesToScroll) * lineHeight;
 				}
 			}
-			/* 
-			* Feature in Safari. If the event target is removed from the DOM 
+			/*
+			* Feature in Safari. If the event target is removed from the DOM
 			* safari stops smooth scrolling. The fix is keep the element target
-			* in the DOM and remove it on a later time. 
+			* in the DOM and remove it on a later time.
 			*
 			* Note: Using a timer is not a solution, because the timeout needs to
 			* be at least as long as the gesture (which is too long).
@@ -2220,9 +2220,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
-			
-			// SCRIPTED 
-			// feature on mac-chrome: 
+
+			// SCRIPTED
+			// feature on mac-chrome:
 			// prevent left scrolling on swipe
 			// otherwise history back navigation will happen
 			if (isChrome && isMac) {
@@ -2236,7 +2236,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (this._doPaste(e)) {
 				if (isIE) {
 					/*
-					 * Bug in IE,  
+					 * Bug in IE,
 					 */
 					var self = this;
 					this._ignoreFocus = true;
@@ -2257,8 +2257,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._parentWidth = newWidth;
 				this._parentHeight = newHeight;
 				/*
-				* Feature in IE7. For some reason, sometimes Internet Explorer 7 
-				* returns incorrect values for element.getBoundingClientRect() when 
+				* Feature in IE7. For some reason, sometimes Internet Explorer 7
+				* returns incorrect values for element.getBoundingClientRect() when
 				* inside a resize handler. The fix is to queue the work.
 				*/
 				if (isIE < 9) {
@@ -2296,16 +2296,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					case "click":
 						if (ruler.onClick) { ruler.onClick(lineIndex, e); }
 						break;
-					case "dblclick": 
+					case "dblclick":
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
 						break;
-					case "mousemove": 
+					case "mousemove":
 						if (ruler.onMouseMove) { ruler.onMouseMove(lineIndex, e); }
 						break;
-					case "mouseover": 
+					case "mouseover":
 						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
 						break;
-					case "mouseout": 
+					case "mouseout":
 						if (ruler.onMouseOut) { ruler.onMouseOut(lineIndex, e); }
 						break;
 				}
@@ -2585,7 +2585,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selection.extend(model.getCharCount());
 			} else {
 				var lineIndex = model.getLineAtOffset(selection.getCaret());
-				selection.extend(model.getLineEnd(lineIndex)); 
+				selection.extend(model.getLineEnd(lineIndex));
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -2603,7 +2603,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._setSelection(selection);
 				this._modifyContent({text: model.getLineDelimiter(), start: lineEnd, end: lineEnd, _ignoreDOMSelection: true}, true);
 			} else {
-				this._doContent(model.getLineDelimiter()); 
+				this._doContent(model.getLineDelimiter());
 				if (args && args.noCursor) {
 					selection.end = selection.start;
 					this._setSelection(selection);
@@ -2618,7 +2618,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selection.extend(0);
 			} else {
 				var lineIndex = model.getLineAtOffset(selection.getCaret());
-				selection.extend(model.getLineStart(lineIndex)); 
+				selection.extend(model.getLineStart(lineIndex));
 			}
 			if (!args.select) { selection.collapse(); }
 			this._setSelection(selection, true);
@@ -2777,7 +2777,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._doContent(text);
 			return true;
 		},
-		
+
 		/************************************ Internals ******************************************/
 		_applyStyle: function(style, node, reset) {
 			if (reset) {
@@ -2785,7 +2785,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var attrs = node.attributes;
 				for (var i= attrs.length; i-->0;) {
 					if (attrs[i].specified) {
-						node.removeAttributeNode(attrs[i]); 
+						node.removeAttributeNode(attrs[i]);
 					}
 				}
 			}
@@ -2976,7 +2976,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			// this can be accomplished by changing the focus around
 			this._scrollDiv.focus();
 			this._clientDiv.focus();
-			
+
 			var model = this._model;
 			var lineIndex = model.getLineAtOffset(this._imeOffset);
 			var lineStart = model.getLineStart(lineIndex);
@@ -3114,7 +3114,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true});
 				bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true});
 			}
-				
+
 			/*
 			* Feature in IE/Chrome: prevent ctrl+'u', ctrl+'i', and ctrl+'b' from applying styles to the text.
 			*
@@ -3177,7 +3177,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				{name: "scrollTextStart",	defaultHandler: function() {return self._doScroll({type: "textStart"});}},
 				{name: "scrollTextEnd",		defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
 				{name: "centerLine",		defaultHandler: function() {return self._doScroll({type: "centerLine"});}},
-				
+
 				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
 				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
 				{name: "selectWholeLineUp",		defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
@@ -3225,21 +3225,21 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var ranges = [];
 			var data = {tabOffset: 0, ranges: ranges};
 			this._createRanges(e.ranges, lineText, 0, lineText.length, lineStart, data);
-			
+
 			/*
 			* A trailing span with a whitespace is added for three different reasons:
 			* 1. Make sure the height of each line is the largest of the default font
 			* in normal, italic, bold, and italic-bold.
-			* 2. When full selection is off, Firefox, Opera and IE9 do not extend the 
-			* selection at the end of the line when the line is fully selected. 
+			* 2. When full selection is off, Firefox, Opera and IE9 do not extend the
+			* selection at the end of the line when the line is fully selected.
 			* 3. The height of a div with only an empty span is zero.
 			*/
 			var c = " ";
 			if (!this._fullSelection && isIE < 9) {
-				/* 
+				/*
 				* IE8 already selects extra space at end of a line fully selected,
-				* adding another space at the end of the line causes the selection 
-				* to look too big. The fix is to use a zero-width space (\uFEFF) instead. 
+				* adding another space at the end of the line causes the selection
+				* to look too big. The fix is to use a zero-width space (\uFEFF) instead.
 				*/
 				c = "\uFEFF";
 			}
@@ -3248,13 +3248,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Feature in WekKit. Adding a regular white space to the line will
 				* cause the longest line in the view to wrap even though "pre" is set.
 				* The fix is to use the zero-width non-joiner character (\u200C) instead.
-				* Note: To not use \uFEFF because in old version of Chrome this character 
+				* Note: To not use \uFEFF because in old version of Chrome this character
 				* shows a glyph;
 				*/
 				c = "\u200C";
 			}
 			ranges.push({text: c, style: this._metrics.largestFontStyle, ignoreChars: 1});
-			
+
 			var range, span, style, oldSpan, oldStyle, text, oldText, end = 0, oldEnd = 0, next;
 			var changeCount, changeStart;
 			if (div) {
@@ -3426,7 +3426,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rootDiv.style.overflow = "hidden";
 			rootDiv.setAttribute("role", "application");
 			parent.appendChild(rootDiv);
-			
+
 			var leftDiv = document.createElement("DIV");
 			leftDiv.className = "textviewLeftRuler";
 			this._leftDiv = leftDiv;
@@ -3456,7 +3456,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.margin = "0px";
 			viewDiv.style.outline = "none";
 			rootDiv.appendChild(viewDiv);
-			
+
 			var rightDiv = document.createElement("DIV");
 			rightDiv.className = "textviewRightRuler";
 			this._rightDiv = rightDiv;
@@ -3474,14 +3474,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			table.border = "0px";
 			table.insertRow(0);
 			rootDiv.appendChild(rightDiv);
-				
+
 			var scrollDiv = document.createElement("DIV");
 			this._scrollDiv = scrollDiv;
 			scrollDiv.style.margin = "0px";
 			scrollDiv.style.borderWidth = "0px";
 			scrollDiv.style.padding = "0px";
 			viewDiv.appendChild(scrollDiv);
-			
+
 			if (isFirefox) {
 				var clipboardDiv = document.createElement("DIV");
 				this._clipboardDiv = clipboardDiv;
@@ -3489,7 +3489,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clipboardDiv.style.whiteSpace = "pre";
 				clipboardDiv.style.left = "-1000px";
 				rootDiv.appendChild(clipboardDiv);
-			
+
 				var clipDiv = document.createElement("DIV");
 				this._clipDiv = clipDiv;
 				clipDiv.style.position = "absolute";
@@ -3498,7 +3498,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clipDiv.style.borderWidth = "0px";
 				clipDiv.style.padding = "0px";
 				rootDiv.appendChild(clipDiv);
-				
+
 				var clipScrollDiv = document.createElement("DIV");
 				this._clipScrollDiv = clipScrollDiv;
 				clipScrollDiv.style.position = "absolute";
@@ -3506,7 +3506,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clipScrollDiv.style.top = "-1000px";
 				clipDiv.appendChild(clipScrollDiv);
 			}
-			
+
 			this._setFullSelection(this._fullSelection, true);
 
 			var clientDiv = document.createElement("DIV");
@@ -3524,7 +3524,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clientDiv.style.WebkitTapHighlightColor = "transparent";
 			}
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
-			
+
 			if (isPad) {
 				var vScrollDiv = document.createElement("DIV");
 				this._vScrollDiv = vScrollDiv;
@@ -3624,7 +3624,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clearTimeout(this._updateTimer);
 				this._updateTimer = null;
 			}
-			
+
 			var rootDiv = this._rootDiv;
 			rootDiv.parentNode.removeChild(rootDiv);
 
@@ -3717,7 +3717,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var lineChild = child.firstChild;
 				while (lineChild) {
 					var textNode = lineChild.firstChild;
-					var nodeLength = textNode.length; 
+					var nodeLength = textNode.length;
 					if (lineChild.ignoreChars) {
 						nodeLength -= lineChild.ignoreChars;
 					}
@@ -3751,7 +3751,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								/*
 								 * Removing the element node that holds the selection start or end
 								 * causes the selection to be lost. The fix is to detect this case
-								 * and restore the selection. 
+								 * and restore the selection.
 								 */
 								var s = this._getSelection();
 								if ((lineOffset <= s.start && s.start < lineOffset + nodeLength) ||  (lineOffset <= s.end && s.end < lineOffset + nodeLength)) {
@@ -3822,7 +3822,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._convertDelimiter(noteText, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 					return clipboadText.join("");
 				};
-				
+
 				/* Try execCommand first. Works on firefox with clipboard permission. */
 				var result = false;
 				this._ignorePaste = true;
@@ -4028,13 +4028,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var lineEnd = model.getLineEnd(lineIndex);
 				var lineLength = lineText.length;
 				var offsetInLine = offset - lineStart;
-				
-				
+
+
 				var c, previousPunctuation, previousLetterOrDigit, punctuation, letterOrDigit;
 				if (direction > 0) {
 					if (offsetInLine === lineLength) { return lineEnd; }
 					c = lineText.charCodeAt(offsetInLine);
-					previousPunctuation = _isPunctuation(c); 
+					previousPunctuation = _isPunctuation(c);
 					previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
 					offsetInLine++;
 					while (offsetInLine < lineLength) {
@@ -4059,7 +4059,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (offsetInLine === 0) { return lineStart; }
 					offsetInLine--;
 					c = lineText.charCodeAt(offsetInLine);
-					previousPunctuation = _isPunctuation(c); 
+					previousPunctuation = _isPunctuation(c);
 					previousLetterOrDigit = !previousPunctuation && !_isWhitespace(c);
 					while (0 < offsetInLine) {
 						c = lineText.charCodeAt(offsetInLine - 1);
@@ -4150,7 +4150,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				bottom = node.currentStyle.paddingBottom;
 			}
 			return {
-				left: parseInt(left, 10) || 0, 
+				left: parseInt(left, 10) || 0,
 				top: parseInt(top, 10) || 0,
 				right: parseInt(right, 10) || 0,
 				bottom: parseInt(bottom, 10) || 0
@@ -4193,7 +4193,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (x > lineRect.right) { x = lineRect.right; }
 			/*
 			* Bug in IE 8 and earlier. The coordinates of getClientRects() are relative to
-			* the browser window.  The fix is to convert to the frame window before using it. 
+			* the browser window.  The fix is to convert to the frame window before using it.
 			*/
 			var deltaX = 0, rects;
 			if (isIE < 9) {
@@ -4214,7 +4214,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						r = rects[i];
 						newRects[i] = {left: r.left - deltaX + scrollX, top: r.top, right: r.right - deltaX + scrollX, bottom: r.bottom};
 					}
-					element._rectsCache = newRects; 
+					element._rectsCache = newRects;
 				}
 				rects = element._rectsCache;
 				newRects = [rects.length];
@@ -4320,7 +4320,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								/*
 								 * Removing the element node that holds the selection start or end
 								 * causes the selection to be lost. The fix is to detect this case
-								 * and restore the selection. 
+								 * and restore the selection.
 								 */
 								var s = this._getSelection();
 								if ((offset <= s.start && s.start < offset + nodeLength) || (offset <= s.end && s.end < offset + nodeLength)) {
@@ -4360,7 +4360,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			};
 			this._model.addEventListener("Changing", this._modelListener.onChanging);
 			this._model.addEventListener("Changed", this._modelListener.onChanged);
-			
+
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
 			var topNode = this._overlayDiv || clientDiv;
@@ -4430,7 +4430,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: rightDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: rightDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: rightDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e); }});
-			
+
 			for (var i=0; i<handlers.length; i++) {
 				var h = handlers[i];
 				addHandler(h.target, h.type, h.handler, h.capture);
@@ -4476,7 +4476,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._grabControl = null;
 			this._moseMoveClosure  = null;
 			this._mouseUpClosure = null;
-			
+
 			/* Double click */
 			this._lastMouseX = 0;
 			this._lastMouseY = 0;
@@ -4486,14 +4486,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._clickDist = 5;
 			this._isMouseDown = false;
 			this._doubleClickSelection = null;
-			
+
 			/* Scroll */
 			this._hScroll = 0;
 			this._vScroll = 0;
 
 			/* IME */
 			this._imeOffset = -1;
-			
+
 			/* Create elements */
 			this._createActions();
 			this._createView();
@@ -4509,7 +4509,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this.onVerify(e);
 
 			if (e.text === null || e.text === undefined) { return; }
-			
+
 			var model = this._model;
 			try {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = true; }
@@ -4517,7 +4517,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			} finally {
 				if (e._ignoreDOMSelection) { this._ignoreDOMSelection = false; }
 			}
-			
+
 			if (updateCaret) {
 				var selection = this._getSelection ();
 				selection.setCaret(e.start + e.text.length);
@@ -4546,7 +4546,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				this._setSelection(selection, false, false);
 			}
-			
+
 			var model = this._model;
 			var startLine = model.getLineAtOffset(start);
 			var child = this._getLineNext();
@@ -4582,7 +4582,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_queueUpdatePage: function() {
 			if (this._updateTimer) { return; }
 			var self = this;
-			this._updateTimer = setTimeout(function() { 
+			this._updateTimer = setTimeout(function() {
 				self._updateTimer = null;
 				self._updatePage();
 			}, 0);
@@ -4638,14 +4638,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* to show the caret when scrollView is not called from showCaret().
 			*/
 			this._ensureCaretVisible = false;
-			
+
 			/*
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
-			* view div. This causes an updatePage from the scroll event. In some browsers 
+			* view div. This causes an updatePage from the scroll event. In some browsers
 			* this event is asynchronous and forcing update page to run synchronously
-			* leads to redraw problems. 
+			* leads to redraw problems.
 			* On Chrome 11, the view redrawing at times when holding PageDown/PageUp key.
-			* On Firefox 4 for Linux, the view redraws the first page when holding 
+			* On Firefox 4 for Linux, the view redraws the first page when holding
 			* PageDown/PageUp key, but it will not redraw again until the key is released.
 			*/
 			var viewDiv = this._viewDiv;
@@ -4665,10 +4665,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var child = document.createElement("PRE");
 				child.style.position = "fixed";
 				child.style.left = "-1000px";
-				this._convertDelimiter(text, 
+				this._convertDelimiter(text,
 					function(t) {
 						child.appendChild(document.createTextNode(t));
-					}, 
+					},
 					function() {
 						child.appendChild(document.createElement("BR"));
 					}
@@ -4690,7 +4690,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._updateDOMSelection();
 				};
 				var result = false;
-				/* 
+				/*
 				* Try execCommand first, it works on firefox with clipboard permission,
 				* chrome 5, safari 4.
 				*/
@@ -4713,7 +4713,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				//webkit
 				clipboardText = [];
 				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
-				return event.clipboardData.setData("text/plain", clipboardText.join("")); 
+				return event.clipboardData.setData("text/plain", clipboardText.join(""));
 			}
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
@@ -4732,7 +4732,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					startLineNode = node;
 					startLineOffset = startOffset - offset;
 					if (lineChild.ignoreChars && nodeLength > 0 && startLineOffset === nodeLength) {
-						startLineOffset += lineChild.ignoreChars; 
+						startLineOffset += lineChild.ignoreChars;
 					}
 					break;
 				}
@@ -4752,14 +4752,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					endLineNode = node;
 					endLineOffset = endOffset - offset;
 					if (lineChild.ignoreChars && nodeLength > 0 && endLineOffset === nodeLength) {
-						endLineOffset += lineChild.ignoreChars; 
+						endLineOffset += lineChild.ignoreChars;
 					}
 					break;
 				}
 				offset += nodeLength;
 				lineChild = lineChild.nextSibling;
 			}
-			
+
 			this._setDOMFullSelection(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd);
 
 			var range;
@@ -4785,7 +4785,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var child = document.createElement("DIV");
 				body.appendChild(child);
 				body.removeChild(child);
-				
+
 				range = body.createTextRange();
 				range.moveToElementText(startLineNode.parentNode);
 				range.moveStart("character", startLineOffset);
@@ -4935,7 +4935,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (selection) {
 				this._columnX = -1;
 				if (update === undefined) { update = true; }
-				var oldSelection = this._selection; 
+				var oldSelection = this._selection;
 				if (!oldSelection.equals(selection)) {
 					this._selection = selection;
 					var e = {
@@ -4945,17 +4945,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					};
 					this.onSelection(e);
 				}
-				/* 
+				/*
 				* Always showCaret(), even when the selection is not changing, to ensure the
 				* caret is visible. Note that some views do not scroll to show the caret during
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
 				if (scroll) { update = !this._showCaret(false, pageScroll); }
-				
-				/* 
-				* Sometimes the browser changes the selection 
-				* as result of method calls or "leaked" events. 
+
+				/*
+				* Sometimes the browser changes the selection
+				* as result of method calls or "leaked" events.
 				* The fix is to set the visual selection even
 				* when the logical selection is not changed.
 				*/
@@ -5010,7 +5010,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				selection.setCaret(start);
 				selection.extend(end);
-			} 
+			}
 			this._setSelection(selection, true, true);
 			return true;
 		},
@@ -5038,7 +5038,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				return;
 			}
-			
+
 			if (!this._selDiv1 && (this._fullSelection && !isWebkit)) {
 				this._hightlightRGB = "Highlight";
 				var selDiv1 = document.createElement("DIV");
@@ -5077,7 +5077,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv3.style.height = "0px";
 				selDiv3.style.zIndex = "0";
 				parent.appendChild(selDiv3);
-				
+
 				/*
 				* Bug in Firefox. The Highlight color is mapped to list selection
 				* background instead of the text selection background.  The fix
@@ -5146,11 +5146,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var caret = selection.getCaret();
 			var start = selection.start;
 			var end = selection.end;
-			var startLine = model.getLineAtOffset(start); 
+			var startLine = model.getLineAtOffset(start);
 			var endLine = model.getLineAtOffset(end);
 			var endInclusive = Math.max(Math.max(start, model.getLineStart(endLine)), end - 1);
 			var viewPad = this._getViewPadding();
-			
+
 			var clientWidth = this._getClientWidth();
 			var leftEdge = viewPad.left;
 			var rightEdge = viewPad.left + clientWidth;
@@ -5166,7 +5166,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (right < bounds.right) { right = bounds.right; }
 				}
 			}
-			var viewRect = this._viewDiv.getBoundingClientRect(); 
+			var viewRect = this._viewDiv.getBoundingClientRect();
 			left -= viewRect.left;
 			right -= viewRect.left;
 			var pixelX = 0;
@@ -5215,8 +5215,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._scrollView (pixelX, pixelY);
 				/*
 				* When the view scrolls it is possible that one of the scrollbars can show over the caret.
-				* Depending on the browser scrolling can be synchronous (Safari), in which case the change 
-				* can be detected before showCaret() returns. When scrolling is asynchronous (most browsers), 
+				* Depending on the browser scrolling can be synchronous (Safari), in which case the change
+				* can be detected before showCaret() returns. When scrolling is asynchronous (most browsers),
 				* the detection is done during the next update page.
 				*/
 				if (clientHeight !== this._getClientHeight() || clientWidth !== this._getClientWidth()) {
@@ -5255,12 +5255,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var endLine = model.getLineAtOffset(selection.end);
 			var firstNode = this._getLineNext();
 			/*
-			* Bug in Firefox. For some reason, after a update page sometimes the 
+			* Bug in Firefox. For some reason, after a update page sometimes the
 			* firstChild returns null incorrectly. The fix is to ignore show selection.
 			*/
 			if (!firstNode) { return; }
 			var lastNode = this._getLinePrevious();
-			
+
 			var topNode, bottomNode, topOffset, bottomOffset;
 			if (startLine < firstNode.lineIndex) {
 				topNode = firstNode;
@@ -5326,7 +5326,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
 				var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
-				
+
 				var lineIndex, lineWidth;
 				var child = clientDiv.firstChild;
 				while (child) {
@@ -5342,7 +5342,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 					child = nextChild;
 				}
-	
+
 				child = this._getLineNext();
 				var frag = document.createDocumentFragment();
 				for (lineIndex=lineStart; lineIndex<=lineEnd; lineIndex++) {
@@ -5361,7 +5361,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 				}
 				if (frag.firstChild) { clientDiv.insertBefore(frag, child); }
-	
+
 				/*
 				* Feature in WekKit. Webkit limits the width of the lines
 				* computed below to the width of the client div.  This causes
@@ -5369,11 +5369,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* is to set the width of the client div to a larger number
 				* before computing the lines width.  Note that this value is
 				* reset to the appropriate value further down.
-				*/ 
+				*/
 				if (isWebkit) {
 					clientDiv.style.width = (0x7FFFF).toString() + "px";
 				}
-	
+
 				var rect;
 				child = this._getLineNext();
 				while (child) {
@@ -5405,30 +5405,30 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						clientDiv.removeChild(dummy);
 					}
 				}
-	
+
 				// Update rulers
 				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
 				this._updateRuler(this._rightDiv, topIndex, bottomIndex);
-				
+
 				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
 				var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
 				viewDiv.style.left = leftWidth + "px";
 				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px";
 				if (this._rightDiv) {
-					this._rightDiv.style.left = (parentWidth - rightWidth) + "px"; 
+					this._rightDiv.style.left = (parentWidth - rightWidth) + "px";
 				}
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
 				scrollDiv.style.height = scrollHeight + "px";
 				/*
-				* TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
-				* then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
+				* TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible,
+				* then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars
 				* at this point.
 				*/
 				clientWidth = this._getClientWidth();
 				var width = Math.max(this._maxLineWidth, clientWidth);
 				/*
-				* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
+				* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding
 				* in the scrollbar. It is possible this a bug since all other paddings are considered.
 				*/
 				scrollWidth = width;
@@ -5457,12 +5457,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._hScrollDiv.style.top = (clientHeight - 9) + "px";
 				this._hScrollDiv.style.width = thumbWidth + "px";
 			}
-			var left = scroll.x;	
+			var left = scroll.x;
 			var clipDiv = this._clipDiv;
 			var overlayDiv = this._overlayDiv;
 			var clipLeft, clipTop;
 			if (clipDiv) {
-				clipDiv.scrollLeft = left;			
+				clipDiv.scrollLeft = left;
 				clipLeft = leftWidth + viewPad.left;
 				clipTop = viewPad.top;
 				var clipWidth = clientWidth;
@@ -5472,7 +5472,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					clipLeft -= viewPad.left;
 					clipWidth += viewPad.left;
 					clientLeft = viewPad.left;
-				} 
+				}
 				if (scroll.x + clientWidth === scrollWidth) {
 					clipWidth += viewPad.right;
 				}
@@ -5481,8 +5481,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					clipHeight += viewPad.top;
 					clientTop += viewPad.top;
 				}
-				if (scroll.y + clientHeight === scrollHeight) { 
-					clipHeight += viewPad.bottom; 
+				if (scroll.y + clientHeight === scrollHeight) {
+					clipHeight += viewPad.bottom;
 				}
 				clipDiv.style.left = clipLeft + "px";
 				clipDiv.style.top = clipTop + "px";
@@ -5529,7 +5529,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			/*
 			* If the client height changed during the update page it means that scrollbar has either been shown or hidden.
 			* When this happens update page has to run again to ensure that the top and bottom lines div are correct.
-			* 
+			*
 			* Note: On IE, updateDOMSelection() has to be called before getting the new client height because it
 			* forces the client area to be recomputed.
 			*/
@@ -5568,7 +5568,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (div.rulerChanged) {
 					this._applyStyle(ruler.getRulerStyle(), div);
 				}
-				
+
 				var widthDiv;
 				var child = div.firstChild;
 				if (child) {
@@ -5698,6 +5698,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		}
 	};//end prototype
 	mEventTarget.EventTarget.addMixin(TextView.prototype);
-	
+
 	return {TextView: TextView};
 });
