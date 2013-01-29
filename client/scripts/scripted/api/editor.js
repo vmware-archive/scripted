@@ -19,23 +19,43 @@
 define(function (require) {
 
 	var when = require('when');
+	var deref = require('scripted/utils/deref');
 
 	console.log('Editor api loaded!');
 
 	var saveHooks = require('scripted/editor/save-hooks');
 
+	/**
+	 * Create an accessor function to easily navigate a typical JSON like
+	 * configuration object. The function acceps a variable number of arguments,
+	 * each argument a property to navigate in the object. Navigation is 'safe'
+	 * and returns the first 'falsy' value that is accessed in the navigation
+	 * path.
+	 */
+	function makeConfigFunction(object) {
+		return function() {
+			var props = arguments;
+			return deref(object, arguments);
+		};
+	}
+
 	return {
 		onSaveTransform: function (transformFun) {
+			//TODO: there's no real guarantee the config is initialized by now
+			// but mostly it will be ok unless someone saves really early on in the lifecycle.
+			var config = makeConfigFunction(deref(window, ['scripted', 'config' ]));
+
 			//Use lower-level preSave hook to grab editor text, apply transformFun
 			//and put contents back into the editor.
 			saveHooks.onPreSave(function (editor, path) {
 				return when(undefined, function () {
-					return transformFun(editor.getText(), path);
+					return transformFun(editor.getText(), path, config);
 				}).otherwise(function (err) {
 					//If something went wrong with this transform
 					//don't reject the save. Just ignore that transform.
 					if (err) {
 						if (err.stack) {
+							console.log(err);
 							console.log(err.stack);
 						} else {
 							console.error(err);
