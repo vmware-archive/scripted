@@ -1,18 +1,17 @@
-@import "../../lib/dojo/resources/dojo.css";
-@import "../../lib/dijit/themes/nihilo/nihilo.css";
-@import "../../lib/dijit/themes/nihilo/layout/BorderContainer.css";
-@import "../../lib/dijit/themes/nihilo/form/Common.css";
-@import "../../lib/dijit/themes/nihilo/form/Button.css";
 @import "../../orion/textview/textview.css";
 @import "../../orion/textview/rulers.css";
 @import "../../orion/textview/annotations.css";
 @import "../../orion/textview/tooltip.css";
+
 @import "../../examples/textview/textstyler.css";
 @import "../../examples/editor/htmlStyles.css";
-@import "../../css/default-theme.css";
+@import "../../orion/editor/default-theme.css";
+
+
+/*
 @import "../../css/ide.css";
 @import "../../css/commands.css";
-
+*/
 .treetable {
 overflow: auto;
 /*

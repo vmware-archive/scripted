@@ -273,7 +273,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			nav.resize(function(){
 				var width = $('#navigator-wrapper').width();
 				$('#editor').css('margin-left', width);
-				editorUtils.getMainEditor().getTextView()._updatePage();
+				editorUtils.getMainEditor().getTextView()._update();
 				storage.unsafeStore("scripted.navigatorWidth", width);
 			});
 			
@@ -358,7 +358,7 @@ function(mEditor, mExplorerTable, mFileApi, mKeyBinding,
 			$('#editor').css('margin-right', side_width);
 
 			if (editorUtils.getMainEditor()) {
-				editorUtils.getMainEditor().getTextView()._updatePage();
+				editorUtils.getMainEditor().getTextView()._update();
 			}
 		});
 		

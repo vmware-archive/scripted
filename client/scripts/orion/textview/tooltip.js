@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -9,15 +9,21 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define setTimeout clearTimeout setInterval clearInterval Node */
+/*global define Node */
 
-define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/textview/textView', 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(messages, mTextView, mTextModel, mProjectionTextModel) {
+define("orion/textview/tooltip", [ //$NON-NLS-0$
+	'i18n!orion/textview/nls/messages',  //$NON-NLS-0$
+	'orion/textview/textView',  //$NON-NLS-0$
+	'orion/textview/textModel',  //$NON-NLS-0$
+	'orion/textview/projectionTextModel', //$NON-NLS-0$
+	'orion/textview/util' //$NON-NLS-0$
+], function(messages, mTextView, mTextModel, mProjectionTextModel, util) {
 
 	/** @private */
 	function Tooltip (view) {
 		this._view = view;
-		this._create(view.getOptions("parent").ownerDocument);
-		view.addEventListener("Destroy", this, this.destroy);
+		this._create(view.getOptions("parent").ownerDocument); //$NON-NLS-0$
+		view.addEventListener("Destroy", this, this.destroy); //$NON-NLS-0$
 	}
 	Tooltip.getTooltip = function(view) {
 		if (!view._tooltip) {
@@ -38,15 +44,21 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			}
 			// SCRIPTED end
 			
-			/* var */ tooltipDiv = this._tooltipDiv = document.createElement("DIV");
-			tooltipDiv.className = "textviewTooltip";
+			/* var */ tooltipDiv = this._tooltipDiv = util.createElement(document, "div"); //$NON-NLS-0$
+			tooltipDiv.className = "textviewTooltip"; //$NON-NLS-0$
+			tooltipDiv.setAttribute("aria-live", "assertive"); //$NON-NLS-1$ //$NON-NLS-0$
+			tooltipDiv.setAttribute("aria-atomic", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			// SCRIPTED start
 			tooltipDiv.id = "tooltip";
 			// SCRIPTED end
-			var tooltipContents = this._tooltipContents = document.createElement("DIV");
+			var tooltipContents = this._tooltipContents = util.createElement(document, "div"); //$NON-NLS-0$
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
 			this.hide();
+		},
+		_getWindow: function() {
+			var document = this._tooltipDiv.ownerDocument;
+			return document.defaultView || document.parentWindow;
 		},
 		destroy: function() {
 			if (!this._tooltipDiv) { return; }
@@ -64,33 +76,40 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				this._tooltipContents.innerHTML = "";
 			}
 			if (this._tooltipDiv) {
-				this._tooltipDiv.style.visibility = "hidden";
+				this._tooltipDiv.style.visibility = "hidden"; //$NON-NLS-0$
 			}
+			var window = this._getWindow();
 			if (this._showTimeout) {
-				clearTimeout(this._showTimeout);
+				window.clearTimeout(this._showTimeout);
 				this._showTimeout = null;
 			}
 			if (this._hideTimeout) {
-				clearTimeout(this._hideTimeout);
+				window.clearTimeout(this._hideTimeout);
 				this._hideTimeout = null;
 			}
 			if (this._fadeTimeout) {
-				clearInterval(this._fadeTimeout);
+				window.clearInterval(this._fadeTimeout);
 				this._fadeTimeout = null;
 			}
 		},
 		isVisible: function() {
-			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible";
+			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible"; //$NON-NLS-0$
 		},
-		setTarget: function(target) {
+		setTarget: function(target, delay) {
 			if (this.target === target) { return; }
 			this._target = target;
 			this.hide();
 			if (target) {
 				var self = this;
-				self._showTimeout = setTimeout(function() {
+				if(delay === 0) {
 					self.show(true);
-				}, 500);
+			}
+				else {
+				var window = this._getWindow();
+					self._showTimeout = window.setTimeout(function() {
+						self.show(true);
+					}, delay ? delay : 500);
+				}
 			}
 		},
 		show: function(autoHide) {
@@ -99,24 +118,25 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			if (!info) { return; }
 			var tooltipDiv = this._tooltipDiv, tooltipContents = this._tooltipContents;
 			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
-				tooltipContents.style.width = tooltipContents.style.height = "auto";
+				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
 			var contents = info.contents;
 			if (contents instanceof Array) {
 				contents = this._getAnnotationContents(contents);
 			}
-			if (typeof contents === "string") {
+			if (typeof contents === "string") { //$NON-NLS-0$
 				tooltipContents.innerHTML = contents;
 			} else if (this._isNode(contents)) {
 				tooltipContents.appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
 				var view = this._view;
 				var options = view.getOptions();
+				options.wrapMode = false;
 				options.parent = tooltipContents;
-				var tooltipTheme = "tooltip";
+				var tooltipTheme = "tooltip"; //$NON-NLS-0$
 				var theme = options.themeClass;
 				if (theme) {
 					theme = theme.replace(tooltipTheme, "");
-					if (theme) { theme = " " + theme; }
+					if (theme) { theme = " " + theme; } //$NON-NLS-0$
 					theme = tooltipTheme + theme;
 				} else {
 					theme = tooltipTheme;
@@ -131,37 +151,41 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 						view.onLineStyle(e);
 					}
 				};
-				contentsView.addEventListener("LineStyle", listener.onLineStyle);
+				contentsView.addEventListener("LineStyle", listener.onLineStyle); //$NON-NLS-0$
 				contentsView.setModel(contents);
 				var size = contentsView.computeSize();
-				tooltipContents.style.width = (size.width + 20) + "px";
-				tooltipContents.style.height = size.height + "px";
+				tooltipContents.style.width = (size.width + 20) + "px"; //$NON-NLS-0$
+				tooltipContents.style.height = size.height + "px"; //$NON-NLS-0$
 				contentsView.resize();
 			} else {
 				return;
 			}
-			var left = parseInt(this._getNodeStyle(tooltipDiv, "padding-left", "0"), 10);
-			left += parseInt(this._getNodeStyle(tooltipDiv, "border-left-width", "0"), 10);
-			if (info.anchor === "right") {
-				var right = parseInt(this._getNodeStyle(tooltipDiv, "padding-right", "0"), 10);
-				right += parseInt(this._getNodeStyle(tooltipDiv, "border-right-width", "0"), 10);
-				tooltipDiv.style.right = (tooltipDiv.ownerDocument.body.getBoundingClientRect().right - info.x + left + right) + "px";
+			var documentElement = tooltipDiv.ownerDocument.documentElement;
+			if (info.anchor === "right") { //$NON-NLS-0$
+				var right = documentElement.clientWidth - info.x;
+				tooltipDiv.style.right = right + "px"; //$NON-NLS-0$
+				tooltipDiv.style.maxWidth = (documentElement.clientWidth - right - 10) + "px"; //$NON-NLS-0$
 			} else {
-				tooltipDiv.style.left = (info.x - left) + "px";
+				var left = parseInt(this._getNodeStyle(tooltipDiv, "padding-left", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
+				left += parseInt(this._getNodeStyle(tooltipDiv, "border-left-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
+				left = info.x - left;
+				tooltipDiv.style.left = left + "px"; //$NON-NLS-0$
+				tooltipDiv.style.maxWidth = (documentElement.clientWidth - left - 10) + "px"; //$NON-NLS-0$
 			}
-			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10);
-			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10);
-			tooltipDiv.style.top = (info.y - top) + "px";
-			tooltipDiv.style.maxWidth = info.maxWidth + "px";
-			tooltipDiv.style.maxHeight = info.maxHeight + "px";
-			tooltipDiv.style.opacity = "1";
-			tooltipDiv.style.visibility = "visible";
+			var top = parseInt(this._getNodeStyle(tooltipDiv, "padding-top", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
+			top += parseInt(this._getNodeStyle(tooltipDiv, "border-top-width", "0"), 10); //$NON-NLS-1$ //$NON-NLS-0$
+			top = info.y - top;
+			tooltipDiv.style.top = top + "px"; //$NON-NLS-0$
+			tooltipDiv.style.maxHeight = (documentElement.clientHeight - top - 10) + "px"; //$NON-NLS-0$
+			tooltipDiv.style.opacity = "1"; //$NON-NLS-0$
+			tooltipDiv.style.visibility = "visible"; //$NON-NLS-0$
 			if (autoHide) {
 				var self = this;
-				self._hideTimeout = setTimeout(function() {
-					var opacity = parseFloat(self._getNodeStyle(tooltipDiv, "opacity", "1"));
-					self._fadeTimeout = setInterval(function() {
-						if (tooltipDiv.style.visibility === "visible" && opacity > 0) {
+				var window = this._getWindow();
+				self._hideTimeout = window.setTimeout(function() {
+					var opacity = parseFloat(self._getNodeStyle(tooltipDiv, "opacity", "1")); //$NON-NLS-1$ //$NON-NLS-0$
+					self._fadeTimeout = window.setInterval(function() {
+						if (tooltipDiv.style.visibility === "visible" && opacity > 0) { //$NON-NLS-0$
 							opacity -= 0.1;
 							tooltipDiv.style.opacity = opacity;
 							return;
@@ -182,12 +206,24 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
 				return baseModel.getText(textStart, textEnd);
 			}
-			var title;
+			function getAnnotationHTML(annotation) {
+				var title = annotation.title;
+				if (title === "") { return null; }
+				var result = "<div>"; //$NON-NLS-0$
+				if (annotation.html) {
+					result += annotation.html + "&nbsp;"; //$NON-NLS-0$
+				}
+				if (!title) {
+					title = getText(annotation.start, annotation.end);
+				}
+				title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;"); //$NON-NLS-1$ //$NON-NLS-0$
+				result += "<span style='vertical-align:middle;'>" + title + "</span><div>"; //$NON-NLS-1$ //$NON-NLS-0$
+				return result;
+			}
 			if (annotations.length === 1) {
 				annotation = annotations[0];
-				if (annotation.title) {
-					title = annotation.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					return "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
+				if (annotation.title !== undefined) {
+					return getAnnotationHTML(annotation);
 				} else {
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
@@ -201,15 +237,13 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 					return newModel;
 				}
 			} else {
-				var tooltipHTML = "<div><em>" + messages.multipleAnnotations + "</em></div>";
+				var tooltipHTML = "<div><em>" + messages.multipleAnnotations + "</em></div>"; //$NON-NLS-1$ //$NON-NLS-0$
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					title = annotation.title;
-					if (!title) {
-						title = getText(annotation.start, annotation.end);
+					var html = getAnnotationHTML(annotation);
+					if (html) {
+						tooltipHTML += html;
 					}
-					title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					tooltipHTML += "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
 				}
 				return tooltipHTML;
 			}
@@ -221,7 +255,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				if (!value) {
 					if (node.currentStyle) {
 						var index = 0, p = prop;
-						while ((index = p.indexOf("-", index)) !== -1) {
+						while ((index = p.indexOf("-", index)) !== -1) { //$NON-NLS-0$
 							p = p.substring(0, index) + p.substring(index + 1, index + 2).toUpperCase() + p.substring(index + 2);
 						}
 						value = node.currentStyle[p];
@@ -234,8 +268,8 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			return value || defaultValue;
 		},
 		_isNode: function (obj) {
-			return typeof Node === "object" ? obj instanceof Node :
-				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string";
+			return typeof Node === "object" ? obj instanceof Node : //$NON-NLS-0$
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
 	return {Tooltip: Tooltip};

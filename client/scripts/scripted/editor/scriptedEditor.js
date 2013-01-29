@@ -506,7 +506,8 @@ define([
 			undoStackFactory: new mEditorFeatures.UndoFactory(),
 			annotationFactory: annotationFactory,
 			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
-			contentAssistFactory: contentAssistFactory,
+			// SCRIPTED just for now...
+//			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory,
 			statusReporter: statusReporter,
 			domNode: domNode
@@ -541,7 +542,8 @@ define([
 		
 		editor.refreshEditorFeatures = function(text){
 			syntaxHighlighter.highlight(filePath, editor);
-			editor.highlightAnnotations();
+			// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 			postSave(text);
 		};
 		
@@ -586,7 +588,8 @@ define([
 					// are in the right order (so syntax highlighter then annotation handler)
 
 					syntaxHighlighter.highlight(filePath, editor);
-					editor.highlightAnnotations();
+								// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 					postSave(xhrobj.responseText);
 					
 					// force caret location if required
@@ -598,7 +601,8 @@ define([
 						// that is OK, start with an empty file
 						editor.setInput("Content", null, "");
 						syntaxHighlighter.highlight(filePath, editor);
-						editor.highlightAnnotations();
+									// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 						postSave(xhrobj.responseText);
 						
 						// force caret location if required

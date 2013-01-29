@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,7 +12,123 @@
 /*jslint regexp:false laxbreak:true*/
 /*global define */
 
-define("orion/editor/textMateStyler", ['orion/editor/regex'], function(mRegex) {
+define("orion/editor/textMateStyler", ['orion/editor/regex' ], function(mRegex) {
+
+var preferences;
+
+function _update( storage, stylerOptions, sUtil ){
+
+	var USER_THEME = "";
+
+	var parent = stylerOptions.textView._parent;
+	var document = parent.ownerDocument;
+	var stylesheet = stylerOptions._stylesheet = stylerOptions.util.createElement(document, "style");
+	stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, stylerOptions.util)));
+	var head = document.getElementsByTagName("head")[0] || document.documentElement;
+	
+	head.appendChild(stylesheet);
+
+	stylerOptions.textView.update(true);		
+}
+
+function _updateStylesheet(preferences, util){
+
+	var storage;
+	var CATEGORY = "JavaScript Editor";
+		
+	var self = this;
+	
+	preferences.getPreferences('/settings', 2).then( function(prefs){	
+			
+		var data = prefs.get(CATEGORY);
+		
+		if( data !== undefined ){
+	
+			storage = JSON.parse( prefs.get(CATEGORY) );	
+			if (!storage) { return; }
+			if (self._stylesheet) {
+				self._stylesheet.parentNode.removeChild(self._stylesheet);
+				self._stylesheet = null;
+			}
+			
+			self._update( storage, self, util );
+		}
+	});
+}
+
+
+function _styleSheet( settings, theme ){
+		
+	var elements = [];
+
+	for( var count = 0; count < settings.length; count++ ){
+		elements[settings[count].element] = settings[count].value;
+	}
+	
+	var result = [];
+	result.push("");
+	
+	//view container
+	var family = elements['fontFamily'];
+	if(family === "sans serif"){
+		family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
+	}else{
+		family = 'monospace';
+	}	
+	
+	result.push( theme + " .textviewContainer {" );
+	result.push( "\background-color:" + elements['background'] + ";" );
+	result.push( "\tfont-family: " + family + ";" );
+	result.push( "\tfont-size: " + elements['fontSize'] + ";" );
+	result.push( "\tmin-width: 50px;" );
+	result.push( "\tmin-height: 50px;" );
+	result.push("\tcolor: " + elements['text'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " {");
+	result.push("\tfont-family: " + family + ";");
+	result.push("\tfont-size: " + elements['fontSize'] + ";");
+	
+	result.push("\tcolor: " + elements['text'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .textview {");
+	result.push("\tbackground-color: " + elements['background'] + ";");
+	result.push("}");
+	
+	result.push(  theme + ".ruler.annotations{");
+	result.push("\tbackground-color: " + 'white' + ";");
+	result.push("}");
+	
+	result.push(  theme + " .ruler {");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .rulerLines {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .rulerLines.even {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+
+	result.push(  theme + " .rulerLines.odd {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .annotationLine.currentLine {");
+	result.push("\tbackground-color: " + elements['currentLine'] + ";");
+	result.push("}");
+
+	result.push(  theme + " .entity-name-tag {");
+	result.push("\color: " + elements['keyword'] + ";");
+	result.push("}");				
+	
+	return result.join("\n");
+}
 
 var RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features
@@ -38,21 +154,21 @@ var RegexUtil = {
 			var insideCharacterClass = false;
 			var len = str.length;
 			for (var i=0; i < len; ) {
-				var chr = str[i];
+				var chr = str.charAt(i);
 				if (!insideCharacterClass && chr === "#") {
 					// skip to eol
 					while (i < len && chr !== "\r" && chr !== "\n") {
-						chr = str[++i];
+						chr = str.charAt(++i);
 					}
 				} else if (!insideCharacterClass && /\s/.test(chr)) {
 					// skip whitespace
 					while (i < len && /\s/.test(chr)) { 
-						chr = str[++i];
+						chr = str.charAt(++i);
 					}
 				} else if (chr === "\\") {
 					result += chr;
-					if (!/\s/.test(str[i+1])) {
-						result += str[i+1];
+					if (!/\s/.test(str.charAt(i+1))) {
+						result += str.charAt(i+1);
 						i += 1;
 					}
 					i += 1;
@@ -107,7 +223,7 @@ var RegexUtil = {
 			    len = pat.length,
 			    flagStop = -1;
 			for (var i=start; i < len && flagStop === -1; i++) {
-				switch (pat[i]) {
+				switch (pat.charAt(i)) {
 					case "\\":
 						i++; // escape: skip next char
 						break;
@@ -194,7 +310,7 @@ var RegexUtil = {
 		    consuming = {};
 		for (var i=0; i < len; i++) {
 			var curGroup = groups[groups.length-1];
-			var chr = src[i];
+			var chr = src.charAt(i);
 			switch (chr) {
 				case "(":
 					// If we're in new capturing group, close it since ( signals end-of-term
@@ -203,7 +319,7 @@ var RegexUtil = {
 						result.push(")");
 						newGroups[newGroups.length-1].end = i;
 					}
-					var peek2 = (i + 2 < len) ? (src[i+1] + "" + src[i+2]) : null;
+					var peek2 = (i + 2 < len) ? (src.charAt(i+1) + "" + src.charAt(i+2)) : null;
 					if (peek2 === "?:" || peek2 === "?=" || peek2 === "?!") {
 						// Found non-capturing group or lookahead assertion. Note that we preserve non-capturing groups
 						// as such, but any term inside them will become a new capturing group (unless it happens to
@@ -245,11 +361,11 @@ var RegexUtil = {
 					// Unary operator. If it's being applied to a capturing group, we need to add a new capturing group
 					// enclosing the pair
 					var op = chr;
-					var prev = src[i-1],
+					var prev = src.charAt(i-1),
 					    prevIndex = i-1;
 					if (chr === "}") {
-						for (var j=i-1; src[j] !== "{" && j >= 0; j--) {}
-						prev = src[j-1];
+						for (var j=i-1; src.charAt(j) !== "{" && j >= 0; j--) {}
+						prev = src.charAt(j-1);
 						prevIndex = j-1;
 						op = src.substring(j, i+1);
 					}
@@ -294,7 +410,7 @@ var RegexUtil = {
 					}
 					result.push(chr);
 					if (chr === "\\") {
-						var peek = src[i+1];
+						var peek = src.charAt(i+1);
 						// Eat next so following iteration doesn't think it's a real special character
 						result.push(peek);
 						i += 1;
@@ -335,6 +451,34 @@ var RegexUtil = {
 		return false;
 	}
 };
+
+	/**
+	 * @private
+	 * @param obj {Object} A JSON-ish object.
+	 * @returns {Object} Deep copy of <code>obj</code>. Does not work on properties that are functions or RegExp instances.
+	 */
+	function clone(obj) {
+		var c;
+		if (obj instanceof Array) {
+			c = new Array(obj.length);
+			for (var i=0; i < obj.length; i++) {
+				c[i] = clone(obj[i]);
+			}
+		} else {
+			c = {};
+			for (var prop in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+					var value = obj[prop];
+					if (typeof value === "object" && value !== null) {
+						c[prop] = clone(value);
+					} else {
+						c[prop] = value;
+					}
+				}
+			}
+		}
+		return c;
+	}
 
 	/**
 	 * @name orion.editor.TextMateStyler
@@ -401,21 +545,36 @@ var RegexUtil = {
 	 * produce this object by running a PList-to-JavaScript conversion tool on a TextMate <code>.tmLanguage</code> file.
 	 * @param {Object[]} [externalGrammars] Additional grammar objects that will be used to resolve named rule references.
 	 */
-	function TextMateStyler(textView, grammar, externalGrammars) {
-		this.initialize(textView);
+	function TextMateStyler(textView, grammar, externalGrammars, mBootStrap, util) {
+		this.initialize(textView, mBootStrap);
 		// Copy grammar object(s) since we will mutate them
-		this.grammar = this.copy(grammar);
-		this.externalGrammars = externalGrammars ? this.copy(externalGrammars) : [];
+		this.grammar = clone(grammar);
+		this.externalGrammars = externalGrammars ? clone(externalGrammars) : [];
 		
 		this._styles = {}; /* key: {String} scopeName, value: {String[]} cssClassNames */
 		this._tree = null;
 		this._allGrammars = {}; /* key: {String} scopeName of grammar, value: {Object} grammar */
 		this.preprocess(this.grammar);
+		this._updateStylesheet = _updateStylesheet;
+		this._update = _update;
+		this._styleSheet = _styleSheet;
+		this.util = util;
 	}
 	TextMateStyler.prototype = /** @lends orion.editor.TextMateStyler.prototype */ {
-		initialize: function(textView) {
+		initialize: function(textView, mBootStrap, util) {
 			this.textView = textView;
+			this.textView.stylerOptions = this;
 			var self = this;
+			
+			if (this.textView && mBootStrap) {
+				mBootStrap.startup().then(function(core) {
+					preferences = core.preferences;
+					self.preferences = preferences;
+					self._updateStylesheet(preferences, util);
+					self.storageKey = preferences.listenForChangedSettings( self._listener.onStorage );
+				});
+			}		
+
 			this._listener = {
 				onModelChanged: function(e) {
 					self.onModelChanged(e);
@@ -425,6 +584,9 @@ var RegexUtil = {
 				},
 				onLineStyle: function(e) {
 					self.onLineStyle(e);
+				},
+				onStorage: function(e){
+					self.onStorage(e);
 				}
 			};
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
@@ -434,6 +596,11 @@ var RegexUtil = {
 		},
 		onDestroy: function(/**eclipse.DestroyEvent*/ e) {
 			this.destroy();
+		},
+		onStorage: function (e) {
+			if( e.key === this.storageKey ){
+				this._updateStylesheet( this.preferences );
+			}
 		},
 		destroy: function() {
 			if (this.textView) {
@@ -446,10 +613,6 @@ var RegexUtil = {
 			this._styles = null;
 			this._tree = null;
 			this._listener = null;
-		},
-		/** @private */
-		copy: function(obj) {
-			return JSON.parse(JSON.stringify(obj));
 		},
 		/** @private */
 		preprocess: function(grammar) {
@@ -599,7 +762,7 @@ var RegexUtil = {
 					throw new Error("Unexpected regex pattern in \"include\" rule " + rule.include);
 				}
 				var name = rule.include;
-				if (name[0] === "#") {
+				if (name.charAt(0) === "#") {
 					resolved = this.grammar.repository && this.grammar.repository[name.substring(1)];
 					if (!resolved) { throw new Error("Couldn't find included rule " + name + " in grammar repository"); }
 				} else if (name === "$self") {
@@ -624,6 +787,7 @@ var RegexUtil = {
 			}
 			return resolved;
 		},
+
 		/** @private */
 		ContainerNode: (function() {
 			function ContainerNode(parent, rule) {

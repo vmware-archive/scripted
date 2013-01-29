@@ -1,0 +1,122 @@
+/* Default theme */
+.comment {
+	color: green;
+}
+
+.comment-block-documentation {
+	color: #00008F;
+}
+
+.constant {
+	font-style: italic;
+	color: blue;
+}
+
+.constant-character-entity {
+	font-style: normal;
+}
+
+.entity {
+	color: #3f7f7f;
+}
+
+.entity-name-function, .entity-name-type {
+	font-weight: bold;
+}
+
+.invalid-illegal {
+	color: white;
+	background-color: red;
+}
+
+.invalid-deprecated {
+	text-decoration: line-through;
+}
+
+.keyword-control {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+.keyword-operator {
+	color: #ddd;
+}
+
+.markup-heading {
+	font-weight: bold;
+}
+
+.markup-quote {
+	font-style: italic;
+}
+
+.meta-tag {
+	color: #3f7f7f;
+}
+
+.storage {
+	color: #7F0055;
+}
+
+.string {
+	color: blue;
+}
+
+.support {
+	color: #21439c;
+}
+
+.variable {
+	color: #0000c0;
+}
+
+.variable-parameter {
+	color: black;
+}
+
+.variable-language {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+/* Hardcoded HTML styles */
+.entity-name-tag /*tag name*/ {
+	color: #3f7f7f;
+}
+
+.entity-other-attribute-name {
+	color: #7f007f;
+}
+
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+
+.punctuation-definition-string {
+	color: blue;
+}
+
+.string-quoted {
+	color: #2a00ff;
+}
+
+/* CodeMirror */
+.cm-meta { color: #00008F; }
+.cm-keyword { font-weight: bold; color: #7F0055; }
+.cm-atom { color: #21439c; }
+.cm-number { color: black; }
+.cm-def { color: green; }
+.cm-variable { color: black; }
+.cm-variable-2 { color: #004080; }
+.cm-variable-3 { color: #004080; }
+.cm-property { color: black; }
+.cm-operator { color: #222; }
+.cm-comment { color: green; }
+.cm-string { color: blue; }
+/*.cm-string-2 { color: blue; }*/
+.cm-error { color: #ff0000; }
+.cm-qualifier { color: gray; }
+.cm-builtin { color: #7F0055; }
+.cm-bracket { color: white; background-color: gray; }
+.cm-tag { color: #3f7f7f; }
+.cm-attribute { color: #7f007f; }
