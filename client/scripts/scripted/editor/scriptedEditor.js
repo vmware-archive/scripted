@@ -252,7 +252,6 @@ define([
 					} else if (isCSS) {
 						providers.push(cssContentAssistant);
 					}
-					templateContentAssistant.install(editor, extension);
 					providers.push(templateContentAssistant);
 					contentAssist.setProviders(providers);
 				});
@@ -534,6 +533,7 @@ define([
 		////////////////////////////////////////
 
 		editor.jsContentAssistant = jsContentAssistant;
+		templateContentAssistant.install(editor, extension);
 
 		editor.addEventListener("DirtyChanged", function(evt) {
 			dirtyIndicator = editor.isDirty()?"You have unsaved changes.  ":"";

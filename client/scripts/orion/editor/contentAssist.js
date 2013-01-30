@@ -155,23 +155,46 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			if (typeof proposal === "function") {
 				proposal = proposal();
 			}
-			// SCRTIPED end
+			// SCRIPTED end
 			
-			var offset = this.textView.getCaretOffset();
+			
+			// SCRIPTED
+			// now handle prefixes
+			var sel = this.textView.getSelection();
+			var start = Math.min(sel.start, sel.end);
+			var end = Math.max(sel.start, sel.end);
+			if( proposal.replace ) {
+				start = this.getPrefixStart(start);
+			}
+			// old
+//			var offset = this.textView.getCaretOffset();
+			// SCRIPTED end
+			
 			var data = {
 				proposal: proposal,
-				start: offset,
-				end: offset
+				// SCRIPTED
+				start: start,
+				end: end
+				// old
+//				start: offset,
+//				end: offset
+				// SCRIPTED end
 			};
 			this.setState(State.INACTIVE);
 			var proposalText = proposal.proposal || proposal;
-			this.textView.setText(proposalText, offset, offset);
+			// SCRIPTED
+			this.textView.setText(proposalText, start, end);
+			// was
+//			this.textView.setText(proposalText, offset, offset);
+			// SCRIPTED end
 			this.dispatchEvent({type: "ProposalApplied", data: data});
 			return true;
 		},
 
 		// SCRIPTED
-		/** @private */
+		/** @private
+		 * provides auto-activation for content assist on '.'
+		 */
 		autoActivate : function(e) {
 			if (e.text === '.' && !this.activationRequest) {
 				this.activationRequest = setTimeout(function() {
@@ -182,6 +205,17 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				clearTimeout(this.activationRequest);
 				this.activationRequest = null;
 			}
+		},
+		/**
+		 * @private
+		 * finds starting prefix
+		 */
+		getPrefixStart: function(end) {
+			var index = end, c;
+			while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
+				index--;
+			}
+			return index;
 		},
 		// SCRIPTED end
 
