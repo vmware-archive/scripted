@@ -73,10 +73,12 @@ function toJSON(kbs) {
 	var json = {};
 	for (var i = 0; i < kbs.length; i++) {
 		var keyBinding = kbs[i];
-		if (keyBinding.name) {
-			json[keybinding2keystroke(keyBinding.keyBinding)] = keyBinding.name;
+		var actionID = keyBinding.actionID;
+		if (actionID) {
+			json[keybinding2keystroke(keyBinding.keyBinding)] = actionID;
 		}
 	}
+
 	return json;
 }
 
@@ -101,6 +103,7 @@ function dumpCurrentKeyBindings(editor) {
 
 function captureDefaults(editor) {
 	if (!defaults.keybindings) {
+		dumpCurrentKeyBindings(editor);
 		//note that defaults are only captured once even if we see multiple editor instances
 		//over the lifetime of the browser window. This could be problematic if the 'defaults'
 		//are not the same for all editor instances.
