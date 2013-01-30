@@ -16,36 +16,23 @@
 /*jslint browser:true */
 /*global define emmet prompt scripted */
 
-define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/editorFeatures',
-	'jquery', 'zen'],
-	function(mKeyBinding, textUtils, editorFeatures, $) {
-	function ZenEditorProxy(editor) {
-		this.editor = editor;
-	}
-
+define(function(require) {
 	var TAB_POS = "${0}";
 
-	ZenEditorProxy.prototype = {
-		init : function() {
-			this.editorProxy = this.createProxy(this.editor);
-			this.attach(this.editor);
-		},
-		createProxy: function(editor) {
+	var setKeyBinding = require('scripted/api/keybinder').setKeyBinding;
+	var action = require('scripted/api/editor').action;
+	var textUtils = require('scripted/utils/textUtils');
+	var editorFeatures = require('orion/editor/editorFeatures');
+	require('jquery');
+	require('zen');
+
+	var createProxy = function(editor) {
 			return emmet.exec(function(req, _) {
-				// TODO shouldn't have to do this twice
 				var res = req('resources');
 				var utils = req('utils');
 				res.setVariable('indentation', textUtils.indent());
 				utils.setNewline('\n');
 				return {
-					setContext: function(context) {
-						// TODO shouldn't have to do this twice
-						var res = req('resources');
-						var utils = req('utils');
-						res.setVariable('indentation', textUtils.indent());
-						utils.setNewline('\n');
-					},
-
 					/**
 					 * Returns character indexes of selected text: object with <code>start</code>
 					 * and <code>end</code> properties. If there's no selection, should return
@@ -57,9 +44,10 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 					 * alert(selection.start + ', ' + selection.end);
 					 */
 					getSelectionRange: function() {
+						var sel = editor.getSelection();
 						return {
-							start: editor.getSelection().start,
-							end: editor.getSelection().end
+							start: sel.start,
+							end: sel.end
 						};
 					},
 
@@ -156,13 +144,16 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 						var pos = value.indexOf(TAB_POS);
 						if (pos !== -1) {
 							var linkedMode = new editorFeatures.LinkedMode(editor);
-							var linkedModeModel = { groups : [] };
+							var linkedModeModel = {
+								groups: []
+							};
 							while (pos !== -1) {
 								linkedModeModel.groups.push({
-									positions : [{
+									positions: [{
 										offset: pos + start,
 										length: TAB_POS.length
-									}]});
+									}]
+								});
 								pos = value.indexOf(TAB_POS, pos + TAB_POS.length);
 							}
 							linkedMode.enterLinkedMode(linkedModeModel);
@@ -209,57 +200,43 @@ define(["orion/textview/keyBinding", 'scripted/utils/textUtils', 'orion/editor/e
 					}
 				};
 			});
-		},
 
-		runEmmetAction : function(name, args) {
-			try {
-				return emmet.require('actions').run(name, [this.editorProxy]);
-			} catch (e) {
-				console.warn(e.message);
-				console.warn(e.stack);
+
+		};
+
+	function runEmmetAction(name, editor) {
+		try {
+			var proxy = createProxy(editor);
+			// Whoooooaaah!!!!! require thinks this is a require call for actions module
+			var r = emmet.require;
+			return r('actions').run(name, [proxy]);
+		} catch (e) {
+			console.warn(e.message);
+			console.warn(e.stack);
+			return false;
+		}
+	}
+
+	function registerEmmetAction(name, key) {
+		var zenName = "Zen " + name;
+		setKeyBinding("Ctrl+Shift+" + key, zenName);
+		action({
+			name: zenName,
+			handler: function(editor) {
+				runEmmetAction(name, editor);
 				return false;
 			}
-		},
+		});
+	}
 
-		registerEmmetAction : function(name, key) {
-			this.editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding(key.toString(), /*command/ctrl*/ true, /*shift*/ true, /*alt*/ false), "Zen " + name);
-			this.editor.getTextView().setAction("Zen " + name, function() {
-				this.runEmmetAction(name);
-				return false;
-			}.bind(this));
-		},
-
-
-		attach : function(editor) {
-
-			var i = 0;
-			this.registerEmmetAction("expand_abbreviation", ++i);
-			this.registerEmmetAction("match_pair_inward", ++i);
-			this.registerEmmetAction("match_pair_outward", ++i);
-			this.registerEmmetAction("matching_pair", ++i);
-			this.registerEmmetAction("merge_lines", ++i);
-			this.registerEmmetAction("remove_tag", ++i);
-			this.registerEmmetAction("select_next_item", ++i);
-			this.registerEmmetAction("select_previous_item", ++i);
-			this.registerEmmetAction("split_join_tag", ++i);
-			var func = function(event, pane) {
-				if (pane.editor === this.editor) {
-
-					this.editor = null;
-					this.editorProxy = null;
-					$(document).off('paneDestroyed', func);
-				}
-			};
-			$(document).on('paneDestroyed', func);
-		}
-	};
-
-	// get the zenCoding plugin attached for each new editor
-
-	$(document).on('paneCreated', function(event, pane) {
-		if (pane.editor) {
-			var proxy = new ZenEditorProxy(pane.editor);
-			proxy.init();
-		}
-	});
+	var i = 0;
+	registerEmmetAction("expand_abbreviation", ++i);
+	registerEmmetAction("match_pair_inward", ++i);
+	registerEmmetAction("match_pair_outward", ++i);
+	registerEmmetAction("matching_pair", ++i);
+	registerEmmetAction("merge_lines", ++i);
+	registerEmmetAction("remove_tag", ++i);
+	registerEmmetAction("select_next_item", ++i);
+	registerEmmetAction("select_previous_item", ++i);
+	registerEmmetAction("split_join_tag", ++i);
 });

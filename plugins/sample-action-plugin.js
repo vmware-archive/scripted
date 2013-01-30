@@ -25,12 +25,15 @@ define(function(require) {
 
 	//Defines an editor action.
 	editorApi.action({
-		name: 'reverse-selection', //action id
-		description: 'Reverse Selection', // readable description
+		name: 'shout', //action id
+		description: 'SHOUTS!', // readable description
 		handler: function (editor) {
-
-			console.log('Someone is trying to reverse some text');
-
+			var sel = editor.getSelection();
+			console.log(JSON.stringify(sel));
+			var text = editor.getText(sel.start, sel.end);
+			console.log(text);
+			text = text.toUpperCase();
+			editor.setText(text, sel.start, sel.end);
 		}
 	});
 

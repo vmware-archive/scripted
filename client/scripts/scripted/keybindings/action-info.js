@@ -16,7 +16,10 @@
 // information about 'actions' that are registered with the scripted
 // editor.
 
-define([], function () {
+define(function (require) {
+
+	var eachEditor = require('scripted/utils/editorUtils').eachEditor;
+	require('jquery');
 
 	/**
 	 * This map contains additional information that we(scripted) want to
@@ -64,7 +67,7 @@ define([], function () {
 		"wordPrevious": "Previous Word",
 		"wordNext": "Next Word"
 	};
-	
+
 	/**
 	 * Any action in this list is considered' global.
 	 * Since in the current infrastructur, all keybinding actions are registered with
@@ -144,7 +147,7 @@ define([], function () {
 //		'Switch Subeditor and Main Editor',
 		'Toggle Subeditor' : true
 	 };
-	
+
 	/**
 	 * Retrieve a 'user friendly' description for an internal action name.
 	 * This is the text that will be used to identify the action in the
@@ -153,8 +156,8 @@ define([], function () {
 	function getActionDescription(actionName) {
 		return descriptions[actionName] || actionName;
 	}
-	
-	
+
+
 	/**
 	 * Fetch 'Set' of global actions associated with an editor. The properties of the map
 	 * are all action names registered with the editor that are marked as global actions.
@@ -179,9 +182,41 @@ define([], function () {
 
 		return result;
 	}
-	
-	
+
+	var handlers = {}; // All handlers registered by plugins go in here.
+
+	function setEditorAction(editor, name, handler) {
+		var tv = editor.getTextView();
+		var action = function() {
+			handler(editor);
+			return true; //stop event propagation.
+		};
+		tv.setAction(name, action);
+	}
+
+	function setAction(name, handler, options) {
+		options = options || {};
+		globalActions[name] = options.global;
+		handlers[name] = handler;
+		descriptions[name] = options.description;
+		eachEditor(function (editor) {
+			setEditorAction(editor, name, handler, options);
+		});
+	}
+
+	$(document).on('paneCreated', function(event, pane) {
+		var editor = pane.editor;
+		if (editor) {
+			for (var name in handlers) {
+				if (handlers.hasOwnProperty(name)) {
+					setEditorAction(editor, name, handlers[name]);
+				}
+			}
+		}
+	});
+
 	return {
+		setAction: setAction,
 		getActionDescription: getActionDescription,
 		getGlobalActions: getGlobalActions
 		//isGlobalAction: isGlobalAction

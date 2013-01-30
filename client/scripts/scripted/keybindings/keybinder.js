@@ -18,8 +18,8 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-define(['./action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/utils/editorUtils'
-], function (mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
+define(['scripted/utils/json-merge', './action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/utils/editorUtils'
+], function (jsonMerge, mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
 
 function debug_log(msg) {
 //	console.log(msg);
@@ -48,6 +48,7 @@ var defaults = {
 	keybindings: null,
 	unboundNames: null
 };
+var pluginKeyBindings = {}; // These are keybindings registered by plugins.
 
 /**
  * Set (or unset) a keybinding on a specific editor.
@@ -130,7 +131,7 @@ var installKeyEventTrap = (function () {
 	var globalKeys = null; // set and updated on every call to installKeyEventTrap
 	                      // This is a map from keystroke strings to action names.
 	                      // Thus the keys of this map are the events that we should trap.
-	                      
+
 
 
 	/**
@@ -209,20 +210,27 @@ var installKeyEventTrap = (function () {
  * Retrieve the user's custom keybindings and apply them to the given editor.
  */
 function installOn(editor) {
+
+	function installKeybindings(conf) {
+		for (var k in conf) {
+			if (conf.hasOwnProperty(k)) {
+				setEditorKeyBinding(editor, k, conf[k]);
+			}
+		}
+	}
+
 	//Before modifying any key bindings capture current keybindings state as the defaults:
 	captureDefaults(editor);
-	
+
+	installKeybindings(pluginKeyBindings);
+
 	return getScriptedRcFile(keyBindingConfigName).then(
 		function (conf) {
 			debug_log('Retrieved config: '+keyBindingConfigName);
 			debug_log(JSON.stringify(conf, null, '  '));
 			//conf is a map from keystroke strings to editor action names
-			for (var k in conf) {
-				if (conf.hasOwnProperty(k)) {
-					setEditorKeyBinding(editor, k, conf[k]);
-				}
-			}
-			
+			installKeybindings(conf);
+
 			installKeyEventTrap(editor);
 		},
 		function (err) {
@@ -303,12 +311,12 @@ function jsonDiff(base, target) {
 			result[p] = tv;
 		}
 	});
-	
+
 	return result;
 }
 
 function persistKeyBindings() {
-	var defaultKeybindings = defaults.keybindings;
+	var defaultKeybindings = jsonMerge(defaults.keybindings, pluginKeyBindings);
 	var currentKeybindings = getKeyBindings();
 	var diff = jsonDiff(defaultKeybindings, currentKeybindings);
 	debug_log('Should persist these key bindings now: ');
@@ -335,9 +343,18 @@ function setKeyBinding(keystroke, actionName) {
 	return persistKeyBindings();
 }
 
+function setPluginKeyBinding(keystroke, action) {
+	pluginKeyBindings[keystroke] = action;
+	eachEditor(function (editor) {
+		setEditorKeyBinding(editor, keystroke, action);
+	});
+	$('#help_panel').trigger('refresh'); //TODO: correct way to do this would
+}
+
 return {
 	setKeyBinding: setKeyBinding,
 	getKeyBindings: getKeyBindings,
+	setPluginKeyBinding: setPluginKeyBinding,
 	getUnboundActionNames: getUnboundActionNames,
 	installOn: installOn
 };

@@ -20,6 +20,7 @@ define(function (require) {
 
 	var when = require('when');
 	var deref = require('scripted/utils/deref');
+	var actions = require('scripted/keybindings/action-info');
 
 	console.log('Editor api loaded!');
 
@@ -75,10 +76,11 @@ define(function (require) {
 				});
 			});
 		},
+		/**
+		 * @param {{name:String,handler:Function,isGlobal:Boolean}} spec
+		 */
 		action: function (spec) {
-			console.log('Someone is trying to define a custom action:');
-			console.log(JSON.stringify(spec, null, '  '));
-
+			actions.setAction(spec.name, spec.handler, spec);
 		}
 	};
 
