@@ -98,7 +98,7 @@ function(
 							}
 						} else {
 							sLogger.info("No .jshintrc found");
-							mJshintDriver.resolveConfiguration({});
+							mJshintDriver.resolveConfiguration({},jshintConfig);
 						}
 						// FIXME: Add a call to deferred.reject() *somewhere*
 						// Perhaps wrap the guts of this function in a try/catch?
