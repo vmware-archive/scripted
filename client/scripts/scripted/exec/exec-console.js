@@ -113,7 +113,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 				$(CONSOLE_WRAPPER).css('top', '0px'); //I think JQuery resizable is changing this from 0 but it messes things up.
 				$(CONSOLE_WRAPPER).height(console_height);
 				$("#editor").height(editor_height);
-				editorUtils.getMainEditor().getTextView()._updatePage();
+				editorUtils.getMainEditor().getTextView()._update();
 				updateWidth();
 			});
 			$("#navigator-wrapper").resize(updateWidth);
@@ -145,7 +145,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 				disabled: false
 			});
 
-			editorUtils.getMainEditor().getTextView()._updatePage();
+			editorUtils.getMainEditor().getTextView()._update();
 			updateWidth();
 		}
 	}
@@ -160,7 +160,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 				disabled: true
 			});
 			e.height(e.height()+console_height);
-			editorUtils.getMainEditor().getTextView()._updatePage();
+			editorUtils.getMainEditor().getTextView()._update();
 		}
 	}
 	

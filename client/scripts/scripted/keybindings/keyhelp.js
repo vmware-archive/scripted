@@ -120,7 +120,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 			cl
 		);
 
-		editorUtil.getMainEditor().getTextView()._updatePage();
+		editorUtil.getMainEditor().getTextView()._update();
 	}
 	
 	/*Command help panel*/

@@ -218,10 +218,11 @@ define([
 
 			var options = {
 				parent: domNode,
+				// This comment was for the 2012 editor, not sure if it applies to the 2013 editor, TODO check!
 				// without this, the listeners aren't registered in quite the right order, meaning that the
 				// one that shuffles annotations along when text is entered (annotations.js _onChanged)
 				// is registered after the one that determines the line style based on annotations
-				// (textview.js _updatePage which calls createLine).  By adding a Projection model
+				// (textview.js _update which calls createLine).  By adding a Projection model
 				// we are more similar to orion and so don't have the problem - this suggests it is
 				// just a(nother) issue with orion and us using it in an unusual way.  If the listeners
 				// are in the wrong order the modified lines pickup the 'old' annotations and inherit

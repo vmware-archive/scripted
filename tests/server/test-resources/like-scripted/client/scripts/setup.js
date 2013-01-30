@@ -158,7 +158,7 @@ require(["editor", "scripted/utils/", "orion/explorer-table", "fileapi", "jquery
 			footer_height - 
 			header_height
 		);
-		window.editor.getTextView()._updatePage();
+		window.editor.getTextView()._update();
 	});
 	
 	require(['jquery_ui'], function(mJqueryUI){
@@ -168,7 +168,7 @@ require(["editor", "scripted/utils/", "orion/explorer-table", "fileapi", "jquery
 			resize: function(event, ui){
 				$('#editor').css('margin-left', ui.size.width);
 				$('#pageToolbar').css('left', ui.size.width);
-				window.editor.getTextView()._updatePage();
+				window.editor.getTextView()._update();
 			}
 		});
 
@@ -202,7 +202,7 @@ require(["editor", "scripted/utils/", "orion/explorer-table", "fileapi", "jquery
 				$('#command_list').append(tmpl.render(keyBindings));
 			});
 
-			window.editor.getTextView()._updatePage();
+			window.editor.getTextView()._update();
 		});
 	});	
 	
@@ -225,7 +225,7 @@ require(["editor", "scripted/utils/", "orion/explorer-table", "fileapi", "jquery
 
 	var help_open = function(){
 		$('#editor').css('margin-right', help_panel_width);
-		window.editor.getTextView()._updatePage();
+		window.editor.getTextView()._update();
 		$('#hoverbox_panel').css('right', hoverbox_panel_right + help_panel_width);
 		$('#help_panel').show();
 		$('#help_open').off('click');
@@ -234,7 +234,7 @@ require(["editor", "scripted/utils/", "orion/explorer-table", "fileapi", "jquery
 
 	help_close = function(){
 		$('#editor').css('margin-right', '0');
-		window.editor.getTextView()._updatePage();
+		window.editor.getTextView()._update();
 		$('#hoverbox_panel').css('right', hoverbox_panel_right);
 		$('#help_panel').hide();
 		$('#help_open').off('click');
