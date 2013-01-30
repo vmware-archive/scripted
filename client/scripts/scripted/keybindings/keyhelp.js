@@ -29,12 +29,12 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
-		var keyBindings = editorUtil.getMainEditor().getTextView()._keyBindings.filter(function (kb) { return kb.name; });
+		var keyBindings = editorUtil.getMainEditor().getTextView()._keyBindings.filter(function (kb) { return kb.actionID; });
 		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
-			var lname = getActionDescription(l.name);
-			var rname =getActionDescription(r.name);
+			var lname = getActionDescription(l.actionID);
+			var rname =getActionDescription(r.actionID);
 			if (lname) {
 				lname = lname.toLowerCase();
 			}
@@ -97,7 +97,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 				}
 			} else {
 			    var element = $(tmpl.render(it));
-			    attachKeyEditor(element, it.name, mKeystroke.fromKeyBinding(it.keyBinding));
+			    attachKeyEditor(element, it.actionID, mKeystroke.fromKeyBinding(it.keyBinding));
 				into.append(element);
 			}
 		}
@@ -112,9 +112,9 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		render(otherKeyBindings, cl);
 		cl.append('<li><hr /></li>');
 		render(
-			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).map(function (name) {
+			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).map(function (actionID) {
 				return {
-					name: name
+					actionID: actionID
 				};
 			}),
 			cl
