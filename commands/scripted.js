@@ -17,48 +17,17 @@
  */
 
 var path = require('path');
+var openBrowser = require('./open').open;
 var childExec = require('child_process').exec;
 var url = "http://localhost:7261";
 var suppressOpen = process.argv[2]=='true';
 var file = process.argv[3];
-
-function open() {
-    var cmd;
-	var browser = process.env.SCRIPTED_BROWSER;
-
-    switch (process.platform) {
-        case 'darwin':
-            cmd = 'open';
-            break;
-        case 'win32':
-            cmd = 'start ""';
-            break;
-        default:
-            cmd = 'xdg-open';
-    }
-
-
-    if (browser) {
-      cmd+=' "'+browser+'"';
-    }
-
-
-    url += "/editor" + (process.platform == 'win32' ? "/" : "");
-
-    if (file && file.length !== 0) {
-        url += path.resolve(process.cwd(), file);
-    } else {
-        url += process.cwd();
-    }
-
-    // console.log("Opening %s with command %s", url,cmd);
-    childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
-}
 
 // Launch the server
 var server=require('../server/scriptedServer.js');
 
 // on return, assume it is up and open the browser
 if (!suppressOpen) {
-	open();
+console.log("abc");
+	openBrowser(process.argv[3]);
 }
