@@ -17,7 +17,7 @@
 /*jslint browser:true devel:true */
 
 define([
-	"require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
+	"require", "scripted/utils/deref", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
@@ -27,7 +27,7 @@ define([
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
-	require, mTextView, mKeyBinding, mEditor, mKeystroke,
+	require, deref, mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
@@ -101,21 +101,6 @@ define([
 			}
 		}
 	}
-
-    /**
-     * Follow a 'trail' of properties starting at given object.
-     * If one of the values on the trail is 'falsy' then
-     * this value is returned instead of trying to keep following the
-     * trail down.
-     */
-    function deref(obj, props) {
-        //TODO func copied from jsdepend.utils
-        var it = obj;
-        for (var i = 0; it && i < props.length; i++) {
-            it = it[props[i]];
-        }
-        return it;
-    }
 
     function shouldExclude(filePath) {
         var exclude_dirs = deref(scripted, ['config', 'lint', 'exclude_dirs']);

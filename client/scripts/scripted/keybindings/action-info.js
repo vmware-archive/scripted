@@ -18,6 +18,7 @@
 
 define(function (require) {
 
+	var deref = require('scripted/utils/deref');
 	var editorUtils = require('scripted/utils/editorUtils');
 	
 	/**
@@ -154,7 +155,7 @@ define(function (require) {
 //		'Toggle Line Comment',
 //		'Add Block Comment',
 //		'Remove Block Comment',
-		'Command Help': true,
+		'scriptedKeyHelp': true,
 //		'Format text',
 		'Save' : true,
 //		'Cancel Current Mode',
@@ -182,6 +183,14 @@ define(function (require) {
 		}
 		return actionID;
 	}
+
+	function setOf(strings) {
+		var result = {};
+		for (var i=0; i<strings.length; i++) {
+			result[strings[i]] = true;
+		}
+		return result;
+	}
 	
 	/**
 	 * Fetch 'Set' of global actions associated with an editor. The properties of the map
@@ -191,26 +200,12 @@ define(function (require) {
 	 * or by having its name configured in the 'globalActions' constant defined above.
 	 */
 	function getGlobalActions(editor) {
-		var result = {};
-		//TODO: use public api in the orion editor? There's now a getActions method.
-		// Also orion actions have a 'description' object in which we may be able to
-		// tag actions as global.
-		var actions = editor.getTextView()._actions;
-		for (var i = 0; i < actions.length; i++) {
-			var a = actions[i];
-			if (a.name) {
-				//Two ways to mark actions global, either in the 'globalActions' table
-				//or by having a 'global' property on the action's userHandler.
-				if (globalActions[a.name] || a.userHandler && a.userHandler.global) {
-					result[a.name] = a; // We only need 'true' but maybe the action object
-					                    // may be useful somehow.
-				}
-			}
-		}
-
-		return result;
+		var tv = editor.getTextView();
+		var actionIDs = tv.getActions(true);
+		return setOf(actionIDs.filter(function(action) {
+			return globalActions[action] || deref(tv.getActionDescription(action), ['global']);
+		}));
 	}
-	
 	
 	return {
 		getActionDescription: getActionDescription,
