@@ -13,7 +13,14 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
-
+	
+	// SCRIPTED
+	var autoActivation = (window.scripted &&
+		window.scripted.config &&
+		window.scripted.config.ui &&
+		window.scripted.config.ui.auto_activation)
+		|| 500;
+	// SCRIPTED end
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -119,6 +126,17 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			self.activate();
 			return true;
 		}, {name: messages.contentAssist});
+		
+		// SCRIPTED automatically open content assist after delay
+		// the scriptedEditor constructor secretly adds a second parameter
+		// we should be applying the auto-activate logic via a content type
+		// through the content assist factory
+		var fileName = arguments[1];
+		if (fileName && fileName.substr(fileName.length-3, 3) === ".js") {
+			this.textView.addEventListener("Verify", this.autoActivate.bind(this));
+		}
+		// SCRIPTED end
+
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 
@@ -131,6 +149,14 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			if (!proposal) {
 				return false;
 			}
+			
+			// SCRIPTED start
+			// allow proposals to be functions
+			if (typeof proposal === "function") {
+				proposal = proposal();
+			}
+			// SCRTIPED end
+			
 			var offset = this.textView.getCaretOffset();
 			var data = {
 				proposal: proposal,
@@ -143,6 +169,22 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.dispatchEvent({type: "ProposalApplied", data: data});
 			return true;
 		},
+
+		// SCRIPTED
+		/** @private */
+		autoActivate : function(e) {
+			if (e.text === '.' && !this.activationRequest) {
+				this.activationRequest = setTimeout(function() {
+					this.activate();
+					this.activationRequest = null;
+				}.bind(this), autoActivation);
+			} else if (this.activationRequest) {
+				clearTimeout(this.activationRequest);
+				this.activationRequest = null;
+			}
+		},
+		// SCRIPTED end
+
 		activate: function() {
 			if (this.state === State.INACTIVE) {
 				this.setState(State.ACTIVE);
@@ -333,13 +375,19 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			return this.contentAssist.apply(proposal);
 		},
 		tab: function() {
-			if (this.widget) {
-				this.widget.createAccessible(this);
-				this.widget.parentNode.focus();
-				return true;
-			} else {
-				return false;
-			}
+			// SCRIPTED
+			// let TAB also apply the proposal
+			var proposal = this.proposals[this.selectedIndex] || null;
+			return this.contentAssist.apply(proposal);
+			// OLD
+//			if (this.widget) {
+//				this.widget.createAccessible(this);
+//				this.widget.parentNode.focus();
+//				return true;
+//			} else {
+//				return false;
+//			}
+			// SCRIPTED end
 		}
 	};
 

@@ -230,20 +230,36 @@ define([
 			return tv;
 		};
 
-		var contentAssistFactory = function(editor) {
-			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-			var providers = [];
-			if (isJS) {
-				providers.push(jsContentAssistant);
-			} else if (isCSS) {
-				providers.push(cssContentAssistant);
+		var contentAssistFactory = {
+			createContentAssistMode: function(editor) {
+				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView(), fileName);
+				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
+					// Content assist is about to be activated; set its providers.
+//					var fileContentType = inputManager.getContentType();
+//					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist"); //$NON-NLS-0$
+					var providers = [];
+//					for (var i=0; i < serviceReferences.length; i++) {
+//						var serviceReference = serviceReferences[i],
+//						    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
+//						    pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
+//						if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
+//								(pattern && new RegExp(pattern).test(fileName))) {
+//							providers.push(serviceRegistry.getService(serviceReference));
+//						}
+//					}
+					if (isJS) {
+						providers.push(jsContentAssistant);
+					} else if (isCSS) {
+						providers.push(cssContentAssistant);
+					}
+					templateContentAssistant.install(editor, extension);
+					providers.push(templateContentAssistant);
+					contentAssist.setProviders(providers);
+				});
+				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
+				return new mContentAssist.ContentAssistMode(contentAssist, widget);
 			}
-			templateContentAssistant.install(editor, extension);
-			providers.push(templateContentAssistant);
-			contentAssist.setProviders(providers);
-			return contentAssist;
 		};
-
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 
 		/* for some reason, jsbeautify likes to strip the first line of its indent.  let's fix that */
@@ -491,8 +507,7 @@ define([
 			undoStackFactory: new mEditorFeatures.UndoFactory(),
 			annotationFactory: annotationFactory,
 			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
-			// SCRIPTED just for now...
-//			contentAssistFactory: contentAssistFactory,
+			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory,
 			statusReporter: statusReporter,
 			domNode: domNode
