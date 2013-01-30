@@ -235,18 +235,10 @@ define([
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView(), fileName);
 				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 					// Content assist is about to be activated; set its providers.
-//					var fileContentType = inputManager.getContentType();
-//					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist"); //$NON-NLS-0$
+					// TODO should be better about registering providers based on content type
+					// note that the templateContentAssistant must be installed early in order 
+					// to ensure that templates are loaded before first invocation
 					var providers = [];
-//					for (var i=0; i < serviceReferences.length; i++) {
-//						var serviceReference = serviceReferences[i],
-//						    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
-//						    pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
-//						if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
-//								(pattern && new RegExp(pattern).test(fileName))) {
-//							providers.push(serviceRegistry.getService(serviceReference));
-//						}
-//					}
 					if (isJS) {
 						providers.push(jsContentAssistant);
 					} else if (isCSS) {
@@ -533,6 +525,7 @@ define([
 		////////////////////////////////////////
 
 		editor.jsContentAssistant = jsContentAssistant;
+		// See note in createContentAssistMode about installing before creating the contentAssistant
 		templateContentAssistant.install(editor, extension);
 
 		editor.addEventListener("DirtyChanged", function(evt) {
