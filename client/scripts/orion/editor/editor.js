@@ -620,8 +620,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
-						// SCRIPTED - this line has no home yet in the new editor.js as highlightAnnotations is gone
-						// styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
 					}
 				}
 				
