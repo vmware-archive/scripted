@@ -12,9 +12,9 @@
  *     Andrew Eisenberg (VMware) - implemented visitor pattern
  ******************************************************************************/
 
-/*global define require eclipse esprima window scriptedLogger doctrine */
-define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "esprima/esprima", "doctrine/doctrine"],
-		function(mVisitor, mTypes, proposalUtils) {
+/*global define require eclipse esprima window doctrine */
+define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "scriptedLogger", "esprima/esprima", "doctrine/doctrine"],
+		function(mVisitor, mTypes, proposalUtils, scriptedLogger) {
 	
 	/** @type {function(obj):Boolean} a safe way of checking for arrays */
 	var isArray = Array.isArray;
@@ -656,7 +656,12 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 								result.rturn = rawtags[i].type;
 								break;
 							case "param":
-								result.params[rawtags[i].name] = rawtags[i].type;
+								// remove square brackets
+								var name = rawtags[i].name;
+								if (name.charAt(0) === '[' && name.charAt(name.length -1) === ']') {
+									name = name.substring(1, name.length-1);
+								}
+								result.params[name] = rawtags[i].type;
 								break;
 						}
 					}

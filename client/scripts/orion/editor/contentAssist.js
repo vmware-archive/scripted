@@ -13,6 +13,7 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -120,6 +121,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		}, {name: messages.contentAssist});
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
+
 		/**
 		 * Applies the given proposal to the TextView.
 		 * @param {Object} [proposal]

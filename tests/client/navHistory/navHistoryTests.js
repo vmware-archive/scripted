@@ -20,8 +20,10 @@ define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState',
 	'when', 'setup', 'jquery'],
 function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os, when) {
 	
-	// TODO hack... scrolling tests behave differently when on firefox
-	var isFirefox = navigator.userAgent.indexOf("Firefox") >= 0;
+	// TODO remove globals
+	window.scripted = window.scripted || {};
+	window.scripted.config = window.scripted.config || {};
+	window.explorer = window.explorer || {};
 
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();

@@ -11,7 +11,7 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global onmessage postMessage importScripts require*/
+/*global onmessage:true postMessage importScripts require*/
 /**
  * This file should be run as a web-worker so that files can be indexed in the background
  */
@@ -19,7 +19,7 @@
 importScripts('../../../components/requirejs/require.js');
 require.config({
     baseUrl: "../../",
-	packages:	[{ name: 'when', location: '../components/when', main:'when', lib: '.'} ],
+	packages: [{ name: 'when', location: '../components/when', main:'when' }],
     paths: {
         i18n: '../components/requirejs/i18n',
         text: '../components/requirejs/text',

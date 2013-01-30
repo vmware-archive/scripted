@@ -36,7 +36,6 @@ define([
 	mMarkoccurrences, tHelptext
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
-		window.foo = 1;
 		var model = editor.getTextView().getModel();
 		var previousLineIndex = model.getLineAtOffset(startPos) - 1;
 		var previousLine = model.getLine( previousLineIndex );
@@ -45,16 +44,16 @@ define([
 			previousLineIndex--;
 			previousLine = model.getLine(previousLineIndex);
 		}
-		
+
 		if (previousLine) {
 			var i = 0;
-			var char = previousLine.charAt(0);
- 
-			while (char === options.indent_char) {
+			var ch = previousLine.charAt(0);
+
+			while (ch === options.indent_char) {
 				i = i + options.indent_size;
-				char = previousLine.charAt(i);
+				ch = previousLine.charAt(i);
 			}
-		
+
 			var lastChar = previousLine.charAt(previousLine.length - 1);
 			if (lastChar === "{" || lastChar === "("){
 				i++;
@@ -62,10 +61,10 @@ define([
 			return i;
 		}
 	};
-	
+
 	var checkFormatSelection = function(editor, startPosition, endPosition) {
 		var selection = editor.getText(startPosition, endPosition);
-		
+
 		if (selection && (endPosition > startPosition)) {
 			var lastChar  = selection.charAt(endPosition - startPosition - 1);
 			if (lastChar === "\n" || lastChar === "\r") {
@@ -76,14 +75,12 @@ define([
 				}
 			}
 		}
-		
-		var checkedResult = {
-				toFormat: selection,
-				start: startPosition,
-				end: endPosition
+
+		return {
+			toFormat: selection,
+			start: startPosition,
+			end: endPosition
 		};
-		
-		return checkedResult;
 	};
 
 	//Recompute and set the given editor's title.
@@ -154,21 +151,21 @@ define([
 		var isJS = !isJSON && extension === "js";
 		var isHTML = !isJS && extension === "html";
 		var isCSS = !isHTML && extension === "css";
-		
+
 		if (editorType === 'main'){
 			//TODO: should use setEditorTitle here. But no editor is available yet.
 			//  should be ok here not to add "*" since this is a new editor so it can't
 			//  possibly be dirty.
 			document.title = fileName + " :: Scripted";
 		}
-		
+
 		var indexer = new mIndexerService.Indexer();
 		if (window.scripted && window.scripted.config) {
 			if (window.scripted.config.jshint) {
 				indexer.lintConfig = window.scripted.config.jshint;
 			}
 		}
-		
+
 		var selection = new mSelection.Selection();
 		var commandService = new mCommands.CommandService({
 			selection: selection
@@ -178,7 +175,7 @@ define([
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
-		
+
 		var postSave = function (text) {
 			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
@@ -206,7 +203,7 @@ define([
 			}
 			setEditorTitle(editor, fileName);
 		};
-		
+
 		/**
 		 * This function is called after successful save.
 		 */
@@ -216,9 +213,9 @@ define([
 			// TODO pass editor on the event? Migrate afterSave handlers to use this one?
 			$(document).trigger('afterEditorSave',[filePath]);
 		}
-		
+
 		var textViewFactory = function() {
-		
+
 			var options = {
 				parent: domNode,
 				// without this, the listeners aren't registered in quite the right order, meaning that the
@@ -262,7 +259,7 @@ define([
 		};
 
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
-		
+
 		/* for some reason, jsbeautify likes to strip the first line of its indent.  let's fix that */
 //		var fixFirstLineFormatting = function(toFormat, formatted) {
 //			var fix_format = "";
@@ -297,7 +294,7 @@ define([
 				$('#help_open').click();
 				return true;
 			});
-			
+
 			// Text formatting
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ false, /*shift*/ true, /*alt*/ true), "Format text");
 			editor.getTextView().setAction("Format text", function() {
@@ -314,11 +311,11 @@ define([
 				var toFormat, formatted;
 				if (!selectionEmpty) {
 					var checkedFormatSelection = checkFormatSelection(editor, start, end);
-					
+
 					toFormat = checkedFormatSelection.toFormat;
 					start = checkedFormatSelection.start;
 					end = checkedFormatSelection.end;
-					
+
 					options.indent_level = determineIndentLevel(editor, start, options);
 					formatted = js_beautify(toFormat, options);
 					if (formatted) {
@@ -346,15 +343,15 @@ define([
 				}
 				return true;
 			});
-			
+
 			// Find actions
 			// These variables are used among the various find actions:
 			var textSearcher = new mTextSearcher.TextSearcher(editor, commandService, undoStack);
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true), "Find...");
 			editor.getTextView().setAction("Find...", function() {
-			
+
 				$('#pageToolbar').remove();
-			
+
 				var pageToolbar = $('<div class="toolbar toolComposite" id="pageToolbar">'+
 										'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>'+
 										'<div id="parameterArea" class="slideParameters slideContainer">'+
@@ -366,7 +363,7 @@ define([
 									'</div>');
 
 				$(editor._domNode).prepend(pageToolbar);
-									
+
 				var selection = editor.getSelection();
 				var searchString = "";
 				if (selection.end > selection.start) {
@@ -378,22 +375,24 @@ define([
 				textSearcher.buildToolBar(searchString);
 
 				$('#closebox').click(textSearcher._commandService.closeParameterCollector);
-	
-				$('.scriptededitor').off('keydown');
-				$('.scriptededitor').on('keydown', function(e){
-					if (e.keyCode === 27){
-						textSearcher._commandService.closeParameterCollector();
-					}
-				});
-				
-				 $('#localSearchFindWith').off('keyup');
-				 $('#localSearchFindWith').on('keyup', function(e){
-					editor.lastSearchTerm = $('#localSearchFindWith').val();
-				 });
+
+				$('.scriptededitor')
+					.off('keydown')
+					.on('keydown', function(e){
+						if (e.keyCode === 27){
+							textSearcher._commandService.closeParameterCollector();
+						}
+					});
+
+				 $('#localSearchFindWith')
+					.off('keyup')
+					.on('keyup', function(){
+						editor.lastSearchTerm = $('#localSearchFindWith').val();
+					});
 
 				return true;
 			});
-			
+
 			// save binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
@@ -449,7 +448,7 @@ define([
 				}
 				return true;
 			});
-			
+
 		};
 
 		// based on the stuff from embeddededitor.js (orion sample).
@@ -481,7 +480,7 @@ define([
 				}
 			}
 		};
-		
+
 		var dirtyIndicator = "";
 		var status = "";
 
@@ -491,7 +490,7 @@ define([
 			} else {
 				status = message;
 			}
-			
+
 			if(editor.type === 'main'){
 
 			} else if (editor.type === 'sub'){
@@ -513,8 +512,28 @@ define([
 			domNode: domNode
 		});
 
+		////////////////////////////////////////
+		// Add extra functions to editor
+		editor.getFilePath = function() {
+			return filePath;
+		};
+
+		// just returns file extension for now
+		editor.getContentType = function() {
+			return extension;
+		};
+
+		editor.getScroll = function() {
+			return $(this._domNode).find('.textview').scrollTop();
+		};
+		editor.setScroll = function(newScroll) {
+			$(this._domNode).find('.textview').scrollTop(newScroll);
+		};
+		// end extra editor functions
+		////////////////////////////////////////
+
 		editor.jsContentAssistant = jsContentAssistant;
-		
+
 		editor.addEventListener("DirtyChanged", function(evt) {
 			dirtyIndicator = editor.isDirty()?"You have unsaved changes.  ":"";
 			setEditorTitle(editor, fileName);
@@ -529,28 +548,24 @@ define([
 			}
 		});
 		editor.setInput("Content", null, "No contents");
-		
+
 		/*function that fixes Firefox cursor problem*/
 		editor.cursorFix = function(focusTarget){
 			$('header').append('<a href="#" id="cursor_fix">.</a>');
 			$('#cursor_fix').focus().remove();
-			
+
 			setTimeout(function(){
 				$('.textviewContent', focusTarget).focus();
 			}, 0);
 		};
-		
+
 		editor.refreshEditorFeatures = function(text){
 			syntaxHighlighter.highlight(filePath, editor);
 			// NEWEDITOR - doesn't have highlightAnnotations
 			// editor.highlightAnnotations();
 			postSave(text);
 		};
-		
-		editor.getFilePath = function(){
-			return filePath;
-		};
-		
+
 		editor.findDefinition = function(offset) {
 			if (isJS) {
 				var text = editor.getTextView().getText();
@@ -562,16 +577,16 @@ define([
 				return definition;
 			}
 		};
-		
+
         //Add exec key bindings defined based on what's in the .scripted file
         require('scripted/exec/exec-keys').installOn(editor);
-		
+
 		var xhrobj = new XMLHttpRequest();
 		try {
 			var url = '/get?file=' + filePath;
 			//console.log("Getting contents for " + url);
 			xhrobj.open("GET", url, false); // synchronous xhr
-			
+
 			// set specific header to bypass the cache
 			// TODO FIXADE we should be saving the etag header of the original file request and caching it in local storage
 			// See http://en.wikipedia.org/wiki/HTTP_ETag
@@ -591,7 +606,7 @@ define([
 								// NEWEDITOR - doesn't have highlightAnnotations
 			// editor.highlightAnnotations();
 					postSave(xhrobj.responseText);
-					
+
 					// force caret location if required
 					//window.onpopstate();
 					editor.loadResponse = "success";
@@ -604,7 +619,7 @@ define([
 									// NEWEDITOR - doesn't have highlightAnnotations
 			// editor.highlightAnnotations();
 						postSave(xhrobj.responseText);
-						
+
 						// force caret location if required
 						//window.onpopstate();
 					} else if (xhrobj.status === 500 && xhrobj.responseText === 'File is a directory') {
@@ -632,7 +647,7 @@ define([
 			console.log("xhr failed " + e);
 			editor.loadResponse = "failed - exception";
 		}
-		
+
 		if (window.scripted && window.scripted.config) {
 			var editorUpdateRequired = false;
 			if(window.scripted.config.ui && window.scripted.config.ui.font){
@@ -652,14 +667,14 @@ define([
 				editor.getTextView().update(true);
 			}
 		}
-		
+
 		// TODO should we persist the instance of mark occurrences?
 		new mMarkoccurrences.SelectionMatcher().install(editor);
-		
+
 		editor.type = editorType;
-		
+
 		require("scripted/exec/exec-after-save").installOn(editor);
-	
+
 		return editor;
 	};
 

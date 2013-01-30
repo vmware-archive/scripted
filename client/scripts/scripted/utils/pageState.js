@@ -36,11 +36,12 @@ side : { // side panel can be specified as an array for multiple side panels
 </pre>
  * there are shortcuts and other ways to simplify the url.  See the jira issue for details.
  */
-define(['scripted/utils/storage', 'lib/json5'], function(storage) {
+define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(storage, scriptedLogger) {
 
 	var editorPrefix, windowsPathRE;
 
-	editorPrefix = "/editor";
+	// TODO FIXADE Should inject this value
+	editorPrefix = window.isTest ? "/clientServerTests?" : "/editor";
 	windowsPathRE = /^\/?.+:/;
 
 	return {
@@ -60,16 +61,16 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				// create empty page state to be filled later
 				return {main: {path: ""}};
 			}
-		
+
 			if (hash.charAt(0) === '#') {
 				hash = hash.substring(1);
 			}
-		
+
 			if (!isNaN(parseInt(hash.charAt(0), 10))) {
 				// http://localhost:7261/editor/path.js#10,20
 				hash = "main:{range:[" + hash + "]}";
 			}
-		
+
 			if (hash.charAt(0) !== '{') {
 				// http://localhost:7261/editor/path.js#main:{range:10,20}
 				hash = '{' + hash +'}';
@@ -98,26 +99,24 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				var state = JSON5.parse(hash);
 				if (typeof state !== "object") {
 					// assume invalid
-					// TOD use scriptedLogger
-					console.warn("Invalid hash: " + hash);
+					scriptedLogger.warn("Invalid hash: " + hash, "STORAGE");
 					state = {main:{}};
 				}
 				if (!state.main) {
 					state.main = {};
 				}
-			
+
 				if (path && !state.main.path) {
 					state.main.path = path;
 				}
 				return state;
 			} catch (e) {
-				// TOD use scriptedLogger
-				console.warn("Invalid hash: " + hash);
+				scriptedLogger.warn("Invalid hash: " + hash, "STORAGE");
 				// return empty state.  use path if exists
 				return {main: {path : (path ? path : "") } };
 			}
 		},
-	
+
 		extractPageStateFromUrl : function(url) {
 			if (url.substring(0, "http://".length) !== "http://" && url.substring(0, editorPrefix.length) !== editorPrefix) {
 				// assume path, not a url
@@ -130,7 +129,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				}
 				return this.extractPageState(hash, splits[0]);
 			}
-		
+
 			var path = url.replace(/^https?:\/\/[^\/]+/, '');
 			var hashIndex = url.indexOf('#');
 			if (hashIndex < 0) {
@@ -142,7 +141,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 			}
 			return this.extractPageState(url, path);
 		},
-		
+
 		/**
 		 * Retrieves the history from local storage
 		 * @return {Array.<{path:String,range:Array,scroll:Number}>}
@@ -161,7 +160,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 			}
 			return arr;
 		},
-	
+
 		getHistoryAsObject : function() {
 			var histArr = this.getHistory();
 			var histObj = {};
@@ -172,11 +171,11 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 			}
 			return histObj;
 		},
-	
+
 		setHistory : function(history) {
 			storage.safeStore("scripted.recentFileHistory", JSON5.stringify(history));
 		},
-	
+
 		/**
 		 * generates an item to be stored in scripted.recentFileHistory as well as browser state
 		 */
@@ -185,7 +184,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				return { path : "", range : [0,0] };
 			}
 			var path = editor.getFilePath();
-			var scrollPos = $(editor._domNode).find('.textview').scrollTop();
+			var scrollPos = editor.getScroll();
 			var selection = editor.getSelection();
 			return {
 				path: path,
@@ -193,7 +192,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				scroll: scrollPos
 			};
 		},
-	
+
 		generateHash : function(histItem, editorKind) {
 			// check to see if we should shortcut and have a simple range as the hash
 			if (!histItem.side) {
@@ -207,20 +206,20 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 					}
 				}
 			}
-		
+
 			if (histItem.main || histItem.side) {
 				return JSON5.stringify(histItem);
 			}
-		
+
 			if (!editorKind) {
 				editorKind = "main";
 			}
-			
+
 			var newItem = {};
 			newItem[editorKind] = histItem;
 			return JSON5.stringify(newItem);
 		},
-	
+
 		/**
 		 * Generates a url to open a file on a given file path or
 		 * history object
@@ -260,7 +259,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 		_setEditorPrefix : function(prefix) {
 			editorPrefix = prefix;
 		},
-	
+
 		storeScriptedHistory : function(histItem) {
 			var scriptedHistory = this.getHistory();
 			for (var i = 0; i < scriptedHistory.length; i++) {
@@ -269,16 +268,16 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 				}
 			}
 			scriptedHistory.push(histItem);
-		
+
 			// arbitrarily keep track of 8 scriptedHistory items
 			// TODO should we have a .scripted setting to customize this?
 			while (scriptedHistory.length > 8) {
 				scriptedHistory.shift();
 			}
-		
+
 			this.setHistory(scriptedHistory);
 		},
-	
+
 		storeBrowserState : function(mainItem, subItem, doReplace) {
 			try {
 				var name = mainItem.path.split('/').pop();
@@ -295,7 +294,7 @@ define(['scripted/utils/storage', 'lib/json5'], function(storage) {
 					window.history.pushState(histItem, name, url);
 				}
 			} catch (e) {
-				console.log(e);
+				scriptedLogger.error(e, "STORAGE");
 			}
 		}
 	};

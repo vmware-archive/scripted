@@ -12,7 +12,7 @@
  *     Andrew Eisenberg (VMware) - implemented visitor pattern
  ******************************************************************************/
 
-/*global define require eclipse esprima window scriptedLogger doctrine */
+/*global define */
 define({
 	/**
 	 * Match ignoring case and checking camel case.

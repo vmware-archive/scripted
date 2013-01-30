@@ -12,9 +12,18 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'scripted/keybindings/keybinder'], 
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'scripted/keybindings/keybinder'],
 function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 
+
+	// SCRIPTED
+	var autoActivation = (window.scripted &&
+		window.scripted.config &&
+		window.scripted.config.ui &&
+		window.scripted.config.ui.auto_activation)
+		|| 500;
+	// SCRIPTED end
+	
 	/**
 	 * Set of styles available for proposals.  The key corresponds to the value of the 'style'
 	 * property of the proposal.  The value corresponds to a css class for styling that proposal.
@@ -116,7 +125,30 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 				this.showContentAssist(true);
 				return true;
 			}.bind(this));
+			
+			// SCRIPTED automatically open content assist after delay
+			var filepath = this.editor.getFilePath();
+			if (filepath.substr(filepath.length-3, 3) === ".js") {
+				this.textView.addEventListener("Verify", this.autoActivate.bind(this));
+			}
+			// SCRIPTED end
 		},
+		
+		// SCRIPTED
+		/** @private */
+		autoActivate : function(e) {
+			if (e.text === '.' && !this.activationRequest) {
+				this.activationRequest = setTimeout(function() {
+					this.showContentAssist(true);
+					this.activationRequest = null;
+				}.bind(this), autoActivation);
+			} else if (this.activationRequest) {
+				clearTimeout(this.activationRequest);
+				this.activationRequest = null;
+			}
+		},
+		// SCRIPTED end
+
 		/** @private */
 		cancel: function() {
 			this.showContentAssist(false);
@@ -450,4 +482,3 @@ function(messages, mKeyBinding, mEventTarget, mKeybinder) {
 	
 	return {ContentAssist: ContentAssist};
 });
-

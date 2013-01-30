@@ -342,9 +342,9 @@ define("plugins/esprima/types", [], function() {
 			$_$toString: new Definition("?String:"),
 			$_$toLocaleString : new Definition("?String:"),
 			$_$valueOf: new Definition("?Object:"),
-			$_$hasOwnProperty: new Definition("?boolean:property"),
-			$_$isPrototypeOf: new Definition("?boolean:object"),
-			$_$propertyIsEnumerable: new Definition("?boolean:property")
+			$_$hasOwnProperty: new Definition("?Boolean:property"),
+			$_$isPrototypeOf: new Definition("?Boolean:object"),
+			$_$propertyIsEnumerable: new Definition("?Boolean:property")
 		},
 		
 		/**

@@ -14,8 +14,8 @@
 /*global scripted:true */
 
 // Tests for the param-resolver module
-define(['orion/assert', 'scripted/exec/param-resolver', 'tests/client/common/testutils', 'jquery'], 
-function(assert, resolver, mTestutils) {
+define(['orion/assert', 'scripted/exec/param-resolver', 'scripted/utils/textUtils', 'tests/client/common/testutils', 'jquery'], 
+function(assert, resolver, textUtils, mTestutils) {
 	var createMockEditor = function(text, path, selStart, selEnd) {
 		return {
 			getFilePath : function() { return path; },
@@ -39,11 +39,13 @@ function(assert, resolver, mTestutils) {
 	};
 	
 	var doReplaceParams = function(text, path, selStart, selEnd, proposal) {
+		textUtils._flushCache();
 		proposal = proposal || text;
 		return resolver.forEditor(createMockEditor(text, path, selStart, selEnd)).replaceParams(proposal);
 	};
 	
 	var doFindReplacements = function(text, path, selStart, selEnd, proposal) {
+		textUtils._flushCache();
 		proposal = proposal || text;
 		return resolver.forEditor(createMockEditor(text, path, selStart, selEnd)).findReplacements(proposal);
 	};

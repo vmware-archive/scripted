@@ -11,28 +11,9 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define require FileReader window Worker XMLHttpRequest ActiveXObject setTimeout scriptedLogger disableIndexerWorker */
+/*global define require FileReader window Worker XMLHttpRequest ActiveXObject setTimeout disableIndexerWorker */
 /*jslint browser:true */
 
-
-// TODO use promises
-//eachk :: ([a], (a, Continuation<Void>) -> Void, Coninuation<Void>) -> Void
-// This is a 'foreach' on an array, where the function that needs to be called on the
-// elements of the array is callback style. I.e. the function calls some other function when its
-// work is done. Since this is a 'each' rather than a 'map', we don't care about the 'return values'
-// of the functions (and in callback style, this means, the parameters of the callbacks).
-function eachk(array, f, callback) {
-	function loop(i) {
-		if (i < array.length) {
-			f(array[i], function() {
-				loop(i + 1);
-			});
-		} else {
-			callback();
-		}
-	}
-	loop(0);
-}
 
 
 /**
@@ -41,9 +22,23 @@ function eachk(array, f, callback) {
  *   retrieveSummaries(file)  grabs the summaries for files that depend on the file file passed in
  *   performIndex(file)   calculates the dependencies of the file and updates the summaries of all of these dependencies
  */
-define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client", "scripted/utils/storage"],
-function(mEsprimaContentAssist, jsdepend, storage) {
+define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client", "scripted/utils/storage", "when", "scriptedLogger"],
+function(mEsprimaContentAssist, jsdepend, storage, when, scriptedLogger) {
 	
+/**
+ * Promise aware array iterator. Loops over elements of an array from left to right
+ * applying the function to each element in the array. The function gets passed
+ * the element and the index in the array.
+ */
+function each(array, fun) {
+	//TODO: move this function to utils/promises
+	return when.reduce(array,
+		function (ignore, element, i) {
+			return fun.call(undefined, element, i);
+		},
+		null
+	);
+}
 	
 	// webworkers exist
 	var worker;
@@ -61,12 +56,12 @@ function(mEsprimaContentAssist, jsdepend, storage) {
 			}
 		}
 	} else {
-		if (this.console) {
+		if (this.window) {
 			if (this.window.isTest) {
 				this.console.warn("Not using webworker since in a test");
 			} else {
 				// TODO temporarily add the popup for debugging on firefox
-				this.alert("Webworker not found");
+				this.alert("Web worker not available for background indexing.  Falling back to in-browser indexing.");
 				this.console.warn("Web worker not available for background indexing.  Falling back to in-browser indexing.");
 			}
 		}
@@ -112,10 +107,10 @@ function(mEsprimaContentAssist, jsdepend, storage) {
 	 * @param {Indexer} indexer
 	 * @param {Function} persistFn function to call for persisting to local storage
 	 * @param {Function} statusFn function to call for messages
-	 * @param {Function} k the continuation
 	 */
-	function createSummary(dependency, indexer, persistFn, statusFn, k) {
+	function createSummary(dependency, indexer, persistFn, statusFn) {
 		var file = dependency.path;
+		var deferred = when.defer();
 		// only index JS files
 		if (file && (file.substr(-3, 3) === ".js" || file.substr(-5, 5) === ".node")) {
 			jsdepend.getContents(file, function (contents) {
@@ -135,16 +130,17 @@ function(mEsprimaContentAssist, jsdepend, storage) {
 						// couldn't create structure. likely a bad parse
 						statusFn("Warning: could not summarize " + file + ". likely there is a problem with the file.");
 					}
-					k();
+					deferred.resolve();
 				},
 				function (err) {
 					statusFn("Warning: " + err + " when getting " + file);
-					k();
+					deferred.resolve();
 				}
 			);
 		} else {
-			k();
+			deferred.resolve();
 		}
+		return deferred.promise;
 	}
 	
 	/**
@@ -385,20 +381,13 @@ function(mEsprimaContentAssist, jsdepend, storage) {
 				// for each dependency, check local storage to see if still valid
 				var needsUpdating = checkCache(deps, retrieveFn);
 				
-				// ask server for contents of each stale dependency
-				// ensure that this happens in order
-				eachk(needsUpdating,
-					// function to call
-					function(itemToUpdate, k) {
-						createSummary(itemToUpdate, indexer, persistFn, statusFn, k);
-					},
-					
-					// callback when completed
-					function() {
-						if (callback) {
-							callback(deps);
-						}
-					});
+				each(needsUpdating, function(element) {
+					return createSummary(element, indexer, persistFn, statusFn);
+				}).then(function() {
+					if (callback) {
+						callback(deps);
+					}
+				});
 			});
 		};
 	}

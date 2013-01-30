@@ -1,2 +1,2 @@
 @echo off
-node %~dp0\scr %*%
+node "%~dp0\scr" %*%
