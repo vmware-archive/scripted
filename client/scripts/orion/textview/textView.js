@@ -3147,7 +3147,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			// feature on mac-chrome: 
 			// prevent left scrolling on swipe
 			// otherwise history back navigation will happen
-			if (isChrome && isMac) {
+			if (util.isMac && util.isChrome) {
 				e.preventDefault();
 			}
 			// SCRIPTED end
