@@ -16,55 +16,78 @@
 // information about 'actions' that are registered with the scripted
 // editor.
 
-define([], function () {
+define(function (require) {
 
+	var editorUtils = require('scripted/utils/editorUtils');
+	
 	/**
 	 * This map contains additional information that we(scripted) want to
 	 * associate with orions actions without modifying orion code.
 	 */
 	var descriptions = {
-		"charPrevious": "Previous Character",
+		//Note: orion now has a facility for attaching a readable name to an editor action
+		// when it is defined... but not all orion-defined actions actually have readable
+		// names. So here we keep our own readable names for the missing ones.
+		
 		"charNext": "Next Character",
-		"centerLine": "Center Editor on Line",
-		"deletePrevious": "Delete Previous Character",
+		"charPrevious": "Previous Character",
 		"deleteNext": "Delete Next Character",
-		"deleteWordPrevious": "Delete Previous Word",
+		"deletePrevious": "Delete Previous Character",
 		"deleteWordNext": "Delete Next Word",
-		"deleteLineStart": "Delete to Start of Line",
-		"deleteLineEnd": "Delete to End of Line",
+		"deleteWordPrevious": "Delete Previous Word",
 		"enter": "Enter",
 		"enterAfter": "Insert Newline at End of line",
-		"enterNoCursor": "Insert Newline after Cursor",
-		"lineUp": "Line Up",
 		"lineDown": "Line Down",
-		"lineStart": "Line Start",
 		"lineEnd": "Line End",
-		"pageUp": "Page Up",
+		"lineStart": "Line Start",
+		"lineUp": "Line Up",
 		"pageDown": "Page Down",
-		"scrollPageUp": "Scroll Page Up",
-		"scrollPageDown": "Scroll Page Down",
+		"pageUp": "Page Up",
 		"selectAll": "Select All",
-		"selectLineUp": "Select Line Up",
+		"selectCharNext": "Select Next Character",
+		"selectCharPrevious": "Select Previous Character",
 		"selectLineDown": "Select Line Down",
+		"selectLineEnd": "Select Line End",
+		"selectLineStart": "Select Line Start",
+		"selectLineUp": "Select Line Up",
+		"selectPageDown": "Select Page Down",
+		"selectPageUp": "Select Page Up",
+		"selectTextEnd": "Select Text End",
+		"selectTextStart": "Select Text Start",
 		"selectWholeLineDown" : "Select Whole Line Down",
 		"selectWholeLineUp" : "Select Whole Line Up",
-		"selectCharPrevious": "Select Previous Character",
-		"selectCharNext": "Select Next Character",
-		"selectPageUp": "Select Page Up",
-		"selectPageDown": "Select Page Down",
-		"selectLineStart": "Select Line Start",
-		"selectLineEnd": "Select Line End",
-		"selectWordPrevious": "Select Previous Word",
 		"selectWordNext": "Select Next Word",
-		"selectTextStart": "Select Text Start",
-		"selectTextEnd": "Select Text End",
+		"selectWordPrevious": "Select Previous Word",
 		"tab": "Tab",
-		"textStart": "Go To Beginning",
 		"textEnd": "Go To End",
+		"textStart": "Go To Beginning",
+		"wordNext": "Next Word",
 		"wordPrevious": "Previous Word",
-		"wordNext": "Next Word"
+		"scrollPageUp": "Scroll Page Up",
+		"scrollPageDown": "Scroll Page Down",
+		"centerLine": "Center Editor on Line",
+		"deleteLineStart": "Delete to Start of Line",
+		"deleteLineEnd": "Delete to End of Line",
+		"enterNoCursor": "Insert Newline after Cursor",
+		"copy": "Copy",
+		"cut": "Cut",
+		"paste": "Paste",
+		
+		//New?? Orion 1.0
+		"toggleTabMode" : "Toggle Tab Mode",
+		"toggleWrapMode" : "Toggle Wrap Mode",
+		"scrollTextStart": "Scroll To Start",
+		"scrollTextEnd": "Scroll To End",
+		
+		"scriptedKeyHelp": "Configure Key Bindings"
+		//TODO: Most scripted specific keybindings are just using the readable description as
+		// the action ID. Maybe this should be cleaned up.
+		
+//		"selectAll": "Select All",
+
+
 	};
-	
+
 	/**
 	 * Any action in this list is considered' global.
 	 * Since in the current infrastructur, all keybinding actions are registered with
@@ -150,10 +173,15 @@ define([], function () {
 	 * This is the text that will be used to identify the action in the
 	 * help panel and keybinding UI.
 	 */
-	function getActionDescription(actionName) {
-		return descriptions[actionName] || actionName;
+	function getActionDescription(actionID) {
+		var editor = editorUtils.getMainEditor();
+		if (editor) {
+			var orionDesc = editor.getTextView().getActionDescription(actionID);
+			orionDesc = orionDesc && orionDesc.name;
+			return orionDesc || descriptions[actionID] || actionID;
+		}
+		return actionID;
 	}
-	
 	
 	/**
 	 * Fetch 'Set' of global actions associated with an editor. The properties of the map
@@ -164,6 +192,9 @@ define([], function () {
 	 */
 	function getGlobalActions(editor) {
 		var result = {};
+		//TODO: use public api in the orion editor? There's now a getActions method.
+		// Also orion actions have a 'description' object in which we may be able to
+		// tag actions as global.
 		var actions = editor.getTextView()._actions;
 		for (var i = 0; i < actions.length; i++) {
 			var a = actions[i];

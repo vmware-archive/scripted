@@ -20,7 +20,7 @@
 // When loaded it sets itself up without requiring any further help
 // from the main app.
 
-define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit', 
+define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit',
 	"scripted/utils/editorUtils",'text!./_keybinding.tmpl.html', './action-info'],
 function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, commandTemplate, mActionInfo) {
 
@@ -29,12 +29,13 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
-		var keyBindings = editorUtil.getMainEditor().getTextView()._keyBindings.filter(function (kb) { return kb.actionID; });
+		var editor = editorUtil.getMainEditor();
+		var keyBindings = editor.getTextView()._keyBindings.filter(function (kb) { return kb.actionID; });
 		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
 			var lname = getActionDescription(l.actionID);
-			var rname =getActionDescription(r.actionID);
+			var rname = getActionDescription(r.actionID);
 			if (lname) {
 				lname = lname.toLowerCase();
 			}
@@ -50,16 +51,6 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 			}
 		});
 
-		//This code removes duplicates, i.e. actions that are bound to more than one
-		//key are reported only once. Arguably this is wrong... since that means
-		//we won't be able to see the alternate keybindings in the help panel!
-//		for (var i = 0; i < keyBindings.length; i++){
-//			if (keyBindings[i].name === lastShortcut) {
-//				keyBindings.splice(i,1);
-//			}
-//			lastShortcut=keyBindings[i].name;
-//		}
-		
 		return keyBindings;
 	}
 	
@@ -67,6 +58,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 	 * Render or re-render the current keybindings to the help side panel.
 	 */
 	function renderKeyHelp() {
+		var editor = editorUtil.getMainEditor();
 	
 		$.views.converters({
 			toKeystroke: mKeystroke.fromKeyBinding,
@@ -120,7 +112,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 			cl
 		);
 
-		editorUtil.getMainEditor().getTextView()._update();
+		editor.getTextView()._update();
 	}
 	
 	/*Command help panel*/

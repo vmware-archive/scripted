@@ -290,8 +290,8 @@ define([
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
 
-			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "Command Help");
-			editor.getTextView().setAction("Command Help", function() {
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "scriptedKeyHelp");
+			editor.getTextView().setAction("scriptedKeyHelp", function() {
 				$('#help_open').click();
 				return true;
 			});
