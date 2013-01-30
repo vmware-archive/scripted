@@ -678,6 +678,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
 				}
 				this.setOverviewRulerVisible(true);
 			}
