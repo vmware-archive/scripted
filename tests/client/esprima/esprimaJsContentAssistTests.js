@@ -164,9 +164,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -201,9 +201,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["undefined", "undefined : undefined"],
 			["zzz", "zzz : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -238,9 +238,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["undefined", "undefined : undefined"],
 			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -277,9 +277,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["yyy", "yyy : {  }"],
 			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -321,9 +321,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -359,9 +359,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -457,9 +457,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -501,9 +501,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -596,9 +596,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -644,9 +644,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -659,7 +659,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test Object inferencing with Variable"] = function() {
 		var results = computeContentAssist("var t = {}\nt.h", "h");
 		testProposals(results, [
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"]
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"]
 		]);
 	};
 	tests["test Object Literal inferencing"] = function() {
@@ -668,7 +668,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["hh2", "hh2 : Number"],
 			["hhh", "hhh : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"]
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"]
 		]);
 	};
 	tests["test Simple String inferencing"] = function() {
@@ -703,7 +703,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["hh2", "hh2 : Number"],
 			["hhh", "hhh : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"]
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"]
 		]);
 	};
 	tests["test Data flow inferencing 1"] = function() {
@@ -795,7 +795,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["ii", "ii : Number"],
 			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"]
 		]);
 	};
 	tests["test for loop 2"] = function() {
@@ -806,7 +806,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["ii", "ii : Number"],
 			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"]
 		]);
 	};
 	tests["test for loop 3"] = function() {
@@ -817,7 +817,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["ii", "ii : Number"],
 			["Infinity", "Infinity : Number"],
 			["", "---------------------------------"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"]
 		]);
 	};
 	tests["test while loop 1"] = function() {
@@ -1068,9 +1068,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1107,9 +1107,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1146,9 +1146,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1353,9 +1353,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1368,9 +1368,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1382,9 +1382,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1397,9 +1397,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1412,9 +1412,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1427,9 +1427,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1449,9 +1449,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -1472,9 +1472,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["ooo", "ooo : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -3344,9 +3344,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -3394,9 +3394,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var foo = { at: { bar: 0} };\n" +
 			"foo[at.foo.bar].");
 		testProposals(results, [
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],
@@ -3414,9 +3414,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"],
 			["toPrecision(digits)", "toPrecision(digits) : Number"],
 			["", "---------------------------------"],
-			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
-			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : Boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"],
 			["valueOf()", "valueOf() : Object"],

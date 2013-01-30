@@ -100,6 +100,5 @@ define(function() {
 				scriptedLoggerCategories[catName];
 		}
 	};
-
 	return scriptedLogger;
 });

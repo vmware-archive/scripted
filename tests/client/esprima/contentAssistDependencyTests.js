@@ -781,7 +781,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["port", "port : String"],
 			["protocol", "protocol : String"],
 			["", "---------------------------------"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["prototype", "prototype : Object"]
 		]);
 	};
@@ -798,7 +798,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["port", "port : String"],
 			["protocol", "protocol : String"],
 			["", "---------------------------------"],
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["prototype", "prototype : Object"]
 		]);
 	};
@@ -811,7 +811,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				first:  "define({ loc : location });"
 			}));
 		testProposals(results, [
-			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : Boolean"],
 			["prototype", "prototype : Object"]
 		]);
 	};
