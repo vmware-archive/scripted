@@ -95,7 +95,7 @@ define(function (require) {
 	 * Any action in this list is considered' global.
 	 * Since in the current infrastructur, all keybinding actions are registered with
 	 * an editor, these actions will simply be delegated to the
-	 * (main) editor.
+	 * last editor that had focus before.
 	 */
 	 var globalActions = [
 		'scriptedKeyHelp',
