@@ -26,6 +26,10 @@
 	color: #00bb22;
 }
 
+.dark .token_singleline_comment {
+	color: #00bb22;
+}
+
 /* Around the editor */
 
 /* Colour of that box in the bottom right when both scrollbars are open */
