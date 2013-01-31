@@ -215,10 +215,6 @@ define(function (require) {
 		hiddenActions.forEach(function (id) {
 			put(actions, [id, 'category'], 'hidden');
 		});
-
-		console.log('>>>> action-infos');
-		console.log(JSON.stringify(actions, null, '\t'));
-		console.log('<<<< action-infos');
 	}
 
 	initActions();
