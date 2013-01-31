@@ -25,7 +25,7 @@ define([
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require, deref, mSaveHooks, when,
@@ -35,7 +35,7 @@ define([
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext
+	mMarkoccurrences, tHelptext, themeManager
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -189,6 +189,7 @@ define([
 				});
 			}
 			setEditorTitle(editor, fileName);
+			
 		};
 
 		/**
@@ -681,6 +682,8 @@ define([
 		editor.type = editorType;
 
 		require("scripted/exec/exec-after-save").installOn(editor);
+		
+		themeManager.applyCurrentTheme(editor);
 
 		return editor;
 	};

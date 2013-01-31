@@ -81,9 +81,11 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				
 				// add live reloading support
 				require(['scripted/application-manager']);
+				
+				require(['scripted/editor/themeManager']);
 
 				$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
-
+			
 				/*Position elements correctly on page*/
 				var footer_height = $('footer').outerHeight();
 				var header_height = $('header').outerHeight();
