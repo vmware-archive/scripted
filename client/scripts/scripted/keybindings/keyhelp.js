@@ -20,21 +20,23 @@
 // When loaded it sets itself up without requiring any further help
 // from the main app.
 
-define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit', 
+define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit',
 	"scripted/utils/editorUtils",'text!./_keybinding.tmpl.html', './action-info'],
 function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, commandTemplate, mActionInfo) {
 
 	var attachKeyEditor = mKeyedit.attachKeyEditor;
 	var getActionDescription = mActionInfo.getActionDescription;
+	var getCategory = mActionInfo.getCategory;
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
-		var keyBindings = editorUtil.getMainEditor().getTextView()._keyBindings.filter(function (kb) { return kb.name; });
+		var editor = editorUtil.getMainEditor();
+		var keyBindings = editor.getTextView()._keyBindings.filter(function (kb) { return kb.actionID; });
 		
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
-			var lname = getActionDescription(l.name);
-			var rname =getActionDescription(r.name);
+			var lname = getActionDescription(l.actionID);
+			var rname = getActionDescription(r.actionID);
 			if (lname) {
 				lname = lname.toLowerCase();
 			}
@@ -50,16 +52,6 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 			}
 		});
 
-		//This code removes duplicates, i.e. actions that are bound to more than one
-		//key are reported only once. Arguably this is wrong... since that means
-		//we won't be able to see the alternate keybindings in the help panel!
-//		for (var i = 0; i < keyBindings.length; i++){
-//			if (keyBindings[i].name === lastShortcut) {
-//				keyBindings.splice(i,1);
-//			}
-//			lastShortcut=keyBindings[i].name;
-//		}
-		
 		return keyBindings;
 	}
 	
@@ -67,6 +59,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 	 * Render or re-render the current keybindings to the help side panel.
 	 */
 	function renderKeyHelp() {
+		var editor = editorUtil.getMainEditor();
 	
 		$.views.converters({
 			toKeystroke: mKeystroke.fromKeyBinding,
@@ -78,15 +71,17 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		var importantKeyBindings = [];
 		var otherKeyBindings = [];
 		
-		for (var i = 0; i < keyBindings.length; i++){
-			if (!keyBindings[i].obvious) {
-				if (keyBindings[i].predefined){
-					otherKeyBindings.push(keyBindings[i]);
-				} else {
-					importantKeyBindings.push(keyBindings[i]);
-				}
+		keyBindings.forEach(function (kb) {
+			switch(getCategory(kb.actionID)) {
+				case 'hidden':
+					break;
+				case 'trivial':
+					otherKeyBindings.push(kb);
+					break;
+				default:
+					importantKeyBindings.push(kb);
 			}
-		}
+		});
 		
 		var tmpl = $.templates(commandTemplate);
 		
@@ -97,7 +92,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 				}
 			} else {
 			    var element = $(tmpl.render(it));
-			    attachKeyEditor(element, it.name, mKeystroke.fromKeyBinding(it.keyBinding));
+			    attachKeyEditor(element, it.actionID, mKeystroke.fromKeyBinding(it.keyBinding));
 				into.append(element);
 			}
 		}
@@ -112,15 +107,17 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		render(otherKeyBindings, cl);
 		cl.append('<li><hr /></li>');
 		render(
-			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).map(function (name) {
+			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).filter(function (id) {
+				return getCategory(id)!=='hidden';
+			}).map(function (actionID) {
 				return {
-					name: name
+					actionID: actionID
 				};
 			}),
 			cl
 		);
 
-		editorUtil.getMainEditor().getTextView()._updatePage();
+		editor.getTextView()._update();
 	}
 	
 	/*Command help panel*/

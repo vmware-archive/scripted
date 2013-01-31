@@ -12,6 +12,14 @@
  *     Andrew Eisenberg
  ******************************************************************************/
 
+//
+// Public facing API to register keybindings. This is the API that
+// plugins should use. Keybindings registered via this API are
+// applied in between 'default' keybindings and keybindings overridden
+// via scripterc config file. This means that plugin keybindings can
+// modify the defaults, and scriptedrc config files can modify
+// plugin keybindings.
+//
 
 define(function(require){
 	var keybinder = require('scripted/keybindings/keybinder');

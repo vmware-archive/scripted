@@ -50,6 +50,7 @@ define(function(require) {
 				}
 			}
 			console.log('All plugins succesfully loaded!');
+			ready.resolve();
 		});
 	});
 

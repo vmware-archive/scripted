@@ -139,7 +139,8 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 			var replaceParams = this.replacer.replaceParams;
 			var findReplacements = this.replacer.findReplacements;
 			// find offset of the start of the word
-			var replaceStart = invocationOffset - prefix.length;
+			// for templates only, we don't care about word start, only what is selected
+			var replaceStart = templatesOnly ? invocationOffset : invocationOffset - prefix.length;
 			myTemplates.forEach(function(template) {
 				if ((templatesOnly && template.isTemplate) ||
 					(!templatesOnly && proposalUtils.looselyMatches(prefix, template.trigger))) {

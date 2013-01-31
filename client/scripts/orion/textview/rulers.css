@@ -1,26 +1,34 @@
 /* Styles for rulers */
 .ruler {
-	background-color: white;
 }
 .ruler.annotations {
-	border-right: 1px solid lightgray;
 	width: 16px;
+	/* Scripted - TODO override properly */
+	border-right: 1px solid lightgray;
 }
 .ruler.folding {
-	border-right: 1px solid lightgray;
+	background-color: white;
 	width: 14px;
 }
 .ruler.lines {
-	border-right: 1px solid lightgray;
+	/* Scripted - removed this, TODO override properly
+	background-color: white;
+	*/
 	text-align: right;
+	
+	/* Scripted - TODO override properly */
+	border-right: 1px solid lightgray;
 }
 .ruler.overview {
-	border-left: 1px solid lightgray;
 	width: 14px;
 }
 
 /* Styles for the line number ruler */
 .rulerLines {
+	/* scripted - removed this, need to override in a better way
+	color: silver;
+	*/
+	background: #eeeeee;
 }
 .rulerLines.even
 .rulerLines.odd {

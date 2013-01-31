@@ -239,4 +239,6 @@ define(function(require) {
 	registerEmmetAction("select_next_item", ++i);
 	registerEmmetAction("select_previous_item", ++i);
 	registerEmmetAction("split_join_tag", ++i);
+
+	console.log('Zen Coding Plugin Loaded');
 });

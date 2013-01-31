@@ -1,5 +1,13 @@
+@import "../scripts/lib/dojo/resources/dojo.css";
+@import "../scripts/lib/dijit/themes/nihilo/nihilo.css";
+@import "../scripts/lib/dijit/themes/nihilo/layout/BorderContainer.css";
+@import "../scripts/lib/dijit/themes/nihilo/form/Common.css";
+@import "../scripts/lib/dijit/themes/nihilo/form/Button.css";
+
 @import "../scripts/orion/editor/editor.css";
 @import "../scripts/scripted/exec/console.css";
+@import "../scripts/css/ide.css";
+@import "../scripts/css/commands.css";
 @import "fonts.css";
 
 ul{

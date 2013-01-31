@@ -23,50 +23,20 @@ var fs = require('fs'),
 	retryClient = retry(client, {initial: 20, max: 200}),
 	childExec = require('child_process').exec,
 	spawn = require('child_process').spawn,
+	openBrowser = require('./open').open,
 	url = "http://localhost:7261";
 
 function exec(options) {
 	ping(options).then(
 		function(response){
 			if (!options.suppressOpen) {
-				open(options);
+				openBrowser(options._?options._[0]:null);
 			}
 		},
 		function(error){
 			start(options);
 		}
 	);
-}
-
-function open(options) {
-	var cmd;
-    var browser = process.env.SCRIPTED_BROWSER;
-		
-	switch (process.platform) {
-		case 'darwin':
-			cmd = 'open';
-			break;
-		case 'win32':
-			cmd = 'start ""';
-			break;
-		default:
-			cmd = 'xdg-open';
-	}
-
-    if (browser) {
-	  cmd+=' "'+browser+'"';
-    }
-	
-	url += "/editor" + (process.platform == 'win32' ? "/" : "");
-	
-	if (options._) {
-		url += path.resolve(process.cwd(), options._[0]);
-	} else {
-		url += process.cwd();
-	}
-
-	// console.log("Opening %s", url);
-	childExec(cmd + ' "' + url.replace(/"/, '\\\"') + '"');
 }
 
 function ping(options) {

@@ -18,11 +18,12 @@
 // Change the keybindings etc.
 //////////////////////////////////////////////////////////////////////////////////
 
-define(['scripted/utils/json-merge', './action-info', './keystroke', 'scripted/utils/os', 'servlets/config-client', 'scripted/utils/editorUtils'
-], function (jsonMerge, mActionInfo, mKeystroke, OS, mConfig, editorUtils) {
+define(['scripted/utils/json-merge', './action-info', './keystroke', 'scripted/utils/os',
+	'servlets/config-client', 'scripted/utils/editorUtils', 'scripted/plugin-loader'
+], function (jsonMerge, mActionInfo, mKeystroke, OS, mConfig, editorUtils, pluginLoader) {
 
 function debug_log(msg) {
-//	console.log(msg);
+	console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
@@ -74,10 +75,12 @@ function toJSON(kbs) {
 	var json = {};
 	for (var i = 0; i < kbs.length; i++) {
 		var keyBinding = kbs[i];
-		if (keyBinding.name) {
-			json[keybinding2keystroke(keyBinding.keyBinding)] = keyBinding.name;
+		var actionID = keyBinding.actionID;
+		if (actionID) {
+			json[keybinding2keystroke(keyBinding.keyBinding)] = actionID;
 		}
 	}
+
 	return json;
 }
 
@@ -102,6 +105,7 @@ function dumpCurrentKeyBindings(editor) {
 
 function captureDefaults(editor) {
 	if (!defaults.keybindings) {
+		dumpCurrentKeyBindings(editor);
 		//note that defaults are only captured once even if we see multiple editor instances
 		//over the lifetime of the browser window. This could be problematic if the 'defaults'
 		//are not the same for all editor instances.
@@ -149,7 +153,7 @@ var installKeyEventTrap = (function () {
 		if (!listener) { //only install it once!
 			listener = function (e) {
 				var keystroke = event2keystroke(e);
-				debug_log('Seeing: '+keystroke);
+				//debug_log('Seeing: '+keystroke);
 				//if (e.ctrlKey || e.altKey || e.metaKey) {
 					// THe if above is no longer needed because we only trap select keys
 					// bound to global actions see comment below why this was needed
@@ -163,7 +167,7 @@ var installKeyEventTrap = (function () {
 					//keypress events.
 					var globalAction = getGlobalAction(keystroke);
 					if (globalAction) {
-						debug_log('Gotcha: '+keystroke);
+						//debug_log('Gotcha: '+keystroke);
 						var editor = editorUtils.getCurrentEditor();
 						if (editor) {
 							editor.getTextView().invokeAction(globalAction);
@@ -172,7 +176,7 @@ var installKeyEventTrap = (function () {
 						e.stopPropagation(); // This is for when using just dom listener
 						return false; // This is when used as jquery listener.
 					} else {
-						debug_log('Ignore: '+keystroke);
+						//debug_log('Ignore: '+keystroke);
 					}
 //				}
 			};
@@ -196,6 +200,7 @@ var installKeyEventTrap = (function () {
 				}
 			}
 		}
+		//debug_log("global keybindings = " +JSON.stringify(result, null, '  '));
 		return result;
 	}
 
@@ -219,24 +224,30 @@ function installOn(editor) {
 		}
 	}
 
-	//Before modifying any key bindings capture current keybindings state as the defaults:
-	captureDefaults(editor);
+	return pluginLoader.ready.always(function () {
+		//Before modifying any key bindings capture current keybindings state as the defaults:
+		//Note that plugins don't (or shouldn't) directly register keybindings with
+		//an editor... so the defaults captured shouldn't be including bindings provided
+		//by plugins.
+		captureDefaults(editor);
 
-	installKeybindings(pluginKeyBindings);
+		installKeybindings(pluginKeyBindings);
 
-	return getScriptedRcFile(keyBindingConfigName).then(
-		function (conf) {
-			debug_log('Retrieved config: '+keyBindingConfigName);
-			debug_log(JSON.stringify(conf, null, '  '));
-			//conf is a map from keystroke strings to editor action names
-			installKeybindings(conf);
+		return getScriptedRcFile(keyBindingConfigName).then(
+			function (conf) {
+				debug_log('Retrieved config: '+keyBindingConfigName);
+				debug_log(JSON.stringify(conf, null, '  '));
+				//conf is a map from keystroke strings to editor action names
+				installKeybindings(conf);
 
-			installKeyEventTrap(editor);
-		},
-		function (err) {
-			console.error(err);
-		}
-	);
+				installKeyEventTrap(editor);
+			},
+			function (err) {
+				console.error(err);
+			}
+		);
+	});
+
 }
 
 /**
@@ -344,11 +355,10 @@ function setKeyBinding(keystroke, actionName) {
 }
 
 function setPluginKeyBinding(keystroke, action) {
+	//Just put the keys in the plugin specific registry. It's someone else's responsibility
+	// to apply these at the right time. That way plugins can register keybindings without
+	// worrying about editor life cycles and timing issues.
 	pluginKeyBindings[keystroke] = action;
-	eachEditor(function (editor) {
-		setEditorKeyBinding(editor, keystroke, action);
-	});
-	$('#help_panel').trigger('refresh'); //TODO: correct way to do this would
 }
 
 return {

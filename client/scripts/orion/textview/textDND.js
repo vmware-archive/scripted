@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,7 +13,7 @@
  
 /*global define */
 
-define("orion/textview/textDND", [], function() {
+define("orion/textview/textDND", [], function() { //$NON-NLS-0$
 
 	function TextDND(view, undoStack) {
 		this._view = view;
@@ -42,23 +42,23 @@ define("orion/textview/textDND", [], function() {
 				self._onDestroy(evt);
 			}
 		};
-		view.addEventListener("DragStart", this._listener.onDragStart);
-		view.addEventListener("DragEnd", this._listener.onDragEnd);
-		view.addEventListener("DragEnter", this._listener.onDragEnter);
-		view.addEventListener("DragOver", this._listener.onDragOver);
-		view.addEventListener("Drop", this._listener.onDrop);
-		view.addEventListener("Destroy", this._listener.onDestroy);
+		view.addEventListener("DragStart", this._listener.onDragStart); //$NON-NLS-0$
+		view.addEventListener("DragEnd", this._listener.onDragEnd); //$NON-NLS-0$
+		view.addEventListener("DragEnter", this._listener.onDragEnter); //$NON-NLS-0$
+		view.addEventListener("DragOver", this._listener.onDragOver); //$NON-NLS-0$
+		view.addEventListener("Drop", this._listener.onDrop); //$NON-NLS-0$
+		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 	}
 	TextDND.prototype = {
 		destroy: function() {
 			var view = this._view;
 			if (!view) { return; }
-			view.removeEventListener("DragStart", this._listener.onDragStart);
-			view.removeEventListener("DragEnd", this._listener.onDragEnd);
-			view.removeEventListener("DragEnter", this._listener.onDragEnter);
-			view.removeEventListener("DragOver", this._listener.onDragOver);
-			view.removeEventListener("Drop", this._listener.onDrop);
-			view.removeEventListener("Destroy", this._listener.onDestroy);
+			view.removeEventListener("DragStart", this._listener.onDragStart); //$NON-NLS-0$
+			view.removeEventListener("DragEnd", this._listener.onDragEnd); //$NON-NLS-0$
+			view.removeEventListener("DragEnter", this._listener.onDragEnter); //$NON-NLS-0$
+			view.removeEventListener("DragOver", this._listener.onDragOver); //$NON-NLS-0$
+			view.removeEventListener("Drop", this._listener.onDrop); //$NON-NLS-0$
+			view.removeEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 			this._view = null;
 		},
 		_onDestroy: function(e) {
@@ -76,15 +76,15 @@ define("orion/textview/textDND", [], function() {
 			var text = model.getText(selection.start, selection.end);
 			if (text) {
 				this._dragSelection = selection;
-				e.event.dataTransfer.effectAllowed = "copyMove";
-				e.event.dataTransfer.setData("Text", text);
+				e.event.dataTransfer.effectAllowed = "copyMove"; //$NON-NLS-0$
+				e.event.dataTransfer.setData("Text", text); //$NON-NLS-0$
 			}
 		},
 		_onDragEnd: function(e) {
 			var view = this._view;
 			if (this._dragSelection) {
 				if (this._undoStack) { this._undoStack.startCompoundChange(); }
-				var move = e.event.dataTransfer.dropEffect === "move";
+				var move = e.event.dataTransfer.dropEffect === "move"; //$NON-NLS-0$
 				if (move) {
 					view.setText("", this._dragSelection.start, this._dragSelection.end);
 				}
@@ -113,15 +113,18 @@ define("orion/textview/textDND", [], function() {
 		_onDragOver: function(e) {
 			var types = e.event.dataTransfer.types;
 			if (types) {
-				var allowed = types.contains ? types.contains("text/plain") : types.indexOf("text/plain") !== -1;
+				var allowed = !this._view.getOptions("readonly"); //$NON-NLS-0$
+				if (allowed) {
+					allowed = types.contains ? types.contains("text/plain") : types.indexOf("text/plain") !== -1; //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				if (!allowed) {
-					e.event.dataTransfer.dropEffect = "none";
+					e.event.dataTransfer.dropEffect = "none"; //$NON-NLS-0$
 				}
 			}
 		},
 		_onDrop: function(e) {
 			var view = this._view;
-			var text = e.event.dataTransfer.getData("Text");
+			var text = e.event.dataTransfer.getData("Text"); //$NON-NLS-0$
 			if (text) {
 				var offset = view.getOffsetAtLocation(e.x, e.y);
 				if (this._dragSelection) {

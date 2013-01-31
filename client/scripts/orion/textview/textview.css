@@ -4,6 +4,14 @@
 }
 
 .textviewContainer {
+/*
+   SCRIPTED - TODO - FROM NEW EDITOR
+	background-color: #eaeaea;
+	font-family: 'Lucida Sans Unicode', 'Lucida Grande', Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;
+	font-size: 10pt;
+	min-width: 50px;
+	min-height: 50px;
+*/
 	background-color: #eeeeee;
 	font-family: Monaco, Consolas, "Lucida Console", "Ubuntu Mono", Monospace, monospace;
 	font-size: 9pt;
@@ -13,4 +21,13 @@
 }
 
 .textviewContent {
+  cursor: auto;
+}
+
+.textviewLeftRuler {
+  border-right: 1px solid #eaeaea;
+}
+
+.textviewRightRuler {
+  border-left: 1px solid #eaeaea;
 }
