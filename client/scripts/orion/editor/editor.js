@@ -423,7 +423,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			// SCRIPTED change use hoverCallback if there are no annotations
 			// was {
-			if (rangeAnnotations.length === 0) { return null; }
+//			if (rangeAnnotations.length === 0) { return null; }
 			// }
 			if (rangeAnnotations.length === 0 || (rangeAnnotations.length === 1 && rangeAnnotations[0].type === "scripted.annotation.markOccurrences")) { 
 				rangeAnnotations = hoverCallback(this.getText(), offset);
