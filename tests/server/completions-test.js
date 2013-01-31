@@ -251,10 +251,9 @@ exports.findCompletions4 = function(test) {
 		testResourcesFolder + path.sep + "test4.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
-			test.equals(completions.length, 2);
+			test.equals(completions.length, 6);  // one invalid completion
 			var i = 0;
 
-			// var origCompletion = '<dl>\n${lineStart}${indent}<dt>${1:First definition}</dt> <dd>${2:First explanation}</dd>\n${lineStart}${indent}<dt>${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n${lineStart}</dl>';
 			var completion = '<dl>\n${lineStart}${indent}<dt>First definition</dt> <dd>First explanation</dd>\n${lineStart}${indent}<dt>Second definition</dt> <dd>Second explanation</dd>\n${lineStart}</dl>';
 			var completionDesc = '<dl>\n\t<dt>First definition</dt> <dd>First explanation</dd>\n\t<dt>Second definition</dt> <dd>Second explanation</dd>\n</dl>';
 			test.equals(completions[i].proposal, completion);
@@ -282,6 +281,63 @@ exports.findCompletions4 = function(test) {
 			]);
 			test.ok(!completions[i].escapePosition);
 			i++;
+
+			completion = '${selection}';
+			completionDesc = '${selection}';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "table");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("${selection}"), length:"${selection}".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			completion = '$selection}';
+			completionDesc = '$selection}';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "table");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("$selection"), length:"$selection".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			completion = '${{selection}}';
+			completionDesc = '${{selection}}';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "table");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("${{selection}}"), length:"${{selection}}".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			completion = '${{}}selection{{}}';
+			completionDesc = '${{}}selection{{}}';
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "table");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("${{}}selection{{}}"), length:"${{}}selection{{}}".length }
+			]);
+			test.ok(!completions[i].escapePosition);
+			i++;
+
+			// this one is invalid
+//			completion = '${1:${{selection}}';
+//			completionDesc = '${1:${{selection}}';
+//			test.equals(completions[i].proposal, completion);
+//			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+//			test.equals(completions[i].trigger, "table");
+//			test.deepEqual(completions[i].positions, [
+//			]);
+//			test.ok(!completions[i].escapePosition);
+//			i++;
+
+
 
 			test.done();
 		}, errback(test));

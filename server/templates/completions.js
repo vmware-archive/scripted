@@ -97,6 +97,26 @@ exports.CompletionsProcessor.prototype = {
 		}
 		when.all(deferreds).then(function() { cb(realFiles); });
 	},
+	
+	
+	// finds the associated closing bracket
+	findClosingBracket : function(contents, start) {
+		var depth = 0;
+		var i = start;
+		while (i < contents.length) {
+			if (contents.charAt(i) === "}") {
+				if (depth === 0) {
+					return i;
+				} else {
+					depth--;
+				}
+			} else if (contents.charAt(i) === "{") {
+				depth++;
+			}
+			i++;
+		}
+		return -1;
+	},
 
 	/**
 	 * Converts a template entry into a proposal that can be sent to the client
@@ -164,7 +184,7 @@ exports.CompletionsProcessor.prototype = {
 								}
 							} else {
 								var nameStart = i+1;
-								var nameEnd = rawContents.indexOf('}', i);
+								var nameEnd = this.findClosingBracket(rawContents, i);
 								if (nameEnd <= nameStart) {
 									return null;
 								}

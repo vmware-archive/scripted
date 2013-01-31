@@ -4,6 +4,11 @@
     "completions":
     [
 		{ trigger : "dl", contents:"<dl>\n\t<dt>${1:First definition}</dt> <dd>${2:First explanation}</dd>\n\t<dt>${3:Second definition}</dt> <dd>${4:Second explanation}</dd>\n</dl>" },
-		{ trigger : "table", contents: "<table>\n\t<tr>\n\t\t<th>${1:Column 1 Heading}</th>\n\t\t<th>${2:Column 2 Heading}</th>\n\t</tr>\n\t<tr>\n\t\t<td>${3:R1C1}</td>\n\t\t<td>${4:R1C2}</td>\n\t</tr>\n</table>" }
+		{ trigger : "table", contents: "<table>\n\t<tr>\n\t\t<th>${1:Column 1 Heading}</th>\n\t\t<th>${2:Column 2 Heading}</th>\n\t</tr>\n\t<tr>\n\t\t<td>${3:R1C1}</td>\n\t\t<td>${4:R1C2}</td>\n\t</tr>\n</table>" },
+		{ trigger : "table", contents: "${1:${selection}}" }, // second closing
+		{ trigger : "table", contents: "${1:$selection}}" }, // first closing
+		{ trigger : "table", contents: "${1:${{selection}}}" }, // third closing
+		{ trigger : "table", contents: "${1:${{}}selection{{}}}" }, // fifth closing
+		{ trigger : "table", contents: "${1:${{selection}}" } // invalid
     ]
 }
