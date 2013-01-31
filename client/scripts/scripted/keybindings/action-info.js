@@ -21,6 +21,8 @@ define(function (require) {
 	var deref = require('scripted/utils/deref');
 	var editorUtils = require('scripted/utils/editorUtils');
 	
+	var actions = {};
+	
 	/**
 	 * This map contains additional information that we(scripted) want to
 	 * associate with orions actions without modifying orion code.
@@ -59,7 +61,7 @@ define(function (require) {
 		"selectWholeLineUp" : "Select Whole Line Up",
 		"selectWordNext": "Select Next Word",
 		"selectWordPrevious": "Select Previous Word",
-		"tab": "Tab",
+		"tab": "Tab / Indent Lines",
 		"textEnd": "Go To End",
 		"textStart": "Go To Beginning",
 		"wordNext": "Next Word",
@@ -95,79 +97,123 @@ define(function (require) {
 	 * an editor, these actions will simply be delegated to the
 	 * (main) editor.
 	 */
-	 var globalActions = {
-//		'lineUp',
-//		'lineDown',
-//		'charPrevious',
-//		'charNext',
-//		'pageUp',
-//		'pageDown',
-//		'lineStart',
-//		'lineEnd',
-//		'wordPrevious',
-//		'wordNext',
-//		'textStart',
-//		'textEnd',
-//		'lineUp',
-//		'lineDown',
-//		'selectLineUp',
-//		'selectLineDown',
-//		'selectCharPrevious',
-//		'selectCharNext',
-//		'selectPageUp',
-//		'selectPageDown',
-//		'selectWholeLineUp',
-//		'selectWholeLineDown',
-//		'selectLineStart',
-//		'selectLineEnd',
-//		'selectWordPrevious',
-//		'selectWordNext',
-//		'selectTextStart',
-//		'selectTextEnd',
-//		'deletePrevious',
-//		'deletePrevious',
-//		'deleteNext',
-//		'deleteWordPrevious',
-//		'deleteWordPrevious',
-//		'deleteWordNext',
-//		'tab',
-//		'enter',
-//		'enterAfter',
-//		'selectAll',
-//		'copy',
-//		'paste',
-//		'cut',
-//		'Undo',
-//		'Redo',
-//		'Content Assist',
-//		'Find...',
-//		'Find Next Occurrence',
-//		'Find Previous Occurrence',
-//		'Incremental Find',
-//		'Unindent Lines',
-//		'Move Lines Up',
-//		'Move Lines Down',
-//		'Copy Lines Up',
-//		'Copy Lines Down',
-//		'Delete Lines',
-//		'Goto Line...',
-//		'Last Edit Location',
-//		'Toggle Line Comment',
-//		'Add Block Comment',
-//		'Remove Block Comment',
-		'scriptedKeyHelp': true,
-//		'Format text',
-		'Save' : true,
-//		'Cancel Current Mode',
-		'Find File Named...' : true,
-//		'Show Outline',
-//		'Open declaration in same editor',
-//		'Open declaration in new tab',
-//		'Open declaration in other editor',
-		'Look in files' : true,
-//		'Switch Subeditor and Main Editor',
-		'Toggle Subeditor' : true
-	 };
+	 var globalActions = [
+		'scriptedKeyHelp',
+		'Save',
+		'Find File Named...',
+		'Look in files',
+		'Toggle Subeditor'
+	 ];
+
+	/**
+	 * Actions marked as 'trivial' by putting their ids in this list will be
+	 * moved into the lower half of the keybinder UI.
+	 */
+	 var trivialActions = [
+		'lineUp', 'lineDown',
+		'charNext', 'charPrevious',
+		'lineEnd', 'lineStart',
+		'pageUp', 'pageDown',
+		'redo', 'undo', 'selectAll',
+		'selectCharNext', 'selectCharPrevious',
+		'textEnd', 'textStart',
+		'lastEdit',
+		'selectLineDown',
+		'selectLineEnd',
+		'selectLineStart',
+		'selectLineUp',
+		'selectPageDown',
+		'selectPageUp',
+		'selectTextEnd',
+		'selectTextStart',
+		'selectWholeLineDown',
+		'selectWholeLineUp',
+		'selectWordNext',
+		'selectWordPrevious',
+		'wordNext',
+		'wordPrevious',
+		'deleteLines',
+		'deleteWordNext',
+		'deleteWordPrevious',
+		'enterAfter',
+		'tab',
+		'shiftTab',
+		'scriptedKeyHelp',
+		'copyLinesUp',
+		'copyLinesDown',
+		'nextAnnotation',
+		'previousAnnotation',
+		'moveLinesUp',
+		'moveLinesDown',
+		'gotoLine'
+	 ];
+	 
+	/**
+	 * Actions marked as 'hidden' by putting their ids in this list will not
+	 * be shown in the keybinding ui.
+	 */
+	 var hiddenActions = [
+		'cut', 'copy', 'paste', 'enter',
+		'collapseAll', 'collapse', 'expand', 'expandAll',
+		'cancelMode', 'lineDown', 'lineUp',
+		'deleteNext', 'deletePrevious',
+		'charNext', 'charPrevious',
+		'toggleTabMode', //TODO: Actually this one should probably be marked invalid and forcibly
+						// unbound. Produces weird effects should user accidentally activate it.
+		
+		//these are only active in the search popup window, can't currently rebind:
+		'findNext', 'findPrevious'
+	 ];
+	 
+	 //TODO: Add a list of 'invalid' actions. Those actions should be
+	 // implicitly hidden and any keybindings to them should be unbound.
+	 
+	/**
+	 * Write an value at the end of a chain of properties in a nested
+	 * object structure. If the objects on the path of the chain don't
+	 * exist yet, empty objects will be created.
+	 */
+	function put(object, props, val) {
+		if (val!==undefined) {
+			for (var i = 0; i < props.length; i++) {
+				var p = props[i];
+				if (i===props.length-1) {
+					//last property in chain of props. Set it here.
+					object[p] = val;
+				} else {
+					//middle property... follow prop chain and force creation of an
+					//empty object if it its not there already.
+					var next = object[p];
+					if (!next) {
+						next = {};
+						object[p] = next;
+					}
+					object = next;
+				}
+			}
+		}
+	}
+	
+	function initActions() {
+		for (var id in descriptions) {
+			put(actions, [id, 'name'], descriptions[id]);
+		}
+		globalActions.forEach(function (id) {
+			put(actions, [id, 'global'], true);
+		});
+		trivialActions.forEach(function (id) {
+			put(actions, [id, 'category'], 'trivial');
+		});
+		hiddenActions.forEach(function (id) {
+			put(actions, [id, 'category'], 'hidden');
+		});
+		
+		console.log('>>>> action-infos');
+		console.log(JSON.stringify(actions, null, '\t'));
+		console.log('<<<< action-infos');
+	}
+	
+	initActions();
 	
 	/**
 	 * Retrieve a 'user friendly' description for an internal action name.
@@ -175,13 +221,30 @@ define(function (require) {
 	 * help panel and keybinding UI.
 	 */
 	function getActionDescription(actionID) {
+		//TODO: Rename this to avoid confusion with orion's getActionDescription which returns
+		// an optional info object rather than a String.
 		var editor = editorUtils.getMainEditor();
 		if (editor) {
 			var orionDesc = editor.getTextView().getActionDescription(actionID);
-			orionDesc = orionDesc && orionDesc.name;
-			return orionDesc || descriptions[actionID] || actionID;
+			return deref(actions, [actionID, 'name']) || deref(orionDesc, ['name']) || actionID;
 		}
 		return actionID;
+	}
+
+	/**
+	 * Action id's can be categorized into special categories. May imply some
+	 * special treatment is required. Currently there are 2 categories that have
+	 * special meaning. Any other categories or a missing category will be treated
+	 * as a 'normal' action.
+	 *
+	 *  'hidden' actions are automatically filtered from the scripted keybinding UI.
+	 *  'trivial' actions are shown in the bottom part of the keybinding UI.
+	 *
+	 *
+	 * @return {String|undefined}
+	 */
+	function getCategory(actionID) {
+		return deref(actions, [actionID, 'category']);
 	}
 
 	function setOf(strings) {
@@ -209,7 +272,8 @@ define(function (require) {
 	
 	return {
 		getActionDescription: getActionDescription,
-		getGlobalActions: getGlobalActions
+		getGlobalActions: getGlobalActions,
+		getCategory: getCategory
 		//isGlobalAction: isGlobalAction
 	};
 
