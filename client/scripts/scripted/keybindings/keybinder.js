@@ -23,7 +23,7 @@ define(['scripted/utils/json-merge', './action-info', './keystroke', 'scripted/u
 ], function (jsonMerge, mActionInfo, mKeystroke, OS, mConfig, editorUtils, pluginLoader) {
 
 function debug_log(msg) {
-	console.log(msg);
+//	console.log(msg);
 }
 
 var keyBindingConfigName = 'keymap-'+OS.name;
