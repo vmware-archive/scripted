@@ -26,6 +26,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 
 	var attachKeyEditor = mKeyedit.attachKeyEditor;
 	var getActionDescription = mActionInfo.getActionDescription;
+	var getCategory = mActionInfo.getCategory;
 
 	function getSortedKeybindings() {
 		// use a copy so we can sort
@@ -70,15 +71,17 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		var importantKeyBindings = [];
 		var otherKeyBindings = [];
 		
-		for (var i = 0; i < keyBindings.length; i++){
-			if (!keyBindings[i].obvious) {
-				if (keyBindings[i].predefined){
-					otherKeyBindings.push(keyBindings[i]);
-				} else {
-					importantKeyBindings.push(keyBindings[i]);
-				}
+		keyBindings.forEach(function (kb) {
+			switch(getCategory(kb.actionID)) {
+				case 'hidden':
+					break;
+				case 'trivial':
+					otherKeyBindings.push(kb);
+					break;
+				default:
+					importantKeyBindings.push(kb);
 			}
-		}
+		});
 		
 		var tmpl = $.templates(commandTemplate);
 		
@@ -104,7 +107,9 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		render(otherKeyBindings, cl);
 		cl.append('<li><hr /></li>');
 		render(
-			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).map(function (actionID) {
+			mKeybinder.getUnboundActionNames(editorUtil.getMainEditor()).filter(function (id) {
+				return getCategory(id)!=='hidden';
+			}).map(function (actionID) {
 				return {
 					actionID: actionID
 				};

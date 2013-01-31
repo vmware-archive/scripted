@@ -271,10 +271,21 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	};
 	/** @private */
 	function TextRect (rect) {
+		// SCRIPTED phantomjs occasionally finds a null bounding rectangle
+		if (!rect) {
+			this.left = 0;
+			this.top = 0;
+			this.right = 0;
+			this.bottom = 0;
+		} else {
+		//SCRIPTED end
 		this.left = rect.left;
 		this.top = rect.top;
 		this.right = rect.right;
 		this.bottom = rect.bottom;
+		// SCRIPTED close if statement
+		}
+		// SCRIPTED end
 	}
 	TextRect.prototype = /** @lends orion.textview.TextRect.prototype */ {
 		/** @private */
@@ -542,6 +553,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						var range;
 						if (view._isRangeRects) {
 							range = document.createRange();
+							if (!range.getBoundingClientRect()) {
+								console.log("document: " + document);
+							}
 							range.setStart(textNode, index);
 							range.setEnd(textNode, index + 1);
 							result = new TextRect(range.getBoundingClientRect());
@@ -551,6 +565,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							range.collapse();
 							range.moveEnd("character", index + 1); //$NON-NLS-0$
 							range.moveStart("character", index); //$NON-NLS-0$
+							if (!range.getBoundingClientRect()) {
+								console.log("document: " + document);
+							}
 							result = new TextRect(range.getBoundingClientRect());
 						} else {
 							var text = textNode.data;

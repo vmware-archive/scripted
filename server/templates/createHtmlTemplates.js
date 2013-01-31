@@ -41,7 +41,7 @@ for (var prop in multiLineElements) {
 	if (multiLineElements.hasOwnProperty(prop)) {
 		var tag = multiLineElements[prop];
 		// TODO find out a way to insert the leading whitespace
-		console.log('\t\t{ trigger : "' + tag + '", contents: "<' + tag + '>\\n\\t$0\\n</' + tag + '>" },');
+		console.log('\t\t{ trigger : "' + tag + '", contents: "<' + tag + '>\\n\\t${1:${selection}}$0\\n</' + tag + '>", isTemplate: true },');
 	}
 }
 console.log("\n\t\t// empty elements");
