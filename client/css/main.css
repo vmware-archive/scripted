@@ -8,6 +8,7 @@
 @import "../scripts/scripted/exec/console.css";
 @import "../scripts/css/ide.css";
 @import "../scripts/css/commands.css";
+@import "dark.css";
 @import "fonts.css";
 
 ul{
@@ -36,6 +37,27 @@ body{
 	font-size: 10px;
 	font-family: InconsolataEmbedded, "Monaco","Ubuntu","Myriad","Helvetica","Tahoma","Arial","clean","sans-serif";
 }
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 0px;
+}
+ 
+::-webkit-scrollbar-thumb {
+	background-color: rgb(80,80,80);
+    border-radius: 0px;
+/*
+    
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.9); 
+*/
+}
+
+
+
 
 header{
 	height: 31px;
@@ -67,7 +89,7 @@ header{
 #navigator-container{ 
 	height:100%;
 	overflow:auto;
-	margin-top: 10px;
+	border-top: 5px;
 }
 
 #navigator-wrapper{
@@ -223,6 +245,14 @@ footer{
 	margin: 5px 5px 0 0;
 	cursor:pointer;
 	background-image: url(../images/console.png);
+	width:20px;
+	height:20px;
+}
+
+#theme_toggle {
+	margin: 5px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/themetoggle.png);
 	width:20px;
 	height:20px;
 }
@@ -464,33 +494,10 @@ footer{
 	background-color: #DDD;
 }
 
-/*
-	Editor styles
-*/
-
-.textviewLeftRuler, .textviewLeftRuler .annotations, .textviewRightRuler, .textviewRightRuler .overview{
-	border-radius:0 0 5px 5px;
-}
-
-.textviewLeftRuler *{
-	height:100%;
-}
-
 .textviewContent{
 	cursor:text;
 }
 
-.textviewContainer{
-	border-radius:0 0 5px 5px;
-}
-
-.textviewContainer > div{
-	background-color:#eee;
-}
-
-.ruler{
-	background-color:#eee;
-}
 
 #pageToolbar{
 	position:absolute;

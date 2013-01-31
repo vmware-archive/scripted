@@ -657,8 +657,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
-					// SCRIPTED - Is this one correct?
-					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
+					// SCRIPTED - This spams the annotation ruler with 'torch' icons...
+				//	ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MARK_OCCURRENCES);
 				}
 				this.setAnnotationRulerVisible(true);
 					

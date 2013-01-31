@@ -1,0 +1,81 @@
+/*
+ * Dark theme, not yet the 'complete set' of things you can configure...
+ */
+
+.dark {
+	color: #dddddd;
+	/* TODO make font size configurable */
+	/*	font-size: 12pt; */
+}
+
+/* Text in the editor */
+
+.dark .token_string {
+	color: #dddd00;
+}
+
+.dark .token_keyword {
+	color: #b58900;
+}
+
+.dark .token_doc_comment {
+	color: #00bbdd;
+}
+
+.dark .token_multiline_comment {
+	color: #00bb22;
+}
+
+/* Around the editor */
+
+/* Colour of that box in the bottom right when both scrollbars are open */
+.dark ::-webkit-scrollbar-corner {
+	background-color: rgb(33,33,33);
+}
+.dark.textviewContainer {
+	background-color: rgb(43,43,43);
+}
+
+.dark .textview {
+	background-color: rgb(43,43,43);
+}
+
+.dark .line_caret {
+	background-color: #fefefe;
+}
+
+.dark .ruler {
+	color: rgb(230,225,220);
+	background-color: rgb(61,61,61);
+}
+
+.dark .ruler.annotations {
+	border-right: 0px;
+}
+
+.dark .textviewLeftRuler {
+	border-right:1px solid rgb(77,77,77);
+	border-radius: 0px;
+}
+
+.dark .textviewRightRuler {
+	border-left:1px solid rgb(77,77,77);
+	border-radius: 0px;
+}
+.dark .ruler.lines {
+	border-right:2px solid rgb(61,61,61);
+	background-color: rgb(61,61,61);
+}
+
+.dark .rulerLines {
+	color: #dddddd;	
+	background-color: rgb(61,61,61);
+}
+
+.dark .annotationLine.currentLine {
+	background-color: rgb(53,53,53);
+}
+
+.dark .annotationRange.task {
+	color: magenta;
+}

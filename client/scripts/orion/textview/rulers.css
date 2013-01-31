@@ -3,20 +3,18 @@
 }
 .ruler.annotations {
 	width: 16px;
-	/* Scripted - TODO override properly */
 	border-right: 1px solid lightgray;
+	background: white;
 }
 .ruler.folding {
 	background-color: white;
 	width: 14px;
 }
 .ruler.lines {
-	/* Scripted - removed this, TODO override properly
 	background-color: white;
-	*/
 	text-align: right;
 	
-	/* Scripted - TODO override properly */
+	padding-right: 1px;
 	border-right: 1px solid lightgray;
 }
 .ruler.overview {
@@ -25,10 +23,8 @@
 
 /* Styles for the line number ruler */
 .rulerLines {
-	/* scripted - removed this, need to override in a better way
-	color: silver;
-	*/
-	background: #eeeeee;
+	color: rgb(60,60,60);
+	background: white;
 }
 .rulerLines.even
 .rulerLines.odd {
