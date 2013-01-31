@@ -14,8 +14,9 @@
  * Keeps track of the current theme, supports the simple toggle button that switches light/dark
  * and can apply the current theme to new editors.
 */
-define(["scripted/utils/editorUtils"],function(editorUtils) {
+define(["scripted/utils/editorUtils","scripted/utils/storage"],function(editorUtils, storage) {
  
+	var themePreferenceKey = 'scripted.preference.theme';
 	var currentTheme=""; // default is 'none'
 
 	var getTheme = function() {
@@ -29,6 +30,7 @@ define(["scripted/utils/editorUtils"],function(editorUtils) {
 		} else {
 			currentTheme="";
 		}
+		storage.safeStore(themePreferenceKey, currentTheme, false);
 		textview._setThemeClass(currentTheme,true);
 		var otherEditors = editorUtils.getSubEditors();
 		if (otherEditors) {
@@ -41,6 +43,11 @@ define(["scripted/utils/editorUtils"],function(editorUtils) {
 	var applyCurrentTheme = function(editor) {
 		editor.getTextView()._setThemeClass(currentTheme,true);
 	};
+	
+	var preference = storage.get(themePreferenceKey);
+	if (preference && preference.length!==0) {
+		currentTheme = preference;
+	}
 				
 	$('#theme_toggle').on('click', switchTheme);
 				
