@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Kris De Volder (VMWare) - initial API and implementation
+ *   Kris De Volder
  ******************************************************************************/
 
 //
@@ -23,7 +23,7 @@ define(function(require) {
 
 	//TODO: better name for 'editor' the thing here is not an editor!
 
-	var editorApi = require('scripted/api/editor');
+	var editorApi = require('scripted/api/editor-extensions');
 
 	//Defines an editor action.
 	editorApi.action({

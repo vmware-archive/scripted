@@ -14,7 +14,7 @@
 define(function(require) {
 
 	var when = require('when');
-	var editorApi = require('scripted/api/editor'); //TODO: load on demand?
+	var editorApi = require('scripted/api/editor-extensions'); //TODO: load on demand?
 
 //	var console = require('./exec/exec-console');
 	var getPlugins = require('servlets/plugin-client').getPlugins;

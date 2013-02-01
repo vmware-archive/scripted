@@ -20,7 +20,7 @@ define(function(require) {
 	var TAB_POS = "${0}";
 
 	var setKeyBinding = require('scripted/api/keybinder').setKeyBinding;
-	var action = require('scripted/api/editor').action;
+	var action = require('scripted/api/editor-extensions').action;
 	var textUtils = require('scripted/utils/textUtils');
 	var editorFeatures = require('orion/editor/editorFeatures');
 	require('jquery');

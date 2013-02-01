@@ -14,7 +14,7 @@ define(function(require) {
 
 	console.log('Trailing white space removal plugin loaded');
 
-	var editorApi = require('scripted/api/editor');
+	var editorApi = require('scripted/api/editor-extensions');
 
 	function trimLines(text) {
 		//This nice line of code:

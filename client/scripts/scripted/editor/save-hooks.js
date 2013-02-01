@@ -12,10 +12,10 @@
  ******************************************************************************/
 
 //
-// This module plays as an intermediary between 'scriptedEditor' and 'scripted/api/editor'
-// So we don't have to expose low-level api to scripted/api/editor.
+// This module plays as an intermediary between 'scriptedEditor' and 'scripted/api/editor-extensions'
+// So we don't have to expose low-level api via scripted/api modules.
 //
-// Both api/editor and scriptedEditor require this module. The api registers hook functions and
+// Both api/editor-extensions and scriptedEditor require this module. The api registers hook functions and
 // the editor calls the hook function.
 //
 
@@ -34,7 +34,6 @@ define(function(require) {
 	 * and display some type of error message somewhere.
 	 */
 	function preSaveHook(editor, filePath) {
-		console.log('preSaveHook called');
 
 		//Call each of the handlers one by one in sequence until one of them
 		//rejects. The preSaveHook returns a promise that rejects if any

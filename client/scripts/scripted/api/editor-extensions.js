@@ -22,8 +22,6 @@ define(function (require) {
 	var deref = require('scripted/utils/deref');
 	var actions = require('scripted/keybindings/action-info');
 
-	console.log('Editor api loaded!');
-
 	var saveHooks = require('scripted/editor/save-hooks');
 
 	/**

@@ -4,8 +4,8 @@ define(function (require) {
 
 	console.log('Copyright plugin loaded');
 
-	var editorApi = require('scripted/api/editor');
-	
+	var editorApi = require('scripted/api/editor-extensions');
+
 	var jsFile = /.*\.js$/;
 	var copyright = new RegExp('@license|\\* Copyright \\(c\\)');
 	var defaultCopyright =  require('text!./copyright.txt');
