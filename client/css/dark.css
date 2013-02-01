@@ -34,10 +34,10 @@
 
 /* Colour of that box in the bottom right when both scrollbars are open */
 .dark ::-webkit-scrollbar-corner {
-	background-color: rgb(33,33,33);
+	background-color: rgb(61,61,61);/*rgb(33,33,33);*/
 }
 .dark.textviewContainer {
-	background-color: rgb(43,43,43);
+	background-color: rgb(61,61,61);/*rgb(43,43,43);*/
 }
 
 .dark .textview {
@@ -62,6 +62,10 @@
 	border-radius: 0px;
 }
 
+#side_panel.dark {
+	background-color:#202020;
+}
+
 .dark .textviewRightRuler {
 	border-left:1px solid rgb(77,77,77);
 	border-radius: 0px;
@@ -82,4 +86,16 @@
 
 .dark .annotationRange.task {
 	color: magenta;
+}
+
+.dark .annotationRange.matchingSearch {
+	background-color: #3030A0;
+}
+
+.dark .annotationRange.currentSearch {
+	background-color: #6060ff;
+}
+
+.dark .annotationRange.markOccurrences {
+	outline: 1px Cyan dotted;
 }

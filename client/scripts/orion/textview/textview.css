@@ -12,7 +12,7 @@
 	min-width: 50px;
 	min-height: 50px;
 */
-	background-color: #eeeeee;
+	background-color: white;/*#eeeeee*/;
 	font-family: Monaco, Consolas, "Lucida Console", "Ubuntu Mono", Monospace, monospace;
 	font-size: 9pt;
 }
