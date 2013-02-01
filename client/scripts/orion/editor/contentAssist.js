@@ -201,21 +201,26 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 					this.activate();
 					this.activationRequest = null;
 				}.bind(this), autoActivation);
-			} else if (this.activationRequest) {
-				clearTimeout(this.activationRequest);
-				this.activationRequest = null;
+			} else {
+				if (this.activationRequest) {
+					clearTimeout(this.activationRequest);
+					this.activationRequest = null;
+				}
+				if (e.text.length > 1 || (!this.isJSIdentifierPart(e.text.charCodeAt(0)) &&
+					this.isVisibleChar(e.text.charCodeAt(0)))) {
+					this.deactivate();
+				}
 			}
 		},
-		/**
-		 * @private
-		 * finds starting prefix
-		 */
-		getPrefixStart: function(end) {
-			var index = end, c;
-			while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
-				index--;
-			}
-			return index;
+		
+		isJSIdentifierPart : function(c) {
+			//LETTER OR UNDERSCORE OR NUMBER
+			return (97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57);
+		},
+		
+		isVisibleChar : function(c) {
+			//Anything that is not a control character
+			return c > 32;
 		},
 		// SCRIPTED end
 
