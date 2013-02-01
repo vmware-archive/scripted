@@ -40,13 +40,13 @@ define(function (require) {
 
 	return {
 		onSaveTransform: function (transformFun) {
-			//TODO: there's no real guarantee the config is initialized by now
-			// but mostly it will be ok unless someone saves really early on in the lifecycle.
-			var config = makeConfigFunction(deref(window, ['scripted', 'config' ]));
 
 			//Use lower-level preSave hook to grab editor text, apply transformFun
 			//and put contents back into the editor.
 			saveHooks.onPreSave(function (editor, path) {
+				//TODO: there's no real guarantee the config is initialized by now
+				// but mostly it will be ok unless someone saves really early on in the lifecycle.
+				var config = makeConfigFunction(deref(window, ['scripted', 'config' ]));
 				return when(undefined, function () {
 					return transformFun(editor.getText(), path, config);
 				}).otherwise(function (err) {
@@ -63,7 +63,8 @@ define(function (require) {
 					return when.resolve();
 				}).then(function(newText) {
 					if (typeof(newText)==='string') {
-						//TODO: work harder at preserving selection even if text has shifted ?
+						//TODO: work harder at preserving selection relative to text
+						// even if text has shifted ?
 						var oldSelection = editor.getSelection();
 						var oldScroll = editor.getScroll();
 
@@ -74,6 +75,7 @@ define(function (require) {
 				});
 			});
 		},
+
 		/**
 		 * @param {{name:String,handler:Function,isGlobal:Boolean}} spec
 		 */
