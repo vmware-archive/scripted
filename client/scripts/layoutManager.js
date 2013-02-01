@@ -22,6 +22,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			// when using wire
 //			var editorNode = $(this.editorNode);
 			var editorNode = $('#editor');
+			var breadcrumb = $('#breadcrumb');
 			mNavHistory.setupPage(pageState, false);
 
 //			require(['jquery_ui'], function() {
@@ -111,7 +112,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 
 					$('#main').height(main_height);
 					$('#side_panel').height(main_height);
-
+					
 					var sideHeight = $('#side_panel').height();
 					var subeditorMargin = parseInt($('.subeditor_wrapper').css('margin-top'), 10);
 
@@ -120,6 +121,8 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 					$('.subeditor_wrapper').height() - $('.subeditor_titlebar').height());
 
 					editorNode.height(editor_height);
+					breadcrumb.width(editorNode.width());
+					breadcrumb.css('margin-left',editorNode.css('margin-left'));
 					var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 					editorNode.css('margin-right', side_width);
 
