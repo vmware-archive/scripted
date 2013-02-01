@@ -15,7 +15,7 @@ define([
 		 "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
 		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration'],
- 
+
 function(
 
 	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration) {

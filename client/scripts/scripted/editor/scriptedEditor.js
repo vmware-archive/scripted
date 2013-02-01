@@ -17,23 +17,25 @@
 /*jslint browser:true devel:true */
 
 define([
-	"require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
+	"require", "scripted/utils/deref", "scripted/editor/save-hooks", "when",
+	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/exec/exec-keys",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
-	require, mTextView, mKeyBinding, mEditor, mKeystroke,
+	require, deref, mSaveHooks, when,
+	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mTextSearcher, mSelection, mCommands,
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext
+	mMarkoccurrences, tHelptext, themeManager
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -101,21 +103,6 @@ define([
 			}
 		}
 	}
-
-    /**
-     * Follow a 'trail' of properties starting at given object.
-     * If one of the values on the trail is 'falsy' then
-     * this value is returned instead of trying to keep following the
-     * trail down.
-     */
-    function deref(obj, props) {
-        //TODO func copied from jsdepend.utils
-        var it = obj;
-        for (var i = 0; it && i < props.length; i++) {
-            it = it[props[i]];
-        }
-        return it;
-    }
 
     function shouldExclude(filePath) {
         var exclude_dirs = deref(scripted, ['config', 'lint', 'exclude_dirs']);
@@ -202,6 +189,7 @@ define([
 				});
 			}
 			setEditorTitle(editor, fileName);
+			
 		};
 
 		/**
@@ -218,10 +206,11 @@ define([
 
 			var options = {
 				parent: domNode,
+				// This comment was for the 2012 editor, not sure if it applies to the 2013 editor, TODO check!
 				// without this, the listeners aren't registered in quite the right order, meaning that the
 				// one that shuffles annotations along when text is entered (annotations.js _onChanged)
 				// is registered after the one that determines the line style based on annotations
-				// (textview.js _updatePage which calls createLine).  By adding a Projection model
+				// (textview.js _update which calls createLine).  By adding a Projection model
 				// we are more similar to orion and so don't have the problem - this suggests it is
 				// just a(nother) issue with orion and us using it in an unusual way.  If the listeners
 				// are in the wrong order the modified lines pickup the 'old' annotations and inherit
@@ -244,20 +233,27 @@ define([
 			return tv;
 		};
 
-		var contentAssistFactory = function(editor) {
-			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-			var providers = [];
-			if (isJS) {
-				providers.push(jsContentAssistant);
-			} else if (isCSS) {
-				providers.push(cssContentAssistant);
+		var contentAssistFactory = {
+			createContentAssistMode: function(editor) {
+				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView(), fileName);
+				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
+					// Content assist is about to be activated; set its providers.
+					// TODO should be better about registering providers based on content type
+					// note that the templateContentAssistant must be installed early in order 
+					// to ensure that templates are loaded before first invocation
+					var providers = [];
+					if (isJS) {
+						providers.push(jsContentAssistant);
+					} else if (isCSS) {
+						providers.push(cssContentAssistant);
+					}
+					providers.push(templateContentAssistant);
+					contentAssist.setProviders(providers);
+				});
+				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
+				return new mContentAssist.ContentAssistMode(contentAssist, widget);
 			}
-			templateContentAssistant.install(editor, extension);
-			providers.push(templateContentAssistant);
-			contentAssist.setProviders(providers);
-			return contentAssist;
 		};
-
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 
 		/* for some reason, jsbeautify likes to strip the first line of its indent.  let's fix that */
@@ -289,8 +285,8 @@ define([
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
 
-			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "Command Help");
-			editor.getTextView().setAction("Command Help", function() {
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "scriptedKeyHelp");
+			editor.getTextView().setAction("scriptedKeyHelp", function() {
 				$('#help_open').click();
 				return true;
 			});
@@ -396,56 +392,67 @@ define([
 			// save binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
-				var text = editor.getTextView().getText();
 				if (editor.getTextView().isReadonly()) {
 					return true;
 				}
-				var xhr = new XMLHttpRequest();
-				try {
-					// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
-					// As described here: http://www.w3.org/TR/html4/interact/forms.html - may need to add some content
-					// type settings to dispositions, for funky charsets
-					var boundary = Math.random().toString().substr(2);
-					//var url = '/put?file=' + window.location.search.substr(1);
-					var url = '/put?file=' + filePath;
-					//				console.log("url is "+url);
-					//				console.log("Saving file, length is "+text.length);
-					xhr.open("POST", url, true);
-					xhr.setRequestHeader('Content-Type', 'multipart/form-data;charset=utf-8; boundary=' + boundary);
-					var payload = '';
-					payload += '--' + boundary + '\r\n';
-					payload += 'Content-Disposition: form-data; name="data"\r\n\r\n';
-					payload += text;
-					payload += '\r\n';
-					payload += '--' + boundary + '\r\n';
-					payload += 'Content-Disposition: form-data; name="length"\r\n\r\n';
-					payload += text.length;
-					payload += '\r\n';
-					payload += '--' + boundary + '--';
-					// console.log("payload is "+payload);
-	/*
-					xhrobj.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-					xhrobj.setRequestHeader('Connection','close');
-					*/
-					//var params = "file="+filePath+"&"text=";
-					xhr.onreadystatechange = function() {
-						if (xhr.readyState === 4) {
-							if (xhr.status === 200) {
-								// console.log("Saved OK I think: "+xhr.status);
-								editor.setInput(null, null, null, true);
-								afterSaveSuccess(filePath);
-							} else {
-								var message = "Failed to save the file. RC:" + xhr.status + " Details:" + xhr.responseText;
-								statusReporter(message, true);
-								console.error(message);
-							}
-							postSave(text);
+				when(mSaveHooks.preSaveHook(editor, filePath),
+					function() {
+						var text = editor.getTextView().getText();
+						//All pre save handlers executed and have 'ok-ed' the save
+						var xhr = new XMLHttpRequest();
+						try {
+							// Make a multipart form submission otherwise the data gets encoded (CRLF pairs inserted for newlines)
+							// As described here: http://www.w3.org/TR/html4/interact/forms.html - may need to add some content
+							// type settings to dispositions, for funky charsets
+							var boundary = Math.random().toString().substr(2);
+							//var url = '/put?file=' + window.location.search.substr(1);
+							var url = '/put?file=' + filePath;
+							//				console.log("url is "+url);
+							//				console.log("Saving file, length is "+text.length);
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader('Content-Type', 'multipart/form-data;charset=utf-8; boundary=' + boundary);
+							var payload = '';
+							payload += '--' + boundary + '\r\n';
+							payload += 'Content-Disposition: form-data; name="data"\r\n\r\n';
+							payload += text;
+							payload += '\r\n';
+							payload += '--' + boundary + '\r\n';
+							payload += 'Content-Disposition: form-data; name="length"\r\n\r\n';
+							payload += text.length;
+							payload += '\r\n';
+							payload += '--' + boundary + '--';
+							// console.log("payload is "+payload);
+			/*
+							xhrobj.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+							xhrobj.setRequestHeader('Connection','close');
+							*/
+							//var params = "file="+filePath+"&"text=";
+							xhr.onreadystatechange = function() {
+								if (xhr.readyState === 4) {
+									if (xhr.status === 200) {
+										// console.log("Saved OK I think: "+xhr.status);
+										editor.setInput(null, null, null, true);
+										afterSaveSuccess(filePath);
+									} else {
+										var message = "Failed to save the file. RC:" + xhr.status + " Details:" + xhr.responseText;
+										statusReporter(message, true);
+										console.error(message);
+									}
+									postSave(text);
+								}
+							};
+							xhr.send(payload);
+						} catch (e) {
+							console.log("xhr failed " + e);
 						}
-					};
-					xhr.send(payload);
-				} catch (e) {
-					console.log("xhr failed " + e);
-				}
+					},
+					function (err) {
+						//One of the save hooks errorred or rejected the save
+
+						statusReporter(err, true);
+						console.error(err);
+					}
+				);
 				return true;
 			});
 
@@ -532,6 +539,8 @@ define([
 		////////////////////////////////////////
 
 		editor.jsContentAssistant = jsContentAssistant;
+		// See note in createContentAssistMode about installing before creating the contentAssistant
+		templateContentAssistant.install(editor, extension);
 
 		editor.addEventListener("DirtyChanged", function(evt) {
 			dirtyIndicator = editor.isDirty()?"You have unsaved changes.  ":"";
@@ -560,7 +569,8 @@ define([
 
 		editor.refreshEditorFeatures = function(text){
 			syntaxHighlighter.highlight(filePath, editor);
-			editor.highlightAnnotations();
+			// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 			postSave(text);
 		};
 
@@ -601,7 +611,8 @@ define([
 					// are in the right order (so syntax highlighter then annotation handler)
 
 					syntaxHighlighter.highlight(filePath, editor);
-					editor.highlightAnnotations();
+								// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 					postSave(xhrobj.responseText);
 
 					// force caret location if required
@@ -613,7 +624,8 @@ define([
 						// that is OK, start with an empty file
 						editor.setInput("Content", null, "");
 						syntaxHighlighter.highlight(filePath, editor);
-						editor.highlightAnnotations();
+									// NEWEDITOR - doesn't have highlightAnnotations
+			// editor.highlightAnnotations();
 						postSave(xhrobj.responseText);
 
 						// force caret location if required
@@ -670,6 +682,8 @@ define([
 		editor.type = editorType;
 
 		require("scripted/exec/exec-after-save").installOn(editor);
+		
+		themeManager.applyCurrentTheme(editor);
 
 		return editor;
 	};

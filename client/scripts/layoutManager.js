@@ -34,7 +34,8 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				nav.resize(function() {
 					var width = $('#navigator-wrapper').width();
 					editorNode.css('margin-left', width);
-					editorUtils.getMainEditor().getTextView()._updatePage();
+					// TODO not the right way to do this
+					editorUtils.getMainEditor().getTextView()._update();
 					storage.unsafeStore("scripted.navigatorWidth", width);
 				});
 
@@ -62,7 +63,8 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 					sidePanel.css('width', side_percent + "%");
 
 					if (editorUtils.getMainEditor()) {
-						editorUtils.getMainEditor().getTextView()._updatePage();
+						// TODO proper way to do this
+						editorUtils.getMainEditor().getTextView()._update();
 						var subEditor = editorUtils.getSubEditor();
 						if (subEditor) {
 							subEditor.getTextView().update();
@@ -79,9 +81,11 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				
 				// add live reloading support
 				require(['scripted/application-manager']);
+				
+				require(['scripted/editor/themeManager']);
 
 				$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
-
+			
 				/*Position elements correctly on page*/
 				var footer_height = $('footer').outerHeight();
 				var header_height = $('header').outerHeight();
@@ -120,7 +124,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 					editorNode.css('margin-right', side_width);
 
 					if (editorUtils.getMainEditor()) {
-						editorUtils.getMainEditor().getTextView()._updatePage();
+						editorUtils.getMainEditor().getTextView()._update();
 					}
 				});
 

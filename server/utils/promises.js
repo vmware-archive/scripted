@@ -18,7 +18,7 @@ var when = require('when');
 
 var detailedRejection = false; //Set to true to retain all reject reasons in a until.
                               // mostly interesting for debugging, otherwise probably best to disable this
-                              // as failed searches through large trees of alternatives may contain 
+                              // as failed searches through large trees of alternatives may contain
                               // many 'rejected' entries.
 
 function until(array, f) {
@@ -43,6 +43,7 @@ function until(array, f) {
 		return loop(0);
 	});
 }
+
 
 /**
  * Variable arity function that accepts any number of 'Actions' as arguments.

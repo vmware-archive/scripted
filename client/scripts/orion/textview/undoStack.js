@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,7 @@
 
 /*global define */
 
-define("orion/textview/undoStack", [], function() {
+define("orion/textview/undoStack", [], function() { //$NON-NLS-0$
 
 	/** 
 	 * Constructs a new Change object.
@@ -48,7 +48,7 @@ define("orion/textview/undoStack", [], function() {
 					var iter = annotationModel.getAnnotations(offset, offset + 1);
 					while (iter.hasNext()) {
 						var annotation = iter.next();
-						if (annotation.type === "orion.annotation.folding") {
+						if (annotation.type === "orion.annotation.folding") { //$NON-NLS-0$
 							annotation.expand();
 							mapOffset = model.mapOffset(offset, true);
 							break;
@@ -147,8 +147,8 @@ define("orion/textview/undoStack", [], function() {
 				self._onDestroy(e);
 			}
 		};
-		model.addEventListener("Changing", this._listener.onChanging);
-		view.addEventListener("Destroy", this._listener.onDestroy);
+		model.addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
+		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 	}
 	UndoStack.prototype = /** @lends orion.textview.UndoStack.prototype */ {
 		/**
@@ -337,8 +337,8 @@ define("orion/textview/undoStack", [], function() {
 			}
 		},
 		_onDestroy: function(evt) {
-			this.model.removeEventListener("Changing", this._listener.onChanging);
-			this.view.removeEventListener("Destroy", this._listener.onDestroy);
+			this.model.removeEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
+			this.view.removeEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 		},
 		_onChanging: function(e) {
 			var newText = e.text;

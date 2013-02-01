@@ -35,7 +35,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 	function updatePosition(initialOffset, replaceStart, replacements) {
 		var newOffset = initialOffset;
 		for (var i = 0; i < replacements.length; i++) {
-			if (replaceStart + replacements[i].start <= initialOffset) {
+			if (replaceStart + replacements[i].start < initialOffset) {
 				newOffset += replacements[i].lengthAdded;
 			} else {
 				break;
@@ -57,9 +57,11 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 				newPositions.push(extractPositions(position, replaceStart, replacements));
 			});
 		} else {
+			var offset = updatePosition(origPositions.offset + replaceStart, replaceStart, replacements);
+			var length = updatePosition(origPositions.offset + origPositions.length+ replaceStart, replaceStart, replacements) - offset;
 			newPositions = {
-				offset : updatePosition(origPositions.offset + replaceStart, replaceStart, replacements),
-				length : origPositions.length
+				offset : offset,
+				length : length
 			};
 		}
 		return newPositions;
@@ -139,21 +141,31 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 			var replaceParams = this.replacer.replaceParams;
 			var findReplacements = this.replacer.findReplacements;
 			// find offset of the start of the word
-			var replaceStart = invocationOffset - prefix.length;
+			// for templates only, we don't care about word start, only what is selected
+			var replaceStart = templatesOnly ? invocationOffset : invocationOffset - prefix.length;
+			// we want to ignore opening < if the template starts with a <
+			var implicitPrefix = buffer.charAt(replaceStart-1);
 			myTemplates.forEach(function(template) {
 				if ((templatesOnly && template.isTemplate) ||
 					(!templatesOnly && proposalUtils.looselyMatches(prefix, template.trigger))) {
 					
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
-						var actualText = replaceParams(template.proposal);
+						var implicitPrefixMatch = template.proposal.charAt(0) === implicitPrefix;
+						var origText = implicitPrefixMatch ? template.proposal.substring(1) : template.proposal;
+						var actualText = replaceParams(origText);
 						var escape = template.escapePosition;
-						var replacements = findReplacements(template.proposal);
+						var replacements = findReplacements(origText);
 						if (escape) {
+							if (implicitPrefixMatch) {
+								escape--;
+							}
 							escape = updatePosition(escape + replaceStart, replaceStart, replacements);
 						} else {
 							escape = actualText.length + replaceStart;
 						}
+						replaceStart = implicitPrefixMatch ? replaceStart-1 : replaceStart;
+						
 						
 						return {
 							proposal : actualText,

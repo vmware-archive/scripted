@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,7 +13,7 @@
 
 /*global define */
 
-define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion/textview/eventTarget'], function(mTextModel, mEventTarget) {
+define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion/textview/eventTarget'], function(mTextModel, mEventTarget) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * @class This object represents a projection range. A projection specifies a
@@ -77,7 +77,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			projection._lineCount = model.getLineAtOffset(projection.end) - projection._lineIndex;
 			var text = projection.text;
 			if (!text) { text = ""; }
-			if (typeof text === "string") {
+			if (typeof text === "string") { //$NON-NLS-0$
 				projection._model = new mTextModel.TextModel(text, model.getLineDelimiter());
 			} else {
 				projection._model = text;
@@ -88,7 +88,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			var addedCharCount = projection._model.getCharCount();
 			var addedLineCount = projection._model.getLineCount() - 1;
 			var modelChangingEvent = {
-				type: "Changing",
+				type: "Changing", //$NON-NLS-0$
 				text: projection._model.getText(),
 				start: eventStart,
 				removedCharCount: removedCharCount,
@@ -100,7 +100,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			var index = this._binarySearch(projections, projection.start);
 			projections.splice(index, 0, projection);
 			var modelChangedEvent = {
-				type: "Changed",
+				type: "Changed", //$NON-NLS-0$
 				start: eventStart,
 				removedCharCount: removedCharCount,
 				addedCharCount: addedCharCount,
@@ -187,7 +187,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 				var removedCharCount = projection._model.getCharCount();
 				var removedLineCount = projection._model.getLineCount() - 1;
 				var modelChangingEvent = {
-					type: "Changing",
+					type: "Changing", //$NON-NLS-0$
 					text: model.getText(projection.start, projection.end),
 					start: eventStart,
 					removedCharCount: removedCharCount,
@@ -198,7 +198,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 				this.onChanging(modelChangingEvent);
 				this._projections.splice(i, 1);
 				var modelChangedEvent = {
-					type: "Changed",
+					type: "Changed", //$NON-NLS-0$
 					start: eventStart,
 					removedCharCount: removedCharCount,
 					addedCharCount: addedCharCount,
@@ -514,8 +514,8 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			var addedLineCount = 0;
 			var cr = 0, lf = 0, index = 0;
 			while (true) {
-				if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
-				if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
+				if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } //$NON-NLS-0$
+				if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } //$NON-NLS-0$
 				if (lf === -1 && cr === -1) { break; }
 				if (cr !== -1 && lf !== -1) {
 					if (cr + 1 === lf) {
@@ -532,7 +532,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			}
 			
 			var modelChangingEvent = {
-				type: "Changing",
+				type: "Changing", //$NON-NLS-0$
 				text: text,
 				start: eventStart,
 				removedCharCount: removedCharCount,
@@ -568,7 +568,7 @@ define("orion/textview/projectionTextModel", ['orion/textview/textModel', 'orion
 			}
 			
 			var modelChangedEvent = {
-				type: "Changed",
+				type: "Changed", //$NON-NLS-0$
 				start: eventStart,
 				removedCharCount: removedCharCount,
 				addedCharCount: addedCharCount,

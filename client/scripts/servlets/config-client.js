@@ -15,7 +15,7 @@ define(['./rest-utils'], function(rest) {
 	var defaultValue = rest.defaultValue;
 	var get = defaultValue(rest.get, {});
 	var put = rest.put;
-	
+
 	return {
 		getScriptedRcFile: function (name) {
 			return get({
@@ -36,5 +36,5 @@ define(['./rest-utils'], function(rest) {
 			});
 		}
 	};
-	
+
 });

@@ -1,26 +1,30 @@
 /* Styles for rulers */
 .ruler {
-	background-color: white;
 }
 .ruler.annotations {
-	border-right: 1px solid lightgray;
 	width: 16px;
+	border-right: 1px solid lightgray;
+	background: white;
 }
 .ruler.folding {
-	border-right: 1px solid lightgray;
+	background-color: white;
 	width: 14px;
 }
 .ruler.lines {
-	border-right: 1px solid lightgray;
+	background-color: white;
 	text-align: right;
+	
+	padding-right: 1px;
+	border-right: 1px solid lightgray;
 }
 .ruler.overview {
-	border-left: 1px solid lightgray;
 	width: 14px;
 }
 
 /* Styles for the line number ruler */
 .rulerLines {
+	color: rgb(60,60,60);
+	background: white;
 }
 .rulerLines.even
 .rulerLines.odd {

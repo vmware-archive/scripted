@@ -64,8 +64,10 @@ define(["require", "orion/textview/keyBinding",
 				cmdExec(replaceParams);
 				return true; //stop event propagation.
 			};
-			action.global = true;
-			tv.setAction(commandName, action);
+			tv.setAction(commandName, action, {
+				name: commandName,
+				global: true
+			});
 		}
 		
 		//BEGIN installOn function body

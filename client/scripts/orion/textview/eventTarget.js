@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,7 @@
  ******************************************************************************/
  
 /*global define */
-define("orion/textview/eventTarget", [], function() {
+define("orion/textview/eventTarget", [], function() { //$NON-NLS-0$
 	/** 
 	 * Constructs a new EventTarget object.
 	 * 
@@ -57,9 +57,13 @@ define("orion/textview/eventTarget", [], function() {
 		 * @param {Event} evt The event to dispatch.
 		 */
 		dispatchEvent: function(evt) {
-			if (!this._eventTypes) { return; }
 			var type = evt.type;
-			var state = this._eventTypes[type];
+			this._dispatchEvent("pre" + type, evt); //$NON-NLS-0$
+			this._dispatchEvent(type, evt);
+			this._dispatchEvent("post" + type, evt); //$NON-NLS-0$
+		},
+		_dispatchEvent: function(type, evt) {
+			var state = this._eventTypes ? this._eventTypes[type] : null;
 			if (state) {
 				var listeners = state.listeners;
 				try {
@@ -68,9 +72,9 @@ define("orion/textview/eventTarget", [], function() {
 						for (var i=0, len=listeners.length; i < len; i++) {
 							if (listeners[i]) {
 								var l = listeners[i].listener;
-								if (typeof l === "function") {
+								if (typeof l === "function") { //$NON-NLS-0$
 									l.call(this, evt);
-								} else if (l.handleEvent && typeof l.handleEvent === "function") {
+								} else if (l.handleEvent && typeof l.handleEvent === "function") { //$NON-NLS-0$
 									l.handleEvent(evt);
 								}
 							}
