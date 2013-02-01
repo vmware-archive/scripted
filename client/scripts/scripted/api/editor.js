@@ -80,7 +80,7 @@ define(function (require) {
 		 * @param {{name:String,handler:Function,isGlobal:Boolean}} spec
 		 */
 		action: function (spec) {
-			actions.setAction(spec.name, spec.handler, spec);
+			actions.setAction(spec.actionID || spec.name, spec.handler, spec);
 		}
 	};
 

@@ -27,10 +27,14 @@ define(function(require) {
 		return text.replace(/[ \t][ \t]*$/gm, "");
 
 	}
-	editorApi.onSaveTransform(function (text, filePath) {
-		console.log('Trailing ws removal on: '+filePath);
-		if (/.*\.js$/.test(filePath)) { //Only .js files
-			return trimLines(text);
+	editorApi.onSaveTransform(function (text, filePath, config) {
+		var enabled = config('plugins', 'trailing-whitespace');
+		console.log('whitespace-plugin: '+enabled);
+		if (enabled) {
+			console.log('Trailing ws removal on: '+filePath);
+			if (/.*\.js$/.test(filePath)) { //Only .js files
+				return trimLines(text);
+			}
 		}
 		//return undefined;
 	});

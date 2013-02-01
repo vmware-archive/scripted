@@ -124,7 +124,9 @@
 		disable : false,  // set to true to disable mark occurrences
 		retain : false  // set to true to retain marks if current caret location is not over a word
 	}
-/*
+/*	plugins: {
+		'trailing-whitespace' : true
+	},
 	application : {
 		webroot:"client" // the folder to 'serve' in the server instance that scripted can launch, relative to inferred project root
 	}

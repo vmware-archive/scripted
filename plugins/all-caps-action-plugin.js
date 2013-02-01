@@ -21,17 +21,17 @@
 
 define(function(require) {
 
+	//TODO: better name for 'editor' the thing here is not an editor!
+
 	var editorApi = require('scripted/api/editor');
 
 	//Defines an editor action.
 	editorApi.action({
-		name: 'shout', //action id
-		description: 'SHOUTS!', // readable description
+		actionID: 'allCaps',
+		name: 'All Caps', // readable description
 		handler: function (editor) {
 			var sel = editor.getSelection();
-			console.log(JSON.stringify(sel));
 			var text = editor.getText(sel.start, sel.end);
-			console.log(text);
 			text = text.toUpperCase();
 			editor.setText(text, sel.start, sel.end);
 		}
