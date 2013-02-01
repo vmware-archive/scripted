@@ -70,7 +70,12 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		 * a result of the iteration as well.
 		 */
 		eachEditor: function (doFun) {
-			var abort = doFun(getMainEditor());
+			var editor = getMainEditor();
+			var abort;
+			if (editor) {
+				//Can be no main editor if we get called really early!
+				abort = doFun(editor);
+			}
 			if (abort) {
 				return abort;
 			}
