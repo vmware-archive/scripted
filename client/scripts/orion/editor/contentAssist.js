@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -44,12 +44,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	/**
 	 * @name orion.editor.ContentAssist
 	 * @class Provides content assist for a TextView.
-	 * @description Creates a <code>ContentAssist</code> for a TextView. A ContentAssist consults a set of 
+	 * @description Creates a <code>ContentAssist</code> for a TextView. A ContentAssist consults a set of
 	 * {@link orion.editor.ContentAssistProvider}s to obtain proposals for text that may be inserted into a
 	 * TextView at a given offset.<p>
-	 * A ContentAssist is generally activated by its TextView action, at which point it computes the set of 
-	 * proposals available. It will re-compute the proposals in response to subsequent changes on the TextView 
-	 * (for example, user typing) for as long as the ContentAssist is active. A proposal may be applied by calling 
+	 * A ContentAssist is generally activated by its TextView action, at which point it computes the set of
+	 * proposals available. It will re-compute the proposals in response to subsequent changes on the TextView
+	 * (for example, user typing) for as long as the ContentAssist is active. A proposal may be applied by calling
 	 * {@link #apply}, after which the ContentAssist becomes deactivated. An active ContentAssist may be deactivated
 	 * by calling {@link #deactivate}.<p>
 	 * A ContentAssist dispatches events when it becomes activated or deactivated, and when proposals have been computed.
@@ -207,7 +207,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 					this.activationRequest = null;
 				}
 				if (e.text.length > 1 || (!this.isJSIdentifierPart(e.text.charCodeAt(0)) &&
-					this.isVisibleChar(e.text.charCodeAt(0)))) {
+						this.isVisibleChar(e.text.charCodeAt(0)))) {
+					// deactivate if this is not a JS identifier char, but it is visible
 					this.deactivate();
 				}
 			}
@@ -220,7 +221,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		
 		isVisibleChar : function(c) {
 			//Anything that is not a control character
-			return c > 32;
+			return c > 31;
 		},
 		// SCRIPTED end
 
@@ -360,8 +361,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 * @name orion.editor.ContentAssistMode
 	 * @class Editor mode for interacting with content assist proposals.
 	 * @description Creates a ContentAssistMode. A ContentAssistMode is a key mode for {@link orion.editor.Editor}
-	 * that provides interaction with content assist proposals retrieved from an {@link orion.editor.ContentAssist}. 
-	 * Interaction is performed via the {@link #lineUp}, {@link #lineDown}, and {@link #enter} actions. An 
+	 * that provides interaction with content assist proposals retrieved from an {@link orion.editor.ContentAssist}.
+	 * Interaction is performed via the {@link #lineUp}, {@link #lineDown}, and {@link #enter} actions. An
 	 * {@link orion.editor.ContentAssistWidget} may optionally be provided to display which proposal is currently selected.
 	 * @param {orion.editor.ContentAssist} contentAssist
 	 * @param {orion.editor.ContentAssistWidget} [ContentAssistWidget]
@@ -374,6 +375,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.contentAssist.addEventListener("ProposalsComputed", function(event) {
 			self.proposals = event.data.proposals;
 			self.selectedIndex = self.proposals.length ? 0 : -1;
+			
+			// SCRIPTED: close content assist when no proposals
+			if (self.proposals.length === 0) {
+				self.contentAssist.deactivate();
+			}
+			// SCRIPTED end
 		});
 	}
 	ContentAssistMode.prototype = /** @lends orion.editor.ContentAssistMode.prototype */ {
@@ -576,7 +583,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				var child = nodes[i];
 				var selIndex = child.className.indexOf(STYLES.selected);
 				if (selIndex >= 0) {
-					child.className = child.className.substring(0, selIndex) + 
+					child.className = child.className.substring(0, selIndex) +
 							child.className.substring(selIndex + STYLES.selected.length);
 				}
 				if (child === node) {
