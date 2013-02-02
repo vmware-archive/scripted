@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports console module process */
 
 //////////////////////////////////////
@@ -29,6 +29,7 @@ var utils = require('./utils');
 
 var pathNormalize = utils.pathNormalize;
 var pathResolve = utils.pathResolve;
+var startsWith = utils.startsWith;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -51,7 +52,7 @@ function ignore(name) {
 function withBaseDir(baseDir) {
 	var fs = require('fs');
 	var encoding = 'UTF-8';
-	
+
 	function getUserHome() {
 		if (baseDir) {
 			//We are testing with a 'mini test file system' can't use the
@@ -64,7 +65,7 @@ function withBaseDir(baseDir) {
 			return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
 		}
 	}
-	
+
 	function handle2file(handle) {
 		if (baseDir) {
 			return pathNormalize(baseDir + '/' + handle);
@@ -72,7 +73,7 @@ function withBaseDir(baseDir) {
 			return handle;
 		}
 	}
-	
+
 	function file2handle(file) {
 		var h;
 		if (baseDir) {
@@ -88,7 +89,7 @@ function withBaseDir(baseDir) {
 									// TODO: in the long run the right thing to do is properly use
 									// libraries like 'path' in node to do all path manipulation.
 	}
-	
+
 	function isFile(handle, callback) {
 		if (typeof(handle)!=='string') {
 			callback(false);
@@ -116,7 +117,7 @@ function withBaseDir(baseDir) {
 			}
 		});
 	}
-	
+
 	function rename(handleOriginal, handleRename) {
 		var original = handle2file(handleOriginal);
 		var newname = handle2file(handleRename);
@@ -168,7 +169,7 @@ function withBaseDir(baseDir) {
 			}
 		});
 	}
-	
+
 	function deleteFile(_handle) {
 		var file = handle2file(_handle);
 		var deferred = when.defer();
@@ -203,7 +204,13 @@ function withBaseDir(baseDir) {
 		});
 		return deferred;
 	}
-	
+
+	/**
+	 * Make the pat
+	 */
+	function getScripteApiName(handle) {
+	}
+
 	function getContents(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -253,7 +260,7 @@ function withBaseDir(baseDir) {
 		};
 	}
 
-	
+
 	function listFiles(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -321,7 +328,7 @@ function withBaseDir(baseDir) {
 	 */
 	function stat(handle) {
 //		console.log('statting: '+handle);
-		
+
 		var d = when.defer();
 		fs.stat(file2handle(handle), function (err, statObj) {
 			if (err) {
@@ -335,7 +342,7 @@ function withBaseDir(baseDir) {
 		});
 		return d.promise;
 	}
-	
+
 	return {
 		getUserHome:  getUserHome,
 		baseDir:      baseDir,

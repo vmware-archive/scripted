@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global console require*/
 
 //
@@ -18,15 +18,27 @@
 // http.
 //
 
+var utils = require('../jsdepend/utils');
+
 var url = require('url');
 var servlets = require('../servlets');
-var configuration = require('../jsdepend/filesystem');
+var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
+var extend = utils.extend;
+var pathResolve = utils.pathResolve;
 
-var conf = configuration.withBaseDir(null);
-conf.sloppy = false; //IMPORTANT: if this gets switched back on... must also make sure
-					 // to switch dirwatch back on (i.e. disable the FAKE mode)
+var conf = extend(filesystem, {
+	sloppy: false, //sloppy resolver turned off.
+	amd: {
+		//Extra paths automatically added to amd-configs found by scripted
+		// this way plugin-apis will receive automatic content assist.
+		paths: {
+			'scripted/api' : pathResolve(__dirname, '../../client/scripts/scripted/api')
+		}
+	}
+});
+
 var api = apiMaker.configure(conf);
 
 var basePath = "/jsdepend";

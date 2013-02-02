@@ -22,29 +22,34 @@ var parser = require("./parser");
 var treeMatcher = require('./tree-matcher');
 var map = require('./utils').map;
 var eachk = require('./utils').eachk;
+var deref = require('./utils').deref;
 var when = require('when');
+var jsonMerge = require('./json-merge');
+var getDirectory = require('./utils').getDirectory;
+var orMap = require('./utils').orMap;
+var ork = require('./utils').ork;
+var getScriptTags = require('./script-tag-finder').getScriptTags;
+var getScriptCode = require('./script-tag-finder').getScriptCode;
+var treeMatcher = require('./tree-matcher');
+var andPat = treeMatcher.andPat;
+var orPat = treeMatcher.orPat;
 
-function configure(filesystem) {
+function configure(conf) {
 
-	var parser = require("./parser");
-	var treeMatcher = require('./tree-matcher');
 	//Note:
 	//   conf = the 'global' configuration for the api, provides file system type operations
 	//   resolverConf = configuration information for the resolver, varies based on the context
 	//                  of where a reference came from.
 
-	var andPat = treeMatcher.andPat;
-	var orPat = treeMatcher.orPat;
+	//conf.amd may contain additional amd config to add to the found config.
+	//Only extra amd path elements are supported at the moment
+	var extraPaths = deref(conf, ['amd', 'paths']);
 
-	var getContents = filesystem.getContents;
-	var getDirectory = require('./utils').getDirectory;
-	var orMap = require('./utils').orMap;
-	var ork = require('./utils').ork;
-	var deref = require('./utils').deref;
-	var listFiles = filesystem.listFiles;
+	var parser = require("./parser");
+
+	var getContents = conf.getContents;
+	var listFiles = conf.listFiles;
 	var pathResolve = require('./utils').pathResolve;
-	var getScriptTags = require('./script-tag-finder').getScriptTags;
-	var getScriptCode = require('./script-tag-finder').getScriptCode;
 	var objectPat = treeMatcher.objectPat;
 	var successPat = treeMatcher.successPat;
 	var containsPat = treeMatcher.containsPat;
@@ -461,7 +466,7 @@ function configure(filesystem) {
 	function logBack(msg, callback) {
 		return function (result) {
 			console.log(++logLine + " : " + msg);
-			//console.log(JSON.stringify(result, null, "  "));
+			console.log(JSON.stringify(result, null, "  "));
 			callback(result);
 		};
 	}
@@ -532,10 +537,37 @@ function configure(filesystem) {
 		}
 	};
 
+	/**
+	 * Wrap a config getter function to add extra stuff to its result.
+	 */
+	function addExtraPaths(getter) {
+		if (extraPaths) {
+			return function (context, callback) {
+				//callback = logBack("amd-config '"+context+"' => ", callback);
+				return getter(context, function (amdConf) {
+//					amdConf = amdConf || {
+//						//Ensure a basic conf. Needs a 'baseDir' at minimum.
+//						baseDir: getDirectory(context)
+//					};
+
+					//WARNING: when generalizing to include 'extraPackages'.
+					//Be aware that jsonMerge won't do the job correctly because
+					//packages are in a list and lists don't get merged but have
+					//replacement behavior.
+					return callback(jsonMerge(amdConf, {
+						paths: extraPaths
+					}));
+				});
+			};
+		} else {
+			return getter;
+		}
+	}
+
 	getAmdConfig = makeCached(getAmdConfig, 10000);
 
 	return {
-		getAmdConfig: getAmdConfig,
+		getAmdConfig: addExtraPaths(getAmdConfig),
 			//getAmdConfig,
 		forTesting: {
 			configBlockPat: configBlockPat

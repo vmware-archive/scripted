@@ -27,7 +27,7 @@ define(function(require, exports, module) {
 function configure(conf) {
 
 	var sloppy = conf.sloppy;
-	
+
 	if (typeof(sloppy)==='undefined') {
 		console.trace('WARNING: sloppy mode is undefined. Assuming it will be disabled');
 	}
@@ -45,7 +45,7 @@ function configure(conf) {
 	var isFile = conf.isFile;
 	var endsWith = utils.endsWith;
 	var getFileName = utils.getFileName;
-	
+
 	function isResolved(dep, k) {
 		if (dep.exists) {
 			k(true);
@@ -55,7 +55,7 @@ function configure(conf) {
 			k(false);
 		}
 	}
-	
+
 	function unresolve(dep) {
 		//it would be strange if we left the error from previous resolve in there
 		//when we resolve it an subsequent resolver in a chain.
@@ -66,7 +66,7 @@ function configure(conf) {
 			delete dep.path;
 		}
 	}
-	
+
 	//compose two resolvers into one. The second resolver is used if the first one fails
 	//to resolve a dependency to an existing file.
 	function compose(r1, r2) {
@@ -144,7 +144,7 @@ function configure(conf) {
 			});
 		});
 	}
-	
+
 	//A 'resolver transformer' which ensures that any resolved dependency
 	//actually points to an existing file. If it does not, then the path is removed.
 	//Client code relies on this. So make sure to apply this transformer to
@@ -163,7 +163,7 @@ function configure(conf) {
 			});
 		};
 	}
-	
+
 	function listResolver(context, list, callback) {
 		if (list.length===0) {
 			//For empty list there won't be any receiveFor functions created
@@ -173,10 +173,10 @@ function configure(conf) {
 		} else { //list is not empty
 			//This is tricky becasue the results are received asynchronously, yet we
 			//can't return the array of results until all results have been received.
-		
+
 			var results = [];
 			var waiting = list.length;
-			
+
 			var receiveFor = function(i) {
 				return function(resolved) {
 					waiting--;
@@ -192,23 +192,23 @@ function configure(conf) {
 			}
 		}
 	}
-	
+
 	var amdResolver = require('./amd-resolver').configure(conf).resolver;
 	var commonjsResolver = require('./commonjs-resolver').configure(conf).resolver;
-	
+
 	var resolvers = {
 		'list': listResolver,
 		'AMD': amdResolver,
 		'commonjs':commonjsResolver,
-		'commonjs,AMD': compose(amdResolver, commonjsResolver) 
+		'commonjs,AMD': compose(amdResolver, commonjsResolver)
 		//TODO: replace 'commonjs,AMD' resolver with a custom implementation.
-		// Custom resolver should try to pick the 'correct' resolver instead of 
+		// Custom resolver should try to pick the 'correct' resolver instead of
 		// simply trying both of them.
 	};
 	if (sloppy) {
 		resolvers.AMD = compose(resolvers.AMD, searchByNameResolver);
 		resolvers.commonjs = compose(resolvers.commonjs, searchByNameResolver);
-		resolvers.unknown = searchByNameResolver; 
+		resolvers.unknown = searchByNameResolver;
 	} else {
 		resolvers.AMD = removePathFromUnresolved(resolvers.AMD);
 		resolvers.commonjs = removePathFromUnresolved(resolvers.commonjs);
@@ -236,7 +236,7 @@ function configure(conf) {
 			return theResolver(context, dep, callback);
 		}
 	}
-	
+
 	return {
 		resolve: resolve,
 		forTesting: {
