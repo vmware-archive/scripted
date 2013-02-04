@@ -41,6 +41,14 @@ define(function (require) {
 	}
 
 	return {
+
+		/**
+		 * Add a save transform function. The function is called just prior to
+		 * saving the contents of the editor and is given a chance to transform the text
+		 * in the editor.
+		 *
+		 * @param {function(text:String, path:String, configuration:function(...[String]):Object):[String]}
+		 */
 		addSaveTransform: function (transformFun) {
 
 			//Use lower-level preSave hook to grab editor text, apply transformFun
@@ -79,10 +87,22 @@ define(function (require) {
 		},
 
 		/**
-		 * @param {{name:String,handler:Function,isGlobal:Boolean}} spec
+		 * Associate a handler function with a given actionID for all existing and future
+		 * scripted editors. Any prior handlers assigned to the id are overwritten.
+		 * <p>
+		 * A readable 'name' option can be provided. This name will be used in places
+		 * like the help side panel instead of the actionID.
+		 * <p>
+		 * A 'global' flag option can be provided. If set to a true value, then keybindings
+		 * triggering this action will also trigger even if an editor does not have focus.
+		 * Globally triggered actions will be redirected to the last editor that had
+		 * focus.
+		 *
+		 * @param {String} actionID
+		 * @param {{handler:function(Editor),name:?String,global:?Boolean}} spec
 		 */
-		action: function (spec) {
-			actions.setAction(spec.actionID || spec.name, spec.handler, spec);
+		setAction: function (actionID, spec) {
+			actions.setAction(actionID, spec);
 		}
 	};
 

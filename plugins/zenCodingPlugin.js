@@ -20,7 +20,7 @@ define(function(require) {
 	var TAB_POS = "${0}";
 
 	var setKeyBinding = require('scripted/api/keybinder').setKeyBinding;
-	var action = require('scripted/api/editor-extensions').action;
+	var setAction = require('scripted/api/editor-extensions').setAction;
 	var textUtils = require('scripted/utils/textUtils');
 	var editorFeatures = require('orion/editor/editorFeatures');
 	require('jquery');
@@ -220,7 +220,7 @@ define(function(require) {
 	function registerEmmetAction(name, key) {
 		var zenName = "Zen " + name;
 		setKeyBinding("Ctrl+Shift+" + key, zenName);
-		action({
+		setAction('zenCodingPlugin.'+name, {
 			name: zenName,
 			handler: function(editor) {
 				runEmmetAction(name, editor);
