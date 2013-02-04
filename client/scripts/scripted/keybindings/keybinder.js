@@ -33,6 +33,7 @@ var keystroke2keybinding = mKeystroke.toKeyBinding;
 var getScriptedRcFile = mConfig.getScriptedRcFile;
 var putScriptedRcFile = mConfig.putScriptedRcFile;
 var event2keystroke = mKeystroke.fromKeyDownEvent;
+var normalize = mKeystroke.normalize;
 
 var eachEditor = editorUtils.eachEditor;
 
@@ -358,7 +359,7 @@ function setPluginKeyBinding(keystroke, action) {
 	//Just put the keys in the plugin specific registry. It's someone else's responsibility
 	// to apply these at the right time. That way plugins can register keybindings without
 	// worrying about editor life cycles and timing issues.
-	pluginKeyBindings[keystroke] = action;
+	pluginKeyBindings[normalize(keystroke)] = action;
 }
 
 return {
