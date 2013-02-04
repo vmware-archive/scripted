@@ -144,11 +144,20 @@ function configure(isMac) {
 		}
 	}
 
+	/**
+	 * Convert a 'keystroke' string into the exact same format it would be as if
+	 * it were entered via the keybinding editor side panel.
+	 */
+	function normalize(keystroke) {
+		return fromKeyBinding(toKeyBinding(keystroke));
+	}
+
 	return {
 		isMac: isMac, //mostly for testing. So we can tell how this module was configured.
 		toKeyBinding: toKeyBinding,
 		fromKeyBinding: fromKeyBinding,
-		fromKeyDownEvent: fromKeyDownEvent
+		fromKeyDownEvent: fromKeyDownEvent,
+		normalize: normalize
 	};
 }
 
