@@ -27,7 +27,7 @@ define(function(require) {
 		return text.replace(/[ \t][ \t]*$/gm, "");
 
 	}
-	editorApi.onSaveTransform(function (text, filePath, config) {
+	editorApi.addSaveTransform(function (text, filePath, config) {
 		var enabled = config('plugins', 'trailing-whitespace');
 		console.log('whitespace-plugin: '+enabled);
 		if (enabled) {

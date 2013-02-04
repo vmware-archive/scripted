@@ -10,7 +10,7 @@ define(function (require) {
 	var copyright = new RegExp('@license|\\* Copyright \\(c\\)');
 	var defaultCopyright =  require('text!./copyright.txt');
 
-	editorApi.onSaveTransform(function (text, path) {
+	editorApi.addSaveTransform(function (text, path) {
 		return configApi.getConfig('copyright/text', path).then(function (copyrightHeader) {
 			if (jsFile.test(path)) {
 				if (!copyright.test(text)) {

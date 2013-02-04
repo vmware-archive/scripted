@@ -27,28 +27,12 @@ define(function(require) {
 		// At the least we can add some timeout logic to ensure
 		// the promise eventually rejects or resolves.
 
-	var pluginHookHandlers = {
-		//This will essentially become a kind of 'extension point registry'.
-		onSaveTransform: function (tf) {
-			editorApi.onSaveTransform(tf);
-		}
-	};
-
 	getPlugins().then(function (plugins) {
 		var pluginPaths = plugins.map(function (name) {
 			return 'scripted/plugins/'+name;
 		});
 		console.log('Plugins found: '+JSON.stringify(pluginPaths, null, '  '));
 		require(pluginPaths, function () {
-			var instances = arguments;
-			for (var i = 0; i < instances.length; i++) {
-				var plugin = instances[i];
-				for (var property in plugin) {
-					if (pluginHookHandlers.hasOwnProperty(property)) {
-						pluginHookHandlers[property](plugin[property]);
-					}
-				}
-			}
 			console.log('All plugins succesfully loaded!');
 			ready.resolve();
 		});

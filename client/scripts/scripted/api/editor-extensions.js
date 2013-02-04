@@ -41,7 +41,7 @@ define(function (require) {
 	}
 
 	return {
-		onSaveTransform: function (transformFun) {
+		addSaveTransform: function (transformFun) {
 
 			//Use lower-level preSave hook to grab editor text, apply transformFun
 			//and put contents back into the editor.

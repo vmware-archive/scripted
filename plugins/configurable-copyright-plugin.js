@@ -11,7 +11,7 @@ define(function (require) {
 	var defaultRegExp = '@license|\\* Copyright \\(c\\)';
 	var defaultPathRegExp = '.*\\.js';
 
-	editorApi.onSaveTransform(function (text, path, config) {
+	editorApi.addSaveTransform(function (text, path, config) {
 		var enabled = config('plugins', 'copyright');
 		//Only enable the copyright plugin functionality if at least some options
 		// are configured for it.
