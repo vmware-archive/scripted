@@ -12,7 +12,7 @@
  ******************************************************************************/
 define(function(require) {
 
-	console.log('Trailing white space removal plugin loaded');
+	//console.log('Trailing white space removal plugin loaded');
 
 	var editorApi = require('scripted/api/editor-extensions');
 
@@ -20,7 +20,8 @@ define(function(require) {
 		//This nice line of code:
 		//return text.replace(/[\s][\s]*$/gm, "");
 		//http://stackoverflow.com/questions/5568797/trim-trailing-spaces-before-newlines-in-a-single-multi-line-string-in-javascript
-		//But it looks like this code below isn't quite right as
+
+		//But it looks like that code isn't quite right as
 		//it deletes blank lines of text entirely.
 
 		//Fixed version:
@@ -29,9 +30,9 @@ define(function(require) {
 	}
 	editorApi.addSaveTransform(function (text, filePath, config) {
 		var enabled = config('plugins', 'trailing-whitespace');
-		console.log('whitespace-plugin: '+enabled);
+		//console.log('whitespace-plugin: '+enabled);
 		if (enabled) {
-			console.log('Trailing ws removal on: '+filePath);
+			//console.log('Trailing ws removal on: '+filePath);
 			if (/.*\.js$/.test(filePath)) { //Only .js files
 				return trimLines(text);
 			}
