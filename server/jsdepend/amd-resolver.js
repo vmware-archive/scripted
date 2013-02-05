@@ -122,6 +122,8 @@ function configure(conf) {
 			//There's nothing to resolve. Let client know not to report this as an error.
 			dep.ignore = true;
 			return callback(dep);
+		} else if ('require'===resource) {
+			dep.ignore = true;
 		} else if (isRelative(resource)) {
 			//Relative resolution doesn't require the resolverConf so avoid fetching it
 			var baseDir = getDirectory(context); //relative to context file, not amd config
