@@ -19,12 +19,13 @@
 define(function(require) {
 	var TAB_POS = "${0}";
 
+	require('jquery');
+	require('zen');
+
 	var setKeyBinding = require('scripted/api/keybinder').setKeyBinding;
 	var setAction = require('scripted/api/editor-extensions').setAction;
 	var textUtils = require('scripted/utils/textUtils');
 	var editorFeatures = require('orion/editor/editorFeatures');
-	require('jquery');
-	require('zen');
 
 	var createProxy = function(editor) {
 			return emmet.exec(function(req, _) {
