@@ -305,7 +305,6 @@ define([
 			
 			// No keybinding by default
 			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
-			console.log("action tvw");
 				syntaxHighlighter.toggleWhitespacesVisible();
 				return true;
 			},"Toggle Visible Whitespace");
