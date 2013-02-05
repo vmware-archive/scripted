@@ -9,7 +9,7 @@ define(function (require) {
 	// Default values for config options of this plugin:
 	var defaultCopyright =  require('text!./copyright.txt');
 	var defaultRegExp = '@license|\\* Copyright \\(c\\)';
-	var defaultPathRegExp = '.*\\.js';
+	var defaultPathRegExp = '.*\\.js$';
 
 	editorApi.addSaveTransform(function (text, path, config) {
 		var enabled = config('plugins', 'copyright');
