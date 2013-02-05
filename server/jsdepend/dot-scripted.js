@@ -37,7 +37,6 @@ function configure(filesystem) {
 	var isFile = filesystem.isFile;
 	var isDirectory = filesystem.isDirectory;
 	var putContents = filesystem.putContents;
-	var handle2file = filesystem.handle2file;
 	var stat = filesystem.stat;
 	var mkdir = filesystem.mkdir;
 	var deleteResource = filesystem.deleteResource;
