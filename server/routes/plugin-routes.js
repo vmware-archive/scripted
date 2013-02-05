@@ -16,7 +16,8 @@
 var when = require('when');
 var express = require('express');
 
-var pluginDiscovery = require('../plugin-support/plugin-discovery');
+var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var pluginDiscovery = require('../plugin-support/plugin-discovery').configure(filesystem);
 var getPlugins = pluginDiscovery.getPlugins;
 
 exports.install = function (app) {

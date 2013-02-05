@@ -108,6 +108,15 @@ function withBaseDir(baseDir) {
 	}
 
 	function isDirectory(handle, callback) {
+		var d, p;
+		if (!callback) {
+			//Switch to using promises.
+			d = when.defer();
+			p = d.promise;
+			callback = function (isDir) {
+				d.resolve(isDir);
+			};
+		}
 		fs.stat(handle2file(handle), function (err, stats) {
 			if (err) {
 				//console.log(err);
@@ -116,6 +125,7 @@ function withBaseDir(baseDir) {
 				callback(stats.isDirectory());
 			}
 		});
+		return p;
 	}
 
 	function rename(handleOriginal, handleRename) {
