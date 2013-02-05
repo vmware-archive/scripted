@@ -41,6 +41,7 @@ function configure(filesystem) {
 	var stat = filesystem.stat;
 	var mkdir = filesystem.mkdir;
 	var deleteResource = filesystem.deleteResource;
+	var parseJsonFile = require('../utils/parse-json-file').configure(filesystem);
 
 	// For a given file handle the '.scripted' configuration info is found and composed as follows:
 
@@ -80,46 +81,6 @@ function configure(filesystem) {
 		} else {
 			callback(false);
 		}
-	}
-
-	var ALL_WHITE_SPACE = /^\s*$/;
-
-	/**
-	 * Tries to read data from a file and parse it as JSON data.
-	 * Call the callback with the resulting data.
-	 * If any part of this operation fails, the callback will be still be
-	 * called with at least an empty object. All errors will be logged
-	 * to the console.
-	 * <p>
-	 * Errors deemed serious enough to be brought to the user's attention
-	 * (i.e. problems parsing the user's config file) will be 'reported'
-	 * by adding an explanation to the object in a property called 'error'.
-	 */
-	function parseJsonFile(handle, callback) {
-		getContents(handle,
-			function (contents) {
-				var data = null;
-				if (!ALL_WHITE_SPACE.test(contents)) {
-					try {
-						data = JSON5.parse(contents);
-					} catch (e) {
-						data = {
-							error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
-						};
-					}
-				}
-				data = data || {};
-				return callback(data);
-			},
-			function (err) {
-				debug_log(err);
-				callback({
-					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc
-					//so this error is expected.
-					//error: "Could not get contents of file '"+handle+"'"
-				});
-			}
-		);
 	}
 
 	function findAndParseDotScripted(handle, callback) {
