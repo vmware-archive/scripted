@@ -269,6 +269,13 @@ define(["require", "dojo/_base/_loader/bootstrap"], function(require, dojo){
 			module= match[1];
 			type= match[2];
 		}
+		require.nameToUrl = require.nameToUrl || function (module, type) {
+		    var r = require.toUrl(module);
+		    if (type) {
+		        r += type;
+		    }
+		    return r;
+		};
 		return new dojo._Url(require.nameToUrl(module, type)); // dojo._Url
 	};
 
