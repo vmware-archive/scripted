@@ -17,26 +17,13 @@ var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
 var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
 var pathResolve = require('../jsdepend/utils').pathResolve;
 var endsWith = require('../jsdepend/utils').endsWith;
+var each = require('../utils/promises').each;
 
 //var pluginDir = pathResolve(getScriptedRcDirLocation(), 'plugins');
 
 //For now it's easier to place the plugins inside of scripted code base
 // So I can put my 'sample' plugin in our codebase and commit it to git.
 
-/**
- * Promise aware array iterator. Loops over elements of an array from left to right
- * applying the function to each element in the array. The function gets passed
- * the element and the index in the array.
- */
-function each(array, fun) {
-	//TODO: move this function to utils/promises
-	return when.reduce(array,
-		function (ignore, element, i) {
-			return fun.call(undefined, element, i);
-		},
-		null
-	);
-}
 
 var pluginDirs = [
 	//plugins packaged with scripted:

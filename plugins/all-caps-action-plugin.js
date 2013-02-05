@@ -21,13 +21,10 @@
 
 define(function(require) {
 
-	//TODO: better name for 'editor' the thing here is not an editor!
-
 	var editorApi = require('scripted/api/editor-extensions');
 
 	//Defines an editor action.
-	editorApi.action({
-		actionID: 'allCaps',
+	editorApi.setAction('allCaps', {
 		name: 'All Caps', // readable description
 		handler: function (editor) {
 			var sel = editor.getSelection();

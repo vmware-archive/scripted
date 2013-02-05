@@ -1,6 +1,8 @@
 {
 	"dependencies": {
-		"requirejs": "1.0.8",
+		"requirejs": "2.1.4",
+		"requirejs-text": "2.0.4",
+		"requirejs-i18n": "2.0.1",
 		"when": "1.7.1",
 		"wire": "0.9.0",
 		"meld": "1.1.0",
