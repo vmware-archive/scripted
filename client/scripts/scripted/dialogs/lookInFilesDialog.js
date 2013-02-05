@@ -490,7 +490,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 				var dialog_results =  $("#dialog_results",$(that.dialog));
 				var scrollPositionOfResults = r.scrollTop();
 				var linkHeight = $(links[0]).outerHeight();
-				console.log("linkHeight="+linkHeight);
+
 				var scrollAreaHeight = dialog_results.height();
 				var viewHeight = $(r).height();
 				

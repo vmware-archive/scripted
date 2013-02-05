@@ -25,7 +25,9 @@ define([
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/exec/exec-keys",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/utils/storage",
+	"layoutManager",
+	"scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require, deref, mSaveHooks, when,
@@ -35,7 +37,7 @@ define([
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager
+	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -290,6 +292,22 @@ define([
 				$('#help_open').click();
 				return true;
 			});
+			
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F2'), "Toggle Navigator");
+			editor.getTextView().setAction("Toggle Navigator",function() {
+				layoutManager.toggleNavigatorVisible();
+				return true;
+			},"Toggle Navigator");
+			$('#nav_toggle').on('click', function() {
+				editor.getTextView().invokeAction("Toggle Navigator",false);
+				return true;
+			});
+			
+			// No keybinding by default
+			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
+				syntaxHighlighter.toggleWhitespacesVisible();
+				return true;
+			},"Toggle Visible Whitespace");
 
 			// Text formatting
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ false, /*shift*/ true, /*alt*/ true), "Format text");
@@ -461,6 +479,15 @@ define([
 		// based on the stuff from embeddededitor.js (orion sample).
 		var syntaxHighlighter = {
 			styler: null,
+			visibleWhitespace: false,
+			
+			toggleWhitespacesVisible: function(visible) {
+				if (this.styler && this.styler.setWhitespacesVisible) {
+					this.visibleWhitespace = !this.visibleWhitespace;
+					this.styler.setWhitespacesVisible(this.visibleWhitespace);
+					editor.getTextView().update(true);
+				}
+			},
 
 			highlight: function(path, editor) {
 				if (this.styler) {
@@ -484,6 +511,9 @@ define([
 							break;
 						}
 					}
+				}
+				if (this.styler && this.styler.setWhitespacesVisible) {
+					this.styler.setWhitespacesVisible(this.visibleWhitespace);
 				}
 			}
 		};

@@ -110,7 +110,9 @@ define(function (require) {
 		'Save',
 		'Find File Named...',
 		'Look in files',
-		'Toggle Subeditor'
+		'Toggle Subeditor',
+		'Toggle Navigator',
+		'Toggle Visible Whitespace'
 	 ];
 
 	/**
