@@ -623,17 +623,18 @@ define([
 		try {
 			var url = '/get?file=' + filePath;
 			//console.log("Getting contents for " + url);
-			xhrobj.open("GET", url, false); // synchronous xhr
+			xhrobj.open("GET", url, true); // asynchronous xhr
 
 			// set specific header to bypass the cache
 			// TODO FIXADE we should be saving the etag header of the original file request and caching it in local storage
 			// See http://en.wikipedia.org/wiki/HTTP_ETag
 			xhrobj.setRequestHeader('If-None-Match', ''+new Date().getTime());
-			xhrobj.send();
-			//xhrobj.onreadystatechange = function() {
+			//xhrobj.send();
+			xhrobj.onreadystatechange = function() {
 			if (xhrobj.readyState === 4) {
 				if (xhrobj.status === 200) {
 					editor.setInput("Content", null, xhrobj.responseText);
+					editor.getTextView().setReadonly(false);
 //						setTimeout(function() {
 //						window.comms.editor.send(JSON.stringify({"registereditor":window.location.search.substr(1)}));
 //						},3000);
@@ -653,6 +654,7 @@ define([
 					if (xhrobj.status === 500 && xhrobj.responseText === 'File not found') {
 						// that is OK, start with an empty file
 						editor.setInput("Content", null, "");
+						editor.getTextView().setReadonly(false);
 						syntaxHighlighter.highlight(filePath, editor);
 									// NEWEDITOR - doesn't have highlightAnnotations
 			// editor.highlightAnnotations();
@@ -676,11 +678,13 @@ define([
 						editor.loadResponse = "error";
 					} else {
 						editor.setInput("Content", null, xhrobj.responseText);
+						editor.getTextView().setReadonly(false);
 					}
 				}
 			}
-			//};
-			//xhrobj.send();
+			};
+			editor.getTextView().setReadonly(true);
+			xhrobj.send();
 		} catch (e) {
 			console.log("xhr failed " + e);
 			editor.loadResponse = "failed - exception";

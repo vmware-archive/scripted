@@ -74,7 +74,18 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		}
 	};
 
+	var initializeBreadcrumbsTimeout;
+
 	var initializeBreadcrumbs = function(path) {
+		clearTimeout(initializeBreadcrumbsTimeout);
+
+		//load asynchronously after 500 ms
+		initializeBreadcrumbsTimeout = setTimeout(function() {
+			initializeBreadcrumbsActual(path);
+		}, 500);
+	}
+
+	var initializeBreadcrumbsActual = function(path) {
 		var autoActivation = (window.scripted &&
 			window.scripted.config &&
 			window.scripted.config.ui &&
