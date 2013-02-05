@@ -339,13 +339,10 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			}
 
 			if (target === EDITOR_TARGET.main) {
-				// explicit check for false since navigator might be 'undefined' at this point
-				if (window.scripted.navigator !== false) {
-					// if model not yet available, highlighting is handled elsewhere.
-					// TODO Yikes!  Yet another global variable.  We should make explorer non-global
-					if (explorer.model) {
-						explorer.highlight(filepath);
-					}
+				// if model not yet available, highlighting is handled elsewhere.
+				// TODO Yikes!  Yet another global variable.  We should make explorer non-global
+				if (explorer.model) {
+					explorer.highlight(filepath);
 				}
 			}
 			targetPane.updateContents(targetEditor);
