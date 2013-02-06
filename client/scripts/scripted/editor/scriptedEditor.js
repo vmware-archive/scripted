@@ -608,7 +608,9 @@ define([
 
 		editor.installTextView(function(buffer, offset) {
 			if (isJS) {
-				return jsContentAssistant.computeHover(buffer, offset);
+				var hoverText = jsContentAssistant.computeHover(buffer, offset);
+//				return hoverText;
+				return hoverText ? "<pre>" + js_beautify(hoverText) + "</pre>" : hoverText;
 			} else {
 				return null;
 			}

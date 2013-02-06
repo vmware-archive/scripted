@@ -1553,7 +1553,18 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// convert into a function signature
 				var prefix = first === "?" ? "" : "new";
 				var args = typeName.substring(nameEnd+1, typeName.length);
-				return prefix + "(" + args + ") -> " + createReadableType(funType, env, useFunctionSig, 1);
+				var argsSigs = [];
+				args.split(",").forEach(function(arg) {
+					var type = env.findType(typeName);
+					if (type[arg]) {
+						var sig = createReadableType(type[arg], env, useFunctionSig, depth);
+						argsSigs.push(arg + (sig ? ":" + sig : ""));
+					} else {
+						argsSigs.push(arg);
+					}
+				});
+				// note the use of the &rarr; char here
+				return prefix + "(" + argsSigs.join(",") + ") → " + createReadableType(funType, env, useFunctionSig, 1);
 			} else {
 				// use the return type
 				return createReadableType(funType, env, useFunctionSig, depth);
