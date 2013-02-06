@@ -37,7 +37,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 	/* Position the pieces of the page */
 	var updatePageElements =  function() {
 	
-		var editorNode = $('#editor');
+		var editorNode = $(this.editorNode);  // injected through wire
 		var breadcrumb = $('#breadcrumb');
 		var nav = $('#navigator-wrapper');
 		var helpPanel = $('#help_panel');
@@ -83,7 +83,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 		updatePageElements: updatePageElements,
 
 		doLayout: function(fileExplorer, pageState) {
-			var editorNode = $('#editor');
+			var editorNode = $(this.editorNode);  // injected through wire
 			var breadcrumb = $('#breadcrumb');
 			mNavHistory.setupPage(pageState, false);
 

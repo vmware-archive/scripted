@@ -52,5 +52,5 @@ requirejs.config({
 	}
 });
 
-require(['main']);
+require(['wire!main']);
 
