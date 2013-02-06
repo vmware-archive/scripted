@@ -16,22 +16,26 @@ var endsWith = require('../jsdepend/utils').endsWith;
 var each = require('../utils/promises').each;
 var pathResolve = require('../jsdepend/utils').pathResolve;
 
+/**
+ * Creates an instance of the plugin-discovery api. Requires a config object
+ * that provides filesystem related operations
+ */
 function configure(filesystem) {
-
-	//Path prefix below which all scripted plugins contents is mapped by the
-	//scripted web server.
-	var SCRIPTED_PLUGINS =  'scripted/plugins/';
 
 	var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
 	var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
 	var isDirectory = filesystem.isDirectory;
 	var parseJsonFile = require('../utils/parse-json-file').configure(filesystem);
 
+	var SCRIPTED_RC = getScriptedRcDirLocation();
+	var SCRIPTED_PLUGINS_WEB_PATH =  'scripted/plugins';
+	var SCRIPTED_HOME = filesystem.getScriptedHome();
+
 	var pluginDirs = [
 		//plugins packaged with scripted:
-		pathResolve(__dirname, '../../plugins'), //TODO: direct filesystem reference <-> pluggable fs.
+		pathResolve(SCRIPTED_HOME, 'plugins'),
 		//user plugins:
-		pathResolve(getScriptedRcDirLocation(), 'plugins')
+		pathResolve(SCRIPTED_RC, 'plugins')
 	];
 
 	/**
@@ -47,7 +51,7 @@ function configure(filesystem) {
 				if (endsWith(name, '.js')) {
 					allPlugins.push({
 						name: baseName,
-						path: SCRIPTED_PLUGINS + baseName
+						path: pathResolve(SCRIPTED_PLUGINS_WEB_PATH, baseName)
 					});
 				} else if (name!=='disabled') {
 					//handle the case where the plugin is packaged as subdirectory.
@@ -61,7 +65,9 @@ function configure(filesystem) {
 								//The main we wanna return is actually relative to
 								//the 'webroot' rather than the filesystem.
 								//So beware:
-								var mainPath = SCRIPTED_PLUGINS + name + '/' + mainName;
+								var mainPath = pathResolve(SCRIPTED_PLUGINS_WEB_PATH,
+									name + '/' + mainName
+								);
 
 								//TODO: This isn't quite correct. But it should work
 								// in most cases. The correct thing to do would be

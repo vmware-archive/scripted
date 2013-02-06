@@ -66,6 +66,24 @@ function withBaseDir(baseDir) {
 		}
 	}
 
+	/**
+	 * Fetches the location where this instance of scripted is installed.
+	 * This info is used to find stuff inside of scripted itself.
+	 *
+	 * TODO: pluggable fs : check all references to __dirname outside of this function
+	 *        they are suspect.
+	 */
+	function getScriptedHome() {
+		if (baseDir) {
+			//We are testing with a 'mini test file system' can't use the
+			// regular scripted home dir here. So use a special "scripted.home" dir under the
+			// baseDir
+			return "scripted.home";
+		} else {
+			return pathResolve(__dirname, '../..');
+		}
+	}
+
 	function handle2file(handle) {
 		if (baseDir) {
 			return pathNormalize(baseDir + '/' + handle);
@@ -215,12 +233,6 @@ function withBaseDir(baseDir) {
 		return deferred;
 	}
 
-	/**
-	 * Make the pat
-	 */
-	function getScripteApiName(handle) {
-	}
-
 	function getContents(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -355,9 +367,10 @@ function withBaseDir(baseDir) {
 
 	return {
 		getUserHome:  getUserHome,
+		getScriptedHome: getScriptedHome,
 		baseDir:      baseDir,
-		handle2file:  handle2file,
-		file2handle:  file2handle,
+		handle2file:  handle2file, //These handle <-> file mapping functions shouldn't really be
+		file2handle:  file2handle, //exported... any place that uses them our abstraction is leaking out!
 		getContents:  getContents,
 		putContents:  putContents,
 		listFiles:	  listFiles,
