@@ -13,6 +13,10 @@
 .dark .token_string {
 	color: #dddd00;
 }
+/* html uses token string with a hyphen, DOH */
+.dark .token-string {
+	color: #dddd00;
+}
 
 .dark .token_keyword {
 	color: #b58900;

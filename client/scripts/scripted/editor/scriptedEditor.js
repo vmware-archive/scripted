@@ -25,7 +25,7 @@ define([
 	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/exec/exec-keys",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require, deref, mSaveHooks, when,
@@ -35,7 +35,7 @@ define([
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager
+	mMarkoccurrences, tHelptext, themeManager, infileSearchDialog
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -342,50 +342,65 @@ define([
 
 			// Find actions
 			// These variables are used among the various find actions:
-			var textSearcher = new mTextSearcher.TextSearcher(editor, commandService, undoStack);
+//			var textSearcher = new mTextSearcher.TextSearcher(editor, commandService, undoStack);
+//			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("x", true), "Find2...");
+//			editor.getTextView().setAction("Find2...", function() {
+//
+//				$('#pageToolbar').remove();
+//
+//				var pageToolbar = $('<div class="toolbar toolComposite" id="pageToolbar">'+
+//										'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>'+
+//										'<div id="parameterArea" class="slideParameters slideContainer">'+
+//											'<span id="pageParameterArea" class="slide">'+
+//												'<span id="pageCommandParameters" class="parameters"></span>'+
+//												'<span id="pageCommandDismiss" class="parametersDismiss"></span>'+
+//											'</span>'+
+//										'</div>'+
+//									'</div>');
+//
+//				$(editor._domNode).prepend(pageToolbar);
+//
+//				var selection = editor.getSelection();
+//				var searchString = "";
+//				if (selection.end > selection.start) {
+//					var model = editor.getModel();
+//					searchString = model.getText(selection.start, selection.end);
+//				} else if (editor.lastSearchTerm){
+//					searchString = editor.lastSearchTerm;
+//				}
+//				textSearcher.buildToolBar(searchString);
+//
+//				$('#closebox').click(textSearcher._commandService.closeParameterCollector);
+//
+//				$('.scriptededitor')
+//					.off('keydown')
+//					.on('keydown', function(e){
+//						if (e.keyCode === 27){
+//							textSearcher._commandService.closeParameterCollector();
+//						}
+//					});
+//
+//				 $('#localSearchFindWith')
+//					.off('keyup')
+//					.on('keyup', function(){
+//						editor.lastSearchTerm = $('#localSearchFindWith').val();
+//					});
+//
+//				return true;
+//			});
+//
+			// Find actions
+			// New dojo-less version
+			// These variables are used among the various find actions:
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true), "Find...");
 			editor.getTextView().setAction("Find...", function() {
-
-				$('#pageToolbar').remove();
-
-				var pageToolbar = $('<div class="toolbar toolComposite" id="pageToolbar">'+
-										'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>'+
-										'<div id="parameterArea" class="slideParameters slideContainer">'+
-											'<span id="pageParameterArea" class="slide">'+
-												'<span id="pageCommandParameters" class="parameters"></span>'+
-												'<span id="pageCommandDismiss" class="parametersDismiss"></span>'+
-											'</span>'+
-										'</div>'+
-									'</div>');
-
-				$(editor._domNode).prepend(pageToolbar);
-
 				var selection = editor.getSelection();
-				var searchString = "";
+				var searchString;
 				if (selection.end > selection.start) {
 					var model = editor.getModel();
 					searchString = model.getText(selection.start, selection.end);
-				} else if (editor.lastSearchTerm){
-					searchString = editor.lastSearchTerm;
 				}
-				textSearcher.buildToolBar(searchString);
-
-				$('#closebox').click(textSearcher._commandService.closeParameterCollector);
-
-				$('.scriptededitor')
-					.off('keydown')
-					.on('keydown', function(e){
-						if (e.keyCode === 27){
-							textSearcher._commandService.closeParameterCollector();
-						}
-					});
-
-				 $('#localSearchFindWith')
-					.off('keyup')
-					.on('keyup', function(){
-						editor.lastSearchTerm = $('#localSearchFindWith').val();
-					});
-
+				infileSearchDialog.openDialog(editor,undoStack,searchString,editor._titleNode);
 				return true;
 			});
 

@@ -62,7 +62,8 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 
 					var side_percent = (side_width / $('#editor_wrapper').width()) * 100;
 					sidePanel.css('width', side_percent + "%");
-
+					
+					$('.subeditor_titlebar').trigger('widthchange');
 					if (editorUtils.getMainEditor()) {
 						// TODO proper way to do this
 						editorUtils.getMainEditor().getTextView()._update();
@@ -87,7 +88,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 
 				$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
 			
-				/*Position elements correctly on page*/
+				/* Position elements correctly on page */
 				var footer_height = $('footer').outerHeight();
 				var header_height = $('header').outerHeight();
 				var breadcrumb_height = $('#breadcrumb').outerHeight();
@@ -104,6 +105,8 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 
 				$('#help_panel').css('top', header_height + "px");
 				editorNode.height($('#main').height() - breadcrumb_height);
+				
+				breadcrumb.width(editorNode.width());
 
 				$(window).resize(function(e) {
 					var main_height = $(window).height() - footer_height - header_height;
@@ -123,6 +126,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 					editorNode.height(editor_height);
 					breadcrumb.width(editorNode.width());
 					breadcrumb.css('margin-left',editorNode.css('margin-left'));
+					breadcrumb.trigger('widthchange');
 					var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 					editorNode.css('margin-right', side_width);
 

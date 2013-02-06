@@ -349,14 +349,19 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		}
 		this.evtName = Date.now();
 		var domNode;
+		var titleNode; // TODO could be the node rather than just the selector, check on usage
 		if (kind === EDITOR_TARGET.main) {
 			domNode = $('#editor');
+			titleNode = '#breadcrumb';
 		} else {
 			domNode = buildSubEditor(filepath, this.evtName);
+			// TODO work to do here when multiple subeditors
+			titleNode = '.subeditor_titlebar';
 		}
 		
 		domNode.show();
 		var editor = mEditor.makeEditor(domNode[0], filepath, kind);
+		editor._titleNode = titleNode;
 		attachEventHandlers(editor, domNode, kind === EDITOR_TARGET.main);
 
 		$('body').off('keydown');

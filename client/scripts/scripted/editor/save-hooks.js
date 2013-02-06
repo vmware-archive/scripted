@@ -41,7 +41,7 @@ define(function(require) {
 		return when.reduce(preSaveHandlers,
 			function (acc, handler, i) {
 				return when(acc, function () {
-					console.log('handle index: '+i);
+//					console.log('handle index: '+i);
 					return handler(editor, filePath);
 				});
 			},
