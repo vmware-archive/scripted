@@ -109,7 +109,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 		 * Specifically purges keys corresponding to index entries and their timestamps
 		 */
 		purgeByTimestamp : function(threshold) {
-			// anything over 2 days old is considered stale
+			// anything over the threshold is considered stale
 			function isStale(val, currentTime) {
 				var ts = parseInt(val, 10);
 				if (ts) {
