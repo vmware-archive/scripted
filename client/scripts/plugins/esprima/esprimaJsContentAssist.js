@@ -129,6 +129,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// need this because jslintworker.js augments the String prototype with a name() function
 				// don't want confusion
 				argName = params[p];
+				var slashIndex = argName.indexOf('/');
+				if (slashIndex > 0) {
+					argName = argName.substring(0, slashIndex);
+				}
 			} else if (params[p].name) {
 				argName = params[p].name();
 			} else {
@@ -1558,14 +1562,14 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
 					
 					if (argSig) {
-						var sig = createReadableType(argSig, env, useFunctionSig, depth+1);
+						var sig = createReadableType(argSig, env, true, depth+1);
 						argsSigs.push(argName + ":" + sig);
 					} else {
 						argsSigs.push(argName);
 					}
-					
 				});
-				// note the use of the &rarr; char here
+				
+				// note the use of the &rArr; char here.  Must use the char directly since js_render will format it otherwise
 				return prefix + "(" + argsSigs.join(",") + ") ⇒ " + createReadableType(funType, env, useFunctionSig, 1);
 			} else {
 				// use the return type
@@ -1589,9 +1593,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					var name;
 					// don't show inner objects
 					if (!depth) {
-						name = createReadableType(type[val].typeName, env, false, 1);
+						name = createReadableType(type[val].typeName, env, true, 1);
 					} else {
-						name = createReadableType(type[val].typeName, env, false, 2);
+						name = createReadableType(type[val].typeName, env, true, 2);
 					}
 					res += val + " : " + name;
 				}
