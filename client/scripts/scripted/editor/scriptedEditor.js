@@ -565,6 +565,34 @@ define([
 		editor.setScroll = function(newScroll) {
 			$(this._domNode).find('.textview').scrollTop(newScroll);
 		};
+		
+		/**
+		 * @return Array.<String> the array of css classes applied to the span at the current offset
+		 * will tell you the location (eg- inside comment, etc) at the location
+		 */
+		mTextView.TextView.prototype.getPartitionType = function(offset) {
+			var model = this.getModel();
+			var lineNum = model.getLineAtOffset(offset);
+			var line = this._getLine(lineNum);
+			if (line._lineDiv) {
+				var lineStart = model.getLineStart(lineNum);
+				var remainingLength = offset - lineStart;
+				var child = line._lineDiv.firstChild;
+				while (child) {
+					remainingLength -= child.innerText.length;
+					if (remainingLength <= 0) {
+						break;
+					}
+					child = child.nextSibling;
+				}
+				
+				if (child) {
+					return child.classList;
+				}
+			}
+			return [];
+		};
+		
 		// end extra editor functions
 		////////////////////////////////////////
 

@@ -190,13 +190,29 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.dispatchEvent({type: "ProposalApplied", data: data});
 			return true;
 		},
-
+		
 		// SCRIPTED
+		// TODO find a better place to put this.  I don't like
+		// having javascript-specific things creeping into the
+		// general purpose content assistant.
+		IGNORABLE_PARTITIONS : {"token_task_tag":true, "token_doc_tag":true, "token_string":true, "token_singleline_comment":true, "token_multiline_comment":true, "token_doc_comment":true, "token_doc_html_markup":true},
+		
 		/** @private
 		 * provides auto-activation for content assist on '.'
 		 */
 		autoActivate : function(e) {
 			if (e.text === '.' && !this.activationRequest) {
+				// simple check to see if we are in a valid location
+				// for content assist.
+				// if not, prevent auto-activation
+				// for now, allow explicit activation to show proposals
+				var classes = this.textView.getPartitionType(e.start);
+				for (var i = 0; i < classes.length; i++) {
+					if (classes[i] in this.IGNORABLE_PARTITIONS) {
+						return;
+					}
+				}
+				
 				this.activationRequest = setTimeout(function() {
 					this.activate();
 					this.activationRequest = null;
