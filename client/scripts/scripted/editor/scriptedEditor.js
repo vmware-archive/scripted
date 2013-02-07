@@ -21,21 +21,16 @@ define([
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
-	"plugins/esprima/indexerService", "orion/selection", "orion/commands",
-	"orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
+	"plugins/esprima/indexerService", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
-], function (
-	require, deref, mSaveHooks, when,
-	mTextView, mKeyBinding, mEditor, mKeystroke,
+], function ( require, deref, mSaveHooks, when, mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
-	mIndexerService, mSelection, mCommands,
-	mHtmlGrammar, mModuleVerifier,
-	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
-	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager, infileSearchDialog
+	mIndexerService, mHtmlGrammar, mModuleVerifier,	mJshintDriver, mJsBeautify, mTextModel,
+	mProjectionModel, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
+	tHelptext, themeManager, infileSearchDialog
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -153,10 +148,6 @@ define([
 			}
 		}
 
-		var selection = new mSelection.Selection();
-		var commandService = new mCommands.CommandService({
-			selection: selection
-		});
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
