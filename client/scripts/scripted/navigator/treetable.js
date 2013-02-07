@@ -260,7 +260,7 @@ define(['dojo'], function(dojo) {
 					}
 				});
 			}
-		}, 
+		},
 		
 		_removeChildRows: function(parentId) {
 			var table = dojo.byId(this._id);

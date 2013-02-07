@@ -14,7 +14,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], function(require, dojo, mTreeTable, mContextMenu){
+define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], 
+function(require, dojo, mTreeTable, mContextMenu) {
 
 var exports = {};
 
@@ -164,15 +165,14 @@ exports.ExplorerModel = (function() {
 		};
 
 	var getFullPathID = function(item) {
-			return "" + (item.Location ? item.Location : item);
-		};
+		return "" + (item.Location ? item.Location : item);
+	};
 
 	var resolveID = function(item) {
-			var shouldUseNoPath = false;
-
-			return shouldUseNoPath ? getNoPathSeparatorID(item) : getFullPathID(item);
-
-		};
+		var shouldUseNoPath = false;
+		return shouldUseNoPath ? getNoPathSeparatorID(item) : getFullPathID(item);
+	};
+	
 	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */
 	{
 		destroy: function() {},
@@ -281,7 +281,7 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			dojo.empty(tableNode);
-			dojo.addClass(tableNode, 'treetable');
+			$(tableNode).addClass('treetable');
 			this.renderTableHeader(tableNode);
 
 		},
@@ -291,7 +291,7 @@ exports.ExplorerRenderer = (function() {
 			var actionsColumn = document.createElement('td');
 			actionsColumn.id = tableRow.id + "actionswrapper";
 			if (columnClass) {
-				dojo.addClass(actionsColumn, columnClass);
+				$(actionsColumn).addClass(columnClass);
 			}
 			// contact the command service to render appropriate commands here.
 			if (this.actionScopeId) {
@@ -312,7 +312,7 @@ exports.ExplorerRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement("span");
 				check.id = this.getCheckBoxId(tableRow.id);
-				dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite");
+				$(check).addClass("core-sprite-check selectionCheckmarkSprite");
 				check.itemId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
@@ -372,12 +372,12 @@ exports.ExplorerRenderer = (function() {
 					var tableRow = dojo.byId(selections[i]);
 					if (tableRow) {
 						if(this._highlightSelection){
-							dojo.addClass(tableRow, "checkedRow");
+							$(tableRow).addClass("checkedRow");
 						}
 						var check = dojo.byId(this.getCheckBoxId(tableRow.id));
 						if (check) {
 							check.checked = true;
-							dojo.addClass(check, "core-sprite-check_on");
+							$(check).addClass("core-sprite-check_on");
 						}
 					}
 				}
@@ -440,8 +440,8 @@ exports.ExplorerRenderer = (function() {
 		updateExpandVisuals: function(tableRow, isExpanded) {
 			var expandImage = dojo.byId(this.expandCollapseImageId(tableRow.id));
 			if (expandImage) {
-				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
-				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
+				$(expandImage).addClass(isExpanded ? this._expandImageClass : this._collapseImageClass);
+				$(expandImage).removeClass(isExpanded ? this._collapseImageClass : this._expandImageClass);
 			}
 		},
 
@@ -451,12 +451,12 @@ exports.ExplorerRenderer = (function() {
 		
 		getExpandImage: function(tableRow, placeHolder, /* optional extra decoration */ decorateImageClass, /* optional sprite class for extra decoration */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.addClass(expandImage, this._twistieSpriteClass);
-			dojo.addClass(expandImage, this._collapseImageClass);
+			$(expandImage).addClass(this._twistieSpriteClass);
+			$(expandImage).addClass(this._collapseImageClass);
 			if (decorateImageClass) {
 				var decorateImage = dojo.create("span", null, placeHolder, "last");
-				dojo.addClass(decorateImage, spriteClass || "imageSprite");
-				dojo.addClass(decorateImage, decorateImageClass);
+				$(decorateImage).addClass(spriteClass || "imageSprite");
+				$(decorateImage).addClass(decorateImageClass);
 			}
 
 			expandImage.onclick = dojo.hitch(this, function(evt) {
@@ -518,11 +518,11 @@ exports.ExplorerRenderer = (function() {
 			        } else {
 					if (!dojo.hasClass(node,"highlightrow")) {
 						if (i % 2) {
-							dojo.addClass(node, "darkTreeTableRow");
-							dojo.removeClass(node, "lightTreeTableRow");
+							$(node).addClass("darkTreeTableRow");
+							$(node).removeClass("lightTreeTableRow");
 						} else {
-							dojo.addClass(node, "lightTreeTableRow");
-							dojo.removeClass(node, "darkTreeTableRow");
+							$(node).addClass("lightTreeTableRow");
+							$(node).removeClass("darkTreeTableRow");
 						}
 					}
 					}
@@ -596,7 +596,7 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
 		var row = document.createElement('tr');
-		dojo.addClass(thead, "navTableHeading");
+		$(thead).addClass("navTableHeading");
 		var th, actions, size;
 		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
@@ -607,9 +607,9 @@ exports.SelectionRenderer = (function(){
 		var cell = this.getCellHeaderElement(i);
 		while(cell){
 			if (cell.innerHTML.length > 0) {
-				dojo.addClass(cell, "navColumn");
+				$(cell).addClass("navColumn");
 			}
-			row.appendChild(cell);			
+			row.appendChild(cell);
 			cell = this.getCellHeaderElement(++i);
 		}
 */
@@ -619,7 +619,7 @@ exports.SelectionRenderer = (function(){
 	
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
-		dojo.addClass(tableRow, "treeTableRow");
+		$(tableRow).addClass("treeTableRow");
 		
 		// Attach context menus to tree elements
 		mContextMenu.initContextMenus(tableRow);
@@ -629,7 +629,7 @@ exports.SelectionRenderer = (function(){
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
-			dojo.addClass(checkColumn, 'checkColumn');
+			$(checkColumn).addClass('checkColumn');
 			tableRow.appendChild(checkColumn);
 		}
 
@@ -638,7 +638,7 @@ exports.SelectionRenderer = (function(){
 		while(cell){
 			tableRow.appendChild(cell);
 			if (i!==1) {
-				dojo.addClass(cell, 'secondaryColumn');
+				$(cell).addClass('secondaryColumn');
 			}
 			cell = this.getCellElement(++i, item, tableRow);
 		}
