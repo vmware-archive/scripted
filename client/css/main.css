@@ -267,6 +267,14 @@ footer{
 	height:20px;
 }
 
+#nav_toggle {
+	margin: 5px 5px 0 0;
+	cursor:pointer;
+	background-image: url(../images/navtoggle.png);
+	width:20px;
+	height:20px;
+}
+
 #breadcrumb{
 	height:36px;
 	width:auto;
@@ -507,6 +515,7 @@ footer{
 
 .textviewContent{
 	cursor:text;
+	padding-left: 3px;
 }
 
 
@@ -537,12 +546,17 @@ footer{
 
 .ui-icon { width: 16px; height: 16px; background-image: url(../images/ui-icons.png)/*{iconsContent}*/; }
 .ui-resizable { position: relative;}
-.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block;}
+.ui-resizable-handle { 
+	position: absolute;font-size: 0.1px;z-index: 99999; display: block;
+	-webkit-box-shadow: inset 3px -1px 3px #000000;
+}
 .ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
 .ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0px; }
 .ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0px; }
-.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0px; height: 100%; }
+/* This is a left/right draggable cursor */
+.ui-resizable-e { cursor: ew-resize; width: 7px; right: -5px; top: 0px; height: 100%; }
 .ui-resizable-w { cursor: w-resize; width: 10px; left: 0px; top: 0px; height: 100%; }
+.ui-resizable-ew { cursor: ew-resize; width: 10px; left: 0px; top: 0px; height: 100%; }
 .ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
 .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
 .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }

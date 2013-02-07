@@ -28,7 +28,7 @@
 //      before hitting a humongous line, then it is acceptable that those initial lines
 //      are still sent to the lineFun.
 
-var fs = require('fs');
+var fs = require('fs'); //TODO: non plugable fs here
 
 var NEWLINE = '\n';  // TODO  doesn't care about \r - maybe it should
 var MAX_LINE_LEN = 1000; //if lines are longer than this, we bail out of trying to read the file
@@ -59,7 +59,7 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 	var lineNumber = 0;
 
 	var stream;
-	
+
 	/**
 	 * Destroy the underlying stream and provide an explanation to the doneFn
 	 * about the 'abnormal' termination
@@ -72,7 +72,7 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 			doneFun(explanation);
 		}
 	}
-	
+
 	try {
 		if (typeof(pathOrStream==='string')) {
 			stream = fs.createReadStream(pathOrStream, {encoding: 'utf8'});
@@ -111,7 +111,7 @@ function eachLine(pathOrStream, lineFun, doneFun) {
 				destroy('minified');
 			}
 		}
-	
+
 	});
 	stream.on('end', function () {
 		if (stream) {

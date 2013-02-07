@@ -18,13 +18,13 @@ var config = {
 		{ name: 'probes', location: '../components/probes', main:'probe', lib: '.'},
 		{ name: 'when', location: '../components/when', main:'when', lib: '.'},
 		{ name: 'wire', location: '../components/wire', main:'wire', lib: '.'},
-		{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'}
+		{ name: 'meld', location: '../components/meld', main:'meld', lib: '.'},
+		{ name: 'text', location: '../components/requirejs-text', main: 'text'},
+		{ name: 'i18n', location: '../components/requirejs-i18n', main: 'i18n'}
 	],
 	paths: {
 		'orion/assert' : '../tests/client/assert',
 		'esprima/esprima' : 'lib/esprima/esprima',
-		i18n: '../components/requirejs/i18n',
-		text: '../components/requirejs/text',
 		jsbeautify: 'lib/beautify',
 		jsrender: 'lib/jsrender',
 		jshint: 'lib/jshint-r12-80277ef',
@@ -34,7 +34,7 @@ var config = {
 		fileapi: 'scripted/fileapi',
 		'doctrine/doctrine' : '../components/doctrine/doctrine',
 		'lib/json5' : '../components/json5/lib/json5',
-		
+
 		tests: '../tests'
 	}
 };

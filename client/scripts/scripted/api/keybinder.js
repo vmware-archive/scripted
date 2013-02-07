@@ -24,8 +24,24 @@
 define(function(require){
 	var keybinder = require('scripted/keybindings/keybinder');
 
-	function setKeyBinding(keystroke, action) {
-		keybinder.setPluginKeyBinding(keystroke, action);
+	/**
+	 * Assign a given actionID (either a built-in editor actionID, or one defined via
+	 * editor-extensions.setAction) to a given keystroke.
+	 * <p>
+	 * This overwrites any prior keybinding associated with given keystroke if
+	 *    - it was registered via this API method
+	 *    - it was a built-in editor keybinding
+	 * However, it does not override changes made to keybingings via the scripted keybindings help panel.
+	 * The bindings made via the help panel have higher priority than those made via this API.
+	 * <p>
+	 * This allows plugins to define default keybindings while allowing users to still
+	 * change them via the keybinder UI.
+	 *
+	 * @param {String} keystroke
+	 * @param {String} actionID
+	 */
+	function setKeyBinding(keystroke, actionID) {
+		keybinder.setPluginKeyBinding(keystroke, actionID);
 	}
 
 	return {

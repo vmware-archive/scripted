@@ -12,6 +12,7 @@
 	min-width: 50px;
 	min-height: 50px;
 */
+	-webkit-box-shadow: -5px 0px 5px #0f0;
 	background-color: white;/*#eeeeee*/;
 	font-family: Monaco, Consolas, "Lucida Console", "Ubuntu Mono", Monospace, monospace;
 	font-size: 9pt;

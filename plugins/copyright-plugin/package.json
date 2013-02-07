@@ -1,0 +1,14 @@
+{	
+	//Scripted is ok with this because it uses JSON5, but likely node/npm won't
+	//like this 'json' file as its not true json syntax.
+	
+	name: 'copyright-plugin',
+	version: '0.9',
+	description: 'A Scripted plugin that adds copyright headers to files upon saving',
+	main: 'copyright-plugin',
+	scripted: {
+		//This information isn't used yet. But maybe we could stuff some useful things in
+		//here to help scripted provider better support for finding / editing plugins.
+		plugin: true
+	}
+}

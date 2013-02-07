@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports console module process */
 
 //////////////////////////////////////
@@ -29,6 +29,7 @@ var utils = require('./utils');
 
 var pathNormalize = utils.pathNormalize;
 var pathResolve = utils.pathResolve;
+var startsWith = utils.startsWith;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -51,7 +52,7 @@ function ignore(name) {
 function withBaseDir(baseDir) {
 	var fs = require('fs');
 	var encoding = 'UTF-8';
-	
+
 	function getUserHome() {
 		if (baseDir) {
 			//We are testing with a 'mini test file system' can't use the
@@ -64,7 +65,25 @@ function withBaseDir(baseDir) {
 			return process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
 		}
 	}
-	
+
+	/**
+	 * Fetches the location where this instance of scripted is installed.
+	 * This info is used to find stuff inside of scripted itself.
+	 *
+	 * TODO: pluggable fs : check all references to __dirname outside of this function
+	 *        they are suspect.
+	 */
+	function getScriptedHome() {
+		if (baseDir) {
+			//We are testing with a 'mini test file system' can't use the
+			// regular scripted home dir here. So use a special "scripted.home" dir under the
+			// baseDir
+			return "scripted.home";
+		} else {
+			return pathResolve(__dirname, '../..');
+		}
+	}
+
 	function handle2file(handle) {
 		if (baseDir) {
 			return pathNormalize(baseDir + '/' + handle);
@@ -72,7 +91,7 @@ function withBaseDir(baseDir) {
 			return handle;
 		}
 	}
-	
+
 	function file2handle(file) {
 		var h;
 		if (baseDir) {
@@ -88,7 +107,7 @@ function withBaseDir(baseDir) {
 									// TODO: in the long run the right thing to do is properly use
 									// libraries like 'path' in node to do all path manipulation.
 	}
-	
+
 	function isFile(handle, callback) {
 		if (typeof(handle)!=='string') {
 			callback(false);
@@ -107,6 +126,15 @@ function withBaseDir(baseDir) {
 	}
 
 	function isDirectory(handle, callback) {
+		var d, p;
+		if (!callback) {
+			//Switch to using promises.
+			d = when.defer();
+			p = d.promise;
+			callback = function (isDir) {
+				d.resolve(isDir);
+			};
+		}
 		fs.stat(handle2file(handle), function (err, stats) {
 			if (err) {
 				//console.log(err);
@@ -115,8 +143,9 @@ function withBaseDir(baseDir) {
 				callback(stats.isDirectory());
 			}
 		});
+		return p;
 	}
-	
+
 	function rename(handleOriginal, handleRename) {
 		var original = handle2file(handleOriginal);
 		var newname = handle2file(handleRename);
@@ -168,7 +197,7 @@ function withBaseDir(baseDir) {
 			}
 		});
 	}
-	
+
 	function deleteFile(_handle) {
 		var file = handle2file(_handle);
 		var deferred = when.defer();
@@ -203,7 +232,7 @@ function withBaseDir(baseDir) {
 		});
 		return deferred;
 	}
-	
+
 	function getContents(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -253,7 +282,7 @@ function withBaseDir(baseDir) {
 		};
 	}
 
-	
+
 	function listFiles(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -321,7 +350,7 @@ function withBaseDir(baseDir) {
 	 */
 	function stat(handle) {
 //		console.log('statting: '+handle);
-		
+
 		var d = when.defer();
 		fs.stat(file2handle(handle), function (err, statObj) {
 			if (err) {
@@ -335,12 +364,13 @@ function withBaseDir(baseDir) {
 		});
 		return d.promise;
 	}
-	
+
 	return {
 		getUserHome:  getUserHome,
+		getScriptedHome: getScriptedHome,
 		baseDir:      baseDir,
-		handle2file:  handle2file,
-		file2handle:  file2handle,
+		handle2file:  handle2file, //These handle <-> file mapping functions shouldn't really be
+		file2handle:  file2handle, //exported... any place that uses them our abstraction is leaking out!
 		getContents:  getContents,
 		putContents:  putContents,
 		listFiles:	  listFiles,

@@ -24,13 +24,15 @@ define([
 	"plugins/esprima/indexerService", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", 
+"scripted/utils/storage",
+"scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function ( require, deref, mSaveHooks, when, mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mHtmlGrammar, mModuleVerifier,	mJshintDriver, mJsBeautify, mTextModel,
 	mProjectionModel, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
-	tHelptext, themeManager, infileSearchDialog
+	tHelptext, themeManager, storage, infileSearchDialog
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -279,6 +281,22 @@ define([
 				$('#help_open').click();
 				return true;
 			});
+			
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F2'), "Toggle Navigator");
+			editor.getTextView().setAction("Toggle Navigator",function() {
+				layoutManager.toggleNavigatorVisible();
+				return true;
+			},"Toggle Navigator");
+			$('#nav_toggle').on('click', function() {
+				editor.getTextView().invokeAction("Toggle Navigator",false);
+				return true;
+			});
+			
+			// No keybinding by default
+			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
+				syntaxHighlighter.toggleWhitespacesVisible();
+				return true;
+			},"Toggle Visible Whitespace");
 
 			// Text formatting
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", /*command/ctrl*/ false, /*shift*/ true, /*alt*/ true), "Format text");
@@ -416,6 +434,15 @@ define([
 		// based on the stuff from embeddededitor.js (orion sample).
 		var syntaxHighlighter = {
 			styler: null,
+			visibleWhitespace: false,
+			
+			toggleWhitespacesVisible: function(visible) {
+				if (this.styler && this.styler.setWhitespacesVisible) {
+					this.visibleWhitespace = !this.visibleWhitespace;
+					this.styler.setWhitespacesVisible(this.visibleWhitespace);
+					editor.getTextView().update(true);
+				}
+			},
 
 			highlight: function(path, editor) {
 				if (this.styler) {
@@ -439,6 +466,9 @@ define([
 							break;
 						}
 					}
+				}
+				if (this.styler && this.styler.setWhitespacesVisible) {
+					this.styler.setWhitespacesVisible(this.visibleWhitespace);
 				}
 			}
 		};
@@ -490,6 +520,34 @@ define([
 		editor.setScroll = function(newScroll) {
 			$(this._domNode).find('.textview').scrollTop(newScroll);
 		};
+		
+		/**
+		 * @return Array.<String> the array of css classes applied to the span at the current offset
+		 * will tell you the location (eg- inside comment, etc) at the location
+		 */
+		mTextView.TextView.prototype.getPartitionType = function(offset) {
+			var model = this.getModel();
+			var lineNum = model.getLineAtOffset(offset);
+			var line = this._getLine(lineNum);
+			if (line._lineDiv) {
+				var lineStart = model.getLineStart(lineNum);
+				var remainingLength = offset - lineStart;
+				var child = line._lineDiv.firstChild;
+				while (child) {
+					remainingLength -= child.innerText.length;
+					if (remainingLength <= 0) {
+						break;
+					}
+					child = child.nextSibling;
+				}
+				
+				if (child) {
+					return child.classList;
+				}
+			}
+			return [];
+		};
+		
 		// end extra editor functions
 		////////////////////////////////////////
 
@@ -505,7 +563,9 @@ define([
 
 		editor.installTextView(function(buffer, offset) {
 			if (isJS) {
-				return jsContentAssistant.computeHover(buffer, offset);
+				var hoverText = jsContentAssistant.computeHover(buffer, offset);
+//				return hoverText;
+				return hoverText ? "<pre>" + js_beautify(hoverText) + "</pre>" : hoverText;
 			} else {
 				return null;
 			}

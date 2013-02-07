@@ -129,6 +129,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// need this because jslintworker.js augments the String prototype with a name() function
 				// don't want confusion
 				argName = params[p];
+				var slashIndex = argName.indexOf('/');
+				if (slashIndex > 0) {
+					argName = argName.substring(0, slashIndex);
+				}
 			} else if (params[p].name) {
 				argName = params[p].name();
 			} else {
@@ -164,18 +168,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		return offset < range[0];
 	}
 	
-	// not used...OK to delete?
-//	/**
-//	 * checks that offset is after the range
-//	 * @return Boolean
-//	 */
-//	function isAfter(offset, range) {
-//		if (!range) {
-//			return true;
-//		}
-//		return offset > range[1];
-//	}
-
 	/**
 	 * Determines if the offset is inside this member expression, but after the '.' and before the
 	 * start of the property.
@@ -954,7 +946,28 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				node.body.extras = {};
 			}
 			node.body.extras.isConstructor = isConstuctor;
-			var functionTypeName = (isConstuctor ? "*" : "?") + newTypeName + ":" + params;
+			
+			// add parameters to the current scope
+			var paramTypeSigs = [], paramSigs = [];
+			if (params.length > 0) {
+				var moduleDefs = findModuleDefinitions(node, env);
+				for (i = 0; i < params.length; i++) {
+					// choose jsdoc tags over module definitions
+					var jsDocParam = jsdocResult.params[params[i]];
+					var typeName = null;
+					if (jsDocParam) {
+						typeName = convertJsDocType(jsDocParam, env);
+					}
+					if (!typeName) {
+						typeName = moduleDefs[i];
+					}
+					paramTypeSigs.push(typeName);
+					paramSigs.push(params[i] + "/" + typeName);
+				}
+			}
+
+			
+			var functionTypeName = (isConstuctor ? "*" : "?") + newTypeName + ":" + paramSigs.join(",");
 			if (isConstuctor) {
 				env.createConstructor(functionTypeName, newTypeName);
 				// assume that constructor will be available from global scope using qualified name
@@ -972,6 +985,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			// now add the scope for inside the function
 			env.newScope();
 			env.addVariable("arguments", node.extras.target, "Arguments", node.range);
+			
 
 			// now determine if we need to add 'this'.  If this function has an appliesTo, the we know it is being assigned as a property onto something else
 			// the 'something else' is the 'this' type.
@@ -990,21 +1004,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 			}
 			
-			// add parameters to the current scope
-			if (params.length > 0) {
-				var moduleDefs = findModuleDefinitions(node, env);
-				for (i = 0; i < params.length; i++) {
-					// choose jsdoc tags over module definitions
-					var jsDocParam = jsdocResult.params[params[i]];
-					var typeName = null;
-					if (jsDocParam) {
-						typeName = convertJsDocType(jsDocParam, env);
-					}
-					if (!typeName) {
-						typeName = moduleDefs[i];
-					}
-					env.addVariable(params[i], node.extras.target, typeName, node.params[i].range);
-				}
+			// add variables for all parameters
+			for (i = 0; i < params.length; i++) {
+				env.addVariable(params[i], node.extras.target, paramTypeSigs[i], node.params[i].range);
 			}
 			break;
 		case "VariableDeclarator":
@@ -1407,7 +1409,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						env.addVariable(name, node.extras.target, env.newFleetingObject(), node.range);
 					} else {
 						// add as a global variable
-						node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range);
+						node.extras.inferredType = env.addOrSetGlobalVariable(name, null, node.range).typeName;
 					}
 				} else {
 					// We found it! rmember for later, but continue to the end of file anyway
@@ -1553,7 +1555,22 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// convert into a function signature
 				var prefix = first === "?" ? "" : "new";
 				var args = typeName.substring(nameEnd+1, typeName.length);
-				return prefix + "(" + args + ") -> " + createReadableType(funType, env, useFunctionSig, 1);
+				var argsSigs = [];
+				args.split(",").forEach(function(arg) {
+					var typeSplit = arg.indexOf("/");
+					var argName = typeSplit > 0 ? arg.substring(0, typeSplit) : arg;
+					var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
+					
+					if (argSig) {
+						var sig = createReadableType(argSig, env, true, depth+1);
+						argsSigs.push(argName + ":" + sig);
+					} else {
+						argsSigs.push(argName);
+					}
+				});
+				
+				// note the use of the &rArr; char here.  Must use the char directly since js_render will format it otherwise
+				return prefix + "(" + argsSigs.join(",") + ") ⇒ " + createReadableType(funType, env, useFunctionSig, 1);
 			} else {
 				// use the return type
 				return createReadableType(funType, env, useFunctionSig, depth);
@@ -1576,9 +1593,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					var name;
 					// don't show inner objects
 					if (!depth) {
-						name = createReadableType(type[val].typeName, env, false, 1);
+						name = createReadableType(type[val].typeName, env, true, 1);
 					} else {
-						name = createReadableType(type[val].typeName, env, false, 2);
+						name = createReadableType(type[val].typeName, env, true, 2);
 					}
 					res += val + " : " + name;
 				}
@@ -1877,6 +1894,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						// do nuthin
 					} else {
 						type[name] = new mTypes.Definition(typeName ? typeName : "Object", range, this.uid);
+						return type[name];
 					}
 				}
 			},
@@ -1909,8 +1927,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				var current = this._allTypes[targetType], found = false;
 				// if no type provided, create a new type
 				typeName = typeName ? typeName : this.newFleetingObject();
+				var defn;
 				while (current) {
 					if (typeContainsProperty(current, name)) {
+						defn = current[name];
 						// found it, just overwrite
 						// do not allow overwriting of built in types
 						// 3 cases to avoid:
@@ -1918,10 +1938,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						//  2. builtin types cannot be redefined
 						//  3. new type name is more general than old type
 						if (!current.$$isBuiltin && current.hasOwnProperty(name) &&
-								!leftTypeIsMoreGeneral(typeName, current[name].typeName, this)) {
-							// since we are just overwriting the type we do not want to change 
+								!leftTypeIsMoreGeneral(typeName, defn.typeName, this)) {
+							// since we are just overwriting the type we do not want to change
 							// the path or the range
-							current[name].typeName = typeName;
+							defn.typeName = typeName;
 						}
 						found = true;
 						break;
@@ -1937,10 +1957,11 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// do not allow overwriting of built in types
 					var type = this._allTypes[targetType];
 					if (!type.$$isBuiltin) {
-						type[name] = new mTypes.Definition(typeName, range, this.uid);
+						defn = new mTypes.Definition(typeName, range, this.uid);
+						type[name] = defn;
 					}
 				}
-				return typeName;
+				return defn;
 			},
 						
 			/** looks up the name in the hierarchy */

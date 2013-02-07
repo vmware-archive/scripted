@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global __dirname exports require console*/
 //This file is a 'scratchpad' in which I paste some snippets of code
 //to run in debugger.
@@ -36,8 +36,12 @@
 //	.getAmdConfig2;
 //	.simpleRequireJsProject;
 
-var testCase = require('./resolver-test')
-	.subPackageImport;
+var testCase = require('./plugin-discovery-test')
+	.one;
+
+//var testCase = require('./resolver-test')
+//	.pathAwarenessSimple;
+//	.subPackageImport;
 //	.voloSample;
 //	.resolveNodeModule;
 //	.commonsJsWrappedModuleInAmdEnabledContext;

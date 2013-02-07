@@ -17,7 +17,6 @@ define([
 		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration'],
 
 function(
-
 	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration) {
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
@@ -50,8 +49,12 @@ function(
 					window.scripted.promises = {
 						"loadJshintrc": loadJshintrc(dotScripted.jshint, pageState)
 					};
+					
+					layoutManager.toggleNavigatorVisible(!isNavigatorOff(dotScripted));
 
-					layoutManager.setNavigatorHidden(hasNavigator(dotScripted), fileExplorer);
+					// Whether on screen or not, let's initialize it (could be smarter here but
+					// want it to appear quickly when requested).
+					initializeNavigator(fileExplorer);
 
 					processConfiguration(dotScripted);
 
@@ -67,12 +70,22 @@ function(
 						mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
 					}
 				});
+				
+				function initializeNavigator(fileExplorer) {
+					var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
+					fileExplorer.loadResourceList(window.fsroot /*pageParams.resource*/ , false, function() {
+						// highlight the row we are using
+						setTimeout(function() {
+							fileExplorer.highlight(pageState.main.path);
+						}, 500);
+					});
+				}
 
 				// Detach configReady so that it and its fulfillment value
 				// can be garbage collected;
 				delete this.configReady;
 
-				function hasNavigator(dotScripted) {
+				function isNavigatorOff(dotScripted) {
 					return dotScripted && dotScripted.ui && dotScripted.ui.navigator===false;
 				}
 

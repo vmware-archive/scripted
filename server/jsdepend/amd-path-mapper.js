@@ -27,7 +27,7 @@ function configure(resolverConf) {
 
 	function getPackageMap(resolverConf) {
 		var packages = resolverConf && resolverConf.packages;
-		
+
 		function map(name) {
 			//TODO: cache this function?
 			for (var i=0; i<packages.length; i++) {
@@ -55,7 +55,7 @@ function configure(resolverConf) {
 				}
 			}
 		}
-		
+
 		if (packages && packages.length > 0) {
 			return map;
 		}
@@ -67,12 +67,25 @@ function configure(resolverConf) {
 	 * a resolverConf
 	 */
 	function getPathMap(resolverConf) {
+		//TODO: code structure is illogical and leads to bugs:
+		// this code also takes into account baseDir... but
+		// it would be nicer to treat that as an extra path mapping function.
+
 		var pathBlock = resolverConf && resolverConf.paths;
 		if (pathBlock) {
 			return function (name) {
-				//TODO: For now we only support if module names are listed exactly in the
-				//path's block. We don't handle nested path blocks or remapping directories
-				return pathResolve(resolverConf.baseDir, pathBlock[name]);
+				var exactMatch = pathBlock[name];
+				if (typeof(exactMatch)==='string') {
+					return pathResolve(resolverConf.baseDir, exactMatch);
+				}
+				for (var prefix in pathBlock) {
+					if (pathBlock.hasOwnProperty(prefix)) {
+						if (startsWith(name, prefix+'/')) {
+							return pathResolve(resolverConf.baseDir,
+								pathBlock[prefix]+name.substring(prefix.length));
+						}
+					}
+				}
 			};
 		}
 		return nullMap;
@@ -88,7 +101,7 @@ function configure(resolverConf) {
 	}
 
 	return mapPaths;
-	
+
 }
 
 exports.configure = configure;

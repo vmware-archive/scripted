@@ -14,7 +14,7 @@
 /////////////////////////////////////
 // amd-support
 //
-//   Implementation of discovery algorithms for finding amd configuration 
+//   Implementation of discovery algorithms for finding amd configuration
 //   in html or js files.
 /////////////////////////////////////
 
@@ -22,29 +22,34 @@ var parser = require("./parser");
 var treeMatcher = require('./tree-matcher');
 var map = require('./utils').map;
 var eachk = require('./utils').eachk;
+var deref = require('./utils').deref;
 var when = require('when');
+var jsonMerge = require('./json-merge');
+var getDirectory = require('./utils').getDirectory;
+var orMap = require('./utils').orMap;
+var ork = require('./utils').ork;
+var getScriptTags = require('./script-tag-finder').getScriptTags;
+var getScriptCode = require('./script-tag-finder').getScriptCode;
+var treeMatcher = require('./tree-matcher');
+var andPat = treeMatcher.andPat;
+var orPat = treeMatcher.orPat;
 
-function configure(filesystem) {
+function configure(conf) {
 
-	var parser = require("./parser");
-	var treeMatcher = require('./tree-matcher');
 	//Note:
 	//   conf = the 'global' configuration for the api, provides file system type operations
 	//   resolverConf = configuration information for the resolver, varies based on the context
 	//                  of where a reference came from.
 
-	var andPat = treeMatcher.andPat;
-	var orPat = treeMatcher.orPat;
-	
-	var getContents = filesystem.getContents;
-	var getDirectory = require('./utils').getDirectory;
-	var orMap = require('./utils').orMap;
-	var ork = require('./utils').ork;
-	var deref = require('./utils').deref;
-	var listFiles = filesystem.listFiles;
+	//conf.amd may contain additional amd config to add to the found config.
+	//Only extra amd path elements are supported at the moment
+	var extraPaths = deref(conf, ['amd', 'paths']);
+
+	var parser = require("./parser");
+
+	var getContents = conf.getContents;
+	var listFiles = conf.listFiles;
 	var pathResolve = require('./utils').pathResolve;
-	var getScriptTags = require('./script-tag-finder').getScriptTags;
-	var getScriptCode = require('./script-tag-finder').getScriptCode;
 	var objectPat = treeMatcher.objectPat;
 	var successPat = treeMatcher.successPat;
 	var containsPat = treeMatcher.containsPat;
@@ -52,11 +57,11 @@ function configure(filesystem) {
 	var variablePat = treeMatcher.variablePat;
 	var arrayWithElementPat = treeMatcher.arrayWithElementPat;
 	var isHtml = require('./html-utils').isHtml;
-	
+
 	function endsWith(str, suffix) {
 		return str.indexOf(suffix, str.length - suffix.length) !== -1;
 	}
-	
+
 	function objectWithProperty(propName) {
 		return objectPat({
 			"type": "ObjectExpression",
@@ -76,7 +81,7 @@ function configure(filesystem) {
 	/**
 	 * Matches an expression that refers to the require function to
 	 * be called with configuration data.
-	 * This is a pattern so that we can more easily allow for 
+	 * This is a pattern so that we can more easily allow for
 	 * a few different ways to refer to this function.
 	 */
 	var requireConfigFunctionPat = orPat([
@@ -98,11 +103,11 @@ function configure(filesystem) {
     ]);
 
 	var configBlockPat = objectWithProperty(orPat(["baseUrl", "paths", "packages"]));
-	
+
 	function findIndirectConfigBlock(tree) {
-	
+
 		var configIdNameVar = variablePat('string');
-		
+
 		var requireCallWithIdentifier = containsPat(objectPat({
 			"type": "CallExpression",
 			"callee": requireConfigFunctionPat,
@@ -145,7 +150,7 @@ function configure(filesystem) {
 		);
 		return configBlock;
 	}
-	
+
 	function findRequireConfigBlock(tree) {
 		//configBlockPat.debug = 'configBlockPat';
 		var requireCall = objectPat({
@@ -179,7 +184,7 @@ function configure(filesystem) {
 		);
 		return configBlock;
 	}
-	
+
 	//tries to determine the value of an expression.
 	//if the value can not be statically determined then 'undefined' is returned.
 	//Note: this function is essentially a dispatcher that delegates to different
@@ -235,7 +240,7 @@ function configure(filesystem) {
 			}
 		);
 	}
-	
+
 	//Receives an AST representation of a requirejs config block that defines stuff like
 	//baseUrl and path mappings. It analyzes the config block and extracts useful info into
 	//an easy to use form.
@@ -266,9 +271,9 @@ function configure(filesystem) {
 		}
 		return obj;
 	}
-	
+
 	analyzeExp.ObjectExpression = analyzeObjectExp;
-	
+
 	function analyzeArrayExp(exp) {
 		//Exp looks something like this:
 		//		{
@@ -284,9 +289,9 @@ function configure(filesystem) {
 		}
 		return arr;
 	}
-	
+
 	analyzeExp.ArrayExpression = analyzeArrayExp;
-	
+
 	var stringVar = variablePat("string");
 	var literalPat = objectPat({
        "type": "Literal",
@@ -305,9 +310,9 @@ function configure(filesystem) {
 		);
 		return value;
 	}
-	
+
 	analyzeExp.Literal = analyzeLiteral;
-	
+
 	function getAmdConfigFromCode(code) {
 		if (code) {
 			try {
@@ -322,7 +327,7 @@ function configure(filesystem) {
 			}
 		}
 	}
-	
+
 	function getAmdConfigFromDataMain(htmlFile, scriptTag, callback) {
 		var datamain = scriptTag.attribs && scriptTag.attribs['data-main'];
 		if (datamain) {
@@ -345,13 +350,13 @@ function configure(filesystem) {
 			return callback(undefined);
 		}
 	}
-	
+
 	function getAmdConfigFromScriptTag(scriptTag) {
 		var code = getScriptCode(scriptTag);
 		//console.log("script-code = "+code);
 		return getAmdConfigFromCode(code);
 	}
-	
+
 	//file: the file where we extracted the config from
 	//rawConfig: the config data not yet adjusted based on the location of the file
 	//returns the config but now adjusted based on the file's location.
@@ -370,7 +375,7 @@ function configure(filesystem) {
 	}
 
 	var REQUIRE_JS = /(.*\/)?(curl|require)\.js$/;
-	
+
 	function find(array, pred) {
 		var pos = 0;
 		while (pos<array.length) {
@@ -381,7 +386,7 @@ function configure(filesystem) {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Helper to extract amd config out of an html file that loads the require config
 	 * from another file via a script tag.
@@ -394,7 +399,7 @@ function configure(filesystem) {
 				var scriptPath = deref(tag, ["attribs", "src"]);
 				return scriptPath && REQUIRE_JS.test(scriptPath);
 			});
-			
+
 			if (pos>=0) {
 				//a tag loading the loader was found...
 				//now look in the remaining tags for a config.
@@ -418,8 +423,8 @@ function configure(filesystem) {
 		//If we reach here, some condition failed and callback wasn't called yet.
 		return callback();
 	}
-	
-	
+
+
 	//determine basedir setting from a given html file by looking for
 	// amd config blocks in the html file, or ... in some specific idioms.
 	// looking in the .js files that get loaded by the script tags.
@@ -451,9 +456,9 @@ function configure(filesystem) {
 			}
 		);
 	}
-	
+
 	var logLine = 0;
-	
+
 	/**
 	 * wraps a callback function so that is logs the value passed to the callback
 	 * in JSON.stringified form.
@@ -461,48 +466,13 @@ function configure(filesystem) {
 	function logBack(msg, callback) {
 		return function (result) {
 			console.log(++logLine + " : " + msg);
-			//console.log(JSON.stringify(result, null, "  "));
+			console.log(JSON.stringify(result, null, "  "));
 			callback(result);
 		};
 	}
-	
-	/**
-	 * To resolve a reference that was found in a given context, we need to
-	 * determine some configuration information associated with that context.
-	 * This function is responsible for fetching, computing or searching for
-	 * that information. If found the information is passed to the callback.
-	 * If not found, a 'falsy' value is passed to the callback.
-	 */
-	function getAmdConfig(context, callback) {
-		//callback = logBack("amd-config '"+context+"' => ", callback);
-		var dir = getDirectory(context);
-		if (dir) {
-			listFiles(dir,
-				function (names) {
-					var files = map(names, function (name) {
-						return isHtml(name) && pathResolve(dir, name);
-					});
-					orMap(files, getAmdConfigFromHtmlFile,
-						function (conf) {
-							if (conf) {
-								callback(conf);
-							} else {
-								getAmdConfig(dir, callback);
-							}
-						}
-					);
-				},
-				function (err) {
-					callback(false);
-				}
-			);
-		} else {
-			callback(false);
-		}
-	}
 
 	var cacheCounter = 0;
-	
+
 	function makeCached(f, timeout) {
 		//console.log("Instance of amd-config-finder created: "+(++cacheCounter));
 		var cache = {};
@@ -532,10 +502,72 @@ function configure(filesystem) {
 		return cachedFun;
 	}
 
+	/**
+	 * To resolve a reference that was found in a given context, we need to
+	 * determine some configuration information associated with that context.
+	 * This function is responsible for fetching, computing or searching for
+	 * that information. If found the information is passed to the callback.
+	 * If not found, a 'falsy' value is passed to the callback.
+	 */
+	var getAmdConfig = function(context, callback) {
+		//callback = logBack("amd-config '"+context+"' => ", callback);
+		var dir = getDirectory(context);
+		if (dir) {
+			listFiles(dir,
+				function (names) {
+					var files = map(names, function (name) {
+						return isHtml(name) && pathResolve(dir, name);
+					});
+					orMap(files, getAmdConfigFromHtmlFile,
+						function (conf) {
+							if (conf) {
+								callback(conf);
+							} else {
+								getAmdConfig(dir, callback);
+							}
+						}
+					);
+				},
+				function (err) {
+					callback(false);
+				}
+			);
+		} else {
+			callback(false);
+		}
+	};
+
+	/**
+	 * Wrap a config getter function to add extra stuff to its result.
+	 */
+	function addExtraPaths(getter) {
+		if (extraPaths) {
+			return function (context, callback) {
+				//callback = logBack("amd-config '"+context+"' => ", callback);
+				return getter(context, function (amdConf) {
+//					amdConf = amdConf || {
+//						//Ensure a basic conf. Needs a 'baseDir' at minimum.
+//						baseDir: getDirectory(context)
+//					};
+
+					//WARNING: when generalizing to include 'extraPackages'.
+					//Be aware that jsonMerge won't do the job correctly because
+					//packages are in a list and lists don't get merged but have
+					//replacement behavior.
+					return callback(jsonMerge(amdConf, {
+						paths: extraPaths
+					}));
+				});
+			};
+		} else {
+			return getter;
+		}
+	}
+
 	getAmdConfig = makeCached(getAmdConfig, 10000);
 
 	return {
-		getAmdConfig: getAmdConfig,
+		getAmdConfig: addExtraPaths(getAmdConfig),
 			//getAmdConfig,
 		forTesting: {
 			configBlockPat: configBlockPat

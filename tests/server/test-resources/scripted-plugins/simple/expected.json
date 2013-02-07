@@ -1,0 +1,7 @@
+[{
+	name: 'simple-builtin-plugin',
+	path: 'scripted/plugins/simple-builtin-plugin'
+}, {
+	name: 'simple-scripted-rc-plugin',
+	path: 'scripted/plugins/simple-scripted-rc-plugin'
+}]

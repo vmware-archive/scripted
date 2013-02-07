@@ -1,0 +1,7 @@
+[ {
+	name: 'foldered-plugin',
+	path: 'scripted/plugins/foldered-plugin/index'
+}, {
+	name: 'foldered-with-pkg-json',
+	path: 'scripted/plugins/foldered-with-pkg-json/banana'
+}]

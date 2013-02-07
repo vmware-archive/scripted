@@ -13,7 +13,6 @@
  ******************************************************************************/
 /*global exports require console __dirname */
 
-var fs = require('fs');
 var eachLine = require('../utils/line-by-line').eachLine;
 
 /**
@@ -49,7 +48,7 @@ function searchFile(term, fullpath, matchFn, doneFn){
 		doneFn
 	);
 }
- 
+
 exports.searchFile = searchFile;
 /*
 var rootdir = require("path").normalize(__dirname+"../../..")+"/";

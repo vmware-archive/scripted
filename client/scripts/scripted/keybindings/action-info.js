@@ -110,7 +110,9 @@ define(function (require) {
 		'Save',
 		'Find File Named...',
 		'Look in files',
-		'Toggle Subeditor'
+		'Toggle Subeditor',
+		'Toggle Navigator',
+		'Toggle Visible Whitespace'
 	 ];
 
 	/**
@@ -284,14 +286,13 @@ define(function (require) {
 		tv.setAction(actionID, action);
 	}
 
-	function setAction(actionID, handler, options) {
-		options = options || {};
-		for (var p in options) {
-			if (options.hasOwnProperty(p)) {
-				put(actions, [actionID, p], options[p]);
-			}
-		}
-		handlers[actionID] = handler; //TODO: should these also go in the 'integrated' actions map as properties?
+	function setAction(actionID, spec) {
+		var handler = spec.handler;
+		var options = spec;
+		actions[actionID] = spec; //Erases any prior info associated with the action.
+		handlers[actionID] = handler; //Keeping handlers separate... so we don't have to search for them
+			                           // in the actions table. Not all actions in the table have user
+			                           // defined handlers.
 		eachEditor(function (editor) {
 			setEditorAction(editor, actionID, handler, options);
 		});

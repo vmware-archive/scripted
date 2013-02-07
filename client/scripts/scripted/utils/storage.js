@@ -9,9 +9,11 @@
  *
  * Contributors:
  *     Andrew Eisenberg - initial API and implementation
+ *         Andy Clement
  ******************************************************************************/
  /*global */
  /*jshint browser:true */
+ 
 /**
  * This module handles all requests for localStorage.  It properly clears out storage
  * when required.
@@ -27,6 +29,9 @@ define(["scriptedLogger"], function(scriptedLogger) {
 	];
 
 	return {
+	
+		preferenceNavigatorVisible: "scripted.preference.navigatorVisible",
+		preferenceNavigatorWidth: "scripted.navigatorWidth",
 
 		/**
 		 * Adds a key/value pair into local storage.  If quota is exceeded, then storage will be partially purged
@@ -58,8 +63,28 @@ define(["scriptedLogger"], function(scriptedLogger) {
 			}
 		},
 		
+		safeStoreBoolean: function(key, value, includeTimestamp, depth) {
+			if (typeof value !== 'boolean') {
+				throw "safeStoreBoolean is for boolean values";
+			}
+			var toStore = value?'true':'false';
+			this.safeStore(key,toStore,includeTimestamp,depth);
+		},
+		
 		get : function(key) {
 			return localStorage.getItem(key);
+		},
+		
+		getBoolean : function(key) {
+			var value = this.get(key);
+			if (value) {
+				if (value==='true') {
+					return true;
+				} else {
+					return false;
+				}
+			}
+			// return undefined
 		},
 		/**
 		 * Adds a key/value pair into local storage.  If quota is exceeded, then this request will be ignored
@@ -84,7 +109,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 		 * Specifically purges keys corresponding to index entries and their timestamps
 		 */
 		purgeByTimestamp : function(threshold) {
-			// anything over 2 days old is considered stale
+			// anything over the threshold is considered stale
 			function isStale(val, currentTime) {
 				var ts = parseInt(val, 10);
 				if (ts) {

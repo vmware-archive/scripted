@@ -30,12 +30,11 @@ requirejs.config({
 		{ name: 'wire', location: '../components/wire', main:'wire'},
 		{ name: 'meld', location: '../components/meld', main:'meld'},
 		{ name: 'rest', location: '../components/rest',  main: 'rest'},
-		{ name: 'scripted/plugin-loader', location: 'scripted/plugin-loader', main: 'plugin-loader' }
+		{ name: 'text', location: '../components/requirejs-text', main: 'text'},
+		{ name: 'i18n', location: '../components/requirejs-i18n', main: 'i18n'}
 	],
 	paths: {
 	//require: 'lib/requirejs/require',
-		i18n: '../components/requirejs/i18n',
-		text: '../components/requirejs/text',
 		"wire/domReady": 'lib/domReady',
 		jquery_ui: 'lib/jquery-ui-custom',
 		jsbeautify: 'lib/beautify',
@@ -53,5 +52,5 @@ requirejs.config({
 	}
 });
 
-require(['main']);
+require(['wire!main']);
 

@@ -11,6 +11,8 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  ******************************************************************************/
 
+/*global define window require console */
+
 //
 // This is meant to be or become a 'nice' and easy to use
 // api for contributing functionality to the scripted editor.
@@ -39,14 +41,22 @@ define(function (require) {
 	}
 
 	return {
-		onSaveTransform: function (transformFun) {
-			//TODO: there's no real guarantee the config is initialized by now
-			// but mostly it will be ok unless someone saves really early on in the lifecycle.
-			var config = makeConfigFunction(deref(window, ['scripted', 'config' ]));
+
+		/**
+		 * Add a save transform function. The function is called just prior to
+		 * saving the contents of the editor and is given a chance to transform the text
+		 * in the editor.
+		 *
+		 * @param {function(text:String, path:String, configuration:function(...[String]):Object):[String]}
+		 */
+		addSaveTransform: function (transformFun) {
 
 			//Use lower-level preSave hook to grab editor text, apply transformFun
 			//and put contents back into the editor.
 			saveHooks.onPreSave(function (editor, path) {
+				//TODO: there's no real guarantee the config is initialized by now
+				// but mostly it will be ok unless someone saves really early on in the lifecycle.
+				var config = makeConfigFunction(deref(window, ['scripted', 'config' ]));
 				return when(undefined, function () {
 					return transformFun(editor.getText(), path, config);
 				}).otherwise(function (err) {
@@ -63,7 +73,8 @@ define(function (require) {
 					return when.resolve();
 				}).then(function(newText) {
 					if (typeof(newText)==='string') {
-						//TODO: work harder at preserving selection even if text has shifted ?
+						//TODO: work harder at preserving selection relative to text
+						// even if text has shifted ?
 						var oldSelection = editor.getSelection();
 						var oldScroll = editor.getScroll();
 
@@ -74,11 +85,24 @@ define(function (require) {
 				});
 			});
 		},
+
 		/**
-		 * @param {{name:String,handler:Function,isGlobal:Boolean}} spec
+		 * Associate a handler function with a given actionID for all existing and future
+		 * scripted editors. Any prior handlers assigned to the id are overwritten.
+		 * <p>
+		 * A readable 'name' option can be provided. This name will be used in places
+		 * like the help side panel instead of the actionID.
+		 * <p>
+		 * A 'global' flag option can be provided. If set to a true value, then keybindings
+		 * triggering this action will also trigger even if an editor does not have focus.
+		 * Globally triggered actions will be redirected to the last editor that had
+		 * focus.
+		 *
+		 * @param {String} actionID
+		 * @param {{handler:function(Editor),name:?String,global:?Boolean}} spec
 		 */
-		action: function (spec) {
-			actions.setAction(spec.actionID || spec.name, spec.handler, spec);
+		setAction: function (actionID, spec) {
+			actions.setAction(actionID, spec);
 		}
 	};
 

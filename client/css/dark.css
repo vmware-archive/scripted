@@ -64,6 +64,10 @@
 .dark .textviewLeftRuler {
 	border-right:1px solid rgb(77,77,77);
 	border-radius: 0px;
+	z-index:999;
+	
+	-webkit-box-shadow: 1px 0 1px #202020;
+	
 }
 
 #side_panel.dark {

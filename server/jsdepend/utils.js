@@ -173,8 +173,17 @@ function pathNormalize(path) {
 	   //so always use '.' as the normalized form of the 'current dir'.
 }
 
+/**
+ * This function is similar to nodejs path.resolve with a few notable differences.
+ *   1) always uses '/' as path separators.
+ *   2) treats relative base paths differently. They are kept relative rather
+ *      than resolved based on process.env.pwd
+ */
 function pathResolve(basePath, resolvePath) {
-	if (typeof(basePath) === 'string' && typeof(resolvePath) === 'string') {
+	if (!basePath) {
+		return pathNormalize(resolvePath);
+	}
+	if (typeof(resolvePath) === 'string') {
 		if (basePath === '.' || resolvePath[0] === '/') {
 			return pathNormalize(resolvePath);
 		} else {
@@ -225,7 +234,7 @@ function eachk(array, f, callback) {
 	}
 	loop(0);
 }
-	
+
 
 function filter(array, pred) {
 	//TODO: remove this... Why not simply use 'Array.filter'???

@@ -11,6 +11,8 @@
  *     Kris De Volder
  ******************************************************************************/
 
+/*global define*/
+
 //
 // This module plays as an intermediary between 'scriptedEditor' and 'scripted/api/editor-extensions'
 // So we don't have to expose low-level api via scripted/api modules.
@@ -41,7 +43,7 @@ define(function(require) {
 		return when.reduce(preSaveHandlers,
 			function (acc, handler, i) {
 				return when(acc, function () {
-//					console.log('handle index: '+i);
+					//console.log('handle index: '+i);
 					return handler(editor, filePath);
 				});
 			},

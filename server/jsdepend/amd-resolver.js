@@ -16,13 +16,13 @@ if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
 define(function(require, exports, module) {
- 
+
 ////////////////////////////////////////
 // amd-support
 //
 //   Support for resolving amd references.
 /////////////////////////////////////////
- 
+
 /**
  * Currently we provide support for any plugin names listed below.
  * References with these plugins are handled by adding an extension to
@@ -48,7 +48,7 @@ var when = require('when');
 function configure(conf) {
 
 	var getAmdConfig = require('./amd-config-finder').configure(conf).getAmdConfig;
-	
+
 	/**
 	 * @param {string}
 	 * @return {Promise}
@@ -60,11 +60,11 @@ function configure(conf) {
 		});
 		return deferred;
 	}
-	 
+
 	function isRelative(path) {
 		return startsWith(path, './') || startsWith(path, '../');
 	}
-	
+
 	function parseName(dep) {
 		//in requirejs the way plugins work is that there's a split at the first !
 		//the piece before the ! determines the plugin and the rest is passed to
@@ -91,7 +91,7 @@ function configure(conf) {
 	function getResource(dep) {
 		return dep.hasOwnProperty('plugin') ? dep.resource : dep.name;
 	}
-	
+
 	/**
 	 * Get the file extension to be added after resolving a reference to a path.
 	 * If the reference is based on an unsupported plugin this will return 'null'.
@@ -110,7 +110,7 @@ function configure(conf) {
 		}
 		return '.js'; //Default extension added by typical amd loader.
 	}
-	
+
 	function amdResolver(context, dep, callback) {
 		parseName(dep);
 		//TODO: special case where resource already has a .js extension. This is
@@ -122,6 +122,8 @@ function configure(conf) {
 			//There's nothing to resolve. Let client know not to report this as an error.
 			dep.ignore = true;
 			return callback(dep);
+		} else if ('require'===resource) {
+			dep.ignore = true;
 		} else if (isRelative(resource)) {
 			//Relative resolution doesn't require the resolverConf so avoid fetching it
 			var baseDir = getDirectory(context); //relative to context file, not amd config
@@ -135,13 +137,13 @@ function configure(conf) {
 			});
 		}
 	}
-	
+
 	//A 'resolver support' module provides a resolver for a particular kind of dependency.
 	return {
 		kind: 'AMD',
 		resolver: amdResolver
 	};
-	
+
 } //end: function configure
 
 exports.configure = configure;

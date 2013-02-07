@@ -37,13 +37,13 @@ function configure(filesystem) {
 	var isFile = filesystem.isFile;
 	var isDirectory = filesystem.isDirectory;
 	var putContents = filesystem.putContents;
-	var handle2file = filesystem.handle2file;
 	var stat = filesystem.stat;
 	var mkdir = filesystem.mkdir;
 	var deleteResource = filesystem.deleteResource;
+	var parseJsonFile = require('../utils/parse-json-file').configure(filesystem);
 
 	// For a given file handle the '.scripted' configuration info is found and composed as follows:
-	
+
 	// 1) find the corresponding rootDir. This is closest directory in the path to the file
 	//    that contains a rootMarkerFile.
 	// 2) if the rootDir has a .scripted file read its JSON data
@@ -81,47 +81,7 @@ function configure(filesystem) {
 			callback(false);
 		}
 	}
-	
-	var ALL_WHITE_SPACE = /^\s*$/;
-	
-	/**
-	 * Tries to read data from a file and parse it as JSON data.
-	 * Call the callback with the resulting data.
-	 * If any part of this operation fails, the callback will be still be
-	 * called with at least an empty object. All errors will be logged
-	 * to the console.
-	 * <p>
-	 * Errors deemed serious enough to be brought to the user's attention
-	 * (i.e. problems parsing the user's config file) will be 'reported'
-	 * by adding an explanation to the object in a property called 'error'.
-	 */
-	function parseJsonFile(handle, callback) {
-		getContents(handle,
-			function (contents) {
-				var data = null;
-				if (!ALL_WHITE_SPACE.test(contents)) {
-					try {
-						data = JSON5.parse(contents);
-					} catch (e) {
-						data = {
-							error: "Couldn't parse (JSON5) '"+handle+"'\nERROR: " + e
-						};
-					}
-				}
-				data = data || {};
-				return callback(data);
-			},
-			function (err) {
-				debug_log(err);
-				callback({
-					//Don't report this as user-level error. Some people simply don't have a .scripted or .scriptedrc
-					//so this error is expected.
-					//error: "Could not get contents of file '"+handle+"'"
-				});
-			}
-		);
-	}
-	
+
 	function findAndParseDotScripted(handle, callback) {
 		getRootDir(handle, function (root) {
 			//use found rootdir, or parent dir, or handle itself (if the handle is itself a root dir so it doesn't have a parent)
@@ -130,7 +90,7 @@ function configure(filesystem) {
 				return callback({});
 			} else {
 				var dotScriptedFile = pathResolve(root, '.scripted');
-				
+
 				parseJsonFile(dotScriptedFile, function (dotScripted) {
 					dotScripted.fsroot = root;
 					callback(dotScripted);
@@ -138,7 +98,7 @@ function configure(filesystem) {
 			}
 		});
 	}
-	
+
 	function findAndParseScriptedRc(callback) {
 		var home = getUserHome();
 		if (home) {
@@ -168,8 +128,6 @@ function configure(filesystem) {
 	function getConfiguration(handle, callback) {
 		findAndParseDotScripted(handle, function (dotScripted) {
 			findAndParseScriptedRc(function (scriptedRc) {
-				console.log(JSON.stringify(scriptedRc));
-				console.log(JSON.stringify(dotScripted));
 				callback(jsonMerge(defaults, scriptedRc, dotScripted));
 			});
 		});
@@ -193,7 +151,7 @@ function configure(filesystem) {
 		}
 		//return undefined;
 	}
-	
+
 	/**
 	 * Gets a given config file from the .scriptedrc folder in the user.home directort
 	 * @return {Promise}
@@ -264,7 +222,7 @@ function configure(filesystem) {
 			}
 		);
 	}
-	
+
 	function putScriptedRcFile(name, contents) {
 		return when(ensureDirectoryForm(), function () {
 			debug_log('putScriptedRcFile: '+ name);
@@ -273,7 +231,7 @@ function configure(filesystem) {
 			return putContents(loc, JSON.stringify(contents, null, '  '));
 		});
 	}
-		
+
 	return {
 		getConfiguration: getConfiguration,
 		getScriptedRcFile: getScriptedRcFile,

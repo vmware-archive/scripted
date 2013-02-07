@@ -12,61 +12,92 @@
  ******************************************************************************/
 
 var when = require('when');
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
-var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
-var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
-var pathResolve = require('../jsdepend/utils').pathResolve;
 var endsWith = require('../jsdepend/utils').endsWith;
-
-//var pluginDir = pathResolve(getScriptedRcDirLocation(), 'plugins');
-
-//For now it's easier to place the plugins inside of scripted code base
-// So I can put my 'sample' plugin in our codebase and commit it to git.
+var each = require('../utils/promises').each;
+var pathResolve = require('../jsdepend/utils').pathResolve;
 
 /**
- * Promise aware array iterator. Loops over elements of an array from left to right
- * applying the function to each element in the array. The function gets passed
- * the element and the index in the array.
+ * Creates an instance of the plugin-discovery api. Requires a config object
+ * that provides filesystem related operations
  */
-function each(array, fun) {
-	//TODO: move this function to utils/promises
-	return when.reduce(array,
-		function (ignore, element, i) {
-			return fun.call(undefined, element, i);
-		},
-		null
-	);
-}
+function configure(filesystem) {
 
-var pluginDirs = [
-	//plugins packaged with scripted:
-	pathResolve(__dirname, '../../plugins'),
-	//user plugins:
-	pathResolve(getScriptedRcDirLocation(), 'plugins')
-];
+	var dotScripted = require('../jsdepend/dot-scripted').configure(filesystem);
+	var getScriptedRcDirLocation = dotScripted.getScriptedRcDirLocation;
+	var isDirectory = filesystem.isDirectory;
+	var parseJsonFile = require('../utils/parse-json-file').configure(filesystem);
 
-/**
- * Get a list of plugins installed into this instance of scripted.
- * @return {Promise}
- */
-function getPlugins() {
-//	console.log('pluginDir = ' + pluginDir);
-	var allPlugins = [];
-	return each(pluginDirs, function (pluginDir) {
-		return filesystem.listFiles(pluginDir).then(function (names) {
-			for (var i = 0; i < names.length; i++) {
-				var name = names[i];
+	var SCRIPTED_RC = getScriptedRcDirLocation();
+	var SCRIPTED_PLUGINS_WEB_PATH =  'scripted/plugins';
+	var SCRIPTED_HOME = filesystem.getScriptedHome();
+
+	var pluginDirs = [
+		//plugins packaged with scripted:
+		pathResolve(SCRIPTED_HOME, 'plugins'),
+		//user plugins:
+		pathResolve(SCRIPTED_RC, 'plugins')
+	];
+
+	/**
+	 * Get a list of plugins installed into this instance of scripted.
+	 * @return {Promise}
+	 */
+	function getPlugins() {
+	//	console.log('pluginDir = ' + pluginDir);
+		var allPlugins = [];
+		return each(pluginDirs, function (pluginDir) {
+			return each(filesystem.listFiles(pluginDir), function (name) {
+				var baseName = name.substring(0, name.length-3);
 				if (endsWith(name, '.js')) {
-					allPlugins.push(name.substring(0, name.length-3));
-				}
-			}
-		});
-	}).then(function () {
-		//... all plugin dirs have been processed.
-		return allPlugins;
-	});
-}
+					allPlugins.push({
+						name: baseName,
+						path: pathResolve(SCRIPTED_PLUGINS_WEB_PATH, baseName)
+					});
+				} else if (name!=='disabled') {
+					//handle the case where the plugin is packaged as subdirectory.
+					//with a package.json
+					var path = pathResolve(pluginDir, name);
+					return isDirectory(path).then(function (isDir) {
+						if (isDir) {
+							var pkgJsonFile = pathResolve(path, 'package.json');
+							return parseJsonFile(pkgJsonFile).then(function (pkgJson) {
+								var mainName = (pkgJson && pkgJson.main) || 'index';
+								//The main we wanna return is actually relative to
+								//the 'webroot' rather than the filesystem.
+								//So beware:
+								var mainPath = pathResolve(SCRIPTED_PLUGINS_WEB_PATH,
+									name + '/' + mainName
+								);
 
-exports.getPlugins = getPlugins;
-//exports.getPluginPath = getPluginPath;
-exports.pluginDirs = pluginDirs;
+								//TODO: This isn't quite correct. But it should work
+								// in most cases. The correct thing to do would be
+								// to tell the plugin loader how to map the paths
+								// via an additional 'packages' declaration for
+								// requirejs.config. I.e. instead of giving just
+								// the path to the 'main' file it should
+								// give a 'location' and a 'main' as separate entries
+								// and then its upto the client-side plugin loader
+								// to configure requirejs with that info.
+								allPlugins.push({
+									name: name,
+									path: mainPath
+								});
+							});
+						}
+					});
+				}
+			});
+		}).then(function () {
+			//... all plugin dirs have been processed.
+			return allPlugins;
+		});
+	}
+
+	return {
+		getPlugins: getPlugins,
+		//exports.getPluginPath = getPluginPath;
+		pluginDirs: pluginDirs
+	};
+} // function configure
+
+exports.configure = configure;
