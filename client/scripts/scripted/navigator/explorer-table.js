@@ -163,7 +163,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 				var thumbnail = dojo.create("img", {
 					src: item.Location
 				}, link, "last");
-				dojo.addClass(thumbnail, "thumbnail");
+				$(thumbnail).addClass("thumbnail");
 				break;
 			default:
 				if (contentType && contentType.image) {
@@ -171,10 +171,10 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 						src: contentType.image
 					}, link, "last");
 					// to minimize the height/width in case of a large one
-					dojo.addClass(image, "thumbnail");
+					$(image).addClass("thumbnail");
 				} else {
 					var fileIcon = dojo.create("span", null, link, "last");
-					dojo.addClass(fileIcon, "core-sprite-file_model modelDecorationSprite");
+					$(fileIcon).addClass("core-sprite-file_model modelDecorationSprite");
 				}
 			}
 		}
@@ -193,10 +193,10 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 				this.getExpandImage(tableRow, span);
 			} else if (item.name === "") {
 				var fileIcon1 = dojo.create("span", null, span, "last");
-				dojo.addClass(fileIcon1, "core-sprite-blank_model modelDecorationSprite2");
+				$(fileIcon1).addClass("core-sprite-blank_model modelDecorationSprite2");
 			} else {
 				var fileIcon = dojo.create("span", null, span, "last");
-				dojo.addClass(fileIcon, "core-sprite-blank_model modelDecorationSprite2");
+				$(fileIcon).addClass("core-sprite-blank_model modelDecorationSprite2");
 			}
 			var span2;
 			var path = mPageState.generateUrl(item.Location);

@@ -90,7 +90,7 @@ define(['dojo'], function(dojo) {
 			var table = document.createElement('table');
 			table.id = this._id;
 			if (this._tableStyle) {
-				dojo.addClass(table, this._tableStyle);
+				$(table).addClass(this._tableStyle);
 			}
 			this._renderer.initTable(table, this);
 			var tbody = document.createElement('tbody');
@@ -167,7 +167,7 @@ define(['dojo'], function(dojo) {
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=371543
 							if (imageId && classToAdd) {
 								var node = dojo.byId(imageId);
-								dojo.addClass(node, classToAdd);
+								$(node).addClass(classToAdd);
 								if (classToRemove) {
 									dojo.removeClass(node, classToRemove);
 								}
@@ -215,7 +215,7 @@ define(['dojo'], function(dojo) {
 					this.collapse(id);
 					if (imageId) {
 						node = dojo.byId(imageId);
-						dojo.addClass(node, collapseClass);
+						$(node).addClass(collapseClass);
 						dojo.removeClass(node, expandClass);
 					}
 				}
@@ -223,7 +223,7 @@ define(['dojo'], function(dojo) {
 					this.expand(id);
 					if (imageId) {
 						node = dojo.byId(imageId);
-						dojo.addClass(node, expandClass);
+						$(node).addClass(expandClass);
 						dojo.removeClass(node, collapseClass);
 					}
 				}
