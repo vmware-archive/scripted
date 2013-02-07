@@ -18,28 +18,28 @@ define(['dojo'], function(dojo) {
 
 	/**
 	 * Constructs a new TableTree with the given options.
-	 * 
-	 * @param options 
-	 * @name orion.treetable.TableTree 
+	 *
+	 * @param options
+	 * @name orion.treetable.TableTree
 	 * @class Generates an HTML table where one of the columns is indented according to depth of children.
 	 * <p>Clients must supply a model that generates children items, and a renderer can be supplied which
 	 * generates the HTML table row for each child. Custom rendering allows clients to use checkboxes,
 	 * images, links, etc. to describe each  element in the tree.  Renderers handle all clicks and other
 	 * behavior via their supplied row content.</p>
-	 * 
+	 *
 	 * <p>The table tree parent can be specified by id or DOM node.</p>
-	 * 
+	 *
 	 * <p>The tree provides API for the client to programmatically expand and collapse
 	 * nodes, based on the client renderer's definition of how that is done (click on icon, etc.).
 	 * The tree will manage the hiding and showing of child DOM elements and proper indent</p>
-	 * 
+	 *
 	 * The model must implement:
 	 * <ul>
 	 *   <li>getRoot(onItem)</li>
 	 *   <li>getChildren(parentItem, onComplete)</li>
 	 *   <li>getId(item)  // must be a valid DOM id</li>
 	 * </ul>
-	 * 
+	 *
 	 * Renderers must implement:
 	 * <ul>
 	 *   <li>initTable(tableNode) // set up table attributes and a header if desired</li>
@@ -96,17 +96,6 @@ define(['dojo'], function(dojo) {
 			var tbody = document.createElement('tbody');
 			tbody.id = this._id+"tbody";
 			this._generateChildren(children, indentLevel, tbody, "last");
-			// add 50 random children to go off the bottom of the page
-//			for (var c =0;c<50;c++) {
-//				var row = document.createElement('tr');
-//				row.id=0;
-//				row._depth=0;
-//				var child={name:"",parentDir:"",size:0,directory:false,Location:""};
-//				row._item = child;
-//				this._renderer.render(child,row);
-//				dojo.style(row.childNodes[this._labelColumnIndex], "paddingLeft", "0px");
-//				dojo.place(row, tbody, "last");
-//			}
 			table.appendChild(tbody);
 			this._parent.appendChild(table);
 			this._rowsChanged();
@@ -118,7 +107,7 @@ define(['dojo'], function(dojo) {
 				row.id = this._treeModel.getId(children[i]);
 				row._depth = indentLevel;
 				// This is a perf problem and potential leak because we're bashing a dom node with
-				// a javascript object.  (Whereas above we are using simple numbers/strings). 
+				// a javascript object.  (Whereas above we are using simple numbers/strings).
 				// We should consider an item map.
 				row._item = children[i];
 				
@@ -128,8 +117,15 @@ define(['dojo'], function(dojo) {
 				this._renderer.render(children[i], row);
 				// generate an indent
 				var indent = this._indent * indentLevel;
-				dojo.style(row.childNodes[this._labelColumnIndex], "paddingLeft", indent +"px");
-				dojo.place(row, referenceNode, position);
+				$(row.childNodes[this._labelColumnIndex]).css('paddingLeft',indent+"px");
+				
+				if (position==='after') {
+					$(referenceNode).after(row);
+				} else if (position==='last') {
+					$(referenceNode).append(row);
+				} else {
+					console.log("DONT SUPPORT "+position+" ADD IT!!");
+				}
 				if (position === "after") {
 					referenceNode = row;
 				}
