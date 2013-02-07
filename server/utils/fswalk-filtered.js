@@ -16,41 +16,43 @@
 // create 'configured' versions of fswalk that filters the tree based on
 // exclude patterns in the '.scripted' config file.
 
-var filesystem = require('./filesystem').withBaseDir(null);
-var extend = require('../jsdepend/utils').extend;
-var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
-var glob = require('../utils/path-glob');
-var deref = require('../jsdepend/utils').deref;
-var pathResolve = require('../jsdepend/utils').pathResolve;
-var mFswalk = require('../jsdepend/fswalk'); //fswalk module not yet configured.
+function configure(filesystem) {
 
-/**
- * Create a configured version of fswalk module based on the .scripted configuration
- * info discovered in the context of a given path.
- */
-function forPath(searchroot, k) {
+	/**
+	 * Create a configured version of fswalk module based on the .scripted configuration
+	 * info discovered in the context of a given path.
+	 *
+	 * @return {Promise}
+	 */
+	function forPath(searchroot) {
+		var extend = require('../jsdepend/utils').extend;
+		var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
+		var glob = require('../utils/path-glob');
+		var deref = require('../jsdepend/utils').deref;
+		var pathResolve = require('../jsdepend/utils').pathResolve;
+		var mFswalk = require('../jsdepend/fswalk'); //fswalk module not yet configured.
 
-	var walkerConf = filesystem;
+		var walkerConf = filesystem;
 
-	getDotScripted(searchroot, function (conf) {
-		var ignorePatterns = deref(conf, ['search', 'exclude']);
-		var ignoreGlob = null;
-		if (ignorePatterns) {
-			ignoreGlob = glob.fromJson(ignorePatterns, conf.fsroot);
-			console.log('ignore glob for fswalk: \n'+ignoreGlob);
-			walkerConf = extend(filesystem, {
-				ignorePath: function (path) {
-					var r = ignoreGlob.test(path);
-//					if (r) {
-//						console.log('fswalk ignored: '+path);
-//					}
-					return r;
-				}
-			});
-		}
+		return getDotScripted(searchroot).then(function (conf) {
+			var ignorePatterns = deref(conf, ['search', 'exclude']);
+			var ignoreGlob = null;
+			if (ignorePatterns) {
+				ignoreGlob = glob.fromJson(ignorePatterns, conf.fsroot);
+				console.log('ignore glob for fswalk: \n'+ignoreGlob);
+				walkerConf = extend(filesystem, {
+					ignorePath: function (path) {
+						return ignoreGlob.test(path);
+					}
+				});
+			}
+			return mFswalk.configure(walkerConf);
+		});
+	}
 
-		k(mFswalk.configure(walkerConf));
-	});
+	return {
+		forPath: forPath
+	};
+
 }
-
-exports.forPath = forPath;
+exports.configure = configure;

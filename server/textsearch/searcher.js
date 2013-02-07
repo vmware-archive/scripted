@@ -13,7 +13,8 @@
  ******************************************************************************/
 /*global exports require console __dirname */
 
-var eachLine = require('../utils/line-by-line').eachLine;
+var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
+var eachLine = require('../utils/line-by-line').configure(filesystem);
 
 /**
  * Search a file for a given term. Every time the term
