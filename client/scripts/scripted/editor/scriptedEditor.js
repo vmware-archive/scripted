@@ -25,14 +25,14 @@ define([
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", 
-"scripted/utils/storage",
-"scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
+	"scripted/utils/storage","layoutManager",
+	"scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function ( require, deref, mSaveHooks, when, mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mHtmlGrammar, mModuleVerifier,	mJshintDriver, mJsBeautify, mTextModel,
 	mProjectionModel, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
-	tHelptext, themeManager, storage, infileSearchDialog
+	tHelptext, themeManager, storage, layoutManager, infileSearchDialog
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
