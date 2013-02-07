@@ -37,7 +37,7 @@
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var map = require('../../server/jsdepend/utils').map;
 var mapk = require('../../server/jsdepend/utils').mapk;
-var filesystem = require('../../server/jsdepend/filesystem');
+var filesystem = require('../../server/utils/filesystem');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;

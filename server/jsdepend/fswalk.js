@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global exports require*/
 var eachk = require('./utils').eachk;
 var pathResolve = require('./utils').pathResolve;
@@ -22,11 +22,11 @@ var when = require('when');
 
 function configure(conf) {
 
-	var ignoreName = conf.ignore || require('./filesystem').ignore;
+	var ignoreName = conf.ignore || require('../utils/filesystem').ignore;
 	var ignorePath = conf.ignorePath || function () { return false; };
 	var listFiles = conf.listFiles;
 	var isDirectory = conf.isDirectory;
-	
+
 	// Walk the FILESYSTEM
 	//A walk function written in callback style. Calls the function f on each file (excluding directories)
 	//The function f is a non-callbacky function.
@@ -159,7 +159,7 @@ function configure(conf) {
 			}
 		);
 	}
-	
+
 	return {
 		fswalk: function (path, f, k) {
 			fswalk(path, f, k);

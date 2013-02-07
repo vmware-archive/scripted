@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -36,7 +36,7 @@
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var map = require('../../server/jsdepend/utils').map;
 var mapk = require('../../server/jsdepend/utils').mapk;
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 var nodeNatives = require('../../server/jsdepend/node-natives');
 
 function makeApi(relativeBaseDir, sloppy) {
@@ -50,8 +50,8 @@ function makeApi(relativeBaseDir, sloppy) {
 			api[p] = api.forTesting[p];
 		}
 	}
-	
-	api.getContents = conf.getContents;	
+
+	api.getContents = conf.getContents;
 	api.findReferences = require('../../server/jsdepend/reference-finder').findReferences;
 	return api;
 }
@@ -171,7 +171,7 @@ exports.commonjsRefs = function (test) {
 		name: './utils'
 	};
 	api.resolve("main.js", dep, function (resolved) {
-		test.equals(toCompareString(resolved), 
+		test.equals(toCompareString(resolved),
 			toCompareString({
 				kind: 'commonjs',
 				name: './utils',
@@ -197,7 +197,7 @@ exports.sloppyMode = function (test) {
 			}])
 		);
 		test.done();
-	});	
+	});
 };
 exports.sloppyModeMissing = function (test) {
 	var api = makeApi('for-sloppy-mode', 'sloppy');
@@ -211,7 +211,7 @@ exports.sloppyModeMissing = function (test) {
 				name: 'magic/missing',
 				kind: 'AMD'
 				//It is now a requirement that we don't return 'path' if the file doesn't exist!!
-				//path: 'web-app/scripts/magic/missing.js' 
+				//path: 'web-app/scripts/magic/missing.js'
 			}])
 		);
 		test.done();
@@ -266,7 +266,7 @@ exports.preciseModeMissing = function (test) {
 		);
 		test.done();
 	});
-	
+
 };
 
 exports.pathAwarenessSimple = function (test) {
@@ -351,7 +351,7 @@ exports.resolveNodeModule = function(test) {
 		'node_modules/snif/sniffer.js',
 		'node_modules/booger.js' //There are two booger.js one in subfolder and one in the root, but the subfolder one should not be found
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,
@@ -381,7 +381,7 @@ exports.resolveNodeModulesInParentDir = function(test) {
 		'node_modules/zor.js',
 		'subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,
@@ -408,7 +408,7 @@ exports.resolveNodeModulesWithProblem3 = function(test) {
 	var expectedPaths = [
 		undefined //won't be found because json is unparsable
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,
@@ -442,7 +442,7 @@ exports.resolveNodeModulesWithProblems = function(test) {
 		'node_modules/zor.js',
 		'subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,
@@ -477,7 +477,7 @@ exports.resolveDotDotReference = function (test) {
 		}));
 		test.done();
 	});
-	
+
 };
 
 exports.resolveDifferentStyleRelativeDotRefs = function (test) {
@@ -489,7 +489,7 @@ exports.resolveDifferentStyleRelativeDotRefs = function (test) {
 		'project/libs/zor/lib/zor-main.js',
 		'project/snif/sniffer.js'
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,
@@ -519,7 +519,7 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 		'project/libs/zor/lib/zor-main.js',
 		'project/snif/sniffer.js'
 	];
-	
+
 	var deps = map(depNames, function (name) {
 		return {
 			name: name,

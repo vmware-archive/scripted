@@ -14,7 +14,7 @@
 /*global console __dirname exports require*/
 var tm = require('../../server/jsdepend/tree-matcher.js');
 var esprima = require('../../server/jsdepend/parser');
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 
 var andPat = tm.andPat;
 var arrayElementPat = tm.arrayElementPat;
@@ -62,7 +62,7 @@ exports.failPatTest = function (test) {
 };
 
 exports.typePatSuccess = function (test) {
-	var tree = { 
+	var tree = {
 		type: 'bangra',
 	    child: { type: 'album'
 	    }
@@ -83,7 +83,7 @@ exports.typePatSuccess = function (test) {
 };
 
 exports.typePatFailure = function (test) {
-	var tree = { 
+	var tree = {
 		type: 'bangra',
 	    child: { type: 'album'
 	    }
@@ -698,7 +698,7 @@ exports.getFieldPatNoSuchField = function (test) {
 exports.getFieldPatOnFailed = function (test) {
 	var tree = 'don not care';
 	var pat = getFieldPat(failPat, "foo");
-	pat(tree)(		
+	pat(tree)(
 		/*success*/
 		function (node) {
 			throw "success function should not be called";
@@ -714,7 +714,7 @@ exports.arrayElementPat = function (test) {
 	var tree = [ "a", "b", "c" ];
 	var el = equalPat("b");
 	var pat = arrayElementPat(successPat, el);
-	pat(tree)(		
+	pat(tree)(
 		/*success*/
 		function (node) {
 			test.equals("b", node);
@@ -731,7 +731,7 @@ exports.arrayElementPatOnFailed = function (test) {
 	var tree = [ "a", "b", "c" ];
 	var el = equalPat("b");
 	var pat = arrayElementPat(failPat, el);
-	pat(tree)(		
+	pat(tree)(
 		/*success*/
 		function (node) {
 			throw "success function should not be called";
@@ -747,7 +747,7 @@ exports.arrayElementPatElementNotFound = function (test) {
 	var tree = [ "a", "b", "c" ];
 	var el = equalPat("missing");
 	var pat = arrayElementPat(failPat, el);
-	pat(tree)(		
+	pat(tree)(
 		/*success*/
 		function (node) {
 			throw "success function should not be called";
@@ -794,7 +794,7 @@ exports.sameThreadMatching = function (test) {
             }))
         } ]
 	}));
-	
+
 	var tree = {
 		"type": "Program",
 		"children": [
@@ -825,7 +825,7 @@ exports.sameThreadMatching = function (test) {
 	pattern(tree)(
 		function () {
 			success = true;
-		}, 
+		},
 		function () {
 			success = false;
 		}
@@ -844,18 +844,18 @@ exports.notWithinPatFail = function(test) {
 			}
 		]
 	} ];
-	
+
 	var fooField = fieldPat('foo', successPat);
 	var barField = fieldPat('bar', successPat);
 	var pattern = notWithinPat(fooField, barField);
-	
+
 	test.equals(false, matches(pattern, tree));
 	test.done();
 };
 
 exports.notWithinPat = function(test) {
 	var tree = [
-		{ 
+		{
 			foo: [
 				'bork',
 				{
@@ -869,11 +869,11 @@ exports.notWithinPat = function(test) {
 			} ]
 		}
 	];
-	
+
 	var fooField = fieldPat('foo', successPat);
 	var barField = fieldPat('bar', successPat);
 	var pattern = notWithinPat(fooField, barField);
-	
+
 	test.equals(toCompareString({ bar: 'barVal' }),
 		toCompareString(matches(pattern, tree))
 	);

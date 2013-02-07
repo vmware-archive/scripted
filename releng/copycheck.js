@@ -12,7 +12,7 @@
  ******************************************************************************/
 /*globale console require __dirname */
 
-///////////////////////////////////////////////////////////////////////////////////// 
+/////////////////////////////////////////////////////////////////////////////////////
 // Script to run with nodejs for checking that all .js files have copyright headers
 //
 // Run this script as follows:
@@ -20,7 +20,7 @@
 
 // Config options:
 
-var IGNORED_NAMES = ['lib', 'node_modules', 'test-resources', 'play-area'];
+var IGNORED_NAMES = ['lib', 'node_modules', 'test-resources', 'play-area', 'components'];
 var copyright = new RegExp('@license|\\* Copyright \\(c\\)'); // play with this regexp to define what a 'licence header' looks like
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -34,11 +34,12 @@ function contains(list, el) {
 	return false;
 }
 
-var defaultIgnore = require('../server/jsdepend/filesystem').ignore;
+var filesystem = require('../server/utils/filesystem').withBaseDir(null);
+var defaultIgnore = require('../server/utils/filesystem').ignore;
 var extend = require('../server/jsdepend/utils').extend;
 var path = require('path');
 
-var jsdependConf = extend(require('../server/jsdepend/filesystem').withBaseDir(null), {
+var jsdependConf = extend(filesystem, {
 	ignore: function ignore(name) {
 		//console.log("calling ignore");
 		return defaultIgnore(name) || contains(IGNORED_NAMES, name);
@@ -59,8 +60,8 @@ fswalk(path.resolve(__dirname, '..'),
 			} else {
 				console.error("BAD: "+f);
 			}
-		}			
-	}, 
+		}
+	},
 	//Called when traversal ends
 	function () {
 		console.log('DONE: All .js files where analyzed');

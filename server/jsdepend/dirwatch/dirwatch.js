@@ -17,7 +17,7 @@ var utils = require('../../jsdepend/utils.js');
 var mapk = utils.mapk;
 var filter = utils.filter;
 var os = require('os');
-var ignore = require('../filesystem').ignore;
+var ignore = require('../../utils/filesystem').ignore;
 
 //TODO: optimize tree for better memory usage:
 //   - don't store full path in every tree node
@@ -48,13 +48,13 @@ function makeWatcher(path, listener) {
 						       //  If this number is exceeded remaining dirs will be read in, but not watched for changes.
 	var MAX_READY_TIME = 2000; //  If initialization takes longer than this tree is returned while still continuing initialization
 							   //  asynchronously.
-						       
+
 	//var POLL_INTERVAL = 10; //  try to refresh really often (stress test).
-	
+
 	//END Configuration options
 
 	//BEGIN makeWatcher nested declarations
-	
+
 	function Node(path) {
 		this.path = path;
 		this.children = {};
@@ -73,7 +73,7 @@ function makeWatcher(path, listener) {
 
 	var watchers = 0; //Counts the number of fs.watch instances that are active at the moment (mostly
 					  //for debugging purposes.
-				
+
 	//A health check for the polling mechanism.
 	//It estimates a load factor by verifying how much 'behind' schedule
 	//this healthCheck function is executed. With high loads the delay is
@@ -96,18 +96,18 @@ function makeWatcher(path, listener) {
 		}
 		thingy.lastRuntime = now;
 	}
-					  
+
 	//This is a 'poor man's' emulation of fs.watch. Instead of actually watching for changes
 	//it periodically fires generic 'poll' events. Clients should respond to 'poll' events by
-	//re-evaluating whether their cached data is still to be considered valid. 
+	//re-evaluating whether their cached data is still to be considered valid.
 	function genericFsWatch(path, listener) {
 		//TODO: Rather than fire poll events indiscriminately every X milliseconds we should
 		//use fstat to check for changes and not fire unless there's an actual change.
-		
+
 		//TODO: It seems that the use of this simple polling mechanim seriously increases the memory footprint.
 		// => for scripted tree the process size goes from 15Mb to 30Mb.
 		//perhaps we should only have a single 'pollster' that keeps track of all the directories to poll.
-		
+
 		var alive = true;
 		function firePollEvent() {
 			if (alive) {
@@ -316,23 +316,23 @@ function makeWatcher(path, listener) {
 					function (newChildren) {
 						if (!node.disposed) {
 							//It is possible for the node to have gotten disposed while we were statting children
-							//Why? stating is done in asynch, and file system changes may have deleted this dir 
+							//Why? stating is done in asynch, and file system changes may have deleted this dir
 							//since the time fetched its children.
 							//In that case don't do anything. Since we got disposed something else has already handled
 							//the changes associate with the deletion. And any children we may have read don't
 							//exist anymore.
-							
+
 							var oldChildren = node.children;
 							var name, oldChild;
-							//proceed in two stages. 
+							//proceed in two stages.
 							//The first stage will compute the difference between old and new children.
 							//It produces
 							//  - a list of deleted
 							//  - a list of added children
-							//  - updated list of newChildren into node.children					
-							
+							//  - updated list of newChildren into node.children
+
 							var added = [];
-							node.children = {}; 
+							node.children = {};
 							//We'll re-add all the children using old or new depending on whether it changed
 							for (var i=0; i<newChildren.length; i++) {
 								var newChild = newChildren[i];
@@ -365,7 +365,7 @@ function makeWatcher(path, listener) {
 									handleDeletion(oldChild);
 								}
 							}
-							
+
 							each(added, function (newChild, k) {
 								handleCreation(newChild, timeLimit, k);
 							}, k);
@@ -390,7 +390,7 @@ function makeWatcher(path, listener) {
 			refreshChildren(node, timeLimit, function () {
 				if (watchers < MAX_WATCHERS && !noWatch(node.path)) {
 					node.fsWatcher = fsWatch(node.path, function (eventType, filename) {
-						//We won't rely on the 'filename' argument as it isn't guaranteed to exist / work 
+						//We won't rely on the 'filename' argument as it isn't guaranteed to exist / work
 						refreshChildren(node);
 					});
 					watchers++;
@@ -423,10 +423,10 @@ function makeWatcher(path, listener) {
 		}
 		return loggedListener;
 	}
-	
+
 	//END makeWatcher nested declarations
-	
-	
+
+
 
 	//BEGIN makeWatcher function body
 	var timeLimit = Date.now() + MAX_INIT_TIME;

@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports __dirname console */
 
 //To run this test do this on the commandline:
@@ -32,7 +32,7 @@
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var findReferences = require("../../server/jsdepend/reference-finder").findReferences;
 var esprima = require('../../server/jsdepend/parser');
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 
 function dumpTree(parseTree) {
 	console.log(JSON.stringify(parseTree, null, "  "));
@@ -71,7 +71,7 @@ exports.requireCallAsRef = function (test) {
 				{kind: 'AMD', name: 'foo'}
 			]));
 			test.done();
-		});	
+		});
 	});
 };
 
@@ -88,7 +88,7 @@ exports.asynchRequireCallRefs = function (test) {
 				{kind: 'AMD', name: 'with-require-calls'}
 			]));
 			test.done();
-		});	
+		});
 	});
 };
 
@@ -103,6 +103,6 @@ exports.commonjsRefs = function (test) {
 				{kind: 'commonjs,AMD', name: './utils'}
 			]));
 			test.done();
-		});	
+		});
 	});
 };

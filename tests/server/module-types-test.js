@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -32,7 +32,7 @@
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var getModuleType = require("../../server/jsdepend/module-types").getModuleType;
 var esprima = require('../../server/jsdepend/parser');
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 
 var walk = require('../../server/jsdepend/tree-walker').walk;
 
@@ -65,7 +65,7 @@ exports.nodeModuleWithRequireCallsAndNoDefine = function (test) {
 		//dumpTree(parseTree);
 		test.equals('commonjs', getModuleType(parseTree));
 		test.done();
-	});	
+	});
 };
 
 exports.nodeModuleWithExports = function (test) {
@@ -75,7 +75,7 @@ exports.nodeModuleWithExports = function (test) {
 		//dumpTree(parseTree);
 		test.equals('commonjs', getModuleType(parseTree));
 		test.done();
-	});	
+	});
 };
 
 exports.bigFile = function (test) {
@@ -85,7 +85,7 @@ exports.bigFile = function (test) {
 		//dumpTree(parseTree);
 		test.equals('commonjs,AMD', getModuleType(parseTree));
 		test.done();
-	});	
+	});
 };
 
 exports.amdModuleWithoutADefine = function (test) {

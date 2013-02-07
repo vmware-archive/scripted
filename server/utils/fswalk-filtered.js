@@ -16,7 +16,7 @@
 // create 'configured' versions of fswalk that filters the tree based on
 // exclude patterns in the '.scripted' config file.
 
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var filesystem = require('./filesystem').withBaseDir(null);
 var extend = require('../jsdepend/utils').extend;
 var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
 var glob = require('../utils/path-glob');
@@ -29,9 +29,9 @@ var mFswalk = require('../jsdepend/fswalk'); //fswalk module not yet configured.
  * info discovered in the context of a given path.
  */
 function forPath(searchroot, k) {
-	
+
 	var walkerConf = filesystem;
-	
+
 	getDotScripted(searchroot, function (conf) {
 		var ignorePatterns = deref(conf, ['search', 'exclude']);
 		var ignoreGlob = null;

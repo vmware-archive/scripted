@@ -22,10 +22,10 @@
 //   in server or browser environments).
 ///////////////////////////////////////////
 
-var nodeNatives = require('./node-natives');
+var nodeNatives = require('../jsdepend/node-natives');
 var when = require('when');
-var oneCache = require('./one-cache');
-var utils = require('./utils');
+var oneCache = require('../jsdepend/one-cache');
+var utils = require('../jsdepend/utils');
 
 var pathNormalize = utils.pathNormalize;
 var pathResolve = utils.pathResolve;

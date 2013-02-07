@@ -22,7 +22,7 @@ var utils = require('../jsdepend/utils');
 
 var url = require('url');
 var servlets = require('../servlets');
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 var extend = utils.extend;

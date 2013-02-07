@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports __dirname console */
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var stf = require('../../server/jsdepend/script-tag-finder');
@@ -20,7 +20,7 @@ var assertContains = require('./test-utils').assertContains;
 
 function makeApi(relativeBaseDir, reducedConfig) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('../../server/jsdepend/filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/utils/filesystem').withBaseDir(baseDir);
 	if (reducedConfig) {
 		conf.listFiles = undefined;
 	}

@@ -34,7 +34,7 @@ var nodeNatives = require('../../server/jsdepend/node-natives');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('../../server/jsdepend/filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/utils/filesystem').withBaseDir(baseDir);
 	conf.sloppy = false;
 	var api = require("../../server/jsdepend/api").configure(conf);
 	return api;
@@ -209,7 +209,7 @@ exports.getDGraph2 = function (test) {
 			}
 		}));
 		test.done();
-	});	
+	});
 };
 
 exports.getDGraphWithCycleTest1 = function(test) {

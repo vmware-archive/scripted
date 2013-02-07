@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -33,7 +33,7 @@ var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 
 function makeApi(relativeBaseDir, reducedConfig) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('../../server/jsdepend/filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/utils/filesystem').withBaseDir(baseDir);
 	return conf;
 }
 

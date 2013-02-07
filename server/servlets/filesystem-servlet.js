@@ -10,14 +10,15 @@
  * Contributors:
  *     Nieraj Singh - initial API and implementation
  ******************************************************************************/
- 
+
 /*global console require*/
 
 var servlets = require('../servlets');
-var rename = require('../jsdepend/filesystem').withBaseDir(null).rename;
-var deleteResource = require('../jsdepend/filesystem').withBaseDir(null).deleteResource;
-var mkDir = require('../jsdepend/filesystem').withBaseDir(null).mkdir;
-var createFile = require('../jsdepend/filesystem').withBaseDir(null).putContents;
+var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
+var rename = filesystem.rename;
+var deleteResource = filesystem.deleteResource;
+var mkDir = filesystem.mkdir;
+var createFile = filesystem.putContents;
 
 var makeRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
 

@@ -16,10 +16,10 @@
 // We are simply using it to walk the scripted tree and print out each
 // filepath in it.
 
-// run it as follows: 'node run-asynchwalk.js' 
+// run it as follows: 'node run-asynchwalk.js'
 
 /*global console require __dirname */
-var conf = require('./filesystem').withBaseDir(null);
+var conf = require('../utils/filesystem').withBaseDir(null);
 var fswalk = require('./fswalk').configure(conf).asynchWalk;
 var pathNormalize = require('./utils').pathNormalize;
 
@@ -27,7 +27,7 @@ var dirToWalk = pathNormalize(__dirname+"/../..");
 
 console.log('Walking: '+dirToWalk);
 
-fswalk(dirToWalk, 
+fswalk(dirToWalk,
 	//Called on each file:
 	function (path, k) {
 		console.log(path);

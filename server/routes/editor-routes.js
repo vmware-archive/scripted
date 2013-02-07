@@ -15,7 +15,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var getUserHome = require('../jsdepend/filesystem').withBaseDir(null).getUserHome;
+var getUserHome = require('../utils/filesystem').withBaseDir(null).getUserHome;
 
 var EDITOR_HTML = path.resolve(__dirname, '../../client/editor.html');
 
