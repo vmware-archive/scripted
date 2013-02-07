@@ -169,7 +169,7 @@ define(['dojo'], function(dojo) {
 								var node = dojo.byId(imageId);
 								$(node).addClass(classToAdd);
 								if (classToRemove) {
-									dojo.removeClass(node, classToRemove);
+									$(node).removeClass(classToRemove);
 								}
 							}
 						} else {
@@ -216,7 +216,7 @@ define(['dojo'], function(dojo) {
 					if (imageId) {
 						node = dojo.byId(imageId);
 						$(node).addClass(collapseClass);
-						dojo.removeClass(node, expandClass);
+						$(node).removeClass(expandClass);
 					}
 				}
 				else {
@@ -224,7 +224,7 @@ define(['dojo'], function(dojo) {
 					if (imageId) {
 						node = dojo.byId(imageId);
 						$(node).addClass(expandClass);
-						dojo.removeClass(node, collapseClass);
+						$(node).removeClass(collapseClass);
 					}
 				}
 			}
