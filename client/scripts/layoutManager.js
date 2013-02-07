@@ -180,6 +180,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				editorNode.height(editor_height);
 				breadcrumb.width(editorNode.width());
 				breadcrumb.css('margin-left',editorNode.css('margin-left'));
+				breadcrumb.trigger('widthchange');
 				var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 				editorNode.css('margin-right', side_width);
 
