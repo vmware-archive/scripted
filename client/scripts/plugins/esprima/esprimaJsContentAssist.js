@@ -1563,7 +1563,11 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					
 					if (argSig) {
 						var sig = createReadableType(argSig, env, true, depth+1);
-						argsSigs.push(argName + ":" + sig);
+						if (sig === "{  }") {
+							argsSigs.push(argName);
+						} else {
+							argsSigs.push(argName + ":" + sig);
+						}
 					} else {
 						argsSigs.push(argName);
 					}

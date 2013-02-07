@@ -1987,7 +1987,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["obj.Fun()", "obj.Fun() : obj.Fun"],
 			["Object([val])", "Object([val]) : Object"],
-			["obj", "obj : { Fun : obj.Fun, fun : undefined, fun2 : Number }"]
+			["obj", "obj : { Fun : new() ⇒ obj.Fun, fun : () ⇒ undefined, fun2 : Number }"]
 		]);
 	};
 
@@ -2005,7 +2005,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["obj.Fun()", "obj.Fun() : obj.Fun"],
 			["Object([val])", "Object([val]) : Object"],
-			["obj", "obj : { Fun : obj.Fun }"]
+			["obj", "obj : { Fun : new() ⇒ obj.Fun }"]
 		]);
 	};
 
@@ -2015,7 +2015,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
 			["Object([val])", "Object([val]) : Object"],
-			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
+			["obj", "obj : { inner : { Fun : new() ⇒ obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2025,7 +2025,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
 			["Object([val])", "Object([val]) : Object"],
-			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
+			["obj", "obj : { inner : { Fun : new() ⇒ obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2046,7 +2046,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var other = obj\n" +
 			"new other.inner", "inner");
 		testProposals(results, [
-			["inner", "inner : { Fun : obj.inner.Fun }"]
+			["inner", "inner : { Fun : new() ⇒ obj.inner.Fun }"]
 		]);
 	};
 	
@@ -2057,7 +2057,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var other = obj.inner\n" +
 			"new other", "other");
 		testProposals(results, [
-			["other", "other : { Fun : obj.inner.Fun }"]
+			["other", "other : { Fun : new() ⇒ obj.inner.Fun }"]
 		]);
 	};
 
