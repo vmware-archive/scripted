@@ -11,8 +11,7 @@
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
 
-/*jslint node:true */
-/*global setTimeout exports console*/
+/*global setTimeout console*/
 
 /**
  * This module loads up all scripted completions and caches them
@@ -21,14 +20,17 @@
  * File format of completions http://sublimetext.info/docs/en/extensibility/completions.html
  */
 
+function configure(filesystem) {
+
 var JSON5 = require('json5');
 var when = require('when');
 var path = require('path');
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
 
 var EXTENSION = ".scripted-completions";
 var EXTENSION_LEN = EXTENSION.length;
+
+var exports = {};
 
 exports.CompletionsProcessor = function(completionsFolders) {
 	if (completionsFolders) {
@@ -291,4 +293,13 @@ exports.CompletionsProcessor.prototype = {
 		});
 		return deferred.promise;
 	}
-};
+
+}; //CompletionsProcessor.prototype
+
+return exports;
+
+
+} //configure
+
+exports.configure = configure; //Beware this is a different 'exports' than the one inside the
+      //configure function

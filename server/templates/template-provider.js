@@ -10,7 +10,7 @@
  * Contributors:
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
- 
+
 /*jslint node:true */
 /*global setTimeout clearTimeout */
 
@@ -18,9 +18,11 @@
  * This module provides templates to the client.
  * Also, caches templates after being calculated by the completions module
  */
- 
-var completions = require("./completions");
+
 var when = require('when');
+
+var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
+var completions = require('./completions').configure(filesystem);
 
 exports.completed = false;
 
@@ -42,7 +44,7 @@ exports.processTemplates = function(root) {
 	}
 
 	thisCompletionsProcessor.allCompletions = {};
-		
+
 	console.log("Processing templates");
 	// can be called synchronously
 	clearTimeout(t);
@@ -59,7 +61,7 @@ exports.processTemplates = function(root) {
 				deferreds.push(thisCompletionsProcessor.findCompletions(files[i]));
 				console.log("Queued finding completions in " + files[i]);
 			}
-			
+
 			console.log("Waiting for " + files.length + " queued completions file calculations to finish.");
 			if (files.length > 0) {
 				when.all(deferreds).then(

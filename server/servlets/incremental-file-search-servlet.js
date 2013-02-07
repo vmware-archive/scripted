@@ -23,13 +23,9 @@ var SERVICE_NAME = 'ifsearch';
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
-
 var websockets = require('./websockets-servlet');
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
-var searchFile = require('../textsearch/searcher').searchFile;
-var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -41,7 +37,10 @@ function debug_log(msg, obj) {
 //	console.log(msg + JSON.stringify(obj));
 }
 
-exports.install = function (server) {
+exports.install = function (server, filesystem) {
+
+	var searchFile = require('../textsearch/searcher').configure(filesystem);
+	var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 	websockets.install(server);
 
