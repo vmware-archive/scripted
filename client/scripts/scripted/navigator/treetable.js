@@ -56,7 +56,7 @@ define(['dojo'], function(dojo) {
 			var parent = options.parent;
 			var tree = this;
 			if (typeof(parent) === "string") {
-				parent = dojo.byId(parent);
+				parent = document.getElementById(parent);
 			}
 			if (!parent) { throw "no parent"; }
 			if (!options.model) { throw "no tree model"; }
@@ -148,10 +148,10 @@ define(['dojo'], function(dojo) {
 			var tree;
 			if (parentId === this._id) {  // root of tree
 				this._removeChildRows(parentId);
-				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last");
+				this._generateChildren(children, 0, document.getElementById(parentId+"tbody"), "last");
 				this._rowsChanged();
 			} else {  // node in the tree
-				var row = dojo.byId(parentId);
+				var row = document.getElementById(parentId);
 				if (row) {
 					// if it is showing children, refresh what is showing
 					row._item = item;
@@ -166,7 +166,7 @@ define(['dojo'], function(dojo) {
 							// TODO this should go away
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=371543
 							if (imageId && classToAdd) {
-								var node = dojo.byId(imageId);
+								var node = document.getElementById(imageId);
 								$(node).addClass(classToAdd);
 								if (classToRemove) {
 									$(node).removeClass(classToRemove);
@@ -196,7 +196,7 @@ define(['dojo'], function(dojo) {
 		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
 			if (typeof(itemOrId) === "string") {  //dom id
-				var node = dojo.byId(itemOrId);
+				var node = document.getElementById(itemOrId);
 				if (node) {
 					return node._item;
 				}
@@ -208,13 +208,13 @@ define(['dojo'], function(dojo) {
 		},
 		
 		toggle: function(id, imageId, expandClass, collapseClass) {
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				var node;
 				if (row._expanded) {
 					this.collapse(id);
 					if (imageId) {
-						node = dojo.byId(imageId);
+						node = document.getElementById(imageId);
 						$(node).addClass(collapseClass);
 						$(node).removeClass(expandClass);
 					}
@@ -222,7 +222,7 @@ define(['dojo'], function(dojo) {
 				else {
 					this.expand(id);
 					if (imageId) {
-						node = dojo.byId(imageId);
+						node = document.getElementById(imageId);
 						$(node).addClass(expandClass);
 						$(node).removeClass(collapseClass);
 					}
@@ -231,7 +231,7 @@ define(['dojo'], function(dojo) {
 		},
 		
 		isExpanded: function(id) {
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				return row._expanded;
 			}
@@ -240,7 +240,7 @@ define(['dojo'], function(dojo) {
 		
 		expand: function(itemOrId , postExpandFunc , args) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				if (row._expanded) {
 					// TODO this has the wrong name!  if it is being called if expansion isn't happening!
@@ -263,7 +263,7 @@ define(['dojo'], function(dojo) {
 		},
 		
 		_removeChildRows: function(parentId) {
-			var table = dojo.byId(this._id);
+			var table = document.getElementById(this._id);
 			// true if we are removing directly from table
 			var foundParent = parentId === this._id;
 			var stop = false;
@@ -296,7 +296,7 @@ define(['dojo'], function(dojo) {
 		
 		collapse: function(itemOrId) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				if (!row._expanded) {
 					return;

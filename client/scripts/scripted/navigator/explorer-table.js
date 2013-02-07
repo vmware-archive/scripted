@@ -121,7 +121,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
 	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
 	FileRenderer.prototype.getRowActionElement = function(tableRowId) {
-		return dojo.byId(tableRowId + "NameColumn");
+		return document.getElementById(tableRowId + "NameColumn");
 	};
 
 	FileRenderer.prototype.onRowIterate = function(model) {
@@ -290,7 +290,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		var rowId = this.model.getId(item);
 		if (rowId) {
 			// I know this from my renderer below.
-			return dojo.byId(rowId + "NameColumn");
+			return document.getElementById(rowId + "NameColumn");
 		}
 	};
 
@@ -360,7 +360,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		var self = this;
 		var id = this.model.getIdFromString(fileintree);
 		this._highlightingId = id;
-		var element = dojo.byId(id);
+		var element = document.getElementById(id);
 		if (element === null || element === undefined) {
 			var expandSection = function(root, splits, index) {
 				if (index < (splits.length - 1)) {
@@ -371,7 +371,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 					});
 				} else {
 					var stringid = self.model.getIdFromString(root + "/" + splits[index]);
-					var element = dojo.byId(id);
+					var element = document.getElementById(id);
 					if (element) {
 						$(element).addClass("highlightrow");
 						$(element).removeClass("lightTreeTableRow");
@@ -417,7 +417,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		}
 
 		this._lastHash = path;
-		var parent = dojo.byId(this.parentId);
+		var parent = document.getElementById(this.parentId);
 
 		// we are refetching everything so clean up the root
 		this.treeRoot = {};
@@ -426,7 +426,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			//the tree root object has changed so we need to load the new one
 
 			// Progress indicator
-			var progress = dojo.byId("progress");
+			var progress = document.getElementById("progress");
 			if (!progress) {
 				progress = dojo.create("div", {
 					id: "progress"
