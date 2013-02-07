@@ -298,6 +298,8 @@ define([
 				layoutManager.toggleNavigatorVisible();
 				return true;
 			},"Toggle Navigator");
+			// TODO move to a central place, don't need to do this for each editor
+			$('#nav_toggle').off('click');
 			$('#nav_toggle').on('click', function() {
 				editor.getTextView().invokeAction("Toggle Navigator",false);
 				return true;
