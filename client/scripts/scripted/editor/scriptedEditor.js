@@ -612,7 +612,7 @@ define([
 			if (isJS) {
 				var hoverText = jsContentAssistant.computeHover(buffer, offset);
 //				return hoverText;
-				return hoverText ? "<pre>" + js_beautify(hoverText) + "</pre>" : hoverText;
+				return hoverText;
 			} else {
 				return null;
 			}

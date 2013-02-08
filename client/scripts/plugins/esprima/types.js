@@ -11,20 +11,40 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define */
-define("plugins/esprima/types", [], function() {
+/*
+This module defines the built in types for the scripted JS inferencer.
+It also contains functions for manipulating internal type signatures.
+
+Here is the BNF for internal type signature:
+
+<type> ::= <simple_type> | <array_type> | <function_type> | <constructor_type> | <proto_type>
+
+<simple_type> ::= js_identifier  // simple types are just js identifiers
+
+<array_type> ::= "Array.[" <type> "]"  // a bit verbose for array types, but following syntax of closure compiler
+
+<proto_type> ::= <type> "~proto"  // specifies that this type is a prototype of the base type
+
+<function_type> ::= "?" <type> ":" (<parameter_type> ",")*  // function types have one or more paramteters
+
+<constructor_type> ::= "*" <type> ":" (<parameter_type> ",")*  // same as function type, but with different start
+
+<parameter_type> ::= js_identifier ("/" <type>)?  // a parameter type consists of a name and an optional type, separated by a /
+*/
+
+
+/*global define doctrine */
+define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"], function(proposalUtils, scriptedLogger) {
 
 	/**
 	 * The Definition class refers to the declaration of an identifier.
 	 * The start and end are locations in the source code.
 	 * Path is a URL corresponding to the document where the definition occurs.
 	 * If range is undefined, then the definition refers to the entire document
-	 * Range is a two element array with the start and end values 
+	 * Range is a two element array with the start and end values
 	 * (Exactly the same range field as is used in Esprima)
 	 * If the document is undefined, then the definition is in the current document.
 	 *
-	 * Types that begin with '?' are functions.  The values after the ':' are the 
-	 * argument names.
 	 * @param String typeName
 	 * @param {Array.<Number>} range
 	 * @param String path
@@ -46,7 +66,7 @@ define("plugins/esprima/types", [], function() {
 		'eval' : new Definition("?Object:toEval"),
 		parseInt : new Definition("?Number:str,[radix]"),
 		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Global"),  
+		"this": new Definition("Global"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
 		Object: new Definition("*Object:[val]"),
@@ -66,7 +86,7 @@ define("plugins/esprima/types", [], function() {
 		encodeURIComponent : new Definition("?String:decodedURIString")
 
 		// not included since not meant to be referenced directly
-		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError 
+		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError
 	};
 	
 	// Node module
@@ -79,7 +99,7 @@ define("plugins/esprima/types", [], function() {
 		'eval' : new Definition("?Object:toEval"),
 		parseInt : new Definition("?Number:str,[radix]"),
 		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Module"),  
+		"this": new Definition("Module"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
 		Object: new Definition("*Object:[val]"),
@@ -126,7 +146,7 @@ define("plugins/esprima/types", [], function() {
 		'eval' : new Definition("?Object:toEval"),
 		parseInt : new Definition("?Number:str,[radix]"),
 		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Window"),  
+		"this": new Definition("Window"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
 		Object: new Definition("*Object:[val]"),
@@ -383,7 +403,7 @@ define("plugins/esprima/types", [], function() {
 			lastIndexOf : new Definition("?Number:searchElement,[fromIndex]"),
 			every : new Definition("?Boolean:callbackFn,[thisArg]"),
 			some : new Definition("?Boolean:callbackFn,[thisArg]"),
-			forEach : new Definition("?Object:callbackFn,[thisArg]"),  // should return 
+			forEach : new Definition("?Object:callbackFn,[thisArg]"),  // should return
 			map : new Definition("?Array:callbackFn,[thisArg]"),
 			filter : new Definition("?Array:callbackFn,[thisArg]"),
 			reduce : new Definition("?Array:callbackFn,[initialValue]"),
@@ -434,7 +454,7 @@ define("plugins/esprima/types", [], function() {
 			toExponential : new Definition("?Number:digits"),
 			toFixed : new Definition("?Number:digits"),
 			toPrecision : new Definition("?Number:digits"),
-			// do we want to include NaN, MAX_VALUE, etc?	
+			// do we want to include NaN, MAX_VALUE, etc?
 		
 			$$proto : new Definition("Object")
 		},
@@ -654,7 +674,7 @@ define("plugins/esprima/types", [], function() {
 		},
 		
 		// See http://nodejs.org/api/stream.html
-		// Stream is a wierd one since it is built into the stream module, 
+		// Stream is a wierd one since it is built into the stream module,
 		// but this module isn't always around, so must explicitly define it.
 		Stream : {
 			$$isBuiltin: true,
@@ -732,10 +752,10 @@ define("plugins/esprima/types", [], function() {
 			appName : new Definition("String"),
 			appVersion : new Definition("String"),
 			connection : new Definition("Connection"),
-			cookieEnabled : new Definition("Boolean"), 
+			cookieEnabled : new Definition("Boolean"),
 			language : new Definition("String"),
 			mimeTypes : new Definition("MimeTypeArray"),
-			onLine : new Definition("Boolean"), 
+			onLine : new Definition("Boolean"),
 			oscpu : new Definition("String"),
 			platform : new Definition("String"),
 			plugins : new Definition("String"),
@@ -1326,7 +1346,7 @@ define("plugins/esprima/types", [], function() {
 		
 // HTML constructors
 // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-33759296
-/*		
+/*
 HTMLVideoElement
 HTMLAppletElement
 HTMLCollection
@@ -1545,8 +1565,364 @@ SVGFEFuncAElement
 */
 	};
 	
+	var protoLength = "~proto".length;
 	return {
 		Types : Types,
-		Definition : Definition
+		Definition : Definition,
+		
+		// now some functions that handle types signatures, styling, and parsing
+		
+		/** constant that defines generated type name prefixes */
+		GEN_NAME : "gen~",
+	
+
+		// type parsing
+		isArrayType : function(typeName) {
+			return typeName.substr(0, "Array.<".length) === "Array.<";
+		},
+		
+		isFunctionOrConstructor : function(typeName) {
+			return typeName.charAt(0) === "?" || typeName.charAt(0) === "*";
+		},
+		
+		isPrototype : function(typeName) {
+			return typeName.charAt(0) === "*" && typeName.substr( - protoLength, protoLength) === "~proto";
+		},
+		
+		findReturnTypeEnd : function(fnType) {
+			if (this.isFunctionOrConstructor(fnType)) {
+				// walk the string and for every ? or *, find the corresponding :, until we reach the
+				// : for the first ? or *
+				var depth = 1;
+				var index = 1;
+				var len = fnType.length;
+				
+				while (index < len) {
+					if (this.isFunctionOrConstructor(fnType.charAt(index))) {
+						depth++;
+					} else if (fnType.charAt(index) === ":") {
+						depth--;
+					}
+					
+					if (depth === 0) {
+						// found it
+						return index;
+					}
+					
+					index++;
+				}
+			}
+			return -1;
+		},
+		
+		removeParameters : function(fnType) {
+			var index = this.findReturnTypeEnd(fnType);
+			if (index >= 0) {
+				return fnType.substring(0,index+1);
+			}
+			// didn't find a matching ":" (ie- invalid type)
+			// or just not a function type
+			return fnType;
+		},
+		
+		/**
+		 * if the type passed in is a function type, extracts the return type
+		 * otherwise returns as is
+		 */
+		extractReturnType : function(fnType) {
+			var index = this.findReturnTypeEnd(fnType);
+			if (index >= 0) {
+				return fnType.substring(1,index);
+			}
+			// didn't find a matching ":" (ie- invalid type)
+			// or just not a function type
+			return fnType;
+		},
+	
+		/**
+		 * returns a parameterized array type with the given type parameter
+		 */
+		parameterizeArray : function(parameterType) {
+			return "Array.<" + parameterType + ">";
+		},
+		
+		/**
+		 * If this is a parameterized array type, then extracts the type,
+		 * Otherwise object
+		 */
+		extractArrayParameterType : function (arrayType) {
+			if (arrayType.substr(0, "Array.<".length) === "Array.<" && arrayType.substr(-1, 1) === ">") {
+				return arrayType.substring("Array.<".length, arrayType.length -1);
+			} else {
+				return "Object";
+			}
+		},
+
+		parseJSDocComment : function(commentText) {
+			var result = { };
+			result.params = {};
+			if (commentText) {
+				try {
+					var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
+					// transform result into something more manageable
+					var rawtags = rawresult.tags;
+					if (rawtags) {
+						for (var i = 0; i < rawtags.length; i++) {
+							switch (rawtags[i].title) {
+								case "typedef":
+								case "define":
+								case "type":
+									result.type = rawtags[i].type;
+									break;
+								case "return":
+									result.rturn = rawtags[i].type;
+									break;
+								case "param":
+									// remove square brackets
+									var name = rawtags[i].name;
+									if (name.charAt(0) === '[' && name.charAt(name.length -1) === ']') {
+										name = name.substring(1, name.length-1);
+									}
+									result.params[name] = rawtags[i].type;
+									break;
+							}
+						}
+					}
+				} catch (e) {
+					scriptedLogger.error(e.message, "CONTENT_ASSIST");
+					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
+				}
+			}
+			return result;
+		},
+		
+		/**
+		 * Best effort to recursively convert from a jsdoc type specification to a scripted type name.
+		 *
+		 * See here: https://developers.google.com/closure/compiler/docs/js-for-compiler
+		 * should handle:
+				NullableLiteral
+				AllLiteral
+				NullLiteral
+				UndefinedLiteral
+				VoidLiteral
+				UnionType
+				ArrayType
+				RecordType
+				FieldType
+				FunctionType
+				ParameterType
+				RestType
+				NonNullableType
+				OptionalType
+				NullableType
+				NameExpression
+				TypeApplication
+		 * @return {String} if the type is found, then return string, otherwise null
+		 */
+		convertJsDocType : function(jsdocType, env) {
+			var allTypes = env.getAllTypes();
+			if (!jsdocType) {
+				return null;
+			}
+		
+			var i;
+			switch (jsdocType.type) {
+				case 'NullableLiteral':
+				case 'AllLiteral':
+				case 'NullLiteral':
+					return "Object";
+
+				case 'UndefinedLiteral':
+				case 'VoidLiteral':
+					return "undefined";
+
+				case 'UnionType':
+					// TODO no direct handling of union types
+					// for now, just return the first of the union
+					if (jsdocType.elements && jsdocType.elements.length > 0) {
+						return this.convertJsDocType(jsdocType.elements[0], env);
+					}
+					return "Object";
+					
+				case 'RestType':
+					return "Array.<" + this.convertJsDocType(jsdocType.expression, env) + ">";
+				case 'ArrayType':
+					if (jsdocType.elements && jsdocType.elements.length > 0) {
+						// assume array type is type of first element, not correct, but close enough
+						return "Array.<" + this.convertJsDocType(jsdocType.elements[0], env) + ">";
+					}
+					return "Array";
+
+				case 'FunctionType':
+					var ret = this.convertJsDocType(jsdocType.result, env);
+					if (!ret) {
+						ret = "Object";
+					}
+					var params = [];
+					if (jsdocType.params) {
+						for (i = 0; i < jsdocType.params.length; i++) {
+							// this means that if no name is used, then the type name is used (if a simple type)
+							var param = jsdocType.params[i].name;
+							if (!param) {
+								param = 'arg'+i;
+							}
+							var paramType = "";
+							if (jsdocType.params[i].expression) {
+								paramType = "/" + this.convertJsDocType(jsdocType.params[i].expression, env);
+							}
+							params.push(param + paramType);
+						}
+					}
+					// TODO FIXADE must also handle @constructor
+					var funcConstr;
+					if (jsdocType['new'] && jsdocType['this']) {
+						// this is actually a constructor
+						var maybeRet = this.convertJsDocType(jsdocType['this'], env);
+						if (maybeRet) {
+							ret = maybeRet;
+						}
+						funcConstr = "*";
+					} else {
+						funcConstr = "?";
+					}
+					return funcConstr + ret + ":" + params.join(',');
+
+				case 'TypeApplication':
+					var expr = this.convertJsDocType(jsdocType.expression, env);
+					if (expr === "Array" && jsdocType.applications && jsdocType.applications.length > 0) {
+						// only parameterize arrays not handling objects yet
+						return "Array.<" + this.convertJsDocType(jsdocType.applications[0], env) + ">";
+					}
+					return expr;
+				case 'ParameterType':
+				case 'NonNullableType':
+				case 'OptionalType':
+				case 'NullableType':
+					return this.convertJsDocType(jsdocType.expression, env);
+					
+				case 'NameExpression':
+					var name = jsdocType.name;
+					name = name.trim();
+					if (allTypes[name]) {
+						return name;
+					} else {
+						var capType = name[0].toUpperCase() + name.substring(1);
+						if (allTypes[capType]) {
+							return capType;
+						}
+					}
+					return null;
+				case 'RecordType':
+					var fields = { };
+					for (i = 0; i < jsdocType.fields.length; i++) {
+						var field = jsdocType.fields[i];
+						var fieldType = this.convertJsDocType(field, env);
+						fields[field.key] = fieldType ? fieldType : "Object";
+					}
+					// create a new type to store the record
+					var obj = env.newFleetingObject();
+					for (var prop in fields) {
+						if (fields.hasOwnProperty(prop)) {
+							// add the variable to the new object, which happens to be the top-level scope
+							env.addVariable(prop, obj, fields[prop]);
+						}
+					}
+					return obj;
+				case 'FieldType':
+					return this.convertJsDocType(jsdocType.value, env);
+			}
+			return null;
+		},
+
+		// type styling
+		styleAsProperty : function(prop, useHtml) {
+			return useHtml ? "<span style=\"color: red;font-weight:bold;\">" + prop + "</span>": prop;
+		},
+		styleAsType : function(type, useHtml) {
+			return useHtml ? "<span style=\"color: blue;font-weight:bold;\">" + type + "</span>": type;
+		},
+		styleAsOther : function(text, useHtml) {
+			return useHtml ? "<span style=\"font-style:italic;\">" + text + "</span>": text;
+		},
+		
+		/**
+		 * creates a human readable type name from the name given
+		 */
+		createReadableType : function(typeName, env, useFunctionSig, depth, useHtml) {
+			depth = depth || 0;
+			var first = typeName.charAt(0);
+			if (first === "?" || first === "*") {
+				// a function
+				var returnEnd = this.findReturnTypeEnd(typeName);
+				if (returnEnd === -1) {
+					returnEnd = typeName.length;
+				}
+				var funType = typeName.substring(1, returnEnd);
+				if (useFunctionSig) {
+					// convert into a function signature
+					var prefix = first === "?" ? "" : "new";
+					var args = typeName.substring(returnEnd+1, typeName.length);
+					var argsSigs = [];
+					args.split(",").forEach(function(arg) {
+						var typeSplit = arg.indexOf("/");
+						var argName = typeSplit > 0 ? arg.substring(0, typeSplit) : arg;
+						argName = this.styleAsProperty(argName, useHtml);
+						var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
+						
+						if (argSig) {
+							var sig = this.createReadableType(argSig, env, true, depth+1, useHtml);
+							if (sig === "{  }") {
+								argsSigs.push(argName);
+							} else {
+								argsSigs.push(argName + ":" + sig);
+							}
+						} else {
+							argsSigs.push(argName);
+						}
+					}.bind(this));
+					
+					// note the use of the ⇒ &rArr; char here.  Must use the char directly since js_render will format it otherwise
+					return prefix + "(" + argsSigs.join(", ") +
+						(useHtml ? ")<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;", depth+1) + "⇒ " : ") ⇒ ") +
+						this.createReadableType(funType, env, true, depth + 1, useHtml);
+				} else {
+					// use the return type
+					return this.createReadableType(funType, env, true, depth, useHtml);
+				}
+			} else if (typeName.indexOf(this.GEN_NAME) === 0) {
+				// a generated object
+				if (depth > 1) {
+					// don't show inner types
+					return this.styleAsOther("{...}", useHtml);
+				}
+				
+				// create a summary
+				var type = env.findType(typeName);
+				var res = "{ ";
+				var props = [];
+				for (var val in type) {
+					if (type.hasOwnProperty(val) && val !== "$$proto") {
+						var name;
+						// don't show inner objects
+						name = this.createReadableType(type[val].typeName, env, true, depth + 1, useHtml);
+						props.push((useHtml ? "<br/>" + this.repeatChar("&nbsp;&nbsp;&nbsp;&nbsp;", depth+1) : "" ) +
+							this.styleAsProperty(val, useHtml) + ":" + name);
+					}
+				}
+				res += props.join(", ");
+				return res + " }";
+			} else if (this.isArrayType(typeName)) {
+				var typeParameter = this.extractArrayParameterType(typeName);
+				if (typeParameter !== "Object") {
+					typeName = this.createReadableType(typeParameter, env, true, depth+1, useHtml) + "[]";
+				} else {
+					typeName = "[]";
+				}
+				return typeName;
+			} else {
+				return this.styleAsType(typeName, useHtml);
+			}
+		}
 	};
 });

@@ -92,5 +92,13 @@ define({
 	
 	isUpperCase : function(char) {
 		return char >= 'A' && char <= 'Z';
+	},
+	
+	repeatChar : function(char, times) {
+		var str = "";
+		for (var i = 0; i < times; i++) {
+			str += char;
+		}
+		return str;
 	}
 });
