@@ -1864,14 +1864,15 @@ SVGFEFuncAElement
 					var prefix = first === "?" ? "" : "new";
 					var args = typeName.substring(returnEnd+1, typeName.length);
 					var argsSigs = [];
+					var self = this;
 					args.split(",").forEach(function(arg) {
 						var typeSplit = arg.indexOf("/");
 						var argName = typeSplit > 0 ? arg.substring(0, typeSplit) : arg;
-						argName = this.styleAsProperty(argName, useHtml);
+						argName = self.styleAsProperty(argName, useHtml);
 						var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
 						
 						if (argSig) {
-							var sig = this.createReadableType(argSig, env, true, depth+1, useHtml);
+							var sig = self.createReadableType(argSig, env, true, depth+1, useHtml);
 							if (sig === "{  }") {
 								argsSigs.push(argName);
 							} else {
@@ -1880,7 +1881,7 @@ SVGFEFuncAElement
 						} else {
 							argsSigs.push(argName);
 						}
-					}.bind(this));
+					});
 					
 					// note the use of the ⇒ &rArr; char here.  Must use the char directly since js_render will format it otherwise
 					return prefix + "(" + argsSigs.join(", ") +
