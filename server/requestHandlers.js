@@ -18,9 +18,10 @@
 var when = require('when');
 var querystring = require("querystring");
 
-var fs = require('fs'); //TODO: plugable fs
+var fs = require('fs');  //TODO: plugable fs
 var filesystem = require('./utils/filesystem').withBaseDir(null); //TODO: plugable fs
-var readFile = filesystem.readFile;
+var getContents = filesystem.getContents;
+//filesystem.getContents;
 var listFiles = filesystem.listFiles;
 
 var formidable = require("formidable");
@@ -47,7 +48,7 @@ var pathResolve = pathUtils.pathResolve;
 
 //This function checks if there are any non-UTF8 characters (character code == 65533, "unknown") in the file.  If there are, it's binary
 function isBinary (buffer){
-	var buffer_utf8 = buffer.toString('utf8', 0, 24);
+	var buffer_utf8 = typeof(buffer)==='string'? buffer : buffer.toString('utf8', 0, 24);
 
 	for (var i = 0; i < buffer_utf8.length; i++){
 		var code = buffer_utf8.charCodeAt(i);
@@ -59,63 +60,52 @@ function isBinary (buffer){
 }
 
 function get(response, request) {
-  var file = url.parse(request.url,true).query.file;
-	console.log("Processing get request for "+file);
-	if (isNativeNodeModulePath(file)) {
-		var contents = nodeNatives.getCode(nativeNodeModuleName(file));
 
-		if (contents) {
+	var file = url.parse(request.url, true).query.file;
+	console.log("Processing get request for " + file);
+
+	getContents(file).then(function(data) {
+		var binary = isBinary(data);
+
+		if (binary) {
+			console.log('Cannot open binary file');
+			response.writeHead(500, {
+				"Content-Type": "text/plain"
+			});
+			response.write("Cannot open binary file");
+			response.end();
+		} else {
 			response.writeHead(200, {
 				"Content-Type": "text/plain",
 				"Cache-Control": "no-store"
 			});
-			response.write(contents);
+			response.write(data);
 			response.end();
-			return;
 		}
-	}
-
-
-
-  readFile(file, function(err,data){
-    if(err) {
-	    // Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
-		if (err.errno === 28 /*EISDIR*/ || err.errno === -1 /*Windows returns this for readFile on dirs*/) {
+	}).otherwise(function(err) {
+		// Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
+		if (err && err.errno === 28 /*EISDIR*/ || err.errno === -1 /*Windows returns this for readFile on dirs*/ ) {
 			// is a directory
-			response.writeHead(500, { "Content-Type": "text/plain"});
+			response.writeHead(500, {
+				"Content-Type": "text/plain"
+			});
 			response.write("File is a directory");
 			response.end();
-        } else if (err.errno === 34 /*ENOENT*/) {
+		} else if (err && err.errno === 34 /*ENOENT*/ ) {
 			// File not found
-			response.writeHead(500, { "Content-Type": "text/plain"});
+			response.writeHead(500, {
+				"Content-Type": "text/plain"
+			});
 			response.write("File not found");
 			response.end();
 		} else {
-			response.writeHead(500, {"Content-Type": "text/plain"});
-			response.write("Error: "+err);
+			response.writeHead(500, {
+				"Content-Type": "text/plain"
+			});
+			response.write("Error: " + err);
 			response.end();
 		}
-    } else {
-
-	  var binary = isBinary(data);
-
-	  if(binary){
-		  console.log('Cannot open binary file');
-		  response.writeHead(500, {"Content-Type": "text/plain"});
-		  response.write("Cannot open binary file");
-		  response.end();
-	  } else {
-		  response.writeHead(200, {
-			"Content-Type": "text/plain",
-			"Cache-Control": "no-store"
-		});
-		  response.write(data);
-		  response.end();
-	  }
-
-
-    }
-  });
+	});
 }
 
 function handleTemplates(response, request) {

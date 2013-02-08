@@ -23,6 +23,11 @@
 ///////////////////////////////////////////
 
 var nodeNatives = require('../jsdepend/node-natives');
+		//TODO: filesystem shouldn't have dependency on node natives module
+		//  handle this in a different way. (if fs is 'plugable' should be
+		//  able to easily add 'mock' files like this as an add-on content
+		//  provider.
+
 var when = require('when');
 var oneCache = require('../jsdepend/one-cache');
 var utils = require('../jsdepend/utils');
@@ -266,7 +271,7 @@ function withBaseDir(baseDir) {
 				callback(data);
 			}
 		});
-		return d;
+		return d && d.promise;
 	}
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 
@@ -397,8 +402,7 @@ function withBaseDir(baseDir) {
 		stat:         stat,
 		mkdir:        mkdir,
 		deleteResource: deleteResource,
-		createReadStream: createReadStream,
-		readFile: readFile
+		createReadStream: createReadStream
 	};
 }
 
