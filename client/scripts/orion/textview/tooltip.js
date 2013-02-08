@@ -102,12 +102,12 @@ define("orion/textview/tooltip", [ //$NON-NLS-0$
 			if (target) {
 				var self = this;
 				if(delay === 0) {
-					self.show(true);
+					self.show(false);
 			}
 				else {
 				var window = this._getWindow();
 					self._showTimeout = window.setTimeout(function() {
-						self.show(true);
+						self.show(false);
 					}, delay ? delay : 500);
 				}
 			}
@@ -117,7 +117,7 @@ define("orion/textview/tooltip", [ //$NON-NLS-0$
 			var info = this._target.getTooltipInfo();
 			if (!info) { return; }
 			var tooltipDiv = this._tooltipDiv, tooltipContents = this._tooltipContents;
-			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height = 
+			tooltipDiv.style.left = tooltipDiv.style.right = tooltipDiv.style.width = tooltipDiv.style.height =
 				tooltipContents.style.width = tooltipContents.style.height = "auto"; //$NON-NLS-0$
 			var contents = info.contents;
 			if (contents instanceof Array) {
