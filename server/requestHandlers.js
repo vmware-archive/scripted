@@ -13,16 +13,27 @@
  *     Kris De Volder
  *     Christopher Johnson
  ******************************************************************************/
- 
+
 /*global console require exports process*/
+var when = require('when');
 var querystring = require("querystring");
-var fs = require("fs");
+
+var fs = require('fs'); //TODO: plugable fs
+var filesystem = require('./utils/filesystem').withBaseDir(null); //TODO: plugable fs
+var readFile = filesystem.readFile;
+var listFiles = filesystem.listFiles;
+
 var formidable = require("formidable");
 var url = require('url');
-var templates = require('./templates/template-provider');
+var templates = require('./templates/template-provider').configure(filesystem);
 var nodeNatives = require('./jsdepend/node-natives');
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
+
+var pathUtils = require('./jsdepend/utils');
+var getDirectory = pathUtils.getDirectory;
+var getFileName = pathUtils.getFileName;
+var pathResolve = pathUtils.pathResolve;
 
 // TODO handle binary files
 /*
@@ -64,7 +75,9 @@ function get(response, request) {
 		}
 	}
 
-  fs.readFile(file, function(err,data){
+
+
+  readFile(file, function(err,data){
     if(err) {
 	    // Look into why windows returns -1 for errno when readFile called on a directory (e.g. 'scr .')
 		if (err.errno === 28 /*EISDIR*/ || err.errno === -1 /*Windows returns this for readFile on dirs*/) {
@@ -124,7 +137,7 @@ function handleTemplates(response, request) {
 				res[scope] ?
 					JSON.stringify(res[scope]) :
 					'[]');
-					
+
 			} catch (e) {
 				console.error("Error sending templates to client.");
 				console.error(e.stack);
@@ -158,11 +171,11 @@ function handleTemplates(response, request) {
 	ChildrenLocation:pathForChildren
 	modified:33				// not yet set correctly
    }
-   
+
    children is an array of Item objects.  However, if directory is true and children isn't set, then ChildrenLocation is the
    path against which to run a further fs_list to obtain them.
-   
-   
+
+
  *
  */
 function fs_list(response, request, path) {
@@ -184,7 +197,7 @@ function fs_list(response, request, path) {
 		}
 	}
 	//console.log("fs_list request for: "+pathToUse);
-	
+
 	/*
 	This next line is due to the fact that /get and /fs_list are routed differently:
 	<localhost> /get?file= <path>
@@ -192,43 +205,40 @@ function fs_list(response, request, path) {
 	<localhost> /fs_list/ <path>
 	*/
 	pathToUse = pathToUse.replace(/%20/g, " ");
-
-	fs.stat(pathToUse,function(err,stats) {
-		if (err) { console.log(err); }
-		//TODO platform specific...
-		if (!stats || stats===undefined) {
-          response.writeHead(404, {'content-type': 'text/plain'});
-          response.write('not found '+pathToUse);
-          response.end();
-		  return;
+	filesystem.stat(pathToUse).otherwise(function (err) {
+		console.log(err);
+	}).then(function (stats) {
+		if (!stats) {
+			response.writeHead(404, {'content-type': 'text/plain'});
+			response.write('not found '+pathToUse);
+			response.end();
+			return;
 		}
-		var filename = pathToUse.split('/').pop();
-		var directory = pathToUse.split('/').slice(-2,-1);
+		var filename = getFileName(pathToUse);
+		var directory = getDirectory(pathToUse);
 		var size =  stats.size;
-		if (stats.isDirectory()) {
-			fs.readdir(pathToUse,function(err,files) {
-				if (err) { console.log(err); }
-				var kids = [];
-				for (var i=0;i<files.length;i++) {
-					var kidpath = pathToUse+"/"+files[i];
-				    try {
-						var kidstat = fs.statSync(kidpath);
-						var kid = {
-							name:files[i],
-							directory:kidstat.isDirectory(),
-							Location:kidpath,
-							size:0,
-							parentDir:filename
-						};
-						if (kidstat.isDirectory()) {
-							kid.ChildrenLocation = kidpath;
-						}
-						kids.push(kid);
-					} catch (e) {
-					  console.log("problems stat'ing "+kidpath);
+		if (stats.isDirectory) {
+			return when.map(listFiles(pathToUse), function (kidName) {
+				var kidPath = pathResolve(pathToUse, kidName);
+				return filesystem.stat(kidPath).then(function (kidStat) {
+					var kid = {
+						name:kidName,
+						directory:kidStat.isDirectory,
+						Location:kidPath,
+						size:0,
+						parentDir:filename //TODO; really?? Looks incorrect!
+					};
+					if (kidStat.isDirectory) {
+						kid.ChildrenLocation = kidPath;
 					}
+					return kid;
+				});
+			}).otherwise(function (err) {
+				if (err) {
+					console.log(err);
 				}
-    
+				return []; //replace with something that won't break the rest of the code
+			}).then(function (kids) {
 				var retval = {
 					name:filename,
 					path:pathToUse,
@@ -244,8 +254,7 @@ function fs_list(response, request, path) {
 				response.write(respons);
 				response.end();
 			});
-		} else {
-            // not a directory
+		} else if (stats.isFile) {
 			var retval = {items:[{
 				name: filename,
 				path:pathToUse,
@@ -260,6 +269,11 @@ function fs_list(response, request, path) {
 			response.writeHead(200, {'content-type': 'text/json'});
 			response.write(jsondata);
 			response.end();
+		} else { //Something funky... neither a file nor a directory!
+			response.writeHead(404, {'content-type': 'text/plain'});
+			response.write('not found '+pathToUse);
+			response.end();
+			return;
 		}
 	});
 }

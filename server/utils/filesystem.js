@@ -341,7 +341,7 @@ function withBaseDir(baseDir) {
 
 	/**
 	 * simplified version of nodejs fs.stat. Only returns a data object with two flags
-	 * isDirectory and isFile.
+	 * isDirectory and isFile; and a size field.
 	 *
 	 * We don't return the 'naked' result from fs.stat here because it can't easily be
 	 * JSON.stringified and sent over to the client.
@@ -357,6 +357,7 @@ function withBaseDir(baseDir) {
 				d.reject(err);
 			} else {
 				d.resolve({
+					size: statObj.size,
 					isDirectory: statObj.isDirectory(),
 					isFile: statObj.isFile()
 				});
@@ -371,6 +372,14 @@ function withBaseDir(baseDir) {
 	function createReadStream(handle) {
 		var file = handle2file(handle);
 		return fs.createReadStream(file, { encoding: 'utf8'});
+	}
+
+	/**
+	 * Like node fs.readFile
+	 */
+	function readFile(handle, callback) {
+		var file = handle2file(handle);
+		fs.readFile(file, callback);
 	}
 
 	return {
@@ -388,7 +397,8 @@ function withBaseDir(baseDir) {
 		stat:         stat,
 		mkdir:        mkdir,
 		deleteResource: deleteResource,
-		createReadStream: createReadStream
+		createReadStream: createReadStream,
+		readFile: readFile
 	};
 }
 

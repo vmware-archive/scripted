@@ -10,18 +10,20 @@
  * Contributors:
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
- 
+
 /*jslint node:true */
 /*global __dirname console */
 
-var provider = require('../../server/templates/template-provider');
+var filesystem = require('../../server/utils/filesystem').withBaseDir(null);
+
+var provider = require('../../server/templates/template-provider').configure(filesystem);
 
 exports.providerTest = function(test) {
 	provider.processTemplates(__dirname + "/test-resources/").then(function(allCompletions) {
 		test.ok(allCompletions.html);
 		test.ok(allCompletions.js);
 		test.ok(allCompletions.json);
-		
+
 		test.done();
 	},
 	function(err) {

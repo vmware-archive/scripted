@@ -21,7 +21,10 @@
 
 var when = require('when');
 
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
+function configure(filesystem) {
+
+var exports = {};
+
 var completions = require('./completions').configure(filesystem);
 
 exports.completed = false;
@@ -91,3 +94,8 @@ exports.processTemplates = function(root) {
 	});
 	return deferred.promise;
 };
+
+return exports;
+} //function configure
+
+exports.configure = configure;
