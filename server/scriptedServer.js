@@ -35,7 +35,7 @@ require("./servlets/exec-servlet");
 //these two wired up in server.js
 //require("./servlets/kill");
 //require("./servlets/status");
-require("./servlets/filesystem-servlet");
+require("./servlets/filesystem-servlet").install(filesystem);
 
 // Request to read a file (returns contents)
 servlets.register("/get", requestHandlers.get);

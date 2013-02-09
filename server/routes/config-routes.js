@@ -14,10 +14,6 @@
 /*global console require*/
 
 var when = require('when');
-var filesystem = require('../utils/filesystem').withBaseDir(null);
-var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
-var getScriptedRcFile = dotscripted.getScriptedRcFile;
-var putScriptedRcFile = dotscripted.putScriptedRcFile;
 
 var makePromisedRequestHandler = require('../servlets/servlet-utils').makePromisedRequestHandler;
 
@@ -33,7 +29,12 @@ function getData(req) {
 	return d.promise;
 }
 
-exports.install = function (app) {
+exports.install = function (app, filesystem) {
+
+	var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
+	var getScriptedRcFile = dotscripted.getScriptedRcFile;
+	var putScriptedRcFile = dotscripted.putScriptedRcFile;
+
 	app.get('/config/:name', function (req, res) {
 		getScriptedRcFile(req.params.name).then(
 			function (jsonObj) {

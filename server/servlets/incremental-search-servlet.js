@@ -23,16 +23,16 @@ var SERVICE_NAME = 'isearch';
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var websockets = require('./websockets-servlet');
 var toRegexp = require('../jsdepend/utils').toRegexp;
 var getFileName = require('../jsdepend/utils').getFileName;
-var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
 
-exports.install = function (server) {
+exports.install = function (server, filesystem) {
+
+	var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 	websockets.install(server); // the websockets servlet is a prerequisite. Ensure its installed.
 
@@ -63,8 +63,6 @@ exports.install = function (server) {
 		var results = {}; //The 'keys' of this map are the results we have already sent to the client.
 		var activeWalker = null; //the current walker, allows cancelation if we need to start a brand new walker.
 		var resultCount = 0; // Tracks number of results. Used to limit the number of results sent to the client.
-
-
 
 		/**
 		 * send data to the client. The data sent must be something that can be 'JSON.stringified'.

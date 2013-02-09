@@ -13,16 +13,25 @@
 
 /*global console require*/
 
-var servlets = require('../servlets');
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
-var rename = filesystem.rename;
-var deleteResource = filesystem.deleteResource;
-var mkDir = filesystem.mkdir;
-var createFile = filesystem.putContents;
-
 var makeRequestHandler = require('./servlet-utils').makePromisedRequestHandler;
+var servlets = require('../servlets');
 
-servlets.register('/filesystem/rename', makeRequestHandler(rename));
-servlets.register('/filesystem/deleteResource', makeRequestHandler(deleteResource));
-servlets.register('/filesystem/mkdir', makeRequestHandler(mkDir));
-servlets.register('/filesystem/createFile', makeRequestHandler(createFile));
+/**
+ * Configure and install the filesystem servlet request handlers into the Scripted server.
+ */
+function install(filesystem) {
+
+	var rename = filesystem.rename;
+	var deleteResource = filesystem.deleteResource;
+	var mkDir = filesystem.mkdir;
+	var createFile = filesystem.putContents;
+
+	//TODO: resitify these request handlers
+	servlets.register('/filesystem/rename', makeRequestHandler(rename));
+	servlets.register('/filesystem/deleteResource', makeRequestHandler(deleteResource));
+	servlets.register('/filesystem/mkdir', makeRequestHandler(mkDir));
+	servlets.register('/filesystem/createFile', makeRequestHandler(createFile));
+
+}
+
+exports.install = install;
