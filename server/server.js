@@ -59,7 +59,7 @@ function configure(filesystem) {
 		require('./routes/editor-routes').install(app, filesystem);
 		require('./routes/test-routes').install(app);
 		require('./routes/config-routes').install(app);
-		require('./routes/plugin-routes').install(app);
+		require('./routes/plugin-routes').install(app, filesystem);
 
 		require('./servlets/incremental-search-servlet').install(app);
 		require('./servlets/incremental-file-search-servlet').install(app, filesystem);

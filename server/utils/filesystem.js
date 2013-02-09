@@ -114,6 +114,11 @@ function withBaseDir(baseDir) {
 	}
 
 	function isFile(handle, callback) {
+		var d;
+		if (!callback) {
+			d = when.defer();
+			callback = function (r) { d.resolve(r); };
+		}
 		if (typeof(handle)!=='string') {
 			callback(false);
 		} else if (isNativeNodeModulePath(handle)) {
@@ -128,6 +133,7 @@ function withBaseDir(baseDir) {
 			    }
 		    });
 		}
+		return d && d.promise;
 	}
 
 	function isDirectory(handle, callback) {

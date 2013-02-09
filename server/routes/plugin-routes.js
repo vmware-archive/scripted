@@ -16,11 +16,14 @@
 var when = require('when');
 var express = require('express');
 
-var filesystem = require('../utils/filesystem').withBaseDir(null);
-var pluginDiscovery = require('../plugin-support/plugin-discovery').configure(filesystem);
-var getPlugins = pluginDiscovery.getPlugins;
+exports.install = function (app, filesystem) {
 
-exports.install = function (app) {
+	var createReadStream = filesystem.createReadStream;
+	var isFile = filesystem.isFile;
+
+	var pluginDiscovery = require('../plugin-support/plugin-discovery').configure(filesystem);
+	var getPlugins = pluginDiscovery.getPlugins;
+
 	app.get('/config/plugins/list', function (req, res) {
 		return getPlugins().then(
 			function (jsonObj) {
@@ -40,11 +43,32 @@ exports.install = function (app) {
 		);
 	});
 
+	/**
+	 * Create a connect midleware function that serves up text files from
+	 * our pluggable filesystem at a given directory.
+	 */
+	function servePluginFiles(dir) {
+		return function (req, res, next) {
+			console.log('request for plugin file: '+req.path);
+			var filepath = dir + req.path; // Don't use pathResolve because req.path is absolute!
+			isFile(filepath).then(function (isFile) {
+				if (!isFile) {
+					return next();
+				}
+				//TODO: proper mime type determination
+				res.header('Content-Type', 'text/plain');
+				createReadStream(dir + req.path).pipe(res);
+			});
+		};
+	}
+
 	var pluginDirs = pluginDiscovery.pluginDirs;
 	for (var i = 0; i < pluginDirs.length; i++) {
 		var dir = pluginDirs[i];
-		app.use('/scripts/scripted/plugins', express.static(dir));
+		app.use('/scripts/scripted/plugins', servePluginFiles(dir));
+			//TODO: plugable fs (express.static implicitly uses raw node fs
 	}
 
 };
+
 
