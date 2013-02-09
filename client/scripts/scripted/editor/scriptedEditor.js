@@ -581,9 +581,11 @@ define([
 				var remainingLength = offset - lineStart;
 				var child = line._lineDiv.firstChild;
 				while (child) {
-					remainingLength -= child.innerText.length;
-					if (remainingLength <= 0) {
-						break;
+					if (child.innerText) {
+						remainingLength -= child.innerText.length;
+						if (remainingLength <= 0) {
+							break;
+						}
 					}
 					child = child.nextSibling;
 				}
