@@ -22,37 +22,45 @@ var utils = require('../jsdepend/utils');
 
 var url = require('url');
 var servlets = require('../servlets');
-var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var apiMaker = require('../jsdepend/api');
 var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 var extend = utils.extend;
 var pathResolve = utils.pathResolve;
 
-var conf = extend(filesystem, {
-	sloppy: false, //sloppy resolver turned off.
-	amd: {
-		//Extra paths automatically added to amd-configs found by scripted
-		// this way plugin-apis will receive automatic content assist.
-		paths: {
-			'scripted/api' : pathResolve(__dirname, '../../client/scripts/scripted/api')
+/**
+ * Configure the api and install all its request handlers.
+ */
+function install(filesystem) {
+
+	var conf = extend(filesystem, {
+		sloppy: false, //sloppy resolver turned off.
+		amd: {
+			//Extra paths automatically added to amd-configs found by scripted
+			// this way plugin-apis will receive automatic content assist.
+			paths: {
+				'scripted/api' : pathResolve(__dirname, '../../client/scripts/scripted/api')
+			}
+		}
+	});
+
+	var api = apiMaker.configure(conf);
+
+	var basePath = "/jsdepend";
+	   //where to serve all this api's functions. Each function will be served at
+	   // basePath + '/' + functionName
+
+	for (var functionName in api) {
+		if (api.hasOwnProperty(functionName)) {
+		    console.log('Creating servlet handler for function: '+functionName);
+			var fun = api[functionName];
+			if (typeof(fun)==='function') {
+				servlets.register(basePath+"/"+functionName, makeRequestHandler(fun));
+			} else {
+			    console.log('SKIPPED: Not a function: '+functionName);
+			}
 		}
 	}
-});
 
-var api = apiMaker.configure(conf);
-
-var basePath = "/jsdepend";
-   //where to serve all this api's functions. Each function will be served at
-   // basePath + '/' + functionName
-
-for (var functionName in api) {
-	if (api.hasOwnProperty(functionName)) {
-	    console.log('Creating servlet handler for function: '+functionName);
-		var fun = api[functionName];
-		if (typeof(fun)==='function') {
-			servlets.register(basePath+"/"+functionName, makeRequestHandler(fun));
-		} else {
-		    console.log('SKIPPED: Not a function: '+functionName);
-		}
-	}
 }
+
+exports.install = install;

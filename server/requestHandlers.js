@@ -18,9 +18,9 @@
 var when = require('when');
 var querystring = require("querystring");
 
-var fs = require('fs');  //TODO: plugable fs
 var filesystem = require('./utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var getContents = filesystem.getContents;
+var putContents = filesystem.putContents;
 //filesystem.getContents;
 var listFiles = filesystem.listFiles;
 
@@ -298,17 +298,18 @@ function put(response, request) {
         response.write('problem with save: received data length: '+dataToSave.length+' does not match transmitted length '+fields.length);
         response.end();
       }
-      fs.writeFile(file,dataToSave,function(err) {
-        if (err) {
-          response.writeHead(500, {'content-type': 'text/plain'});
-          response.write('problem with save:'+err);
-          response.end();
-        } else {
+      putContents(file, dataToSave).then(
+		function() {
           response.writeHead(200, {'content-type': 'text/plain'});
           response.write('save successful\n');
           response.end();
+		},
+		function(err) {
+          response.writeHead(500, {'content-type': 'text/plain'});
+          response.write('problem with save:'+err);
+          response.end();
         }
-      });
+      );
     });
     return;
   }

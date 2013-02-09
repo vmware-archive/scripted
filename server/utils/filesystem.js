@@ -321,12 +321,10 @@ function withBaseDir(baseDir) {
 	 * @return Promise
 	 */
 	function putContents(handle, contents) {
-		console.log('putContents: '+handle);
 		var d = when.defer();
 		var file = handle2file(handle);
 		fs.writeFile(file, contents, function (err) {
 			if (err) {
-				console.error(err);
 				d.reject(err);
 			} else {
 				d.resolve();

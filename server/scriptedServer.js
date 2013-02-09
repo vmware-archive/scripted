@@ -29,7 +29,7 @@ var requestHandlers = require("./requestHandlers");
 
 //require("./servlets/hello");
 require("./servlets/listFiles");
-require("./servlets/jsdepend-servlet");
+require("./servlets/jsdepend-servlet").install(filesystem);
 require("./servlets/exec-servlet");
 //require("./servlets/config-servlet");
 //these two wired up in server.js
