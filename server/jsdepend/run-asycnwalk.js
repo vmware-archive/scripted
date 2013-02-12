@@ -19,7 +19,7 @@
 // run it as follows: 'node run-asynchwalk.js'
 
 /*global console require __dirname */
-var conf = require('../utils/filesystem').withBaseDir(null);
+var conf = require('../utils/filesystem').withBaseDir(undefined);
 var fswalk = require('./fswalk').configure(conf).asynchWalk;
 var pathNormalize = require('./utils').pathNormalize;
 

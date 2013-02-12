@@ -11,7 +11,7 @@
  *   Kris De Volder
  ******************************************************************************/
 var reporter = require('nodeunit').reporters['default'];
-var filesystem = require('../../server/utils/filesystem').withBaseDir(null);
+var filesystem = require('../../server/utils/filesystem').withBaseDir(undefined);
 var fswalk = require('../../server/jsdepend/fswalk').configure(filesystem).fswalk;
 var endsWith = require('../../server/jsdepend/utils').endsWith;
 var testFiles = [];

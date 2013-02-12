@@ -392,8 +392,8 @@ function withBaseDir(baseDir) {
 	}
 
 	return {
-		getUserHome:  getUserHome,
-		getScriptedHome: getScriptedHome,
+		getUserHome:  getUserHome, //TODO: does this really belong in here?
+		getScriptedHome: getScriptedHome, //TODO: does this really belong in here?
 		baseDir:      baseDir,
 		handle2file:  handle2file, //These handle <-> file mapping functions shouldn't really be
 		file2handle:  file2handle, //exported... any place that uses them our abstraction is leaking out!

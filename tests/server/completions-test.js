@@ -14,7 +14,7 @@
 /*jslint node:true */
 /*global require exports __dirname console */
 
-var filesystem = require('../../server/utils/filesystem').withBaseDir(null);
+var filesystem = require('../../server/utils/filesystem').withBaseDir(undefined);
 
 var completionsModule = require('../../server/templates/completions').configure(filesystem);
 var path = require('path');

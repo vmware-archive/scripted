@@ -14,7 +14,7 @@
 /*jslint node:true */
 /*global __dirname console */
 
-var filesystem = require('../../server/utils/filesystem').withBaseDir(null);
+var filesystem = require('../../server/utils/filesystem').withBaseDir(undefined);
 
 var provider = require('../../server/templates/template-provider').configure(filesystem);
 

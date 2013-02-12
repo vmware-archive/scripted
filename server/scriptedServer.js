@@ -25,7 +25,7 @@ var server = require("./server").configure(filesystem);
 var router = require("./router");
 var servlets = require("./servlets");
 
-var requestHandlers = require("./requestHandlers");
+var requestHandlers = require("./requestHandlers").configure(filesystem);
 
 //require("./servlets/hello");
 require("./servlets/listFiles");
