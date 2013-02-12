@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global resolve require define esprima console module process*/
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
@@ -54,7 +54,9 @@ function configure(conf) {
 			//Notes:
 			//1: The enhanced resolver is a node module so it uses 'real' file system paths.
 			//Therefore we must make sure to translate back and forth between our own internal file handles.
-			
+			//TODO: plugable fs : enhanced-resolve library, as used right now is not compatible with making
+			//                     the filesystem plugable!
+
 			//2: enhanced resolver expects a directory as the 'context' not a file.
 			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {
 				if (err) {
@@ -66,13 +68,13 @@ function configure(conf) {
 			});
 		}
 	}
-	
+
 	//A 'resolver support' module provides a resolver for a particular kind of dependency.
 	return {
 		kind: 'commonjs',
 		resolver: resolver
 	};
-	
+
 } //end: function configure
 
 exports.configure = configure;

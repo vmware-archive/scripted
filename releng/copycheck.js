@@ -34,7 +34,7 @@ function contains(list, el) {
 	return false;
 }
 
-var filesystem = require('../server/utils/filesystem').withBaseDir(null);
+var filesystem = require('../server/utils/filesystem').withBaseDir(undefined);
 var defaultIgnore = require('../server/utils/filesystem').ignore;
 var extend = require('../server/jsdepend/utils').extend;
 var path = require('path');
