@@ -120,8 +120,8 @@ function configure(conf) {
 
 
 	function amdResolver(context, dep, callback) {
-		console.log('>>> amdResolver: '+JSON.stringify(dep));
-		callback = logBack("<<< amdResolver "+JSON.stringify(dep), callback);
+//		console.log('>>> amdResolver: '+JSON.stringify(dep));
+//		callback = logBack("<<< amdResolver "+JSON.stringify(dep), callback);
 		parseName(dep);
 		//TODO: special case where resource already has a .js extension. This is
 		// treated specially in requirejs.
