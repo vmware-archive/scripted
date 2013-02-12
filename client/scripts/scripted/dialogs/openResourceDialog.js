@@ -15,15 +15,15 @@
 /**
  * The Open File dialog.
  */
-define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client", "text!scripted/dialogs/openResourceDialog.html"],
-	function(dialogUtils, pagestate, isearch, dialogText) {
+define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client", "text!scripted/dialogs/openResourceDialog.html","jquery"],
+	function(dialogUtils, pagestate, isearch, dialogText, $) {
 	
 	/**
 	 * Convert from a path into an object containing the components of the path.
 	 * parseFile('a/b/c/D') returns {name:D, path:a/b/c/D, folderName:a/b/c, directory:a/b/c}'
 	 * @param {String} path fully qualified path
 	 * @return {{name:String,path:String,folderName:String,directory:String}}
-	 */
+	 */ 
 	function parseFile(path) {
 		var segments = path.split('/');
 		var name = segments[segments.length-1];
@@ -318,11 +318,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		$(this.dialog).off('keydown.dialogs');
 		$(this.dialog).on('keydown.dialogs',function( e ) {
 			var links, nextSelected, loopedRound;
-			if ((e.keyCode === $.ui.keyCode.UP || e.keyCode === $.ui.keyCode.DOWN)) {
+			if ((e.keyCode === 38/*UP*/ || e.keyCode === 40/*DOWN*/)) {
 				links = $(that.dialog).find(".dialog_results_row");
 				var currentSelection = that.selected;
 				loopedRound = false;
-				if (e.keyCode === $.ui.keyCode.DOWN) {
+				if (e.keyCode === 40/*DOWN*/) {
 					if (that.selected >= 0) {
 						nextSelected = that.selected===(links.length-1)?0:that.selected+1;
 						if (nextSelected===0) {
@@ -374,7 +374,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				if (isOffScreen) {
 					if (!wasOffScreen) {
 						// readjust scroll position
-						if (e.keyCode === $.ui.keyCode.DOWN) {
+						if (e.keyCode === 40/*DOWN*/) {
 							if (!loopedRound) {
 								r.scrollTop(scrollPositionOfResults + linkHeight);
 							} else {
@@ -404,7 +404,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					}
 				}
 				return false;
-			} else if (e.keyCode === $.ui.keyCode.ENTER) {
+			} else if (e.keyCode === 13/*ENTER*/) {
 				// Pressing ENTER triggers the button click on the selection
 				var results = $("a",$(that.dialog));
 				if (results && results.length>0) {
@@ -421,7 +421,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					setTimeout(function() { $(result).trigger(click);},0);
 				}
 				return false;
-		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
+		    } else if (e.keyCode === 27/*ESCAPE*/) {
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
 				return false;
