@@ -19,8 +19,8 @@
  * The Open File dialog.
  */
 define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-file-search-client",
-		"text!scripted/dialogs/lookInFilesDialog.html"],
-function(dialogUtils, pagestate, isearch, dialogText) {
+		"text!scripted/dialogs/lookInFilesDialog.html","jquery"],
+function(dialogUtils, pagestate, isearch, dialogText,$) {
 	
 	var MINIMUM_LENGTH = 3; //Search Strings smaller than this are considered problematic and not executed.
 
@@ -452,11 +452,11 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 		$(this.dialog).off('keydown.dialogs');
 		$(this.dialog).on('keydown.dialogs',function( e ) {
 			var links, nextSelected, loopedRound;
-			if ((e.keyCode === $.ui.keyCode.UP || e.keyCode === $.ui.keyCode.DOWN)) {
+			if ((e.keyCode === 38/*UP*/ || e.keyCode === 40/*DOWN*/)) {
 				links = $(that.dialog).find(".dialog_results_row");
 				var currentSelection = that.selected;
 				loopedRound = false;
-				if (e.keyCode === $.ui.keyCode.DOWN) {
+				if (e.keyCode === 40/*DOWN*/) {
 					if (that.selected >= 0) {
 						nextSelected = that.selected===(links.length-1)?0:that.selected+1;
 						if (nextSelected===0) {
@@ -509,7 +509,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 				if (isOffScreen) {
 					if (!wasOffScreen) {
 						// readjust scroll position
-						if (e.keyCode === $.ui.keyCode.DOWN) {
+						if (e.keyCode === 40/*DOWN*/) {
 							if (!loopedRound) {
 								r.scrollTop(scrollPositionOfResults + linkHeight);
 							} else {
@@ -539,7 +539,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 					}
 				}
 				return false;
-			} else if (e.keyCode === $.ui.keyCode.ENTER) {
+			} else if (e.keyCode === 13/*ENTER*/) {
 				// Pressing ENTER triggers the button click on the selection
 				links = $(that.dialog).find(".dialog_results_row");
 				if (links && links.length>0) {
@@ -547,7 +547,7 @@ function(dialogUtils, pagestate, isearch, dialogText) {
 					$(result).trigger('click');
 				}
 				return false;
-		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
+		    } else if (e.keyCode === 27/*ESCAPE*/) {
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
 				return false;
