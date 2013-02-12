@@ -29,7 +29,6 @@ var nodeNatives = require('../jsdepend/node-natives');
 		//  provider.
 
 var when = require('when');
-var oneCache = require('../jsdepend/one-cache');
 var utils = require('../jsdepend/utils');
 
 var pathNormalize = utils.pathNormalize;
@@ -413,5 +412,9 @@ function withBaseDir(baseDir, options) {
 	};
 }
 
-exports.withBaseDir = oneCache.makeCached(withBaseDir);
+exports.withBaseDir = withBaseDir; //Note: 'oneCache' removed. Not needed
+									// anymore because a single filesystem
+									// instance is configured in scriptedServer
+									// and that one is passed down to everyone
+									// else.
 exports.ignore = ignore;

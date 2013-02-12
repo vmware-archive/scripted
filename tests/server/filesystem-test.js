@@ -67,7 +67,12 @@ exports.isDirectoryNoExist = function(test) {
 	});
 };
 
-//exports.userHome = function (test) {
-//	var api =
-//
-//};
+exports.userHome = function (test) {
+	var api = makeApi('nested-web', {
+		userHome: 'HOME',
+		scriptedHome: 'SCRIPTED'
+	});
+	test.equals('HOME', api.getUserHome());
+	test.equals('SCRIPTED', api.getScriptedHome());
+	test.done();
+};
