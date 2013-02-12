@@ -19,6 +19,11 @@
 // Basic construction.  Some requestHandlers are used for
 // specific actions. Other URLs are assumed to be static content.
 
+//An experiment: try and use scripted with a 'sub-directory file system'.
+//var filesystem = require('./utils/filesystem').withBaseDir('/home/kdvolder', {
+//	userHome: '/',
+//	scriptedHome: '/commandline-dev/new-tools/scripted'
+//});
 var filesystem = require('./utils/filesystem').withBaseDir(null);
 
 var server = require("./server").configure(filesystem);

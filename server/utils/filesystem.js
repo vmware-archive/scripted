@@ -54,12 +54,15 @@ function ignore(name) {
 	return result;
 }
 
-function withBaseDir(baseDir) {
+function withBaseDir(baseDir, options) {
+	options = options || {};
 	var fs = require('fs');
 	var encoding = 'UTF-8';
 
 	function getUserHome() {
-		if (baseDir) {
+		if (options.userHome) {
+			return options.userHome;
+		} else if (baseDir) {
 			//We are testing with a 'mini test file system' can't use the
 			// regular user home dir here. So use a special "user.home" dir under the
 			// baseDir
@@ -76,10 +79,12 @@ function withBaseDir(baseDir) {
 	 * This info is used to find stuff inside of scripted itself.
 	 *
 	 * TODO: pluggable fs : check all references to __dirname outside of this function
-	 *        they are suspect.
+	 *        they are suspect and should use filesystem.getScriptedHome() instead.
 	 */
 	function getScriptedHome() {
-		if (baseDir) {
+		if (options.scriptedHome) {
+			return options.scriptedHome;
+		} else if (baseDir) {
 			//We are testing with a 'mini test file system' can't use the
 			// regular scripted home dir here. So use a special "scripted.home" dir under the
 			// baseDir
@@ -90,6 +95,7 @@ function withBaseDir(baseDir) {
 	}
 
 	function handle2file(handle) {
+		//TODO: Don't allow path navigation '..' to escape out of a 'subdirectory' filesystem.
 		if (baseDir) {
 			return pathNormalize(baseDir + '/' + handle);
 		} else {
@@ -107,10 +113,7 @@ function withBaseDir(baseDir) {
 		} else {
 			h = file;
 		}
-		return h.replace(/\\/g, '/'); //Always use slashes even on Windows. Fewer problems with bad code that
-									// assumes slashes are used.
-									// TODO: in the long run the right thing to do is properly use
-									// libraries like 'path' in node to do all path manipulation.
+		return h.replace(/\\/g, '/'); //Always use slashes even on Windows.
 	}
 
 	function isFile(handle, callback) {
@@ -361,7 +364,7 @@ function withBaseDir(baseDir) {
 //		console.log('statting: '+handle);
 
 		var d = when.defer();
-		fs.stat(file2handle(handle), function (err, statObj) {
+		fs.stat(handle2file(handle), function (err, statObj) {
 			if (err) {
 				d.reject(err);
 			} else {

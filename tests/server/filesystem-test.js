@@ -31,9 +31,9 @@
 
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 
-function makeApi(relativeBaseDir, reducedConfig) {
+function makeApi(relativeBaseDir, options) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var conf = require('../../server/utils/filesystem').withBaseDir(baseDir);
+	var conf = require('../../server/utils/filesystem').withBaseDir(baseDir, options);
 	return conf;
 }
 
@@ -66,3 +66,8 @@ exports.isDirectoryNoExist = function(test) {
 		test.done();
 	});
 };
+
+//exports.userHome = function (test) {
+//	var api =
+//
+//};

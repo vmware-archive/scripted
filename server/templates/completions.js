@@ -24,8 +24,8 @@ function configure(filesystem) {
 
 var JSON5 = require('json5');
 var when = require('when');
-var path = require('path');
 var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
+var pathResolve = require('../jsdepend/utils').pathResolve;
 
 var EXTENSION = ".scripted-completions";
 var EXTENSION_LEN = EXTENSION.length;
@@ -53,7 +53,7 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders.
 	completionsFolders : [
-		path.resolve(__dirname, '../../completions'),
+		pathResolve(filesystem.getScriptedHome(), '../../completions'),
 		dotscripted.getScriptedRcDirLocation()
 	],
 
@@ -72,7 +72,7 @@ exports.CompletionsProcessor.prototype = {
 						for (var i = 0; i < files.length; i++) {
 							if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
 								console.log("Found " + files[i]);
-								realFiles.push(folder + path.sep + files[i]);
+								pathResolve(folder, files[i]);
 							}
 						}
 						deferred.resolve(realFiles);
