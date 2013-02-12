@@ -17,6 +17,9 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+var testCase = require('./filesystem-test')
+	.userHome;
+
 //var testCase = require('./path-glob-test')
 //	.win_match;
 
@@ -27,7 +30,9 @@
 //var testCase = require('./dot-scripted-test')
 //	.getScriptedRcFile;
 
-//var testCase = require('./module-types-test.js').bigFile;
+//var testCase = require('./module-types-test.js')
+//	.bigFile;
+
 //var testCase = require('./amd-resolver-test')
 //	.findIndirectAmdConfigInHtmlFileWithThreeScriptTags;
 //	.likeScripted;
@@ -36,8 +41,8 @@
 //	.getAmdConfig2;
 //	.simpleRequireJsProject;
 
-var testCase = require('./plugin-discovery-test')
-	.one;
+//var testCase = require('./plugin-discovery-test')
+//	.one;
 
 //var testCase = require('./resolver-test')
 //	.pathAwarenessSimple;
