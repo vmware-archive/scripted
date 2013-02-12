@@ -16,8 +16,8 @@
  * This module interacts with the server to start and stop an 'application' (static file server).
  */
  
-define(['rest/interceptor/mime', 'rest', 'scripted/utils/editorUtils'],
-function (mime, rest, editorUtils) {
+define(['rest/interceptor/mime', 'rest', 'scripted/utils/editorUtils','jquery'],
+function (mime, rest, editorUtils, $) {
  
 	var activeAppPath = null;
 	

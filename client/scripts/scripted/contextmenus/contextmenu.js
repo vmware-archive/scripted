@@ -14,7 +14,7 @@
 define(
 ['scripted/contextmenus/contextmenuprovider', "scriptedLogger", 'jquery'],
 
-function(contextMenuProvider, scriptedLogger) {
+function(contextMenuProvider, scriptedLogger, $) {
 
 	var loggingCategory = "CONTEXT_MENU";
 
@@ -119,7 +119,7 @@ function(contextMenuProvider, scriptedLogger) {
 			// Handle ESCAPE keypresses on the dialog
 			$(window).on('keyup.' + contextMenuClass, function(e) {
 
-				if (e.keyCode === $.ui.keyCode.ESCAPE) {
+				if (e.keyCode === 27/*ESCAPE*/) {
 					hideContextMenu(contextMenu);
 				}
 			});
