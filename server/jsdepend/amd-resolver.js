@@ -111,7 +111,17 @@ function configure(conf) {
 		return '.js'; //Default extension added by typical amd loader.
 	}
 
+	function logBack(msg, callback) {
+		return function (result) {
+			console.log(msg);
+			return callback(result);
+		};
+	}
+
+
 	function amdResolver(context, dep, callback) {
+		console.log('>>> amdResolver: '+JSON.stringify(dep));
+		callback = logBack("<<< amdResolver "+JSON.stringify(dep), callback);
 		parseName(dep);
 		//TODO: special case where resource already has a .js extension. This is
 		// treated specially in requirejs.
@@ -124,6 +134,7 @@ function configure(conf) {
 			return callback(dep);
 		} else if ('require'===resource) {
 			dep.ignore = true;
+			return callback(dep); //TODO: add a regression test!
 		} else if (isRelative(resource)) {
 			//Relative resolution doesn't require the resolverConf so avoid fetching it
 			var baseDir = getDirectory(context); //relative to context file, not amd config
