@@ -450,34 +450,44 @@ exports.ExplorerRenderer = (function() {
         },
 		
 		getExpandImage: function(tableRow, placeHolder, /* optional extra decoration */ decorateImageClass, /* optional sprite class for extra decoration */ spriteClass){
-			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
+			
+			var expandImage = $('<span/>', {id: this.expandCollapseImageId(tableRow.id)});
+			$(placeHolder).append(expandImage);
+			
 			$(expandImage).addClass(this._twistieSpriteClass);
 			$(expandImage).addClass(this._collapseImageClass);
 			if (decorateImageClass) {
-				var decorateImage = dojo.create("span", null, placeHolder, "last");
+				
+				var decorateImage = $('<span/>');
+				$(placeHolder).append(decorateImage);
+
 				$(decorateImage).addClass(spriteClass || "imageSprite");
 				$(decorateImage).addClass(decorateImageClass);
 			}
 
-			expandImage.onclick = dojo.hitch(this, function(evt) {
-				if (evt.isTrigger === undefined) return false;
-				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
-				var expanded = this.tableTree.isExpanded(tableRow.id);
+            var explorer = this;
+			$(expandImage)[0].onclick = function(evt) {
+			
+				if (evt.isTrigger === undefined) {
+				     return false;
+				}
+				explorer.tableTree.toggle(tableRow.id, explorer.expandCollapseImageId(tableRow.id), explorer._expandImageClass, explorer._collapseImageClass);
+				var expanded = explorer.tableTree.isExpanded(tableRow.id);
 				if (expanded) {
-					this._expanded.push(tableRow.id);
+					explorer._expanded.push(tableRow.id);
 				} else {
-					for (var i in this._expanded) {
-						if (this._expanded[i] === tableRow.id) {
-							this._expanded.splice(i, 1);
+					for (var i in explorer._expanded) {
+						if (explorer._expanded[i] === tableRow.id) {
+							explorer._expanded.splice(i, 1);
 							break;
 						}
 					}
 				}
-				var prefPath = this._getUIStatePreferencePath();
+				var prefPath = explorer._getUIStatePreferencePath();
 				if (prefPath && window.sessionStorage) {
-					this._storeExpansions(prefPath);
+					explorer._storeExpansions(prefPath);
 				}
-			});
+			};
 			return expandImage;
 		},
 		render: function(item, tableRow){

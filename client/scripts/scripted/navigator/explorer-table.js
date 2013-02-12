@@ -159,10 +159,12 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			case "image.gif":
 			case "image.ico":
 			case "image.tiff":
-			case "image.svg":
-				var thumbnail = dojo.create("img", {
+			case "image.svg":				
+				var thumbnail = $('<img/>', {
 					src: item.Location
-				}, link, "last");
+				});
+				$(link).append(thumbnail);
+				
 				$(thumbnail).addClass("thumbnail");
 				break;
 			default:
@@ -172,8 +174,10 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 					}, link, "last");
 					// to minimize the height/width in case of a large one
 					$(image).addClass("thumbnail");
-				} else {
-					var fileIcon = dojo.create("span", null, link, "last");
+				} else {					
+					var fileIcon = $('<span/>');
+					$(link).append(fileIcon);
+					
 					$(fileIcon).addClass("core-sprite-file_model modelDecorationSprite");
 				}
 			}
@@ -184,9 +188,11 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		case 0:
 			var col = document.createElement('td');
 			
-			var span = dojo.create("span", {
+			$(col).empty();
+			var span = $('<span/>', {
 				id: tableRow.id + "Actions"
-			}, col, "only");
+			});
+			$(col).append(span);
 			var link;
 			//			scriptedLogger.debug("name is '"+item.name+"'", "EXPLORER_TABLE");
 			if (item.directory) {
@@ -195,26 +201,30 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 				var fileIcon1 = dojo.create("span", null, span, "last");
 				$(fileIcon1).addClass("core-sprite-blank_model modelDecorationSprite2");
 			} else {
-				var fileIcon = dojo.create("span", null, span, "last");
+				var fileIcon = $('<span/>');
+				$(span).append(fileIcon);
 				$(fileIcon).addClass("core-sprite-blank_model modelDecorationSprite2");
 			}
 			var span2;
 			var path = mPageState.generateUrl(item.Location);
 			if (item.directory) {
-				span2 = dojo.create("span", null, span, "last");
+				span2 = $('<span/>');
+				$(span).append(span2);
+				
 				// When the directory name is clicked, simulate a keypress on the expand/collapse image
 				tableRow.onclick = function(event){
 					$(event.currentTarget).find('.modelDecorationSprite').click();
 				};
 				
 			} else {
-				span2 = dojo.create("a", {
+				span2 = $('<a/>', {
 					href: path
-				}, span, "last");
+					});
+				$(span).append(span2);
 			}
 
 			var textnode = document.createTextNode(item.name);
-			dojo.place(textnode, span2, "last");
+			$(span2).append(textnode);
 
 			if (!item.directory) {
 				$(span2).click(mNavHistory.handleNavigationEvent);
