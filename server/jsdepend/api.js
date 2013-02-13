@@ -62,13 +62,13 @@ function configure(config) {
 	var getConf = require('./dot-scripted').configure(config).getConfiguration;
 	var retrieveNearestFile = require('./retrieve-nearest-file').configure(config).retrieveNearestFile;
 	var findGlobalDependencies = require('./global-dependencies-finder').configure(config);
-	
+
 //	console.log('jsdepend/api is using encoding: '+encoding);
-	
+
 	function getReferences(handle, moduleType, tree, callback) {
 		findReferences(handle, moduleType, tree, callback);
 	}
-	
+
 	function getDependencies(handle, callback) {
 		//callback = logBack("getDependencies("+handle+") ==> ", callback);
 		getContents(handle,
@@ -131,7 +131,7 @@ function configure(config) {
 			}
 		};
 	}
-	
+
 	function buildGraph(handle, store, k) {
 		if (handle && store.mark(handle)) {
 			getDependencies(handle, function (deps, kind) {
@@ -155,9 +155,9 @@ function configure(config) {
 			k();
 		}
 	}
-	
+
 	function getDGraph(handle, callback) {
-		//callback = logBack('getDGraph '+handle+ ' => ', callback);
+		callback = logBack('getDGraph '+handle+ ' => ', callback);
 		var store = makeGraphStore();
 		buildGraph(handle, store, function () {
 			var graph = store.getGraph();
@@ -179,13 +179,13 @@ function configure(config) {
 			}
 		});
 	}
-	
+
 	getDGraph.remoteType =  ['JSON', 'callback'];
 	getDependencies.remoteType = ['JSON', 'callback'];
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
 	getConf.remoteType = ['JSON', 'callback'];
 	retrieveNearestFile.remoteType = ['JSON', 'JSON', 'JSON', 'callback'];
-	
+
 	//Creates the API object containing all exported operations for this API.
 	return {
 		getContents: getContents,

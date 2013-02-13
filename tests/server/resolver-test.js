@@ -239,10 +239,10 @@ exports.sloppyModePreferBestMatch = function (test) {
 		name: 'libs/orion/utils',
 		kind: 'AMD'
 	};
-	api.resolve('web-app/scripts/main.js', dep, function (resolved) {
+	api.resolve('/web-app/scripts/main.js', dep, function (resolved) {
 		//console.log(resolved);
 		dep = resolved;
-		test.equals(dep.path, 'web-app/libs/orion/utils.js');
+		test.equals(dep.path, '/web-app/libs/orion/utils.js');
 		test.equals(5, dep.candidates.length);
 		test.done();
 	});
@@ -255,7 +255,7 @@ exports.preciseModeMissing = function (test) {
 		name: 'magic/missing',
 		kind: 'AMD'
 	};
-	api.resolve('web-app/scripts/main.js', [dep], function (resolved) {
+	api.resolve('/web-app/scripts/main.js', [dep], function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString([{
 				name: 'magic/missing',
@@ -276,12 +276,12 @@ exports.pathAwarenessSimple = function (test) {
 		name: 'sub/submain',
 		kind: 'AMD'
 	};
-	api.resolve('web/main.js', dep, function (resolved) {
+	api.resolve('/web/main.js', dep, function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString({
 				name: 'sub/submain',
 				kind: 'AMD',
-				path: 'web/odd-name/submain.js'
+				path: '/web/odd-name/submain.js'
 			})
 		);
 		test.done();
@@ -294,12 +294,12 @@ exports.pathAwarenessSimple2 = function (test) {
 		name: 'sub/subdep',
 		kind: 'AMD'
 	};
-	api.resolve('web/odd-name/submain.js', dep, function (resolved) {
+	api.resolve('/web/odd-name/submain.js', dep, function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString({
 				name: 'sub/subdep',
 				kind: 'AMD',
-				path: 'web/odd-name/subdep.js'
+				path: '/web/odd-name/subdep.js'
 			})
 		);
 		test.done();
@@ -345,11 +345,11 @@ exports.resolveNodeModule = function(test) {
 	var api = makeApi('node-with-node-modules');
 	var depNames = ['foo', 'bar', 'zor', 'snif', 'booger'];
 	var expectedPaths = [
-		'node_modules/foo/loader.js',
-		'node_modules/bar/index.js',
-		'node_modules/zor.js',
-		'node_modules/snif/sniffer.js',
-		'node_modules/booger.js' //There are two booger.js one in subfolder and one in the root, but the subfolder one should not be found
+		'/node_modules/foo/loader.js',
+		'/node_modules/bar/index.js',
+		'/node_modules/zor.js',
+		'/node_modules/snif/sniffer.js',
+		'/node_modules/booger.js' //There are two booger.js one in subfolder and one in the root, but the subfolder one should not be found
 	];
 
 	var deps = map(depNames, function (name) {
@@ -359,7 +359,7 @@ exports.resolveNodeModule = function(test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('main.js', dep, k);
+			api.resolve('/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
@@ -376,10 +376,10 @@ exports.resolveNodeModulesInParentDir = function(test) {
 	var api = makeApi('node-with-node-modules');
 	var depNames = ['foo', 'bar', 'zor', 'booger'];
 	var expectedPaths = [
-		'node_modules/foo/loader.js',
-		'node_modules/bar/index.js',
-		'node_modules/zor.js',
-		'subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
+		'/node_modules/foo/loader.js',
+		'/node_modules/bar/index.js',
+		'/node_modules/zor.js',
+		'/subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
 	];
 
 	var deps = map(depNames, function (name) {
@@ -389,7 +389,7 @@ exports.resolveNodeModulesInParentDir = function(test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('subfolder/main.js', dep, k);
+			api.resolve('/subfolder/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
@@ -416,7 +416,7 @@ exports.resolveNodeModulesWithProblem3 = function(test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('subfolder/main.js', dep, k);
+			api.resolve('/subfolder/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
@@ -438,9 +438,9 @@ exports.resolveNodeModulesWithProblems = function(test) {
 		undefined, //won't be found because json is unparsable
 		undefined, //won't be found because dir has neither index.js nor package.json
 		//Despite above problems, the rest of the modules should be found still:
-		'node_modules/bar/index.js',
-		'node_modules/zor.js',
-		'subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
+		'/node_modules/bar/index.js',
+		'/node_modules/zor.js',
+		'/subfolder/node_modules/booger.js' //There are two candidates one in subfolder and one in the root, but the subfolder should take priority
 	];
 
 	var deps = map(depNames, function (name) {
@@ -450,7 +450,7 @@ exports.resolveNodeModulesWithProblems = function(test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('subfolder/main.js', dep, k);
+			api.resolve('/subfolder/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
@@ -469,11 +469,11 @@ exports.resolveDotDotReference = function (test) {
 		kind: 'commonjs',
 		name: '../utils'
 	};
-	api.resolve('sub/other.js', dep, function (resolved) {
+	api.resolve('/sub/other.js', dep, function (resolved) {
 		test.equals(toCompareString(resolved), toCompareString({
 			kind: 'commonjs',
 			name: '../utils',
-			path: 'utils.js'
+			path: '/utils.js'
 		}));
 		test.done();
 	});
@@ -484,10 +484,10 @@ exports.resolveDifferentStyleRelativeDotRefs = function (test) {
 	var api = makeApi('node-with-different-relative-refs');
 	var depNames = ['./libs/foo', './libs/bar', './libs/zor', './snif'];
 	var expectedPaths = [
-		'project/libs/foo.js',
-		'project/libs/bar/index.js',
-		'project/libs/zor/lib/zor-main.js',
-		'project/snif/sniffer.js'
+		'/project/libs/foo.js',
+		'/project/libs/bar/index.js',
+		'/project/libs/zor/lib/zor-main.js',
+		'/project/snif/sniffer.js'
 	];
 
 	var deps = map(depNames, function (name) {
@@ -497,7 +497,7 @@ exports.resolveDifferentStyleRelativeDotRefs = function (test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('project/main.js', dep, k);
+			api.resolve('/project/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);
@@ -514,10 +514,10 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 	var api = makeApi('node-with-different-relative-refs');
 	var depNames = ['../project/libs/foo', '../project/libs/bar', '../project/libs/zor', '../project/snif'];
 	var expectedPaths = [
-		'project/libs/foo.js',
-		'project/libs/bar/index.js',
-		'project/libs/zor/lib/zor-main.js',
-		'project/snif/sniffer.js'
+		'/project/libs/foo.js',
+		'/project/libs/bar/index.js',
+		'/project/libs/zor/lib/zor-main.js',
+		'/project/snif/sniffer.js'
 	];
 
 	var deps = map(depNames, function (name) {
@@ -527,7 +527,7 @@ exports.resolveDifferentStyleRelativeDotDotRefs = function (test) {
 		};
 	});
 	mapk(deps, function (dep, k) {
-			api.resolve('project/main.js', dep, k);
+			api.resolve('/project/main.js', dep, k);
 		},
 		function (resolveds) {
 			test.equals(resolveds.length, expectedPaths.length);

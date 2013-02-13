@@ -61,9 +61,9 @@ define(function() {
 	 */
 	var scriptedLogger = {
 		SHOW_CALLER : false,
-		INFO : false,
-		DEBUG : false,
-		WARN : false,
+		INFO : true,
+		DEBUG : true,
+		WARN : true,
 		ERROR : true,  // I don't know why we'd want to disable error handling, but I'll keep it here
 		info : function(msg, category) {
 			if (this.INFO && this.isEnabled(category)) {

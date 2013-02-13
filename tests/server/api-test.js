@@ -48,11 +48,11 @@ function makeApi(relativeBaseDir) {
 
 exports.getDependenciesTest = function(test) {
 	var api = makeApi('simple-web');
-	api.getDependencies('bork.js', function (deps) {
+	api.getDependencies('/bork.js', function (deps) {
 		test.equals(toCompareString(deps), toCompareString([{
 			kind: 'AMD',
 			name: 'foo',
-			path: 'foo.js'
+			path: '/foo.js'
 		}]));
 		test.done();
 	});
@@ -74,7 +74,7 @@ exports.getDependenciesTest = function(test) {
 
 exports.getContentsTest = function(test) {
 	var api = makeApi('simple-web');
-	api.getContents('bork.js', function (contents) {
+	api.getContents('/bork.js', function (contents) {
 		test.equals(typeof(contents), 'string');
 		//console.log(contents);
 		test.done();
@@ -83,11 +83,11 @@ exports.getContentsTest = function(test) {
 
 exports.nestedWebReferenceFromMainToSub = function (test) {
 	var api = makeApi('nested-web');
-	api.getDependencies('main.js', function (deps) {
+	api.getDependencies('/main.js', function (deps) {
 		test.equals(toCompareString(deps), toCompareString([{
 			kind: 'AMD',
 			name: 'sub/submain',
-			path: 'sub/submain.js'
+			path: '/sub/submain.js'
 		}]));
 		test.done();
 	});
@@ -95,11 +95,11 @@ exports.nestedWebReferenceFromMainToSub = function (test) {
 
 exports.nestedWebReferenceSubToSibling = function (test) {
 	var api = makeApi('nested-web');
-	api.getDependencies('sub/submain.js', function (deps) {
+	api.getDependencies('/sub/submain.js', function (deps) {
 		test.equals(toCompareString(deps), toCompareString([{
 			kind: 'AMD',
 			name: 'sub/subdep',
-			path: 'sub/subdep.js'
+			path: '/sub/subdep.js'
 		}]));
 		test.done();
 	});
@@ -107,11 +107,11 @@ exports.nestedWebReferenceSubToSibling = function (test) {
 
 exports.nodePlain = function (test) {
 	var api = makeApi('node-plain');
-	api.getDependencies('main.js', function (deps) {
+	api.getDependencies('/main.js', function (deps) {
 		test.equals(toCompareString(deps), toCompareString([{
 			kind: 'commonjs',
 			name: './utils',
-			path: 'utils.js'
+			path: '/utils.js'
 		}]));
 		test.done();
 	});
@@ -143,34 +143,34 @@ exports.getNativeNodeModuleContentsTest = function (test) {
 
 exports.getDGraph1 = function (test) {
 	var api = makeApi('node-with-shared-util');
-	api.getDGraph('main.js', function (graph) {
+	api.getDGraph('/main.js', function (graph) {
 		test.equals(toCompareString(graph), toCompareString({
-			"utils.js": {
+			"/utils.js": {
 				"kind": "commonjs",
 				"refs": {}
 			},
-			"sub/other.js": {
+			"/sub/other.js": {
 				"kind": "commonjs",
 				"refs": {
 					"../utils": {
 						"kind": "commonjs",
 						"name": "../utils",
-						"path": "utils.js"
+						"path": "/utils.js"
 					}
 				}
 			},
-			"main.js": {
+			"/main.js": {
 				"kind": "commonjs",
 				"refs": {
 					"./sub/other": {
 						"kind": "commonjs",
 						"name": "./sub/other",
-						"path": "sub/other.js"
+						"path": "/sub/other.js"
 					},
 					"./utils": {
 						"kind": "commonjs",
 						"name": "./utils",
-						"path": "utils.js"
+						"path": "/utils.js"
 					}
 				}
 			}
@@ -181,23 +181,23 @@ exports.getDGraph1 = function (test) {
 
 exports.getDGraph2 = function (test) {
 	var api = makeApi('nested-web');
-	api.getDGraph('main.js', function(deps) {
+	api.getDGraph('/main.js', function(deps) {
 		test.equals(toCompareString(deps), toCompareString({
-			"sub/subdep.js" : {
+			"/sub/subdep.js" : {
 				"kind" : "AMD",
 				"refs": {}
 			},
-			"sub/submain.js" : {
+			"/sub/submain.js" : {
 				"kind" : "AMD",
 				"refs" : {
 					"sub/subdep" : {
 						"kind": "AMD",
-						"name": "sub/subdep",
-						"path": "sub/subdep.js"
+						"name": "/sub/subdep",
+						"path": "/sub/subdep.js"
 					}
 				}
 			},
-			"main.js" : {
+			"/main.js" : {
 				"kind" : "AMD",
 				"refs" : {
 					"sub/submain" : {
@@ -214,40 +214,40 @@ exports.getDGraph2 = function (test) {
 
 exports.getDGraphWithCycleTest1 = function(test) {
 	var api = makeApi('cycles');
-	api.getDGraph('main.js', function(deps) {
+	api.getDGraph('/main.js', function(deps) {
 		test.equals(toCompareString(deps), toCompareString({
-			"sub/subdep.js": {
+			"/sub/subdep.js": {
 				"kind": "AMD",
 				"refs": {
 					"main": {
 						"kind": "AMD",
 						"name": "main",
-						"path": "main.js"
+						"path": "/main.js"
 					}
 				}
 			},
-			"sub/submain.js": {
+			"/sub/submain.js": {
 				"kind": "AMD",
 				"refs": {
 					"sub/subdep": {
 						"kind": "AMD",
 						"name": "sub/subdep",
-						"path": "sub/subdep.js"
+						"path": "/sub/subdep.js"
 					}
 				}
 			},
-			"main.js": {
+			"/main.js": {
 				"kind": "AMD",
 				"refs": {
 					"sub/submain": {
 						"kind": "AMD",
 						"name": "sub/submain",
-						"path": "sub/submain.js"
+						"path": "/sub/submain.js"
 					},
 					"sub/subdep": {
 						"kind": "AMD",
 						"name": "sub/subdep",
-						"path": "sub/subdep.js"
+						"path": "/sub/subdep.js"
 					}
 				}
 			}
@@ -258,40 +258,40 @@ exports.getDGraphWithCycleTest1 = function(test) {
 
 exports.getDGraphWithCycleTest2 = function(test) {
 	var api = makeApi('cycles');
-	api.getDGraph('sub/subdep.js', function(deps) {
+	api.getDGraph('/sub/subdep.js', function(deps) {
 		test.equals(toCompareString(deps), toCompareString({
-			"sub/submain.js": {
+			"/sub/submain.js": {
 				"kind": "AMD",
 				"refs": {
 					"sub/subdep": {
 						"kind": "AMD",
 						"name": "sub/subdep",
-						"path": "sub/subdep.js"
+						"path": "/sub/subdep.js"
 					}
 				}
 			},
-			"main.js": {
+			"/main.js": {
 				"kind": "AMD",
 				"refs": {
 					"sub/submain": {
 						"kind": "AMD",
 						"name": "sub/submain",
-						"path": "sub/submain.js"
+						"path": "/sub/submain.js"
 					},
 					"sub/subdep": {
 						"kind": "AMD",
 						"name": "sub/subdep",
-						"path": "sub/subdep.js"
+						"path": "/sub/subdep.js"
 					}
 				}
 			},
-			"sub/subdep.js": {
+			"/sub/subdep.js": {
 				"kind": "AMD",
 				"refs": {
 					"main": {
 						"kind": "AMD",
 						"name": "main",
-						"path": "main.js"
+						"path": "/main.js"
 					}
 				}
 			}
@@ -302,19 +302,19 @@ exports.getDGraphWithCycleTest2 = function(test) {
 
 exports.withParseErrors = function(test) {
     var api = makeApi('simple-web-with-errors');
-    api.getDGraph('bork.js', function(deps) {
+    api.getDGraph('/bork.js', function(deps) {
         test.equals(toCompareString(deps), toCompareString({
-            "foo.js": {
+            "/foo.js": {
                 "kind": "AMD",
                 "refs": {}
             },
-            "bork.js": {
+            "/bork.js": {
                 "kind": "AMD",
                 "refs": {
                     "foo": {
                         "kind": "AMD",
                         "name": "foo",
-                        "path": "foo.js"
+                        "path": "/foo.js"
                     }
                 }
             }
@@ -325,27 +325,27 @@ exports.withParseErrors = function(test) {
 
 exports.globalDependenciesSimple1 = function(test) {
 	var api = makeApi('with-global-dependencies');
-	api.getDGraph('simple/scripts/main.js', function(deps) {
+	api.getDGraph('/simple/scripts/main.js', function(deps) {
 		test.equals(toCompareString(deps), toCompareString({
-			"simple/scripts/foo.js": {
+			"/simple/scripts/foo.js": {
 				"kind": "global",
 				"refs": {}
 			},
-			"simple/scripts/bar.js": {
+			"/simple/scripts/bar.js": {
 				"kind": "global",
 				"refs": {
 					"it": {
 						"kind": "global",
-						"path": "simple/scripts/foo.js"
+						"path": "/simple/scripts/foo.js"
 					}
 				}
 			},
-			"simple/scripts/main.js": {
+			"/simple/scripts/main.js": {
 				"kind": "global",
 				"refs": {
 					"it": {
 						"kind": "global",
-						"path": "simple/scripts/bar.js"
+						"path": "/simple/scripts/bar.js"
 					}
 				}
 			}
