@@ -72,8 +72,24 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 								}
 								children = newchildren;
 								children = children.sort(function (a,b) {
-									return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+									if (a.directory) {
+										if (b.directory) {
+											return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+										} else {
+											return -1;
+										}
+									} else {
+										if (b.directory) {
+											return +1;
+										} else {
+											return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+										}
+									}
+									// return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 								});
+//								children = children.sort(function(a,b) {
+//									 return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+//								});
 							}
 							processNavigatorParent(parentItem, children);
 							onComplete(children);
@@ -486,8 +502,25 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 							}
 							response.children = newchildren;
 							response.children = response.children.sort(function (a,b) {
-								return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+								if (a.directory) {
+									if (b.directory) {
+										return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+									} else {
+										return -1;
+									}
+								} else {
+									if (b.directory) {
+										return +1;
+									} else {
+										return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+									}
+								}
+								// return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 							});
+								
+//							response.children = response.children.sort(function (a,b) {
+//								return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+//							});
 						}
 						
 						place.treeRoot = response;
