@@ -72,7 +72,7 @@ exports.CompletionsProcessor.prototype = {
 						for (var i = 0; i < files.length; i++) {
 							if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
 								console.log("Found " + files[i]);
-								pathResolve(folder, files[i]);
+								realFiles.push(pathResolve(folder, files[i]));
 							}
 						}
 						deferred.resolve(realFiles);
