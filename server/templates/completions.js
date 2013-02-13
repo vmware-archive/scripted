@@ -53,7 +53,7 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders.
 	completionsFolders : [
-		pathResolve(filesystem.getScriptedHome(), '../../completions'),
+		pathResolve(filesystem.getScriptedHome(), 'completions'),
 		dotscripted.getScriptedRcDirLocation()
 	],
 

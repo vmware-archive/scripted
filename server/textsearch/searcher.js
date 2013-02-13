@@ -11,7 +11,7 @@
  *     Andy Clement   - initial API and implementation
  *     Kris De Volder
  ******************************************************************************/
-/*global exports require console __dirname */
+/*global exports require console */
 
 function configure(filesystem) {
 
@@ -55,15 +55,3 @@ function configure(filesystem) {
 }
 
 exports.configure = configure;
-/*
-var rootdir = require("path").normalize(__dirname+"../../..")+"/";
-var term = "readdirSync";
-var matches = [];
-var startTime = (new Date).getTime();
-fs_list(rootdir, 0);
-var perf = (new Date).getTime() - startTime;
-console.log('time : ' + perf);
-matches.forEach(function(item, i){
-	console.log(item.file + ': ' + item.pos);
-});
-*/
