@@ -17,8 +17,8 @@
  * This module is responsible for dialogs - creating them, positioning them,
  * showing/hiding them.
  */
-define(['text!scripted/contextmenus/addResourceDialogue.html', 'text!scripted/contextmenus/renameResourceDialogue.html', 'text!scripted/contextmenus/deleteResourceDialogue.html', 'when'], function(
-addResourceDialogue, renameResourceDialogue, deleteResourceDialogue, when) {
+define(['text!scripted/contextmenus/addResourceDialogue.html', 'text!scripted/contextmenus/renameResourceDialogue.html', 'text!scripted/contextmenus/deleteResourceDialogue.html', 'when', 'jquery'], function(
+addResourceDialogue, renameResourceDialogue, deleteResourceDialogue, when, $) {
 
 	/**
 	 * Show (or resize) the mask and a particular dialog. The sizes are computed
@@ -90,12 +90,12 @@ addResourceDialogue, renameResourceDialogue, deleteResourceDialogue, when) {
 			$(window).off('keyup.dialogs');
 			$(window).on('keyup.dialogs', function(e) {
 				// Pressing ENTER triggers the button click
-				if (e.keyCode === $.ui.keyCode.ENTER) {
+				if (e.keyCode === 13/*ENTER*/) {
 					$('#dialogue_ok_button').trigger('click');
 				}
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the
 				// original element
-				if (e.keyCode === $.ui.keyCode.ESCAPE) {
+				if (e.keyCode === 27/*ESCAPE*/) {
 					removeDialogue(dialogueID);
 					$(activeElement).focus();
 				}

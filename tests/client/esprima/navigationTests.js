@@ -44,7 +44,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		
 	function assertDefinition(expected, actual) {
 		if (!actual) {
-			assert.fail("No definition found for:\n" + expected.hover );
+			assert.fail("No definition found for:\n" + expected.hoverText );
 		}
 		assert.equal(actual.typeName, expected.typeName, "Invalid type name in definition");
 		assert.equal(actual.path, expected.path, "Invalid path in definition");
@@ -54,10 +54,17 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			assert.equal(actual.range[0], expected.range[0], "Invalid range start in definition");
 			assert.equal(actual.range[1], expected.range[1], "Invalid range end in definition");
 		}
-		assert.equal(actual.hover, expected.hover, "Invalid hover in definition");
+		if (!expected.docRange) {
+			assert.ok(!actual.docRange, "Should not have found a doc range object: " + actual.range);
+		} else {
+			assert.equal(actual.docRange[0], expected.docRange[0], "Invalid doc range start in definition");
+			assert.equal(actual.docRange[1], expected.docRange[1], "Invalid doc range end in definition");
+		}
+
+		assert.equal(actual.hoverText, expected.hoverText, "Invalid hover in definition");
 	}
 	
-	function createExpected(buffer, toFind, typeName, hover, path, findIndex) {
+	function createExpected(buffer, toFind, typeName, hover, path, findIndex, docRange) {
 		if (!hover) {
 			hover = toFind + " : " + typeName;
 		}
@@ -75,20 +82,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			expected.range = null;
 		}
 		expected.typeName = typeName;
-		expected.hover = hover;
+		expected.hoverText = hover;
 		expected.path = path;
 		expected.buffer = buffer;
+		expected.docRange = docRange;
 		return expected;
 	}
 	
-	function doSameFileTest(buffer, toFind, typeName, hover, findIndex) {
+	function doSameFileTest(buffer, toFind, typeName, hover, findIndex, docRange) {
 		if (!findIndex) { findIndex = 1; }
 		var findText;
 		if (typeof findIndex === "string") {
 			findText = findIndex;
 			findIndex = -1;
 		}
-		var expected = createExpected(buffer, toFind, typeName, hover, null, findIndex);
+		var expected = createExpected(buffer, toFind, typeName, hover, null, findIndex, docRange);
 		if (findText) {
 			expected.range = [];
 			expected.range[0] = buffer.indexOf(findText);
@@ -97,7 +105,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		var actual = computeDefinition(buffer, toFind);
 		assertDefinition(expected, actual);
 	}
-	function doMultiFileTest(otherFile, otherBuffer, buffer, toFind, typeName, hover, findIndex, targetInSameFile) {
+	function doMultiFileTest(otherFile, otherBuffer, buffer, toFind, typeName, hover, findIndex, targetInSameFile, docRange) {
 		var targetFile = otherFile;
 		if (targetInSameFile) {
 			targetFile = null;
@@ -105,7 +113,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		if (!findIndex) {
 			findIndex = 1;
 		}
-		var expected = createExpected(targetInSameFile ? buffer : otherBuffer, toFind, typeName, hover, targetFile, findIndex);
+		var expected = createExpected(targetInSameFile ? buffer : otherBuffer, toFind, typeName, hover, targetFile, findIndex, docRange);
 		var buffers = { };
 		buffers[otherFile] = otherBuffer;
 		var actual = computeDefinition(buffer, toFind, new MockIndexer(buffers));
@@ -426,51 +434,111 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"first[0] = [1];\n" +
 			"var other = first[0][0]", "other", "Number", "other : Number", 1);
 	};
-	tests.testJSDoc1 = function() {
-		doSameFileTest(
+	
+	
+	// jsdoc testing
+	tests.testJSDoc0 = function() {
+		var contents =
 			"/**\n" +
+			" */\n" +
+			"var x;";
+		doSameFileTest(
+			contents, "x", "gen~local~0", "x : {  }", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
+	};
+	tests.testJSDoc0a = function() {
+		var contents =
+			"/***/\n" +
+			"var x;";
+		doSameFileTest(
+			contents, "x", "gen~local~0", "x : {  }", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
+	};
+	tests.testJSDoc0b = function() {
+		var contents =
+			"/***/\n" +
+			"// TODO this is strannnnnnnnge.\n" +
+			"var x;";
+		doSameFileTest(
+			contents, "x", "gen~local~0", "x : {  }", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
+	};
+	
+	tests.testJSDoc0c = function() {
+		var otherContents =
+			"/***/\n" +
+			"exports.x = function() {};";
+		doMultiFileTest(
+			"a", otherContents, "require('a').x", "x",
+			"?undefined:", "x : () ⇒ undefined", 2, false,
+			[otherContents.indexOf("/**"), otherContents.indexOf("*/")+2]);
+	};
+	
+	tests.testJSDoc0d = function() {
+		var otherContents =
+			"/** @type String */\n" +
+			"exports.x = function() {};";
+		doMultiFileTest(
+			"a", otherContents, "require('a').x", "x",
+			"String", "x : String", 2, false,
+			[otherContents.indexOf("/**"), otherContents.indexOf("*/")+2]);
+	};
+	
+	tests.testJSDoc1 = function() {
+		var contents = "/**\n" +
 			" * @param {String} path \n" +
 			" * @return String\n" +
 			" */\n" +
 			"function parseFile(path) { }\n" +
-			"var x;", "parseFile", "?String:path/String", "parseFile : (path:String) ⇒ String", 1);
+			"var x;";
+		doSameFileTest(
+			contents, "parseFile", "?String:path/String", "parseFile : (path:String) ⇒ String", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	
 	tests.testJSDoc2 = function() {
-		doSameFileTest(
-			"/**\n" +
+		var contents = "/**\n" +
 			" * @param {{foo:Number,bar:string}} path \n" +
 			" * @return String\n" +
 			" */\n" +
 			"function parseFile(path) { path.sumpin = ''; }\n" +
-			"var x;", "parseFile", "?String:path/gen~local~2", "parseFile : (path:{ foo:Number, bar:String, sumpin:String }) ⇒ String", 1);
+			"var x;";
+		doSameFileTest(
+			contents, "parseFile", "?String:path/gen~local~2", "parseFile : (path:{ foo:Number, bar:String, sumpin:String }) ⇒ String", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	
 	tests.testJSDoc3 = function() {
-		doSameFileTest(
-			"/**\n" +
+		var contents = "/**\n" +
 			" * @param {{foo:Number,bar:string}} path \n" +
 			" */\n" +
 			"function ParseFile(path) { path.sumpin = ''; }\n" +
-			"var x;", "ParseFile", "*ParseFile:path/gen~local~3", "ParseFile : new(path:{ foo:Number, bar:String, sumpin:String }) ⇒ ParseFile", 1);
+			"var x;";
+		doSameFileTest(
+			contents, "ParseFile", "*ParseFile:path/gen~local~3", "ParseFile : new(path:{ foo:Number, bar:String, sumpin:String }) ⇒ ParseFile", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	
 	tests.testJSDoc4 = function() {
-		doSameFileTest(
-			"/**\n" +
+		var contents = "/**\n" +
 			" * @param {{foo:Number,bar:function(a,b):String}} path \n" +
 			" */\n" +
 			"function parseFile(path) { path.sumpin = ''; }\n" +
-			"var x;", "parseFile", "?undefined:path/gen~local~2", "parseFile : (path:{ foo:Number, bar:(a, b) ⇒ String, sumpin:String }) ⇒ undefined", 1);
+			"var x;";
+		doSameFileTest(
+			contents, "parseFile", "?undefined:path/gen~local~2", "parseFile : (path:{ foo:Number, bar:(a, b) ⇒ String, sumpin:String }) ⇒ undefined", 1,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	
 	tests.testJSDocParamArgs1 = function() {
+		var contents = "/** @param {function(text:String, path:String, configuration:function(foo:String):Object):String?} transformFun */\n" +
+		"function addSaveTransform(transformFun) {	}";
 		doSameFileTest(
-		"/** @param {function(text:String, path:String, configuration:function(foo:String):Object):String?} transformFun */\n" +
-		"function addSaveTransform(transformFun) {	}",
+		contents,
 		"addSaveTransform",
 		"?undefined:transformFun/?String:text/String,path/String,configuration/?Object:foo/String",
-		"addSaveTransform : (transformFun:(text:String) ⇒ String, path:String, configuration:(foo:String) ⇒ Object) ⇒ undefined", 1);
+		"addSaveTransform : (transformFun:(text:String) ⇒ String, path:String, configuration:(foo:String) ⇒ Object) ⇒ undefined", 1,
+		[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	
 	return tests;

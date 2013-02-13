@@ -13,6 +13,7 @@
  *     Kris De Volder
  *     Christopher Johnson
  *     Scott Andrews
+ *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  ******************************************************************************/
 
 function configure(filesystem) {
@@ -47,7 +48,7 @@ function configure(filesystem) {
 			app.use(express.json());
 			app.use(app.router);
 			app.use(onRequest); // bridge to 'servlets', we should remove over time
-			app.use(express['static'](pathResolve(__dirname, '../client')), { maxAge: 6e5 });
+			app.use(express['static'](pathResolve(__dirname, '../client'), { maxAge: 6e5 }));
 			app.use(express.errorHandler({
 				dumpExceptions: true,
 				showStack: true

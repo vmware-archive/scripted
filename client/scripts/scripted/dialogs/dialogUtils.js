@@ -15,7 +15,7 @@
 /**
  * This module is responsible for dialogs - creating them, positioning them, showing/hiding them.
  */
-define([],function() {
+define(['jquery'],function($) {
 				
 	/**
 	 * Show (or resize) the mask and a particular dialog (e.g. '#dialog_goto_line'). The sizes are computed
@@ -61,11 +61,11 @@ define([],function() {
 		$('#dialog_goto_line').off('keyp.dialogs');
 		$('#dialog_goto_line').on('keyup.dialogs',function( e ) {
 			// Pressing ENTER triggers the button click
-		    if( e.keyCode === $.ui.keyCode.ENTER ) {
+		    if( e.keyCode === 13/*ENTER*/ ) {
 		      $('#dialog_goto_line_button').trigger( 'click' );
 		    }
 		    // Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
-		    if (e.keyCode === $.ui.keyCode.ESCAPE ) {
+		    if (e.keyCode === 27/*ESCAPE*/ ) {
 				$('#dialog_mask,#dialog_goto_line').hide();
 				$(activeElement).focus();
 		    }

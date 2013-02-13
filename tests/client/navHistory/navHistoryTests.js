@@ -17,13 +17,16 @@
 
 define(['orion/assert', 'scripted/utils/navHistory', 'scripted/utils/pageState', 'tests/client/common/testutils',
 	'scripted/pane/sidePanelManager', 'scripted/pane/paneFactory', 'scripted/editor/editorPane', 'scripted/utils/editorUtils', 'scripted/utils/os', 
-	'when', 'setup', 'jquery'],
-function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os, when) {
+	'when', 'scripted/utils/behaviourConfig', 'setup', 'jquery'],
+function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFactory, mEditorPane, editorUtils, os, when, behaviourConfig) {
 	
 	// TODO remove globals
 	window.scripted = window.scripted || {};
 	window.scripted.config = window.scripted.config || {};
 	window.explorer = window.explorer || {};
+	
+	behaviourConfig.setAsyncBreadcrumbConstruction(false);
+	behaviourConfig.setAsyncEditorContentLoading(false);
 
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();

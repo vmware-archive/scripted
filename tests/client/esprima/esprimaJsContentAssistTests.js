@@ -2535,6 +2535,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			]);
 		};
 		
+		// @type overrides @return
 		tests["test simple jsdoc12"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2542,10 +2543,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"xx = function() { };\nx", "x"
 			);
 			testProposals(results, [
-				["xx()", "xx() : Number"]
+				["xx", "xx : String"]
 			]);
 		};
 	
+		// @type overrides @return
 		tests["test simple jsdoc13"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2553,7 +2555,29 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"xx = function(ss) { s/**/ };", "s"
 			);
 			testProposals(results, [
-				["ss", "ss : Number"]
+				["ss", "ss : {  }"]
+			]);
+		};
+	
+		tests["test simple jsdoc14"] = function() {
+			var results = computeContentAssist(
+				"var xx;\n" +
+				"/** @return Number*/\n" +
+				"xx = function() { };\nx", "x"
+			);
+			testProposals(results, [
+				["xx()", "xx : String"]
+			]);
+		};
+	
+		tests["test simple jsdoc15"] = function() {
+			var results = computeContentAssist(
+				"var xx;\n" +
+				"/** @param Number ss\n@return String*/\n" +
+				"xx = function(ss) { s/**/ };", "s"
+			);
+			testProposals(results, [
+				["ss", "ss : {  }"]
 			]);
 		};
 	
@@ -2971,6 +2995,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			var results = computeContentAssist(
 				// ignoring the second type
 				"/** @type {...Array.<Number>} */ var xxx;\nxxx[0][0].toF", "toF");
+			testProposals(results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		
+		tests["test jsdoc on property decl1"] = function() {
+			var results = computeContentAssist(
+				"var jjj = {};/** @type {Number} */\n" +
+				"jjj.x = '';x.toF", "toF");
+			testProposals(results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test jsdoc on property decl2"] = function() {
+			var results = computeContentAssist(
+				"var jjj = {x:false};/** @type {Number} */\n" +
+				"jjj.x = '';x.toF", "toF");
 			testProposals(results, [
 				["toFixed(digits)", "toFixed(digits) : Number"]
 			]);

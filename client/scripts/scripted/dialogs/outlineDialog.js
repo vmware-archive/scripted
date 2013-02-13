@@ -17,8 +17,8 @@
  * The outline dialog.
  */
 define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/outline/esprimaOutliner",
-	"text!scripted/dialogs/outlineDialog.html"],
-	function(dialogUtils, pagestate, outliner, dialogText) {
+	"text!scripted/dialogs/outlineDialog.html","jquery"],
+	function(dialogUtils, pagestate, outliner, dialogText,$) {
 
 	function closeDialog() {
 		$('#dialog_mask').hide();
@@ -167,12 +167,12 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 		$(this.dialog).off('keydown.dialogs');
 		$(this.dialog).on('keydown.dialogs',function( e ) {
 			var links, nextSelected, loopedRound;
-			if ((e.keyCode === $.ui.keyCode.UP || e.keyCode === $.ui.keyCode.DOWN)) {
+			if ((e.keyCode === 38/*UP*/ || e.keyCode === 40/*DOWN*/)) {
 				links = $(that.dialog).find(".dialog_results_row");
 				var currentSelection = that.selected;
 				loopedRound = false;
 				// TODO refactor scrolling and repositioning into dialogUtils (across this and the other dialogs)
-				if (e.keyCode === $.ui.keyCode.DOWN) {
+				if (e.keyCode === 40/*DOWN*/) {
 					if (that.selected >= 0) {
 						nextSelected = that.selected===(links.length-1)?0:that.selected+1;
 						if (nextSelected===0) {
@@ -224,7 +224,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 				if (isOffScreen) {
 					if (!wasOffScreen) {
 						// readjust scroll position
-						if (e.keyCode === $.ui.keyCode.DOWN) {
+						if (e.keyCode === 40/*DOWN*/) {
 							if (!loopedRound) {
 								r.scrollTop(scrollPositionOfResults + linkHeight);
 							} else {
@@ -254,7 +254,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 					}
 				}
 				return false;
-			} else if (e.keyCode === $.ui.keyCode.ENTER) {
+			} else if (e.keyCode === 13/*ENTER*/) {
 				// Pressing ENTER triggers the button click on the selection
 				var results = $(".dialog_results_row");
 				if (results && results.length>0) {
@@ -263,7 +263,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 				}
 				that.closeDialog();
 				return false;
-		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
+		    } else if (e.keyCode === 27/*ESCAPE*/) {
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
 				return false;

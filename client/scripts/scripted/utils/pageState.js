@@ -269,9 +269,9 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 			}
 			scriptedHistory.push(histItem);
 
-			// arbitrarily keep track of 8 scriptedHistory items
+			// arbitrarily keep track of 10 scriptedHistory items
 			// TODO should we have a .scripted setting to customize this?
-			while (scriptedHistory.length > 8) {
+			while (scriptedHistory.length > 10) {
 				scriptedHistory.shift();
 			}
 
