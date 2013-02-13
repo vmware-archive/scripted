@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports */
 var utils = require('../../server/jsdepend/utils');
 var toCompareString = toCompareString;
@@ -29,7 +29,7 @@ function toCompareString(obj) {
 
 exports.orMapK = function (test) {
 	var f = function (x, k) {
-		k(x>2 && x*10); 
+		k(x>2 && x*10);
 	};
 	orMap([1, 2, 3, 4], f, function (result) {
 		test.equals(result, 30);
@@ -39,7 +39,7 @@ exports.orMapK = function (test) {
 
 exports.orMapKfalse = function (test) {
 	var f = function (x, k) {
-		k(x>20 && x*10); 
+		k(x>20 && x*10);
 	};
 	orMap([1, 2, 3, 4], f, function (result) {
 		test.equals(result, false);
@@ -49,7 +49,7 @@ exports.orMapKfalse = function (test) {
 
 exports.orMapKempty = function (test) {
 	var f = function (x, k) {
-		k(x>2 && x*10); 
+		k(x>2 && x*10);
 	};
 	orMap([], f, function (result) {
 		test.equals(result, false);
@@ -59,13 +59,28 @@ exports.orMapKempty = function (test) {
 
 exports.pathNormalize = function (test) {
 	var normalize = require('../../server/jsdepend/utils').pathNormalize;
+	test.equals('/', normalize('////'));
 	test.equals('a/b/c', normalize('a/b/c'));
 	test.equals('.', normalize('.'));
 	test.equals('a/d', normalize('a/b/c/../../d'));
 	test.equals('../../foo', normalize('a/b/../../../../foo'));
 	test.equals('/a/b', normalize('/a/b'));
-//	test.equals('/a/b', normalize('/a/b/')); Trailing slahses aren't handled properly
-//  test.equals('/a/b', normalize('/a//b')); Double slashes aren't handled properly
+	test.equals('/a/b', normalize('/a/b/'));
+	test.equals('/a/b', normalize('/a//b'));
+	test.equals('/a/b', normalize('///a/b'));
+	test.equals('/a/b', normalize('//a/b'));
+	test.equals('/a/b', normalize('/a/b'));
+	test.done();
+};
+
+exports.getDirectory = function (test) {
+	var getDir = require('../../server/jsdepend/utils').getDirectory;
+	test.equals('/a', getDir('/a/b'));
+	test.equals('/', getDir('/a'));
+	test.equals(null, getDir('/'));
+	test.equals(null, getDir('.'));
+	test.equals('.', getDir('foo'));
+	test.equals('foo', getDir('foo/bar'));
 	test.done();
 };
 

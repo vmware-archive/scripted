@@ -41,32 +41,32 @@ function makeApi(relativeBaseDir) {
 
 exports.scriptedFileAtRoot = function(test) {
 	var api = makeApi('with-a-scripted-file');
-	api.getIndexer('subdir/subsubdir/dummy.js', function (indexer) {
-		test.equals(indexer.getRootDir(), '.');
+	api.getIndexer('/subdir/subsubdir/dummy.js', function (indexer) {
+		test.equals(indexer.getRootDir(), '/');
 		test.done();
 	});
 };
 
 exports.scriptedFileInSubproject = function(test) {
 	var api = makeApi('with-a-scripted-file');
-	api.getIndexer('subproject/subdir/subsubdir/dummy.js', function (indexer) {
-		test.equals(indexer.getRootDir(), 'subproject');
+	api.getIndexer('/subproject/subdir/subsubdir/dummy.js', function (indexer) {
+		test.equals(indexer.getRootDir(), '/subproject');
 		test.done();
 	});
 };
 
 exports.projectFileAtRoot = function(test) {
 	var api = makeApi('with-a-project-file');
-	api.getIndexer('subdir/subsubdir/dummy.js', function (indexer) {
-		test.equals(indexer.getRootDir(), '.');
+	api.getIndexer('/subdir/subsubdir/dummy.js', function (indexer) {
+		test.equals(indexer.getRootDir(), '/');
 		test.done();
 	});
 };
 
 exports.projectFileInSubproject = function(test) {
 	var api = makeApi('with-a-project-file');
-	api.getIndexer('subproject/subdir/subsubdir/dummy.js', function (indexer) {
-		test.equals(indexer.getRootDir(), 'subproject');
+	api.getIndexer('/subproject/subdir/subsubdir/dummy.js', function (indexer) {
+		test.equals(indexer.getRootDir(), '/subproject');
 		test.done();
 	});
 };
@@ -75,9 +75,9 @@ exports.noRootMarkerFile = function(test) {
 	//The behavior for this case has changed a few times.
 	//current expected behavior is that we use directory of the file itself as the root.
 	var api = makeApi('no-root-marker-file');
-	api.getIndexer('subdir/subsubdir/dummy.js',
+	api.getIndexer('/subdir/subsubdir/dummy.js',
 		function (indexer) {
-			test.equals(indexer.getRootDir(), 'subdir/subsubdir');
+			test.equals(indexer.getRootDir(), '/subdir/subsubdir');
 			test.done();
 		},
 		function (error) {

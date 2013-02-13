@@ -117,15 +117,12 @@ function getDirectory(handle) {
 		//We should return null for the parent.
 		return null;
 	}
+	if (handle==='.' || handle === '/') {
+		return null;
+	}
 	var segments = handle.split('/');
 	if (segments.length===1) {
-		if (handle==='.') {
-			//When using relative file names as handles... we aren't supposed to
-			//walk up above the baseDir.
-			return null;
-		} else {
-			return '.';
-		}
+		return '.';
 	} else {
 		segments.splice(-1, 1);
 		var result = segments.join('/');
@@ -134,7 +131,7 @@ function getDirectory(handle) {
 			//What we want instead is 'C:/'
 			return result+'/';
 		} else {
-			return result;
+			return result || '/';
 		}
 	}
 }
@@ -150,9 +147,11 @@ function pathNormalize(path) {
 	var normalized = [];
 	var i = 0;
 	while (i < segments.length) {
-		var segment = segments[i++];
+		var segment = segments[i];
 		if (segment==='.') {
 			//skip
+		} else if (segment==='' && i>0) {
+			//This means there were consecutive slashes or a trailing slash: ignore!
 		} else if (segment==='..') {
 			if (normalized.length>0) {
 				var prevSeg = normalized[normalized.length-1];
@@ -167,10 +166,9 @@ function pathNormalize(path) {
 		} else {
 			normalized.push(segment);
 		}
+		i++;
 	}
-	return normalized.join('/') || '.';
-	   //Note: || '.' is to avoid returning '' because it counts as false!
-	   //so always use '.' as the normalized form of the 'current dir'.
+	return normalized.join('/') || (path[0]==='/' ? '/' : '.');
 }
 
 /**
@@ -190,6 +188,15 @@ function pathResolve(basePath, resolvePath) {
 			return pathNormalize(basePath + '/' + resolvePath);
 		}
 	}
+}
+
+function logit(f) {
+	return function () {
+		console.log('>>> '+f.name + ' ' + JSON.stringify(arguments));
+		var r = f.apply(this, arguments);
+		console.log('<<< '+f.name + ' ' + JSON.stringify(r));
+		return r;
+	};
 }
 
 //Map a function onto an array in callback (continuation passing) style:
@@ -235,6 +242,21 @@ function eachk(array, f, callback) {
 	loop(0);
 }
 
+/**
+ * Join two path strings together being careful not to
+ * create double slashes in the process.
+ * <p>
+ * In most cases use of this function could be replaced by
+ * pathResolve, but this is more efficient since it
+ * doesn't normalize the resulting path.
+ */
+function pathJoin(p1, p2) {
+	var sep = p1[p1.length-1]==='/'?'' : '/';
+	if (p2[0] === '/') {
+		p2 = p2.substring(1);
+	}
+	return p1 + sep + p2;
+}
 
 function filter(array, pred) {
 	//TODO: remove this... Why not simply use 'Array.filter'???
@@ -329,6 +351,7 @@ function mapFilter(arr, f) {
 
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
+exports.pathJoin = pathJoin;
 exports.pathResolve = pathResolve;
 exports.getDirectory = getDirectory;
 exports.getFileName = getFileName;

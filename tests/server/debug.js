@@ -17,8 +17,14 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
-var testCase = require('./filesystem-test')
-	.userHome;
+//var testCase = require('./file-indexer-test')
+//	.scriptedFileAtRoot;
+
+//var testCase = require('./utils-test')
+//	.pathNormalize;
+
+//var testCase = require('./filesystem-test')
+//	.userHome;
 
 //var testCase = require('./path-glob-test')
 //	.win_match;
@@ -44,7 +50,9 @@ var testCase = require('./filesystem-test')
 //var testCase = require('./plugin-discovery-test')
 //	.one;
 
-//var testCase = require('./resolver-test')
+var testCase = require('./resolver-test')
+	.sloppyMode;
+//	.commonjsRefs;
 //	.pathAwarenessSimple;
 //	.subPackageImport;
 //	.voloSample;

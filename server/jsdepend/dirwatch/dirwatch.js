@@ -18,6 +18,7 @@ var mapk = utils.mapk;
 var filter = utils.filter;
 var os = require('os');
 var ignore = require('../../utils/filesystem').ignore;
+var pathJoin = utils.pathJoin;
 
 //TODO: optimize tree for better memory usage:
 //   - don't store full path in every tree node
@@ -306,7 +307,7 @@ function makeWatcher(path, listener) {
 				}
 				mapk(files,
 					function (fileName, k) {
-						var childPath = parentPath+"/"+fileName;
+						var childPath = pathJoin(parentPath, fileName);
 						makeStatNode(childPath, function (childNode) {
 							childNode.name = fileName;
 							childNode.listener = listener;

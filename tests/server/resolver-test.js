@@ -98,12 +98,12 @@ exports.resolveSubToSiblingReference = function (test) {
 		name: 'sub/subdep',
 		kind: 'AMD'
 	};
-	api.resolve('sub/submain', [dep], function (resolved) {
+	api.resolve('/sub/submain', [dep], function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString([{
 				name: 'sub/subdep',
 				kind: 'AMD',
-				path: 'sub/subdep.js'
+				path: '/sub/subdep.js'
 			}])
 		);
 		test.done();
@@ -116,12 +116,12 @@ exports.resolveInScriptsFolder = function (test) {
 		name: 'dep',
 		kind: 'AMD'
 	};
-	api.resolve('web-app/scripts/main.js', [dep], function (resolved) {
+	api.resolve('/web-app/scripts/main.js', [dep], function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString([{
 				name: 'dep',
 				kind: 'AMD',
-				path: 'web-app/scripts/dep.js'
+				path: '/web-app/scripts/dep.js'
 			}])
 		);
 		test.done();
@@ -165,17 +165,17 @@ exports.requireCallWithBaseDir = function (test) {
 };
 
 exports.commonjsRefs = function (test) {
-	var api = makeApi('node-with-amd-defines');
+	var api = makeApi('/node-with-amd-defines');
 	var dep = {
 		kind: 'commonjs',
 		name: './utils'
 	};
-	api.resolve("main.js", dep, function (resolved) {
+	api.resolve("/main.js", dep, function (resolved) {
 		test.equals(toCompareString(resolved),
 			toCompareString({
 				kind: 'commonjs',
 				name: './utils',
-				path: 'utils.js'
+				path: '/utils.js'
 			})
 		);
 		test.done();
@@ -193,7 +193,7 @@ exports.sloppyMode = function (test) {
 			toCompareString([{
 				name: 'magic/external',
 				kind: 'AMD',
-				path: 'libs/external.js'
+				path: '/libs/external.js'
 			}])
 		);
 		test.done();
@@ -205,7 +205,7 @@ exports.sloppyModeMissing = function (test) {
 		name: 'magic/missing',
 		kind: 'AMD'
 	};
-	api.resolve('web-app/scripts/main.js', [dep], function (resolved) {
+	api.resolve('/web-app/scripts/main.js', [dep], function (resolved) {
 		test.equals( toCompareString(resolved),
 			toCompareString([{
 				name: 'magic/missing',
@@ -224,10 +224,10 @@ exports.sloppyModeMultiple = function (test) {
 		name: 'magic/several',
 		kind: 'AMD'
 	};
-	api.resolve('web-app/scripts/main.js', [dep], function (resolved) {
+	api.resolve('/web-app/scripts/main.js', [dep], function (resolved) {
 		dep = resolved[0];
 		//console.log(JSON.stringify(dep, null, '  '));
-		test.equals(true, dep.path==='libs/several.js' || dep.path==='web-app/scripts/several.js');
+		test.equals(true, dep.path==='/libs/several.js' || dep.path==='/web-app/scripts/several.js');
 		test.equals(2, dep.candidates.length);
 		test.done();
 	});

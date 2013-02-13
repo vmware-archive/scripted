@@ -54,9 +54,58 @@ function ignore(name) {
 }
 
 function withBaseDir(baseDir, options) {
+	if (baseDir) {
+		baseDir = pathNormalize(baseDir); // Avoid trouble with bad code that creates double slashes.
+		if (baseDir[baseDir.length-1]!=='/') {
+			baseDir += '/';
+		}
+	}
 	options = options || {};
 	var fs = require('fs');
 	var encoding = 'UTF-8';
+
+	function handle2file(handle) {
+		//TODO: Don't allow path navigation '..' to escape out of a 'subdirectory' filesystem.
+		if (baseDir) {
+			while (handle[0] === '/') {
+				handle = handle.substring(1);
+			}
+			if (handle==='.') {
+				return baseDir;
+			} else {
+				return baseDir + handle;
+			}
+		} else {
+			return handle;
+		}
+	}
+
+//	function logit(f) {
+//		return function () {
+//			console.log('>>> '+f.name + ' ' + JSON.stringify(arguments));
+//			var r = f.apply(this, arguments);
+//			console.log('<<< '+f.name + ' ' + JSON.stringify(r));
+//			return r;
+//		};
+//	}
+//
+//	handle2file = logit(handle2file);
+//	file2handle = logit(file2handle);
+
+	function file2handle(file) {
+		var h;
+		if (baseDir) {
+			h = '/'+file.substring(baseDir.length);
+//			if (!h) {
+//				h = '.'; //Always use '.' instead of "", it causes trouble because it counts as 'false'.
+//			}
+		} else {
+			h = file;
+		}
+		return h.replace(/\\/g, '/'); //Always use slashes even on Windows.
+	}
+
+
 
 	function getUserHome() {
 		if (options.userHome) {
@@ -91,28 +140,6 @@ function withBaseDir(baseDir, options) {
 		} else {
 			return pathResolve(__dirname, '../..');
 		}
-	}
-
-	function handle2file(handle) {
-		//TODO: Don't allow path navigation '..' to escape out of a 'subdirectory' filesystem.
-		if (baseDir) {
-			return pathNormalize(baseDir + '/' + handle);
-		} else {
-			return handle;
-		}
-	}
-
-	function file2handle(file) {
-		var h;
-		if (baseDir) {
-			h = file.substring(baseDir.length+1);
-			if (!h) {
-				h = '.'; //Always use '.' instead of "", it causes trouble because it counts as 'false'.
-			}
-		} else {
-			h = file;
-		}
-		return h.replace(/\\/g, '/'); //Always use slashes even on Windows.
 	}
 
 	function isFile(handle, callback) {
@@ -383,14 +410,6 @@ function withBaseDir(baseDir, options) {
 	function createReadStream(handle) {
 		var file = handle2file(handle);
 		return fs.createReadStream(file, { encoding: 'utf8'});
-	}
-
-	/**
-	 * Like node fs.readFile
-	 */
-	function readFile(handle, callback) {
-		var file = handle2file(handle);
-		fs.readFile(file, callback);
 	}
 
 	return {

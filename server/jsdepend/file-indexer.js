@@ -25,13 +25,13 @@ var eachk = require('./utils').eachk;
 function configure(conf) {
 
 	//console.log("configuring file-indexer for: "+ conf.baseDir);
-	
+
 	//configure = level 1 config
 	//   provides 'the file system'.
-	//getIndexer = level 2 config 
+	//getIndexer = level 2 config
 	//   provides a search scope (typically smaller than the file system)
-	
-	//This two step config is needed because we need the file system to walk around a bit and 
+
+	//This two step config is needed because we need the file system to walk around a bit and
 	//determine the search scope. (Currently we walk up, until we find a .scripted, .project or .git file
 
 	var listFiles = conf.listFiles;
@@ -42,7 +42,7 @@ function configure(conf) {
 	var toRegexp = require('./utils').toRegexp;
 
 	var fileEventListeners = [];
-			
+
 	function fileEventHandler(type, path) {
 		for (var i = 0; i < fileEventListeners.length; i++) {
 			try {
@@ -65,39 +65,36 @@ function configure(conf) {
 	function getRootMarkerFile(context, callback) {
 		var dir = getDirectory(context);
 		if (dir) {
-			listFiles(dir, 
+			listFiles(dir,
 				function (names) {
-					var rootMarkerName = orMap(names, isRootMarkerFile); 
-					if (rootMarkerName) { 
+					var rootMarkerName = orMap(names, isRootMarkerFile);
+					if (rootMarkerName) {
 						callback(pathResolve(dir, rootMarkerName));
 					} else {
 						getRootMarkerFile(dir, callback);
 					}
-				},
-				function (err) {
-
 				}
 			);
 		} else {
 			callback(false);
 		}
 	}
-	
+
 	//TODO: This cache should be managed outside of 'configuration specific memory space' because
 	// it just directly uses nodejs's fs rather than our own mini local file system.
 	//In 'production setting' this doesn't matter as there's only one instance of our fs.
 	//But in testing code this is a memory leak.
 	var indexerCache = {};
-	
+
 	function createIndexer(rootMarkerFile, k) {
-		
+
 		var rootDirFile = handle2file(getDirectory(rootMarkerFile));
 		var cached = indexerCache[rootDirFile];
 		if (cached) {
 			//Careful... we enter stuff into the cache before the dirwatcher is fully ready.
 			//This is to avoid accidentally creating a second
 			//dirwatcher while the first one is still being created.
-			//This however means that before passing the cached entry to the our 'k' we must 
+			//This however means that before passing the cached entry to the our 'k' we must
 			//ensure the dirwatcher is actually ready
 			//console.log('found cached indexer for :'+rootDirFile);
 			return cached.dirwatcher.whenReady(function () {
@@ -106,7 +103,7 @@ function configure(conf) {
 			});
 		}
 
-		var dirwatcher = dirwatch.makeWatcher(rootDirFile, fileEventHandler);	
+		var dirwatcher = dirwatch.makeWatcher(rootDirFile, fileEventHandler);
 
 		function walk(f, k) {
 //			if (IN_MEMORY_SEARCH) {
@@ -119,7 +116,7 @@ function configure(conf) {
 //				return fswalk(file2handle(dirwatcher.path), f, k);
 //			}
 		}
-		
+
 		/**
 		 * Searches for given pattern, return the results incrementally.
 		 * Each time we find a match, the add function is called with the matching file path as an argument.
@@ -159,18 +156,18 @@ function configure(conf) {
 				}
 			);
 		}
-		
+
 		cached = {
 			getRootDir: function () {
 				return file2handle(rootDirFile);
 			},
 
 			dirwatcher: dirwatcher,
-			
+
 			incrementalSearch: function (pat, requestor) {
-				incrementalSearch(toRegexp(pat), requestor);				
+				incrementalSearch(toRegexp(pat), requestor);
 			},
-			
+
 			findFileNamesContaining: function (substring, callback) {
 				//TODO: this now does regexp search so the name is not so good!
 				var pat = toRegexp(substring);
@@ -215,7 +212,7 @@ function configure(conf) {
 			//put the indexer methods in here
 		};
 		indexerCache[rootDirFile] = cached;
-		
+
 //		console.log(">>> cached indexers");
 //		for (var prop in indexerCache) {
 //			if (indexerCache.hasOwnProperty(prop)) {
@@ -223,13 +220,13 @@ function configure(conf) {
 //			}
 //		}
 //		console.log("<<< cached indexers");
-		
+
 		return dirwatcher.whenReady(function () {
 			k(cached);
 		});
 	}
-	
-	//Determine the indexer to be associated with a given file. 
+
+	//Determine the indexer to be associated with a given file.
 	//To avoid overly broad searches a indexer must be configured for a given context.
 	//The context is somehow determined based on the current file in the editor.
 	function getIndexer(file, callback) {
@@ -255,6 +252,6 @@ function configure(conf) {
 		}
 	};
 }
-	
+
 exports.configure = oneCache.makeCached(configure);
 
