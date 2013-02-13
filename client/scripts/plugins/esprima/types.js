@@ -1658,10 +1658,11 @@ SVGFEFuncAElement
 			}
 		},
 
-		parseJSDocComment : function(commentText) {
+		parseJSDocComment : function(docComment) {
 			var result = { };
 			result.params = {};
-			if (commentText) {
+			if (docComment) {
+				var commentText = docComment.value;
 				try {
 					var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
 					// transform result into something more manageable
@@ -1907,7 +1908,7 @@ SVGFEFuncAElement
 						var name;
 						// don't show inner objects
 						name = this.createReadableType(type[val].typeName, env, true, depth + 1, useHtml);
-						props.push((useHtml ? "<br/>" + this.repeatChar("&nbsp;&nbsp;&nbsp;&nbsp;", depth+1) : "" ) +
+						props.push((useHtml ? "<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;&nbsp;&nbsp;", depth+1) : "" ) +
 							this.styleAsProperty(val, useHtml) + ":" + name);
 					}
 				}

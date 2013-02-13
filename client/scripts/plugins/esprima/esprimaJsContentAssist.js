@@ -574,17 +574,18 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	
 	/**
 	 * Finds the closest doc comment to this node
-	 * @param {} node
-	 * @param {Array} comments
+	 * @param {{range:Array.<Number>}} node
+	 * @param {Array.<String>} comments
+	 * @return {{value:String,range:Array.<Number>}}
 	 */
 	function findAssociatedCommentBlock(node, doccomments) {
 //		look for closest doc comment that is before the start of this node
 //		just shift all the other ones
 		var candidate;
 		while (doccomments.length > 0 && doccomments[0].range[0] < node.range[0]) {
-			candidate = doccomments.shift().value;
+			candidate = doccomments.shift();
 		}
-		return candidate;
+		return candidate ? candidate : { value : null };
 	}
 	
 
@@ -646,13 +647,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// first just add as an object property (or use jsdoc if exists).
 					// after finishing the ObjectExpression, go and update
 					// all of the variables to reflect their final inferred type
-					jsdocResult = mTypes.parseJSDocComment(findAssociatedCommentBlock(property.key, env.comments));
+					var docComment = findAssociatedCommentBlock(property.key, env.comments);
+					jsdocResult = mTypes.parseJSDocComment(docComment);
 					jsdocType = mTypes.convertJsDocType(jsdocResult.type, env);
 					var keyType = jsdocType ? jsdocType : "Object";
-					env.addVariable(property.key.name, node, keyType, property.key.range);
+					env.addVariable(property.key.name, node, keyType, property.key.range, docComment.range);
 					if (!property.key.extras) {
 						property.key.extras = {};
 					}
+					property.key.extras.associatedComment = docComment;
 					// remember that this is the LHS so that we don't add the identifier to global scope
 					property.key.extras.isLHS = property.key.extras.isDecl = true;
 					
@@ -691,10 +694,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 			}
 			
+			var docComment;
 			if (node.extras.jsdocResult) {
 				jsdocResult = node.extras.jsdocResult;
+				docComment = { range : null };
 			} else {
-				jsdocResult = mTypes.parseJSDocComment(node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments));
+				docComment = node.extras.associatedComment || findAssociatedCommentBlock(node, env.comments);
+				jsdocResult = mTypes.parseJSDocComment(docComment);
 			}
 
 			// assume that function name that starts with capital is
@@ -752,14 +758,14 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				env.createConstructor(functionTypeName, newTypeName);
 				// assume that constructor will be available from global scope using qualified name
 				// this is not correct in all cases
-				env.addOrSetGlobalVariable(name, functionTypeName, nameRange);
+				env.addOrSetGlobalVariable(name, functionTypeName, nameRange, docComment.range);
 			}
 
 			node.extras.inferredType = functionTypeName;
 			
 			if (name && !isBefore(env.offset, node.range)) {
 				// if we have a name, then add it to the scope
-				env.addVariable(name, node.extras.target, functionTypeName, nameRange);
+				env.addVariable(name, node.extras.target, functionTypeName, nameRange, docComment.range);
 			}
 			
 			// now add the scope for inside the function
@@ -780,7 +786,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					if (mTypes.isPrototype(ownerTypeName)) {
 						ownerTypeName = mTypes.extractReturnType(ownerTypeName);
 					}
-					env.addVariable("this", node.extras.target, ownerTypeName, node.range);
+					env.addVariable("this", node.extras.target, ownerTypeName, nameRange, docComment.range);
 				}
 			}
 			
@@ -807,12 +813,14 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					node.init.extras.fnameRange = node.id.range;
 				} else {
 					// not the RHS of a function, check for jsdoc comments
-					jsdocResult = mTypes.parseJSDocComment(findAssociatedCommentBlock(node, env.comments));
+					var docComment = findAssociatedCommentBlock(node, env.comments);
+					jsdocResult = mTypes.parseJSDocComment(docComment);
 					jsdocType = mTypes.convertJsDocType(jsdocResult.type, env);
+					node.extras.docRange = docComment.range;
 					if (jsdocType) {
 						node.extras.inferredType = jsdocType;
 						node.extras.jsdocType = jsdocType;
-						env.addVariable(node.id.name, node.extras.target, jsdocType, node.id.range);
+						env.addVariable(node.id.name, node.extras.target, jsdocType, node.id.range, docComment.range);
 					}
 				}
 			}
@@ -838,6 +846,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					if (!node.left.extras) {
 						node.left.extras = {};
 					}
+				}
+				var docComment = findAssociatedCommentBlock(node, env.comments);
+				jsdocResult = mTypes.parseJSDocComment(docComment);
+				jsdocType = mTypes.convertJsDocType(jsdocResult.type, env);
+				node.extras.docRange = docComment.range;
+				if (jsdocType) {
+					node.extras.inferredType = jsdocType;
+					node.extras.jsdocType = jsdocType;
+					env.addVariable(rightMost.name, node.extras.target, jsdocType, rightMost.range, docComment.range);
 				}
 			}
 			env.pushName(qualName);
@@ -987,7 +1004,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						}
 						
 						inferredType = kvps[i].value.extras.inferredType;
-						env.addVariable(name, node, inferredType, range);
+						var docComment = kvps[i].key.extras.associatedComment;
+						env.addVariable(name, node, inferredType, range, docComment.range);
 						if (inRange(env.offset-1, kvps[i].key.range)) {
 							// We found it! rmember for later, but continue to the end of file anyway
 							env.storeTarget(env.scope(node));
@@ -1116,7 +1134,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			node.id.extras.inferredType = inferredType;
 			if (!node.extras.jsdocType) {
 				node.extras.inferredType = inferredType;
-				env.addVariable(node.id.name, node.extras.target, inferredType, node.id.range);
+				env.addVariable(node.id.name, node.extras.target, inferredType, node.id.range, node.extras.docRange);
 			}
 			if (inRange(env.offset-1, node.id.range)) {
 				// We found it! rmember for later, but continue to the end of file anyway
@@ -1130,7 +1148,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			break;
 			
 		case "AssignmentExpression":
-			if (node.operator === '=') {
+			if (node.extras.jsdocType) {
+				// use jsdoc instead of whatever we have inferred
+				inferredType = node.extras.jsdocType;
+			} else if (node.operator === '=') {
 				// standard assignment
 				inferredType = node.right.extras.inferredType;
 			} else {
@@ -1148,7 +1169,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (rightMost && (rightMost.type === "Identifier" || rightMost.type === "Literal")) {
 				name = rightMost.name ? rightMost.name : rightMost.value;
 				rightMost.extras.inferredType = inferredType;
-				env.addOrSetVariable(name, rightMost.extras.target, inferredType, rightMost.range);
+				env.addOrSetVariable(name, rightMost.extras.target, inferredType, rightMost.range, node.extras.docRange);
 				if (inRange(env.offset-1, rightMost.range)) {
 					// We found it! remember for later, but continue to the end of file anyway
 					env.storeTarget(env.scope(rightMost.extras.target));
@@ -1164,7 +1185,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						var arrayType = mTypes.parameterizeArray(inferredType);
 						node.left.extras.inferredType = inferredType;
 						node.left.object.extras.inferredType = arrayType;
-						env.addOrSetVariable(rightMost.name, rightMost.extras.target, arrayType, rightMost.range);
+						env.addOrSetVariable(rightMost.name, rightMost.extras.target, arrayType, rightMost.range, node.extras.docRange);
 					}
 				}
 			}
@@ -1585,8 +1606,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * @param {String} typeName
 			 * @param {Object} target
 			 * @param {Array.<Number>} range
+			 * @param {Array.<Number>} docRange
 			 */
-			addVariable : function(name, target, typeName, range) {
+			addVariable : function(name, target, typeName, range, docRange) {
 				if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
@@ -1599,19 +1621,20 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						// do nuthin
 					} else {
 						type[name] = new mTypes.Definition(typeName ? typeName : "Object", range, this.uid);
+						type[name].docRange = docRange;
 						return type[name];
 					}
 				}
 			},
 			
-			addOrSetGlobalVariable : function(name, typeName, range) {
+			addOrSetGlobalVariable : function(name, typeName, range, docRange) {
 				if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
 				}
 				return this.addOrSetVariable(name,
 					// mock an ast node with a global type
-					{ extras : { inferredType : this.globalTypeName() } }, typeName, range);
+					{ extras : { inferredType : this.globalTypeName() } }, typeName, range, docRange);
 			},
 			
 			/**
@@ -1620,7 +1643,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 *
 			 * Will not override an existing variable if the new typeName is "Object" or "undefined"
 			 */
-			addOrSetVariable : function(name, target, typeName, range) {
+			addOrSetVariable : function(name, target, typeName, range, docRange) {
 				if (name === 'prototype') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
@@ -1647,6 +1670,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							// since we are just overwriting the type we do not want to change
 							// the path or the range
 							defn.typeName = typeName;
+							if (docRange) {
+								defn.docRange = docRange;
+							}
 						}
 						found = true;
 						break;
@@ -1663,6 +1689,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					var type = this._allTypes[targetType];
 					if (!type.$$isBuiltin) {
 						defn = new mTypes.Definition(typeName, range, this.uid);
+						defn.docRange = docRange;
 						type[name] = defn;
 					}
 				}
@@ -2266,12 +2293,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			var maybeType = environment.lookupName(lookupName, toLookFor.extras.target ? toLookFor.extras.target : target, false, true);
 			if (maybeType) {
 				var hover = mTypes.styleAsProperty(lookupName, findName) + " : " + mTypes.createReadableType(maybeType.typeName, environment, true, 0, findName);
-				if (findName) {
-					return hover;
-				} else {
-					maybeType.hover = hover;
+//				if (findName) {
+//					return hover;
+//				} else {
+					maybeType.hoverText = hover;
 					return maybeType;
-				}
+//				}
 			} else {
 				return null;
 			}

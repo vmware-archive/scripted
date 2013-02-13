@@ -58,7 +58,7 @@ define([], function() {
 					//we hit the start of the line so we are done
 					break;
 				}
-				if (/\s/.test(c)) {
+				if (this.isWhitespace(c)) {
 					//we found whitespace to add it to our result
 					whitespace = c.concat(whitespace);
 				} else {
@@ -69,10 +69,60 @@ define([], function() {
 			return whitespace;
 		},
 		
+		isWhitespace : function(c) {
+			return (/\s/).test(c);
+		},
+		
 		/** for testing only */
 		_flushCache : function() {
 			indentText = null;
+		},
+		
+		/**
+		 * @param {String} text the jsdoc text to format
+		 * @return {String} html formatted version of the jsdoc
+		 */
+		formatJSdoc : function (text) {
+			var splits = text.split("\n");
+			var newSplits = [];
+			splits.forEach(function(line, i) {
+				var lineLength = line.length, lineStart = 0, lineEnd = lineLength;
+				if (i === 0) {
+					if (line.charAt(0) && line.charAt(1) === '*') {
+						lineStart += 2;
+						if (line.charAt(2) === '*') {
+							lineStart++;
+						}
+					}
+				} else {
+					while (lineStart < lineLength) {
+						if (this.isWhitespace(line.charAt(lineStart))) {
+							lineStart++;
+						} else if ('*' === line.charAt(lineStart)) {
+							if (' ' === line.charAt(lineStart+1)) {
+								lineStart++;
+							}
+							lineStart++;
+							break;
+						} else {
+							lineStart = 0;
+							break;
+						}
+					}
+					
+				}
+
+				if (i === splits.length -1) {
+					if (line.substr(-2, 2) === '*/') {
+						lineEnd -=2;
+						lineEnd = Math.max(lineStart, lineEnd);
+					}
+				}
+				
+				
+				newSplits.push(line.substring(lineStart, lineEnd));
+			}, this);
+			return newSplits.join('\n');
 		}
 	};
-
 });

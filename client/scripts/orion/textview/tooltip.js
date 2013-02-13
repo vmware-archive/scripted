@@ -1,11 +1,11 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
@@ -103,9 +103,8 @@ define("orion/textview/tooltip", [ //$NON-NLS-0$
 				var self = this;
 				if(delay === 0) {
 					self.show(false);
-			}
-				else {
-				var window = this._getWindow();
+				} else {
+					var window = this._getWindow();
 					self._showTimeout = window.setTimeout(function() {
 						self.show(false);
 					}, delay ? delay : 500);
@@ -124,7 +123,29 @@ define("orion/textview/tooltip", [ //$NON-NLS-0$
 				contents = this._getAnnotationContents(contents);
 			}
 			if (typeof contents === "string") { //$NON-NLS-0$
-				tooltipContents.innerHTML = contents;
+				// SCRIPTED allow contents to be added asynchorously
+				// old
+//				tooltipContents.innerHTML = contents;
+				var newContents = contents;
+				if (info.promise) {
+					// add a pending notice
+					newContents = "<img src=\"images/pending.gif\" /><br/>" + contents;
+					var self = this;
+					var target = this._target;
+					info.promise.then(function(resolved) {
+						if (self.isVisible()) {
+							info.promise = null;
+							// update the tooltip with the new information
+							self._target.getTooltipInfo = function() {
+								// TODO should we include old tooltip with the new?
+								return { x: info.x, y: info.y, contents : resolved + "<br/><br/>" + contents };
+							};
+							self.show(false);
+						}
+					}, function(reject) { console.log(reject); });
+				}
+				tooltipContents.innerHTML = newContents;
+				// SCRIPTED end
 			} else if (this._isNode(contents)) {
 				tooltipContents.appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
@@ -160,6 +181,7 @@ define("orion/textview/tooltip", [ //$NON-NLS-0$
 			} else {
 				return;
 			}
+
 			var documentElement = tooltipDiv.ownerDocument.documentElement;
 			if (info.anchor === "right") { //$NON-NLS-0$
 				var right = documentElement.clientWidth - info.x;
