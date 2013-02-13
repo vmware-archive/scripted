@@ -26,6 +26,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	window.explorer = window.explorer || {};
 	
 	behaviourConfig.setAsyncBreadcrumbConstruction(false);
+	behaviourConfig.setAsyncEditorContentLoading(false);
 
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
