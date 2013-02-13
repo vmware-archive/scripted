@@ -192,7 +192,7 @@ exports.getDGraph2 = function (test) {
 				"refs" : {
 					"sub/subdep" : {
 						"kind": "AMD",
-						"name": "/sub/subdep",
+						"name": "sub/subdep",
 						"path": "/sub/subdep.js"
 					}
 				}
@@ -203,7 +203,7 @@ exports.getDGraph2 = function (test) {
 					"sub/submain" : {
 						"kind": "AMD",
 						"name": "sub/submain",
-						"path": "sub/submain.js"
+						"path": "/sub/submain.js"
 					}
 				}
 			}

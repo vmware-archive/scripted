@@ -114,7 +114,7 @@ function withBaseDir(baseDir, options) {
 			//We are testing with a 'mini test file system' can't use the
 			// regular user home dir here. So use a special "user.home" dir under the
 			// baseDir
-			return "user.home";
+			return "/user.home";
 		} else {
 			//Note: this code from here
 			// http://stackoverflow.com/questions/9080085/node-js-find-home-directory-in-platform-agnostic-way
@@ -136,7 +136,7 @@ function withBaseDir(baseDir, options) {
 			//We are testing with a 'mini test file system' can't use the
 			// regular scripted home dir here. So use a special "scripted.home" dir under the
 			// baseDir
-			return "scripted.home";
+			return "/scripted.home";
 		} else {
 			return pathResolve(__dirname, '../..');
 		}
