@@ -157,7 +157,7 @@ function configure(config) {
 	}
 
 	function getDGraph(handle, callback) {
-		callback = logBack('getDGraph '+handle+ ' => ', callback);
+		//callback = logBack('getDGraph '+handle+ ' => ', callback);
 		var store = makeGraphStore();
 		buildGraph(handle, store, function () {
 			var graph = store.getGraph();
