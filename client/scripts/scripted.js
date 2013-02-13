@@ -14,10 +14,10 @@
 define([
 		 "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
-		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration'],
+		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration', 'scripted/utils/jshintloader'],
 
 function(
-	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration) {
+	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration, jshintloader) {
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 	return {
@@ -46,9 +46,7 @@ function(
 					// Start the search for .jshintrc
 					// must be called inside of getConf since jshint relies on dotScripted
 
-					window.scripted.promises = {
-						"loadJshintrc": loadJshintrc(dotScripted.jshint, pageState)
-					};
+					when.chain(loadJshintrc(dotScripted.jshint,pageState),jshintloader.getDeferred().resolver);
 					
 					layoutManager.toggleNavigatorVisible(!isNavigatorOff(dotScripted));
 

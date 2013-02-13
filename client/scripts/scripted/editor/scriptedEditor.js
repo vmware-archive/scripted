@@ -26,7 +26,7 @@ define([
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/utils/storage",
-	"layoutManager",
+	"layoutManager", "scripted/utils/jshintloader",
 	"scripted/exec/exec-keys",
 	"scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
@@ -37,7 +37,7 @@ define([
 	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager
+	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, jshintloader
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -168,7 +168,7 @@ define([
 		var postSave = function (text) {
 			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
-				window.scripted.promises.loadJshintrc.then(function completed() {
+				jshintloader.getDeferred().promise.then(function completed() {
 					if (!(isHTML || isJSON)) {
 						problems = mJshintDriver.checkSyntax('', text).problems;
 					}
