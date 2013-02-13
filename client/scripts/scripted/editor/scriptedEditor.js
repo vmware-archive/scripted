@@ -12,6 +12,7 @@
  *     Chris Johnson
  *     Kris De Volder
  *     Andrew Eisenberg
+ *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  *******************************************************************************/
 /*global orion:true window define dojo FormData js_beautify statusReporter Worker scripted $*/
 /*jslint browser:true devel:true */

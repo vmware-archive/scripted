@@ -13,6 +13,7 @@
  *     Kris De Volder
  *     Christopher Johnson
  *     Scott Andrews
+ *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  ******************************************************************************/
 
 function configure(filesystem) {

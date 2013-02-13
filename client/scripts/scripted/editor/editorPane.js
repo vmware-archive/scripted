@@ -10,6 +10,8 @@
  * Contributors:
  *    Andrew Eisenberg - initial implementation
  *     Chris Johnson - functions
+ *      Andy Clement
+ *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  ******************************************************************************/
 
 // implements the pane interface for editors
