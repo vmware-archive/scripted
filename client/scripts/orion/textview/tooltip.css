@@ -13,7 +13,7 @@
 	padding: 2px;
 	border-radius: 4px;
 	border: 1px solid black;
-	z-index: 100;
+	z-index: 1000; /* must be 1000 or greater else floats behind resizable handles */
 	position: fixed;
 	overflow: hidden;
 	white-space: pre;
