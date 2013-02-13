@@ -113,7 +113,8 @@
 		exclude: [
 			"*/**/.scripted", //only wanna see the toplevel .scripted file!
 			"**/scripts/lib",
-			"**/node_modules"
+			"**/node_modules",
+			"**/client/components"
 		]
 	},
 
