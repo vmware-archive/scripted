@@ -33,15 +33,21 @@ var pathResolve = utils.pathResolve;
 function install(filesystem) {
 
 	var conf = extend(filesystem, {
-		sloppy: false, //sloppy resolver turned off.
-		amd: {
+		sloppy: false
+	});
+
+	var scriptedHome = filesystem.getScriptedHome();
+	if (scriptedHome) {
+		//If the scripted code is accessible on the user's file system we can
+		//attempt to provide magic content assist for the scripted/api
+		conf.amd = {
 			//Extra paths automatically added to amd-configs found by scripted
 			// this way plugin-apis will receive automatic content assist.
 			paths: {
-				'scripted/api' : pathResolve(__dirname, '../../client/scripts/scripted/api')
+				'scripted/api' : pathResolve(scriptedHome, 'client/scripts/scripted/api')
 			}
-		}
-	});
+		};
+	}
 
 	var api = apiMaker.configure(conf);
 

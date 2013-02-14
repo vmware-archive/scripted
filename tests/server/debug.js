@@ -17,6 +17,9 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+var testCase = require('./completions-test')
+	.findCompletionsFiles;
+
 //var testCase = require('./file-indexer-test')
 //	.scriptedFileAtRoot;
 
@@ -50,8 +53,8 @@
 //var testCase = require('./plugin-discovery-test')
 //	.one;
 
-var testCase = require('./resolver-test')
-	.sloppyMode;
+//var testCase = require('./resolver-test')
+//	.sloppyMode;
 //	.commonjsRefs;
 //	.pathAwarenessSimple;
 //	.subPackageImport;
