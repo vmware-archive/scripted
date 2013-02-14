@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2010 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,7 +14,7 @@
 /*jslint forin:true devel:true*/
 /*global define dojo document*/
 
-define(['dojo'], function(dojo) {
+define([], function() {
 
 	/**
 	 * Constructs a new TableTree with the given options.
@@ -86,7 +86,7 @@ define(['dojo'], function(dojo) {
 		},
 		
 		_generate: function(children, indentLevel) {
-			dojo.empty(this._parent);
+			$(this._parent).empty();
 			var table = document.createElement('table');
 			table.id = this._id;
 			if (this._tableStyle) {
@@ -110,9 +110,6 @@ define(['dojo'], function(dojo) {
 				// a javascript object.  (Whereas above we are using simple numbers/strings).
 				// We should consider an item map.
 				row._item = children[i];
-				
-				// FIXNS: For context menus to determine if dir or file
-//				row._isDirectory = children[i].Directory ? true : false;
 				
 				this._renderer.render(children[i], row);
 				// generate an indent
@@ -269,7 +266,8 @@ define(['dojo'], function(dojo) {
 			var stop = false;
 			var parentDepth = -1;
 			var toRemove = [];
-			dojo.query(".treeTableRow").forEach(function(row, i) {
+
+			$('.treeTableRow').each(function(i, row) {
 				if (stop) {
 					return;
 				}

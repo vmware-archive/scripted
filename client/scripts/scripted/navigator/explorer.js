@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2011 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,8 +14,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], 
-function(require, dojo, mTreeTable, mContextMenu) {
+define('scripted/navigator/explorer',['require', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], 
+function(require, mTreeTable, mContextMenu) {
 
 var exports = {};
 
@@ -40,12 +40,12 @@ exports.Explorer = (function() {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
-			dojo.hitch(this.myTree, this.myTree.refreshAndExpand)(parent, children);
+		     $.proxy(this.myTree.refreshAndExpand, this.myTree)(parent, children);
 		},
 		updateCommands: function(item){
 			// update the commands in the tree if the tree exists.
 			if (this.myTree) {
-				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+				$.proxy(this.myTree._renderer.updateCommands(item), this.myTree._renderer);
 			}
 		},
 		
@@ -56,7 +56,8 @@ exports.Explorer = (function() {
 			if(column_no){
 				refNode = refNode.childNodes[column_no];
 				// make a row and empty column so that the new name appears after checkmarks/expansions
-				dojo.place("<br><span id='"+domId+"placeHolderRow'></span>", refNode, "last");
+				 $(refNode).append($("<br><span id='"+domId+"placeHolderRow'></span>"));
+				
 				tempNode = document.getElementById(domId+"placeHolderRow");
 				if (tempNode) {
 					return {tempNode: tempNode, refNode: tempNode};
@@ -64,7 +65,7 @@ exports.Explorer = (function() {
 			}
 			if (refNode) {
 				// make a row and empty column so that the new name appears after checkmarks/expansions
-				dojo.place("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>", refNode, "after");
+				$(refNode).after("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>");
 				tempNode = document.getElementById(domId+"placeHolderRow");
 				refNode = document.getElementById(domId+"placeHolderCol");
 				if (tempNode && refNode) {
@@ -92,7 +93,7 @@ exports.Explorer = (function() {
 			var treeId = parentId + "innerTree";
 			var existing = document.getElementById(treeId);
 			if (existing) {
-				dojo.destroy(existing);
+				$(existing).remove();
 			}
 			if (model){
 				model.rootId = treeId;
@@ -179,10 +180,10 @@ exports.ExplorerModel = (function() {
 		
 		getRoot: function(onItem) {
 			this.fetchItems(this.rootPath).then(
-			dojo.hitch(this, function(item) {
+			$.proxy(function(item) {
 				this.root = item;
 				onItem(item);
-			}));
+			}, this));
 		},
 		
 		getChildren: function( /* dojo.data.Item */ parentItem, /* function(items) */ onComplete) {
@@ -191,10 +192,10 @@ exports.ExplorerModel = (function() {
 				onComplete(parentItem.Children);
 			} else if (parentItem.ChildrenLocation) {
 				this.fetchItems(parentItem.ChildrenLocation).then(
-				dojo.hitch(this, function(Children) {
+				$.proxy(function(Children) {
 					parentItem.Children = Children;
 					onComplete(Children);
-				}));
+				}, this));
 			} else {
 				onComplete([]);
 			}
@@ -244,10 +245,10 @@ exports.ExplorerFlatModel = (function() {
 			onItem(this.root);
 		} else {
 			this.fetchItems(this.rootPath).then(
-					dojo.hitch(this, function(item){
+					$.proxy(function(item){
 						this.root = item;
 						onItem(item);
-					})
+					}, this)
 					);
 		}
 	};
@@ -280,7 +281,7 @@ exports.ExplorerRenderer = (function() {
 		
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
-			dojo.empty(tableNode);
+			$(tableNode).empty();
 			$(tableNode).addClass('treetable');
 			this.renderTableHeader(tableNode);
 
@@ -317,15 +318,15 @@ exports.ExplorerRenderer = (function() {
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
 					if(this._highlightSelection){
-						dojo.toggleClass(tableRow, "checkedRow", check.checked);
+						$(tableRow).toggleClass("checkedRow", check.checked);
 					}
-					dojo.toggleClass(check, "core-sprite-check_on", check.checked);
+					$(check).toggleClass("core-sprite-check_on", check.checked);
 				}
 				checkColumn.appendChild(check);
-				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				$(check).bind("onclick", $.proxy(function(evt) {
 					var newValue = evt.target.checked ? false : true;
 					this.onCheck(tableRow, evt.target, newValue, true);
-				}));
+				}, this));
 				return checkColumn;
 			}
 		},
@@ -337,15 +338,15 @@ exports.ExplorerRenderer = (function() {
 		onCheck: function(tableRow, checkBox, checked, manually){
 			checkBox.checked = checked;
 			if(this._highlightSelection && tableRow){
-				dojo.toggleClass(tableRow, "checkedRow", checked);
+				$(tableRow).toggleClass("checkedRow", checked);
 			}
-			dojo.toggleClass(checkBox, "core-sprite-check_on", checked);
+			$(checkBox).toggleClass("core-sprite-check_on", checked);
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
 			this._storeSelections();
 			if (this.explorer.selection) {
-				this.explorer.selection.setSelections(this.getSelected());		
+				this.explorer.selection.setSelections(this.getSelected());
 			}
 		},
 		
@@ -411,9 +412,9 @@ exports.ExplorerRenderer = (function() {
 					if (row) {
 						this._expanded.push(expanded[i]);
 						// restore selections after expansion in case an expanded item was selected.
-						this.tableTree.expand(expanded[i], dojo.hitch(this, function() {
+						this.tableTree.expand(expanded[i], $.proxy(function() {
 							this._restoreSelections(prefPath);
-						}));
+						}, this));
 						didRestoreSelections = true;
 					}
 				}
@@ -497,36 +498,36 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
+			$(".core-sprite-check_on").each($.proxy(function(i, node) {
 				var row = node.parentNode.parentNode;
 				selected.push(this.tableTree.getItem(row));
-			}));
+			}, this));
 			return selected;
 		},
 		
 		getSelectedIds: function() {
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
+			$(".core-sprite-check_on").each($.proxy(function(i, node) {
 				var row = node.parentNode.parentNode;
 				selected.push(row.id);
-			}));
+			}, this));
 			return selected;
 		},
 		
 		rowsChanged: function() {
 			if (this._decorateAlternatingLines) {
 				var highlightingId = this.explorer._highlightingId;
-				dojo.query(".treeTableRow").forEach(function(node, i) {
+				$(".treeTableRow").each(function(i, node) {
 					if (node.id === highlightingId) {
 			            $(node).addClass("highlightrow");
     					$(node).removeClass("lightTreeTableRow");
     					$(node).removeClass("darkTreeTableRow");
     					if (node.childNodes) {
-//				$(node.childNodes[1]).removeClass("secondaryColumnDark");
+//				            $(node.childNodes[1]).removeClass("secondaryColumnDark");
 							$(node.childNodes[1]).addClass("secondaryColumnDark");
 						}
 			        } else {
-					if (!dojo.hasClass(node,"highlightrow")) {
+					if (!$(node).hasClass("highlightrow")) {
 						if (i % 2) {
 							$(node).addClass("darkTreeTableRow");
 							$(node).removeClass("lightTreeTableRow");
@@ -545,12 +546,12 @@ exports.ExplorerRenderer = (function() {
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;
-			dojo.query(".treeTableRow").forEach(function(node, i) {
+			$(".treeTableRow").each(function(i, node) {
 				
 				var actionsWrapperId = node.id + "actionswrapper";
 				var actionsWrapper = document.getElementById(actionsWrapperId);
 				
-				dojo.empty(actionsWrapper);
+				$(actionsWrapper).empty();
 				// contact the command service to render appropriate commands here.
 				registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool");
 			});
@@ -628,7 +629,7 @@ exports.SelectionRenderer = (function(){
 	};
 	
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
-		dojo.style(tableRow, "verticalAlign", "baseline");
+		$(tableRow).css("verticalAlign", "baseline");
 		$(tableRow).addClass("treeTableRow");
 		
 		// Attach context menus to tree elements

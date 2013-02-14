@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2009 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,8 +14,8 @@
 /*global define window uri alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory", "scriptedLogger"],
-	function(require, dojo, mExplorer, mJquery, mPageState, mNavHistory, scriptedLogger) {
+define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory", "scriptedLogger"],
+	function(require, mExplorer, mJquery, mPageState, mNavHistory, scriptedLogger) {
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -112,9 +112,9 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		case 0:
 		case 1:
 		case 2:
-			return dojo.create("th", {
+			return $('<th/>', {
 				style: "height: 8px;"
-			});
+			})[0];
 		}
 	};
 
@@ -133,7 +133,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 	FileRenderer.prototype.setTarget = function(target) {
 		this.target = target;
 
-		dojo.query(".targetSelector").forEach(function(node, index, arr) {
+		$('.targetSelector').each(function(index, node) {
 			node.target = target;
 		});
 	};
@@ -169,12 +169,13 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 				break;
 			default:
 				if (contentType && contentType.image) {
-					var image = dojo.create("img", {
+					var image = $('<img/>', {
 						src: contentType.image
-					}, link, "last");
+					});
+					$(link).append(image);
 					// to minimize the height/width in case of a large one
 					$(image).addClass("thumbnail");
-				} else {					
+				} else {
 					var fileIcon = $('<span/>');
 					$(link).append(fileIcon);
 					
@@ -198,7 +199,8 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			if (item.directory) {
 				this.getExpandImage(tableRow, span);
 			} else if (item.name === "") {
-				var fileIcon1 = dojo.create("span", null, span, "last");
+				var fileIcon1 = $('<span/>');
+				$(span).append(fileIcon1);
 				$(fileIcon1).addClass("core-sprite-blank_model modelDecorationSprite2");
 			} else {
 				var fileIcon = $('<span/>');
@@ -275,7 +277,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		this.setTarget();
 		// TODO ASC made conditional
 		if (this.preferences) {
-			this.storageKey = this.preferences.listenForChangedSettings(dojo.hitch(this, 'onStorage'));
+			this.storageKey = this.preferences.listenForChangedSettings($.proxy(onStorage, this));
 		}
 		// TODO bad!!!
 		window.explorer = this;
@@ -292,7 +294,8 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			if (self.navHandler) {
 				self.navHandler.refreshModel(self.model);
 			}
-			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
+			
+			$.proxy(self.myTree.refreshAndExpand, self.myTree)(parent, children);
 		});
 	};
 
@@ -438,19 +441,25 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			// Progress indicator
 			var progress = document.getElementById("progress");
 			if (!progress) {
-				progress = dojo.create("div", {
+				$(parent).empty();
+				progress = $('<div/>', {
 					id: "progress"
-				}, parent, "only");
+				});
+				$(parent).append(progress);
 			}
-			dojo.empty(progress);
+			$(progress).empty();
 
 			var progressTimeout = setTimeout(function() {
-				dojo.empty(progress);
-				var b = dojo.create("b");
-				dojo.place(document.createTextNode("Loading "), progress, "last");
-				dojo.place(document.createTextNode(path), b, "last");
-				dojo.place(b, progress, "last");
-				dojo.place(document.createTextNode("..."), progress, "last");
+				$(progress).empty();
+
+				var b = $('<b/>');
+
+				$(progress).append(document.createTextNode("Loading "));
+				$(b).append(document.createTextNode(path));
+
+				$(progress).append(b);
+				$(progress).append(document.createTextNode("..."));
+
 			}, 500); // wait 500ms before displaying
 
 			this.treeRoot.Path = path;
