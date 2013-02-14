@@ -40,7 +40,7 @@ fswalk(__dirname,
 		reporter.run(testFiles, undefined, function (err) {
 			problem = problem || err;
 			try {
-				var scripted = require('../../server/scriptedServer');
+				var scripted = require('../../server/scriptedServer').start(filesystem);
 			} catch (e) {
 				//ignore (already a server running?)
 			}

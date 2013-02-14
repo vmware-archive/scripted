@@ -18,16 +18,16 @@
 
 var path = require('path');
 var openBrowser = require('./open').open;
-var childExec = require('child_process').exec;
 var url = "http://localhost:7261";
 var suppressOpen = process.argv[2]=='true';
 var file = process.argv[3];
 
+var filesystem = require('../server/utils/filesystem').withBaseDir(null);
+
 // Launch the server
-var server=require('../server/scriptedServer.js');
+var server=require('../server/scriptedServer.js').start(filesystem);
 
 // on return, assume it is up and open the browser
 if (!suppressOpen) {
-console.log("abc");
 	openBrowser(process.argv[3]);
 }
