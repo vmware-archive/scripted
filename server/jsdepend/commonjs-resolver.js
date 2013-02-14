@@ -36,12 +36,18 @@ function endsWith(str, suffix) {
 }
 
 var nodeNatives = require('./node-natives');
-var enhancedResolver = require('enhanced-resolve');
 
 function configure(conf) {
 
-	var handle2file = conf.handle2file;
-	var file2handle = conf.file2handle;
+	var enhancedResolver = require('./enhanced-resolve').configure(conf);
+
+//	var handle2file = conf.handle2file;
+//	var file2handle = conf.file2handle;
+
+	function idf(x) { return x; }
+
+	var handle2file = idf;
+	var file2handle = idf;
 
 	//Note:
 	//   conf = the 'global' configuration for the api, provides file system type operations
@@ -60,6 +66,10 @@ function configure(conf) {
 			//2: enhanced resolver expects a directory as the 'context' not a file.
 			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {
 				if (err) {
+					console.log(err);
+					if (err.stack) {
+						console.log(err.stack);
+					}
 					dep.error = err;
 				} else {
 					dep.path = file2handle(result);

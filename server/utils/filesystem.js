@@ -291,21 +291,22 @@ function withBaseDir(baseDir, options) {
 		if (isNativeNodeModulePath(handle)) {
 			var contents = nodeNatives.getCode(nativeNodeModuleName(handle));
 			if (contents) {
-				return callback(contents);
+				callback(contents);
 			}
-		}
-		fs.readFile(handle2file(handle), encoding, function(err, data) {
-			if (err) {
-				if (typeof(errback) === 'function') {
-					errback(err);
+		} else {
+			fs.readFile(handle2file(handle), encoding, function(err, data) {
+				if (err) {
+					if (typeof(errback) === 'function') {
+						errback(err);
+					} else {
+						console.error(err);
+						callback("");
+					}
 				} else {
-					console.error(err);
-					callback("");
+					callback(data);
 				}
-			} else {
-				callback(data);
-			}
-		});
+			});
+		}
 		return d && d.promise;
 	}
 	getContents.remoteType = ['JSON', 'callback', 'errback'];
@@ -343,7 +344,7 @@ function withBaseDir(baseDir, options) {
 				callback(files);
 			}
 		});
-		return d;
+		return d && d.promise;
 	}
 
 	/**
@@ -410,6 +411,20 @@ function withBaseDir(baseDir, options) {
 	function createReadStream(handle) {
 		var file = handle2file(handle);
 		return fs.createReadStream(file, { encoding: 'utf8'});
+	}
+
+	/**
+	 * Wrap a function so that any call to it is logged with a big ugly stacktrace
+	 */
+	function leaky(f) {
+	    var traced = false;
+		return function () {
+		    if (!traced) {
+        		console.trace('Leaky abstraction');
+        		traced = true;
+        	}
+    		return f.apply(this, arguments);
+    	};
 	}
 
 	return {
