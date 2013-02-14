@@ -18,8 +18,8 @@
 /**
  * This module defines the navigation and history functionality of scripted.
  */
-define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/utils/editorUtils", 'scriptedLogger', 'lib/json5'],
-function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scriptedLogger) {
+define(["scripted/pane/sidePanelManager", "scripted/pane/paneFactory", "scripted/utils/pageState", "scripted/utils/os", "scripted/utils/editorUtils", 'scriptedLogger', 'when', 'lib/json5'],
+function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scriptedLogger, when) {
 
 	var EDITOR_TARGET = {
 		main : "main",
@@ -28,9 +28,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 	};
 	var LINE_SCROLL_OFFSET = 5;
 	var GET_URL = "/get?file=";
-
-	// define as forward reference
-	var navigate;
 
 	var findTarget = function(event) {
 		var target;
@@ -124,26 +121,34 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 
 		var mainActive = editorUtils.getCurrentEditor() === mainEditor;
 
-		navigate({path:mainPath, range:[mainSel.start, mainSel.end], scroll:mainScrollpos}, EDITOR_TARGET.sub, true, true);
-		navigate({path:subPath, range:[subSel.start, subSel.end], scroll:subScrollpos}, EDITOR_TARGET.main, true, true);
-
-		mainEditor.setScroll(subScrollpos);
-		subEditor.setScroll(mainScrollpos);
-
-
-		setTimeout(function() {
+		// TODO can we combine the promises?
+		navigate({
+				path:mainPath,
+				range:[mainSel.start,
+				mainSel.end], scroll:mainScrollpos},
+				EDITOR_TARGET.sub, true, true).then(function() {
+			mainEditor = editorUtils.getMainEditor();
+			subEditor = editorUtils.getSubEditor();
 			if (mainActive) {
 				subEditor.getTextView().focus();
 			} else {
 				mainEditor.getTextView().focus();
 			}
-			if (subDirty) {
-				mainEditor.setText(subText);
+		});
+		navigate({
+				path:subPath,
+				range:[subSel.start, subSel.end],
+				scroll:subScrollpos},
+				EDITOR_TARGET.main, true, true).then(function() {
+			mainEditor = editorUtils.getMainEditor();
+			subEditor = editorUtils.getSubEditor();
+			if (mainActive) {
+				subEditor.getTextView().focus();
+			} else {
+				mainEditor.getTextView().focus();
 			}
-			if (mainDirty) {
-				subEditor.setText(mainText);
-			}
-		}, 200);
+		});
+
 	};
 
 	var toggleSidePanel = function() {
@@ -169,9 +174,9 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				path:mainEditor.getFilePath(),
 				range:[sel.start, sel.end],
 				scroll: mainEditor.getScroll()
-			}, "sub");
-			subEditor = editorUtils.getSubEditor();
-			subEditor.getTextView().focus();
+			}, "sub").then(function() {
+				subEditor.getTextView().focus();
+			});
 		}
 
 		storeAllState(false);
@@ -273,14 +278,16 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 	 * displaying in the main editor, the sub-editor or a new tab.  If a null or invalid value is passed
 	 * there will be an attempt to guess the target
 	 * @param {Boolean} force if true editor will be closed even if dirty
-	 *
-	 * @return {boolean} true if navigation occurred successfully and false otherwise.
+	 * a
+	 * @return {{then:function(callback:function(editor):undefined):undefined}} promise that gets resolved when the editor has been loaded
+	 * or gets resolved immediately if the navigation is canceled.
 	 */
-	navigate = function(editorDesc, target, doSaveState, force) {
+	var navigate = function(editorDesc, target, doSaveState, force) {
 		var mainItem, filepath = editorDesc.path, range = editorDesc.range, scroll = editorDesc.scroll;
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
-
+		var deferred = when.defer();
+		
 		if (mainEditor) {
 			// if any editor exists at all, save the state.
 			mainItem = mPageState.generateHistoryItem(mainEditor);
@@ -302,7 +309,8 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 			var isSame = targetPane && targetPane.editor.getFilePath() === filepath;
 			if (!isSame && targetPane && !force &&!mPaneFactory.confirmNavigation(targetPane)) {
 				// user chose not to move from existing editor
-				return false;
+				deferred.resolve(targetPane.editor);
+				return deferred.promise;
 			}
 
 			if (target === EDITOR_TARGET.sub && !mSidePanelManager.isSidePanelOpen()) {
@@ -318,53 +326,55 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				});
 			}
 			var targetEditor = targetPane.editor;
-
-			if (range) {
-				if (isNaN(range[0]) || isNaN(range[1])) {
-					scriptedLogger.warn("invalid range, ignoring", scriptedLogger.SETUP);
-					scriptedLogger.warn(range, scriptedLogger.SETUP);
-				} else {
-					targetEditor.getTextView().setSelection(range[0], range[1], true);
+			targetEditor.editorLoadedPromise.then(function() {
+				if (range) {
+					if (isNaN(range[0]) || isNaN(range[1])) {
+						scriptedLogger.warn("invalid range, ignoring", scriptedLogger.SETUP);
+						scriptedLogger.warn(range, scriptedLogger.SETUP);
+					} else {
+						targetEditor.getTextView().setSelection(range[0], range[1], true);
+					}
 				}
-			}
 
-			if (scroll) {
-				if (isNaN(range[0])) {
-					scriptedLogger.warn("invalid scroll, ignoring", scriptedLogger.SETUP);
-					scriptedLogger.warn(scroll, scriptedLogger.SETUP);
+				if (scroll) {
+					if (isNaN(range[0])) {
+						scriptedLogger.warn("invalid scroll, ignoring", scriptedLogger.SETUP);
+						scriptedLogger.warn(scroll, scriptedLogger.SETUP);
+						scrollToSelection(targetEditor);
+					} else {
+						targetEditor.setScroll(scroll);
+					}
+				} else {
 					scrollToSelection(targetEditor);
-				} else {
-					targetEditor.setScroll(scroll);
 				}
-			} else {
-				scrollToSelection(targetEditor);
-			}
 
-			if (target === EDITOR_TARGET.main) {
-				// if model not yet available, highlighting is handled elsewhere.
-				// TODO Yikes!  Yet another global variable.  We should make explorer non-global
-				if (explorer.model) {
-					explorer.highlight(filepath);
+				if (target === EDITOR_TARGET.main) {
+					// if model not yet available, highlighting is handled elsewhere.
+					// TODO Yikes!  Yet another global variable.  We should make explorer non-global
+					if (explorer.model) {
+						explorer.highlight(filepath);
+					}
 				}
-			}
-			targetPane.updateContents(targetEditor);
+				targetPane.updateContents(targetEditor);
 
-			// now add a history entry for the new page state
-			if (doSaveState) {
-				mainEditor = editorUtils.getMainEditor();
-				subEditor = editorUtils.getSubEditor();
-				mPageState.storeBrowserState(
-					mPageState.generateHistoryItem(mainEditor),
-					subEditor ? mPageState.generateHistoryItem(subEditor) : null);
-			}
-			targetEditor.getTextView().focus();
+				// now add a history entry for the new page state
+				if (doSaveState) {
+					mainEditor = editorUtils.getMainEditor();
+					subEditor = editorUtils.getSubEditor();
+					mPageState.storeBrowserState(
+						mPageState.generateHistoryItem(mainEditor),
+						subEditor ? mPageState.generateHistoryItem(subEditor) : null);
+				}
+				targetEditor.getTextView().focus();
+				deferred.resolve(targetEditor);
+			});
 
 		} else if (target === EDITOR_TARGET.tab) {
 			// open editor in new tab
 			window.open(mPageState.generateUrl({path:filepath, range:range}));
+			deferred.resolve();
 		}
-
-		return false;
+		return deferred.promise;
 	};
 
 	/**
