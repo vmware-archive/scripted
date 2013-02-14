@@ -104,43 +104,44 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		if (!editorUtils.getSubEditor()) {
 			return false;
 		}
+		if (!mSidePanelManager.confirmAll()) {
+			return false;
+		}
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
 
-		var main_path = mainEditor.getFilePath();
-		var main_scrollpos = mainEditor.getScroll();
-		var main_sel = mainEditor.getTextView().getSelection();
-		var main_text = mainEditor.getText();
-		var main_dirty = mainEditor.isDirty();
+		var mainPath = mainEditor.getFilePath();
+		var mainScrollpos = mainEditor.getScroll();
+		var mainSel = mainEditor.getTextView().getSelection();
+		var mainText = mainEditor.getText();
+		var mainDirty = mainEditor.isDirty();
 
-		var sub_path = subEditor.getFilePath();
-		var sub_scrollpos = subEditor.getScroll();
-		var sub_sel = subEditor.getTextView().getSelection();
-		var sub_text = subEditor.getText();
-		var sub_dirty = subEditor.isDirty();
+		var subPath = subEditor.getFilePath();
+		var subScrollpos = subEditor.getScroll();
+		var subSel = subEditor.getTextView().getSelection();
+		var subText = subEditor.getText();
+		var subDirty = subEditor.isDirty();
 
-		// TODO This is not working when using the button to switch since
-		// clicking on the button will call a blur() on the active editor
-		var main_active = mainEditor.getTextView().hasFocus();
+		var mainActive = editorUtils.getCurrentEditor() === mainEditor;
 
-		navigate({path:main_path, range:[main_sel.start, main_sel.end], scroll:main_scrollpos}, EDITOR_TARGET.sub, true);
-		navigate({path:sub_path, range:[sub_sel.start, sub_sel.end], scroll:sub_scrollpos}, EDITOR_TARGET.main, true);
+		navigate({path:mainPath, range:[mainSel.start, mainSel.end], scroll:mainScrollpos}, EDITOR_TARGET.sub, true, true);
+		navigate({path:subPath, range:[subSel.start, subSel.end], scroll:subScrollpos}, EDITOR_TARGET.main, true, true);
 
-		mainEditor.setScroll(sub_scrollpos);
-		subEditor.setScroll(main_scrollpos);
+		mainEditor.setScroll(subScrollpos);
+		subEditor.setScroll(mainScrollpos);
 
-		if (sub_dirty) {
-			mainEditor.setText(sub_text);
-		}
-		if (main_dirty) {
-			subEditor.setText(main_text);
-		}
 
 		setTimeout(function() {
-			if (main_active) {
+			if (mainActive) {
 				subEditor.getTextView().focus();
 			} else {
 				mainEditor.getTextView().focus();
+			}
+			if (subDirty) {
+				mainEditor.setText(subText);
+			}
+			if (mainDirty) {
+				subEditor.setText(mainText);
 			}
 		}, 200);
 	};
@@ -271,10 +272,11 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 	 * @param {String} target the target of the navigation, either EDITOR_TARGET.main, EDITOR_TARGET.sub, or EDITOR_TARGET.tab for
 	 * displaying in the main editor, the sub-editor or a new tab.  If a null or invalid value is passed
 	 * there will be an attempt to guess the target
+	 * @param {Boolean} force if true editor will be closed even if dirty
 	 *
 	 * @return {boolean} true if navigation occurred successfully and false otherwise.
 	 */
-	navigate = function(editorDesc, target, doSaveState) {
+	navigate = function(editorDesc, target, doSaveState, force) {
 		var mainItem, filepath = editorDesc.path, range = editorDesc.range, scroll = editorDesc.scroll;
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
@@ -298,7 +300,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		if (target === EDITOR_TARGET.sub || target === EDITOR_TARGET.main) {
 			var targetPane = mPaneFactory.getPane("scripted.editor", target === EDITOR_TARGET.main);
 			var isSame = targetPane && targetPane.editor.getFilePath() === filepath;
-			if (!isSame && targetPane && !mPaneFactory.confirmNavigation(targetPane)) {
+			if (!isSame && targetPane && !force &&!mPaneFactory.confirmNavigation(targetPane)) {
 				// user chose not to move from existing editor
 				return false;
 			}

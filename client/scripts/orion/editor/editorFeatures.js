@@ -1,10 +1,10 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2011, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -516,12 +516,12 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				while(annotations.hasNext()) {
 					var annotation = annotations.next();
 					if(annotation.start <= currentOffset) { continue; }
-					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
+					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR &&
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING &&
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK &&
 					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
 					var tooltip = mTooltip.Tooltip.getTooltip(this.textView);
-					if (!tooltip) { 
+					if (!tooltip) {
 						editor.moveSelection(annotation.start);
 						return true;
 					}
@@ -531,7 +531,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						setTimeout( function() {
 							tooltip.setTarget({
 								getTooltipInfo: function() {
-									var tooltipCoords = view.convert({x: view.getLocationAtOffset(annotation.start).x, 
+									var tooltipCoords = view.convert({x: view.getLocationAtOffset(annotation.start).x,
 																	  y: view.getLocationAtOffset(model.getLineStart(nextLine)).y},
 																	  "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 									return { contents: [annotation],
@@ -560,9 +560,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				while(annotations.hasNext()) {
 					var annotation = annotations.next();
 					if(annotation.start >= currentOffset) { continue; }
-					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
+					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR &&
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING &&
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK &&
 					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
 					previousAnnotation = annotation;
 				}
@@ -578,7 +578,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						setTimeout( function() {
 							tooltip.setTarget({
 								getTooltipInfo: function() {
-									var tooltipCoords = view.convert({x: view.getLocationAtOffset(previousAnnotation.start).x, 
+									var tooltipCoords = view.convert({x: view.getLocationAtOffset(previousAnnotation.start).x,
 																	  y: view.getLocationAtOffset(model.getLineStart(nextLine)).y},
 																	  "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 									return { contents: [previousAnnotation],
@@ -720,13 +720,13 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			if (this.undoStack) {
 				this.undoStack.startCompoundChange();
 			}
-		}, 
+		},
 		
 		endUndo: function() {
 			if (this.undoStack) {
 				this.undoStack.endCompoundChange();
 			}
-		}, 
+		},
 	
 		cancel: function() {
 			this.toggleIncrementalFind();
@@ -773,7 +773,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}
 			return false;
 		},
-		lineDown: function() {	
+		lineDown: function() {
 			if (this._incrementalFindActive) {
 				var prefix = this._incrementalFindPrefix;
 				if (prefix.length === 0) {
@@ -829,13 +829,13 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			if (this.undoStack) {
 				this.undoStack.startCompoundChange();
 			}
-		}, 
+		},
 		
 		endUndo: function() {
 			if (this.undoStack) {
 				this.undoStack.endCompoundChange();
 			}
-		}, 
+		},
 		init: function() {
 		
 			this.textView.setAction("lineStart", function() { //$NON-NLS-0$
@@ -1273,9 +1273,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			this.cancel();
 			return true;
 		},
-		/** 
-		 * Exits Linked Mode. Optionally places the caret at linkedModeEscapePosition. 
-		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the 
+		/**
+		 * Exits Linked Mode. Optionally places the caret at linkedModeEscapePosition.
+		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the
 		 * escape position.
 		 */
 		cancel: function(ignoreEscapePosition) {
