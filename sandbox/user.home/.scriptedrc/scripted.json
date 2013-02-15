@@ -1,0 +1,6 @@
+{
+	"jshint" : {
+		"global" : ["console", "define", "exports", "module", "process", "__dirname",
+					"require", "$", "window"]
+	}
+}
