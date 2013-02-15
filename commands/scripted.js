@@ -24,6 +24,13 @@ var file = process.argv[3];
 
 var filesystem = require('../server/utils/filesystem').withBaseDir(null);
 
+// Hack alert! The code below is just to play with a very simple case of
+// a 'plugable fs'.
+//var filesystem = require('../server/utils/filesystem').withBaseDir('/home/kdvolder', {
+//	userHome: '/',
+//	scriptedHome: 'commandline-dev/new-tools/scripted'
+//});
+
 // Launch the server
 var server=require('../server/scriptedServer.js').start(filesystem);
 
