@@ -93,6 +93,7 @@ header{
 	width:200px;
 	float:left;
 	background-color: #323232;
+	z-index: 10000;
 	/* do we need a border on the right of the navigator?
 	border-right: 1px solid #646464;
 	*/
@@ -721,7 +722,7 @@ footer{
 	height:16px;
 	width:16px;
 	display:inline;
-	padding: 0px 12px 0 0;
+	padding: 1px 12px 0 0;
 } 
 
 .icon_uparrow{ 
