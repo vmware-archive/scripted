@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2011 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -14,7 +14,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define('scripted/navigator/explorer',['require', 'dojo', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], function(require, dojo, mTreeTable, mContextMenu){
+define('scripted/navigator/explorer',['require', 'scripted/navigator/treetable', 'scripted/contextmenus/contextmenu'], 
+function(require, mTreeTable, mContextMenu) {
 
 var exports = {};
 
@@ -39,12 +40,12 @@ exports.Explorer = (function() {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
-			dojo.hitch(this.myTree, this.myTree.refreshAndExpand)(parent, children);
+		     $.proxy(this.myTree.refreshAndExpand, this.myTree)(parent, children);
 		},
 		updateCommands: function(item){
 			// update the commands in the tree if the tree exists.
 			if (this.myTree) {
-				dojo.hitch(this.myTree._renderer, this.myTree._renderer.updateCommands(item));
+				$.proxy(this.myTree._renderer.updateCommands(item), this.myTree._renderer);
 			}
 		},
 		
@@ -55,17 +56,18 @@ exports.Explorer = (function() {
 			if(column_no){
 				refNode = refNode.childNodes[column_no];
 				// make a row and empty column so that the new name appears after checkmarks/expansions
-				dojo.place("<br><span id='"+domId+"placeHolderRow'></span>", refNode, "last");
-				tempNode = dojo.byId(domId+"placeHolderRow");
+				 $(refNode).append($("<br><span id='"+domId+"placeHolderRow'></span>"));
+				
+				tempNode = document.getElementById(domId+"placeHolderRow");
 				if (tempNode) {
 					return {tempNode: tempNode, refNode: tempNode};
 				}
 			}
 			if (refNode) {
 				// make a row and empty column so that the new name appears after checkmarks/expansions
-				dojo.place("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>", refNode, "after");
-				tempNode = dojo.byId(domId+"placeHolderRow");
-				refNode = dojo.byId(domId+"placeHolderCol");
+				$(refNode).after("<tr id='"+domId+"placeHolderRow'><td id='"+domId+"placeHolderCol'></td>");
+				tempNode = document.getElementById(domId+"placeHolderRow");
+				refNode = document.getElementById(domId+"placeHolderCol");
 				if (tempNode && refNode) {
 					return {tempNode: tempNode, refNode: refNode};
 				}
@@ -76,7 +78,7 @@ exports.Explorer = (function() {
 		getRow: function(item) {
 			var rowId = this.model.getId(item);
 			if (rowId) {
-				return dojo.byId(rowId);
+				return document.getElementById(rowId);
 			}
 		},
 	
@@ -89,9 +91,9 @@ exports.Explorer = (function() {
 		 */
 		createTree: function (parentId, model, options,postCreate){
 			var treeId = parentId + "innerTree";
-			var existing = dojo.byId(treeId);
+			var existing = document.getElementById(treeId);
 			if (existing) {
-				dojo.destroy(existing);
+				$(existing).remove();
 			}
 			if (model){
 				model.rootId = treeId;
@@ -164,25 +166,24 @@ exports.ExplorerModel = (function() {
 		};
 
 	var getFullPathID = function(item) {
-			return "" + (item.Location ? item.Location : item);
-		};
+		return "" + (item.Location ? item.Location : item);
+	};
 
 	var resolveID = function(item) {
-			var shouldUseNoPath = false;
-
-			return shouldUseNoPath ? getNoPathSeparatorID(item) : getFullPathID(item);
-
-		};
+		var shouldUseNoPath = false;
+		return shouldUseNoPath ? getNoPathSeparatorID(item) : getFullPathID(item);
+	};
+	
 	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */
 	{
 		destroy: function() {},
 		
 		getRoot: function(onItem) {
 			this.fetchItems(this.rootPath).then(
-			dojo.hitch(this, function(item) {
+			$.proxy(function(item) {
 				this.root = item;
 				onItem(item);
-			}));
+			}, this));
 		},
 		
 		getChildren: function( /* dojo.data.Item */ parentItem, /* function(items) */ onComplete) {
@@ -191,10 +192,10 @@ exports.ExplorerModel = (function() {
 				onComplete(parentItem.Children);
 			} else if (parentItem.ChildrenLocation) {
 				this.fetchItems(parentItem.ChildrenLocation).then(
-				dojo.hitch(this, function(Children) {
+				$.proxy(function(Children) {
 					parentItem.Children = Children;
 					onComplete(Children);
-				}));
+				}, this));
 			} else {
 				onComplete([]);
 			}
@@ -244,10 +245,10 @@ exports.ExplorerFlatModel = (function() {
 			onItem(this.root);
 		} else {
 			this.fetchItems(this.rootPath).then(
-					dojo.hitch(this, function(item){
+					$.proxy(function(item){
 						this.root = item;
 						onItem(item);
-					})
+					}, this)
 					);
 		}
 	};
@@ -280,8 +281,8 @@ exports.ExplorerRenderer = (function() {
 		
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
-			dojo.empty(tableNode);
-			dojo.addClass(tableNode, 'treetable');
+			$(tableNode).empty();
+			$(tableNode).addClass('treetable');
 			this.renderTableHeader(tableNode);
 
 		},
@@ -291,7 +292,7 @@ exports.ExplorerRenderer = (function() {
 			var actionsColumn = document.createElement('td');
 			actionsColumn.id = tableRow.id + "actionswrapper";
 			if (columnClass) {
-				dojo.addClass(actionsColumn, columnClass);
+				$(actionsColumn).addClass(columnClass);
 			}
 			// contact the command service to render appropriate commands here.
 			if (this.actionScopeId) {
@@ -312,20 +313,20 @@ exports.ExplorerRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement("span");
 				check.id = this.getCheckBoxId(tableRow.id);
-				dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite");
+				$(check).addClass("core-sprite-check selectionCheckmarkSprite");
 				check.itemId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
 					if(this._highlightSelection){
-						dojo.toggleClass(tableRow, "checkedRow", check.checked);
+						$(tableRow).toggleClass("checkedRow", check.checked);
 					}
-					dojo.toggleClass(check, "core-sprite-check_on", check.checked);
+					$(check).toggleClass("core-sprite-check_on", check.checked);
 				}
 				checkColumn.appendChild(check);
-				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				$(check).bind("onclick", $.proxy(function(evt) {
 					var newValue = evt.target.checked ? false : true;
 					this.onCheck(tableRow, evt.target, newValue, true);
-				}));
+				}, this));
 				return checkColumn;
 			}
 		},
@@ -337,15 +338,15 @@ exports.ExplorerRenderer = (function() {
 		onCheck: function(tableRow, checkBox, checked, manually){
 			checkBox.checked = checked;
 			if(this._highlightSelection && tableRow){
-				dojo.toggleClass(tableRow, "checkedRow", checked);
+				$(tableRow).toggleClass("checkedRow", checked);
 			}
-			dojo.toggleClass(checkBox, "core-sprite-check_on", checked);
+			$(checkBox).toggleClass("core-sprite-check_on", checked);
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
 			this._storeSelections();
 			if (this.explorer.selection) {
-				this.explorer.selection.setSelections(this.getSelected());		
+				this.explorer.selection.setSelections(this.getSelected());
 			}
 		},
 		
@@ -369,15 +370,15 @@ exports.ExplorerRenderer = (function() {
 			var i;
 			if (selections) {
 				for (i=0; i<selections.length; i++) {
-					var tableRow = dojo.byId(selections[i]);
+					var tableRow = document.getElementById(selections[i]);
 					if (tableRow) {
 						if(this._highlightSelection){
-							dojo.addClass(tableRow, "checkedRow");
+							$(tableRow).addClass("checkedRow");
 						}
-						var check = dojo.byId(this.getCheckBoxId(tableRow.id));
+						var check = document.getElementById(this.getCheckBoxId(tableRow.id));
 						if (check) {
 							check.checked = true;
-							dojo.addClass(check, "core-sprite-check_on");
+							$(check).addClass("core-sprite-check_on");
 						}
 					}
 				}
@@ -407,13 +408,13 @@ exports.ExplorerRenderer = (function() {
 			var i;
 			if (expanded) {
 				for (i=0; i<expanded.length; i++) {
-					var row= dojo.byId(expanded[i]);
+					var row= document.getElementById(expanded[i]);
 					if (row) {
 						this._expanded.push(expanded[i]);
 						// restore selections after expansion in case an expanded item was selected.
-						this.tableTree.expand(expanded[i], dojo.hitch(this, function() {
+						this.tableTree.expand(expanded[i], $.proxy(function() {
 							this._restoreSelections(prefPath);
-						}));
+						}, this));
 						didRestoreSelections = true;
 					}
 				}
@@ -438,10 +439,10 @@ exports.ExplorerRenderer = (function() {
 		},
 		
 		updateExpandVisuals: function(tableRow, isExpanded) {
-			var expandImage = dojo.byId(this.expandCollapseImageId(tableRow.id));
+			var expandImage = document.getElementById(this.expandCollapseImageId(tableRow.id));
 			if (expandImage) {
-				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
-				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
+				$(expandImage).addClass(isExpanded ? this._expandImageClass : this._collapseImageClass);
+				$(expandImage).removeClass(isExpanded ? this._collapseImageClass : this._expandImageClass);
 			}
 		},
 
@@ -450,34 +451,44 @@ exports.ExplorerRenderer = (function() {
         },
 		
 		getExpandImage: function(tableRow, placeHolder, /* optional extra decoration */ decorateImageClass, /* optional sprite class for extra decoration */ spriteClass){
-			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
-			dojo.addClass(expandImage, this._twistieSpriteClass);
-			dojo.addClass(expandImage, this._collapseImageClass);
+			
+			var expandImage = $('<span/>', {id: this.expandCollapseImageId(tableRow.id)});
+			$(placeHolder).append(expandImage);
+			
+			$(expandImage).addClass(this._twistieSpriteClass);
+			$(expandImage).addClass(this._collapseImageClass);
 			if (decorateImageClass) {
-				var decorateImage = dojo.create("span", null, placeHolder, "last");
-				dojo.addClass(decorateImage, spriteClass || "imageSprite");
-				dojo.addClass(decorateImage, decorateImageClass);
+				
+				var decorateImage = $('<span/>');
+				$(placeHolder).append(decorateImage);
+
+				$(decorateImage).addClass(spriteClass || "imageSprite");
+				$(decorateImage).addClass(decorateImageClass);
 			}
 
-			expandImage.onclick = dojo.hitch(this, function(evt) {
-				if (evt.isTrigger === undefined) return false;
-				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
-				var expanded = this.tableTree.isExpanded(tableRow.id);
+            var explorer = this;
+			$(expandImage)[0].onclick = function(evt) {
+			
+				if (evt.isTrigger === undefined) {
+				     return false;
+				}
+				explorer.tableTree.toggle(tableRow.id, explorer.expandCollapseImageId(tableRow.id), explorer._expandImageClass, explorer._collapseImageClass);
+				var expanded = explorer.tableTree.isExpanded(tableRow.id);
 				if (expanded) {
-					this._expanded.push(tableRow.id);
+					explorer._expanded.push(tableRow.id);
 				} else {
-					for (var i in this._expanded) {
-						if (this._expanded[i] === tableRow.id) {
-							this._expanded.splice(i, 1);
+					for (var i in explorer._expanded) {
+						if (explorer._expanded[i] === tableRow.id) {
+							explorer._expanded.splice(i, 1);
 							break;
 						}
 					}
 				}
-				var prefPath = this._getUIStatePreferencePath();
+				var prefPath = explorer._getUIStatePreferencePath();
 				if (prefPath && window.sessionStorage) {
-					this._storeExpansions(prefPath);
+					explorer._storeExpansions(prefPath);
 				}
-			});
+			};
 			return expandImage;
 		},
 		render: function(item, tableRow){
@@ -487,42 +498,42 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
+			$(".core-sprite-check_on").each($.proxy(function(i, node) {
 				var row = node.parentNode.parentNode;
 				selected.push(this.tableTree.getItem(row));
-			}));
+			}, this));
 			return selected;
 		},
 		
 		getSelectedIds: function() {
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
+			$(".core-sprite-check_on").each($.proxy(function(i, node) {
 				var row = node.parentNode.parentNode;
 				selected.push(row.id);
-			}));
+			}, this));
 			return selected;
 		},
 		
 		rowsChanged: function() {
 			if (this._decorateAlternatingLines) {
 				var highlightingId = this.explorer._highlightingId;
-				dojo.query(".treeTableRow").forEach(function(node, i) {
+				$(".treeTableRow").each(function(i, node) {
 					if (node.id === highlightingId) {
 			            $(node).addClass("highlightrow");
     					$(node).removeClass("lightTreeTableRow");
     					$(node).removeClass("darkTreeTableRow");
     					if (node.childNodes) {
-//				$(node.childNodes[1]).removeClass("secondaryColumnDark");
+//				            $(node.childNodes[1]).removeClass("secondaryColumnDark");
 							$(node.childNodes[1]).addClass("secondaryColumnDark");
 						}
 			        } else {
-					if (!dojo.hasClass(node,"highlightrow")) {
+					if (!$(node).hasClass("highlightrow")) {
 						if (i % 2) {
-							dojo.addClass(node, "darkTreeTableRow");
-							dojo.removeClass(node, "lightTreeTableRow");
+							$(node).addClass("darkTreeTableRow");
+							$(node).removeClass("lightTreeTableRow");
 						} else {
-							dojo.addClass(node, "lightTreeTableRow");
-							dojo.removeClass(node, "darkTreeTableRow");
+							$(node).addClass("lightTreeTableRow");
+							$(node).removeClass("darkTreeTableRow");
 						}
 					}
 					}
@@ -535,12 +546,12 @@ exports.ExplorerRenderer = (function() {
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;
-			dojo.query(".treeTableRow").forEach(function(node, i) {
+			$(".treeTableRow").each(function(i, node) {
 				
 				var actionsWrapperId = node.id + "actionswrapper";
-				var actionsWrapper = dojo.byId(actionsWrapperId);
+				var actionsWrapper = document.getElementById(actionsWrapperId);
 				
-				dojo.empty(actionsWrapper);
+				$(actionsWrapper).empty();
 				// contact the command service to render appropriate commands here.
 				registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool");
 			});
@@ -596,7 +607,7 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead');
 		var row = document.createElement('tr');
-		dojo.addClass(thead, "navTableHeading");
+		$(thead).addClass("navTableHeading");
 		var th, actions, size;
 		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
@@ -607,9 +618,9 @@ exports.SelectionRenderer = (function(){
 		var cell = this.getCellHeaderElement(i);
 		while(cell){
 			if (cell.innerHTML.length > 0) {
-				dojo.addClass(cell, "navColumn");
+				$(cell).addClass("navColumn");
 			}
-			row.appendChild(cell);			
+			row.appendChild(cell);
 			cell = this.getCellHeaderElement(++i);
 		}
 */
@@ -618,8 +629,8 @@ exports.SelectionRenderer = (function(){
 	};
 	
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
-		dojo.style(tableRow, "verticalAlign", "baseline");
-		dojo.addClass(tableRow, "treeTableRow");
+		$(tableRow).css("verticalAlign", "baseline");
+		$(tableRow).addClass("treeTableRow");
 		
 		// Attach context menus to tree elements
 		mContextMenu.initContextMenus(tableRow);
@@ -629,7 +640,7 @@ exports.SelectionRenderer = (function(){
 
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
-			dojo.addClass(checkColumn, 'checkColumn');
+			$(checkColumn).addClass('checkColumn');
 			tableRow.appendChild(checkColumn);
 		}
 
@@ -638,7 +649,7 @@ exports.SelectionRenderer = (function(){
 		while(cell){
 			tableRow.appendChild(cell);
 			if (i!==1) {
-				dojo.addClass(cell, 'secondaryColumn');
+				$(cell).addClass('secondaryColumn');
 			}
 			cell = this.getCellElement(++i, item, tableRow);
 		}

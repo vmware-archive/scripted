@@ -62,12 +62,14 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			nav.resize();
 			breadcrumb.width(editorNode.width());
 			breadcrumb.css('margin-left',editorNode.css('margin-left'));
+			breadcrumb.trigger('widthchange');
 		} else {
 			nav.hide();
 			editorNode.css('margin-left', 0);
 			editorNode.css("left", "0px");
 			breadcrumb.width(editorNode.width());
 			breadcrumb.css('margin-left',editorNode.css('margin-left'));
+			breadcrumb.trigger('widthchange');
 		}
 	};
 	
@@ -121,9 +123,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				editorNode.css('margin-right', side_width);
 				sidePanel.css('left', '');
 
-				var side_percent = (side_width / $('#editor_wrapper').width()) * 100;
-				sidePanel.css('width', side_percent + "%");
-
+				$('.subeditor_titlebar').trigger('widthchange');
 				if (editorUtils.getMainEditor()) {
 					// TODO proper way to do this
 					editorUtils.getMainEditor().getTextView()._update();
@@ -180,6 +180,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				editorNode.height(editor_height);
 				breadcrumb.width(editorNode.width());
 				breadcrumb.css('margin-left',editorNode.css('margin-left'));
+				breadcrumb.trigger('widthchange');
 				var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
 				editorNode.css('margin-right', side_width);
 

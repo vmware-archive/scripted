@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2009 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,8 +14,8 @@
 /*global define window uri alert $ */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory", "scriptedLogger"],
-	function(require, dojo, mExplorer, mJquery, mPageState, mNavHistory, scriptedLogger) {
+define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/pageState", "scripted/utils/navHistory", "scriptedLogger"],
+	function(require, mExplorer, mJquery, mPageState, mNavHistory, scriptedLogger) {
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -128,16 +128,16 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		case 0:
 		case 1:
 		case 2:
-			return dojo.create("th", {
+			return $('<th/>', {
 				style: "height: 8px;"
-			});
+			})[0];
 		}
 	};
 
 	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
 	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
 	FileRenderer.prototype.getRowActionElement = function(tableRowId) {
-		return dojo.byId(tableRowId + "NameColumn");
+		return document.getElementById(tableRowId + "NameColumn");
 	};
 
 	FileRenderer.prototype.onRowIterate = function(model) {
@@ -149,7 +149,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 	FileRenderer.prototype.setTarget = function(target) {
 		this.target = target;
 
-		dojo.query(".targetSelector").forEach(function(node, index, arr) {
+		$('.targetSelector').each(function(index, node) {
 			node.target = target;
 		});
 	};
@@ -175,22 +175,27 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			case "image.gif":
 			case "image.ico":
 			case "image.tiff":
-			case "image.svg":
-				var thumbnail = dojo.create("img", {
+			case "image.svg":				
+				var thumbnail = $('<img/>', {
 					src: item.Location
-				}, link, "last");
-				dojo.addClass(thumbnail, "thumbnail");
+				});
+				$(link).append(thumbnail);
+				
+				$(thumbnail).addClass("thumbnail");
 				break;
 			default:
 				if (contentType && contentType.image) {
-					var image = dojo.create("img", {
+					var image = $('<img/>', {
 						src: contentType.image
-					}, link, "last");
+					});
+					$(link).append(image);
 					// to minimize the height/width in case of a large one
-					dojo.addClass(image, "thumbnail");
+					$(image).addClass("thumbnail");
 				} else {
-					var fileIcon = dojo.create("span", null, link, "last");
-					dojo.addClass(fileIcon, "core-sprite-file_model modelDecorationSprite");
+					var fileIcon = $('<span/>');
+					$(link).append(fileIcon);
+					
+					$(fileIcon).addClass("core-sprite-file_model modelDecorationSprite");
 				}
 			}
 		}
@@ -200,37 +205,44 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		case 0:
 			var col = document.createElement('td');
 			
-			var span = dojo.create("span", {
+			$(col).empty();
+			var span = $('<span/>', {
 				id: tableRow.id + "Actions"
-			}, col, "only");
+			});
+			$(col).append(span);
 			var link;
 			//			scriptedLogger.debug("name is '"+item.name+"'", "EXPLORER_TABLE");
 			if (item.directory) {
 				this.getExpandImage(tableRow, span);
 			} else if (item.name === "") {
-				var fileIcon1 = dojo.create("span", null, span, "last");
-				dojo.addClass(fileIcon1, "core-sprite-blank_model modelDecorationSprite2");
+				var fileIcon1 = $('<span/>');
+				$(span).append(fileIcon1);
+				$(fileIcon1).addClass("core-sprite-blank_model modelDecorationSprite2");
 			} else {
-				var fileIcon = dojo.create("span", null, span, "last");
-				dojo.addClass(fileIcon, "core-sprite-blank_model modelDecorationSprite2");
+				var fileIcon = $('<span/>');
+				$(span).append(fileIcon);
+				$(fileIcon).addClass("core-sprite-blank_model modelDecorationSprite2");
 			}
 			var span2;
 			var path = mPageState.generateUrl(item.Location);
 			if (item.directory) {
-				span2 = dojo.create("span", null, span, "last");
+				span2 = $('<span/>');
+				$(span).append(span2);
+				
 				// When the directory name is clicked, simulate a keypress on the expand/collapse image
 				tableRow.onclick = function(event){
 					$(event.currentTarget).find('.modelDecorationSprite').click();
 				};
 				
 			} else {
-				span2 = dojo.create("a", {
+				span2 = $('<a/>', {
 					href: path
-				}, span, "last");
+					});
+				$(span).append(span2);
 			}
 
 			var textnode = document.createTextNode(item.name);
-			dojo.place(textnode, span2, "last");
+			$(span2).append(textnode);
 
 			if (!item.directory) {
 				$(span2).click(mNavHistory.handleNavigationEvent);
@@ -281,7 +293,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		this.setTarget();
 		// TODO ASC made conditional
 		if (this.preferences) {
-			this.storageKey = this.preferences.listenForChangedSettings(dojo.hitch(this, 'onStorage'));
+			this.storageKey = this.preferences.listenForChangedSettings($.proxy(onStorage, this));
 		}
 		// TODO bad!!!
 		window.explorer = this;
@@ -298,7 +310,8 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			if (self.navHandler) {
 				self.navHandler.refreshModel(self.model);
 			}
-			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
+			
+			$.proxy(self.myTree.refreshAndExpand, self.myTree)(parent, children);
 		});
 	};
 
@@ -306,7 +319,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		var rowId = this.model.getId(item);
 		if (rowId) {
 			// I know this from my renderer below.
-			return dojo.byId(rowId + "NameColumn");
+			return document.getElementById(rowId + "NameColumn");
 		}
 	};
 
@@ -376,7 +389,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		var self = this;
 		var id = this.model.getIdFromString(fileintree);
 		this._highlightingId = id;
-		var element = dojo.byId(id);
+		var element = document.getElementById(id);
 		if (element === null || element === undefined) {
 			var expandSection = function(root, splits, index) {
 				if (index < (splits.length - 1)) {
@@ -387,7 +400,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 					});
 				} else {
 					var stringid = self.model.getIdFromString(root + "/" + splits[index]);
-					var element = dojo.byId(id);
+					var element = document.getElementById(id);
 					if (element) {
 						$(element).addClass("highlightrow");
 						$(element).removeClass("lightTreeTableRow");
@@ -433,7 +446,7 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 		}
 
 		this._lastHash = path;
-		var parent = dojo.byId(this.parentId);
+		var parent = document.getElementById(this.parentId);
 
 		// we are refetching everything so clean up the root
 		this.treeRoot = {};
@@ -442,21 +455,27 @@ define(['require', 'dojo', 'scripted/navigator/explorer', "jquery", "scripted/ut
 			//the tree root object has changed so we need to load the new one
 
 			// Progress indicator
-			var progress = dojo.byId("progress");
+			var progress = document.getElementById("progress");
 			if (!progress) {
-				progress = dojo.create("div", {
+				$(parent).empty();
+				progress = $('<div/>', {
 					id: "progress"
-				}, parent, "only");
+				});
+				$(parent).append(progress);
 			}
-			dojo.empty(progress);
+			$(progress).empty();
 
 			var progressTimeout = setTimeout(function() {
-				dojo.empty(progress);
-				var b = dojo.create("b");
-				dojo.place(document.createTextNode("Loading "), progress, "last");
-				dojo.place(document.createTextNode(path), b, "last");
-				dojo.place(b, progress, "last");
-				dojo.place(document.createTextNode("..."), progress, "last");
+				$(progress).empty();
+
+				var b = $('<b/>');
+
+				$(progress).append(document.createTextNode("Loading "));
+				$(b).append(document.createTextNode(path));
+
+				$(progress).append(b);
+				$(progress).append(document.createTextNode("..."));
+
 			}, 500); // wait 500ms before displaying
 
 			this.treeRoot.Path = path;

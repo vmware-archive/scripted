@@ -1,9 +1,3 @@
-@import "../scripts/lib/dojo/resources/dojo.css";
-@import "../scripts/lib/dijit/themes/nihilo/nihilo.css";
-@import "../scripts/lib/dijit/themes/nihilo/layout/BorderContainer.css";
-@import "../scripts/lib/dijit/themes/nihilo/form/Common.css";
-@import "../scripts/lib/dijit/themes/nihilo/form/Button.css";
-
 @import "../scripts/orion/editor/editor.css";
 @import "../scripts/scripted/exec/console.css";
 @import "../scripts/css/ide.css";
@@ -51,8 +45,7 @@ body{
 ::-webkit-scrollbar-thumb {
 	background-color: rgb(80,80,80);
     border-radius: 0px;
-/*
-    
+/*  
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.9); 
 */
 }
@@ -100,9 +93,13 @@ header{
 	width:200px;
 	float:left;
 	background-color: #323232;
+	z-index: 10000;
 	/* do we need a border on the right of the navigator?
 	border-right: 1px solid #646464;
 	*/
+}
+#navigator-wrapper ::-webkit-scrollbar-corner {
+	background-color: #323232;
 }
 
 #side_panel{
@@ -578,6 +575,163 @@ footer{
   left:0;
   z-index:3000;
 }
+
+.inplace_dialog {
+	height:36px;
+	background-color: #323232;
+	overflow: hidden;
+	position: absolute;
+	display:inline;
+	z-index:5000;
+}
+
+.inplace_dialog_options_menu {
+	position: absolute;
+	color: white;
+	background-color: #707070;
+	width:160px;
+	left:870px;
+	top:59px;
+	height:132px;
+	font-size: 12px;
+	z-index:99999;
+	border-radius: 0px 5px 5px 5px;
+    -moz-border-radius: 0px 5px 5px 5px;
+    -webkit-border-radius: 0px 5px 5px 5px;
+}
+
+.inplace_dialog_options_menu .option {
+	padding: 2px;
+}
+
+.inplace_dialog_options_menu span {
+	vertical-align: top;
+}
+
+
+
+.inplace_dialog #arrow_next {
+	width: 16px;
+	height: 16px;
+}
+
+.inplace_dialog .icon_downarrow {
+	position: relative;
+	left: 0px;
+	top: 12px;
+}
+
+.inplace_dialog .icon_uparrow {
+	position: relative;
+	left: 12px;
+	top: 0px;
+}
+
+.inplace_dialog .findtext_container {
+	position: absolute;
+	left: 36px;
+	top: 4px;
+	display:inline;
+}
+
+.inplace_dialog .replacetext_container {
+	position: absolute;
+	left: 200px;
+	top: 4px;
+	display:inline;
+}
+
+.defaultTextActive { color: #a1a1a1;}/* font-style: italic; }*/
+
+
+.inplace_dialog .inplace_button {
+
+	position: absolute;
+	margin:8px auto 5px auto;
+    text-align:center;
+    padding: 3px 10px 4px;
+    font-size: 12px;
+    top: 7px;
+
+    /* button color */
+    background-color: #707070;
+     
+    /* rounded corner */
+    border-radius: 2px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+	color: white;
+	font-family: InconsolataEmbedded, monospace;
+}
+
+.inplace_dialog .inplace_pulldown {
+	position: absolute;
+	margin:8px auto 5px auto;
+    text-align:center;
+    padding: 3px 10px 4px;
+    font-size: 12px;
+    top: 7px;
+
+    /* button color */
+    /*
+    background-color: #707070;
+    */
+     
+    /* rounded corner */
+    border-radius: 2px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+	color: white;
+	font-family: InconsolataEmbedded, monospace;
+	background: #707070 url('../images/nav_down_arrow.png') 55px 2px no-repeat; 
+
+/*	background: #707070 url(../scripts/images/nav_down_arrow.png);/* 30px 5px no-repeat;*/
+	
+}
+
+
+.inplace_dialog #replace_button {
+	position: relative;
+	top: 7px;
+	left: 355px;
+	display:inline;
+}
+
+
+.inplace_dialog #replace_all_button {
+	position: relative;
+	top: 7px;
+	left: 367px;
+	display:inline;
+}
+
+.inplace_dialog #options {
+	position: relative;
+	left: 379px;
+	top:7px;
+	display:inline;
+}
+
+.inplace_dialog .options  {
+	color:white;
+	display:hidden;
+}
+
+.icon_downarrow { 
+	background-image: url(../scripts/images/down_arrow.png);
+	height:16px;
+	width:16px;
+	display:inline;
+	padding: 1px 12px 0 0;
+} 
+
+.icon_uparrow{ 
+	background-image: url(../scripts/images/up_arrow.png);
+	height:16px;
+	width:16px;
+	display:inline;
+	padding: 0px 12px 0 0;
+} 
 
 .dynamic_dialog_popup {
     -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);

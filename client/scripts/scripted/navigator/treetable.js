@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010 - 2012 IBM Corporation, VMware and others.
+ * Copyright (c) 2010 - 2013 IBM Corporation, VMware and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -14,32 +14,32 @@
 /*jslint forin:true devel:true*/
 /*global define dojo document*/
 
-define(['dojo'], function(dojo) {
+define([], function() {
 
 	/**
 	 * Constructs a new TableTree with the given options.
-	 * 
-	 * @param options 
-	 * @name orion.treetable.TableTree 
+	 *
+	 * @param options
+	 * @name orion.treetable.TableTree
 	 * @class Generates an HTML table where one of the columns is indented according to depth of children.
 	 * <p>Clients must supply a model that generates children items, and a renderer can be supplied which
 	 * generates the HTML table row for each child. Custom rendering allows clients to use checkboxes,
 	 * images, links, etc. to describe each  element in the tree.  Renderers handle all clicks and other
 	 * behavior via their supplied row content.</p>
-	 * 
+	 *
 	 * <p>The table tree parent can be specified by id or DOM node.</p>
-	 * 
+	 *
 	 * <p>The tree provides API for the client to programmatically expand and collapse
 	 * nodes, based on the client renderer's definition of how that is done (click on icon, etc.).
 	 * The tree will manage the hiding and showing of child DOM elements and proper indent</p>
-	 * 
+	 *
 	 * The model must implement:
 	 * <ul>
 	 *   <li>getRoot(onItem)</li>
 	 *   <li>getChildren(parentItem, onComplete)</li>
 	 *   <li>getId(item)  // must be a valid DOM id</li>
 	 * </ul>
-	 * 
+	 *
 	 * Renderers must implement:
 	 * <ul>
 	 *   <li>initTable(tableNode) // set up table attributes and a header if desired</li>
@@ -56,7 +56,7 @@ define(['dojo'], function(dojo) {
 			var parent = options.parent;
 			var tree = this;
 			if (typeof(parent) === "string") {
-				parent = dojo.byId(parent);
+				parent = document.getElementById(parent);
 			}
 			if (!parent) { throw "no parent"; }
 			if (!options.model) { throw "no tree model"; }
@@ -86,27 +86,16 @@ define(['dojo'], function(dojo) {
 		},
 		
 		_generate: function(children, indentLevel) {
-			dojo.empty(this._parent);
+			$(this._parent).empty();
 			var table = document.createElement('table');
 			table.id = this._id;
 			if (this._tableStyle) {
-				dojo.addClass(table, this._tableStyle);
+				$(table).addClass(this._tableStyle);
 			}
 			this._renderer.initTable(table, this);
 			var tbody = document.createElement('tbody');
 			tbody.id = this._id+"tbody";
 			this._generateChildren(children, indentLevel, tbody, "last");
-			// add 50 random children to go off the bottom of the page
-//			for (var c =0;c<50;c++) {
-//				var row = document.createElement('tr');
-//				row.id=0;
-//				row._depth=0;
-//				var child={name:"",parentDir:"",size:0,directory:false,Location:""};
-//				row._item = child;
-//				this._renderer.render(child,row);
-//				dojo.style(row.childNodes[this._labelColumnIndex], "paddingLeft", "0px");
-//				dojo.place(row, tbody, "last");
-//			}
 			table.appendChild(tbody);
 			this._parent.appendChild(table);
 			this._rowsChanged();
@@ -118,18 +107,22 @@ define(['dojo'], function(dojo) {
 				row.id = this._treeModel.getId(children[i]);
 				row._depth = indentLevel;
 				// This is a perf problem and potential leak because we're bashing a dom node with
-				// a javascript object.  (Whereas above we are using simple numbers/strings). 
+				// a javascript object.  (Whereas above we are using simple numbers/strings).
 				// We should consider an item map.
 				row._item = children[i];
-				
-				// FIXNS: For context menus to determine if dir or file
-//				row._isDirectory = children[i].Directory ? true : false;
 				
 				this._renderer.render(children[i], row);
 				// generate an indent
 				var indent = this._indent * indentLevel;
-				dojo.style(row.childNodes[this._labelColumnIndex], "paddingLeft", indent +"px");
-				dojo.place(row, referenceNode, position);
+				$(row.childNodes[this._labelColumnIndex]).css('paddingLeft',indent+"px");
+				
+				if (position==='after') {
+					$(referenceNode).after(row);
+				} else if (position==='last') {
+					$(referenceNode).append(row);
+				} else {
+					console.log("DONT SUPPORT "+position+" ADD IT!!");
+				}
 				if (position === "after") {
 					referenceNode = row;
 				}
@@ -152,10 +145,10 @@ define(['dojo'], function(dojo) {
 			var tree;
 			if (parentId === this._id) {  // root of tree
 				this._removeChildRows(parentId);
-				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last");
+				this._generateChildren(children, 0, document.getElementById(parentId+"tbody"), "last");
 				this._rowsChanged();
 			} else {  // node in the tree
-				var row = dojo.byId(parentId);
+				var row = document.getElementById(parentId);
 				if (row) {
 					// if it is showing children, refresh what is showing
 					row._item = item;
@@ -170,10 +163,10 @@ define(['dojo'], function(dojo) {
 							// TODO this should go away
 							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=371543
 							if (imageId && classToAdd) {
-								var node = dojo.byId(imageId);
-								dojo.addClass(node, classToAdd);
+								var node = document.getElementById(imageId);
+								$(node).addClass(classToAdd);
 								if (classToRemove) {
-									dojo.removeClass(node, classToRemove);
+									$(node).removeClass(classToRemove);
 								}
 							}
 						} else {
@@ -200,7 +193,7 @@ define(['dojo'], function(dojo) {
 		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
 			if (typeof(itemOrId) === "string") {  //dom id
-				var node = dojo.byId(itemOrId);
+				var node = document.getElementById(itemOrId);
 				if (node) {
 					return node._item;
 				}
@@ -212,30 +205,30 @@ define(['dojo'], function(dojo) {
 		},
 		
 		toggle: function(id, imageId, expandClass, collapseClass) {
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				var node;
 				if (row._expanded) {
 					this.collapse(id);
 					if (imageId) {
-						node = dojo.byId(imageId);
-						dojo.addClass(node, collapseClass);
-						dojo.removeClass(node, expandClass);
+						node = document.getElementById(imageId);
+						$(node).addClass(collapseClass);
+						$(node).removeClass(expandClass);
 					}
 				}
 				else {
 					this.expand(id);
 					if (imageId) {
-						node = dojo.byId(imageId);
-						dojo.addClass(node, expandClass);
-						dojo.removeClass(node, collapseClass);
+						node = document.getElementById(imageId);
+						$(node).addClass(expandClass);
+						$(node).removeClass(collapseClass);
 					}
 				}
 			}
 		},
 		
 		isExpanded: function(id) {
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				return row._expanded;
 			}
@@ -244,7 +237,7 @@ define(['dojo'], function(dojo) {
 		
 		expand: function(itemOrId , postExpandFunc , args) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				if (row._expanded) {
 					// TODO this has the wrong name!  if it is being called if expansion isn't happening!
@@ -264,16 +257,17 @@ define(['dojo'], function(dojo) {
 					}
 				});
 			}
-		}, 
+		},
 		
 		_removeChildRows: function(parentId) {
-			var table = dojo.byId(this._id);
+			var table = document.getElementById(this._id);
 			// true if we are removing directly from table
 			var foundParent = parentId === this._id;
 			var stop = false;
 			var parentDepth = -1;
 			var toRemove = [];
-			dojo.query(".treeTableRow").forEach(function(row, i) {
+
+			$('.treeTableRow').each(function(i, row) {
 				if (stop) {
 					return;
 				}
@@ -300,7 +294,7 @@ define(['dojo'], function(dojo) {
 		
 		collapse: function(itemOrId) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId);
-			var row = dojo.byId(id);
+			var row = document.getElementById(id);
 			if (row) {
 				if (!row._expanded) {
 					return;

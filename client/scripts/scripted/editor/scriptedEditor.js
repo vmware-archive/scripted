@@ -21,22 +21,20 @@ define([
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
-	"plugins/esprima/indexerService", "orion/searchAndReplace/textSearcher", "orion/selection", "orion/commands",
-	"orion/parameterCollectors", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
+	"plugins/esprima/indexerService", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/utils/storage",
-	"layoutManager", "scripted/utils/jshintloader", "scripted/utils/behaviourConfig", "scripted/utils/textUtils",
+	"layoutManager", "scripted/inplacedialogs/infile-search", "scripted/utils/jshintloader", "scripted/utils/behaviourConfig", "scripted/utils/textUtils",
 	"scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require, deref, mSaveHooks, when, fileapi,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
-	mIndexerService, mTextSearcher, mSelection, mCommands,
-	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
+	mIndexerService, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, jshintloader, behaviourConfig, textUtils
+	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, infileSearchDialog, jshintloader, behaviourConfig, textUtils
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -154,12 +152,6 @@ define([
 			}
 		}
 
-		var selection = new mSelection.Selection();
-		var commandService = new mCommands.CommandService({
-			selection: selection
-		});
-		// Set up a custom parameter collector that slides out of adjacent tool areas.
-		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
@@ -360,51 +352,17 @@ define([
 			});
 
 			// Find actions
+			// New dojo-less version
 			// These variables are used among the various find actions:
-			var textSearcher = new mTextSearcher.TextSearcher(editor, commandService, undoStack);
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true), "Find...");
 			editor.getTextView().setAction("Find...", function() {
-
-				$('#pageToolbar').remove();
-
-				var pageToolbar = $('<div class="toolbar toolComposite" id="pageToolbar">'+
-										'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>'+
-										'<div id="parameterArea" class="slideParameters slideContainer">'+
-											'<span id="pageParameterArea" class="slide">'+
-												'<span id="pageCommandParameters" class="parameters"></span>'+
-												'<span id="pageCommandDismiss" class="parametersDismiss"></span>'+
-											'</span>'+
-										'</div>'+
-									'</div>');
-
-				$(editor._domNode).prepend(pageToolbar);
-
 				var selection = editor.getSelection();
-				var searchString = "";
+				var searchString;
 				if (selection.end > selection.start) {
 					var model = editor.getModel();
 					searchString = model.getText(selection.start, selection.end);
-				} else if (editor.lastSearchTerm){
-					searchString = editor.lastSearchTerm;
 				}
-				textSearcher.buildToolBar(searchString);
-
-				$('#closebox').click(textSearcher._commandService.closeParameterCollector);
-
-				$('.scriptededitor')
-					.off('keydown')
-					.on('keydown', function(e){
-						if (e.keyCode === 27){
-							textSearcher._commandService.closeParameterCollector();
-						}
-					});
-
-				 $('#localSearchFindWith')
-					.off('keyup')
-					.on('keyup', function(){
-						editor.lastSearchTerm = $('#localSearchFindWith').val();
-					});
-
+				infileSearchDialog.openDialog(editor,undoStack,searchString,editor._titleNode);
 				return true;
 			});
 
