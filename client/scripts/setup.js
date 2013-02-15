@@ -23,8 +23,6 @@
 // Scripted starting point
 requirejs.config({
 	packages: [
-		{ name: 'dojo', location: 'lib/dojo', main:'lib/main-browser'},
-		{ name: 'dijit',location: 'lib/dijit',main:'lib/main'},
 		{ name: 'probes', location: '../components/probes', main:'probe'},
 		{ name: 'when', location: '../components/when', main:'when'},
 		{ name: 'wire', location: '../components/wire', main:'wire'},
