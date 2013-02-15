@@ -30,7 +30,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		sub : "sub",
 		tab : "tab"
 	};
-	
+
 	function openOnClick(event, editor) {
 		if (mOsUtils.isCtrlOrMeta(event)) {
 			var rect = editor.getTextView().convert({x:event.pageX, y:event.pageY}, "page", "document");
@@ -41,7 +41,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			}
 		}
 	}
-	
+
 	var fileEntryCompare = function(a, b) {
 		a = a.name.toLowerCase();
 		b = b.name.toLowerCase();
@@ -75,9 +75,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			historyMenu.append(newHistoryElem);
 		}
 	};
-	
+
 	var initializeBreadcrumbsTimeout;
-	
+
 	var initializeBreadcrumbs = function(path) {
 		if (behaviourConfig.getAsyncBreadcrumbConstruction()) {
 			clearTimeout(initializeBreadcrumbsTimeout);
@@ -88,7 +88,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			initializeBreadcrumbsActual(path);
 		}
 	};
-	
+
 
 	var initializeBreadcrumbsActual = function(path) {
 		var autoActivation = (window.scripted &&
@@ -104,7 +104,12 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 
 		initializeHistoryMenu();
 
-		var crumbs = path.substring(1 + root.length, path.length).split('/'); // the first position is moved up by 1 for the trailing '/'
+		var start = root.length;
+		if (root[root.length-1]!=='/') {
+			// the first position is moved up by 1 for the separating '/'
+			start++;
+		}
+		var crumbs = path.substring(start, path.length).split('/');
 		crumbs.splice(0, 0, root);
 		var constructedPath = "", newCrumbElem, xhrobj, url;
 
@@ -148,7 +153,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 
 		var openRequests = {};
 		var closeRequests = {};
-		
+
 		// breadcrumb enter will open drop-down after auto-activation time
 		$('#breadcrumb > li').on('mouseenter', function(evt) {
 			var self = this;
@@ -298,7 +303,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		}
 		editor.getTextView().addEventListener("Selection", selListener);
 	};
-	
+
 	/**
 	 * Adds one-time configuration to the main editor
 	 */
@@ -323,7 +328,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		}
 	};
 
-	
+
 	var buildSubEditor = function(filepath, evtName) {
 		var filename = filepath.split('/').pop();
 		// remove this html snippet to separate file
@@ -338,23 +343,23 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			'</div>'+
 			'<div class="subeditor scriptededitor"></div>'+
 		'</div>');
-		
+
 		$('#side_panel').append(subeditorHTML);
 		var domNode = $('.subeditor');
-		
+
 		var sideHeight = $('#side_panel').height();
 		var subeditorMargin = parseInt($('.subeditor_wrapper').css('margin-top'), 10);
-		
+
 		$('.subeditor_wrapper').height(sideHeight - (subeditorMargin*2));
 		domNode.height(
 			$('.subeditor_wrapper').height() -
 			$('.subeditor_titlebar').height()
 		);
-		
+
 		// must reattach these handlers on every new subeditor open since we always delete the old editor
 		$('.subeditor_close').on('click.' + evtName, mNavHistory.toggleSidePanel);
 		$('.subeditor_switch').on('click.' + evtName, mNavHistory.switchEditors);
-		
+
 		return domNode;
 	};
 
@@ -374,7 +379,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			// TODO work to do here when multiple subeditors
 			titleNode = '.subeditor_titlebar';
 		}
-		
+
 		domNode.show();
 		var editor = mEditor.makeEditor(domNode[0], filepath, kind);
 		editor._titleNode = titleNode;
@@ -386,7 +391,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			attachSearchClient(null);
 			return editor;
 		}
-		
+
 		attachSearchClient(editor);
 		attachOutlineClient(editor);
 		attachDefinitionNavigation(editor);
@@ -395,14 +400,14 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		mKeybinder.installOn(editor); //Important: keybinder should be installed after all other things
 		                              //that register keybindings to the editor.
 		editor.cursorFix();
-		
+
 		if (kind === EDITOR_TARGET.main) {
 			var self = this;
 			setTimeout(function() {
 				self.setFocus();
 			}, 5);
 		}
-		
+
 		installPageStateListener(editor);
 		this.editor = editor;
 		this.kind = kind;
@@ -428,7 +433,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		isDirty : function() {
 			return this.editor.isDirty();
 		},
-		
+
 		/**
 		 * Pane API
 		 * @return true iff pane can be navigated away from.  typically opens a dialog for user to click through.
@@ -436,7 +441,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		confirm : function() {
 			return confirm("Editor has unsaved changes.  Are you sure you want to leave this page?  Your changes will be lost.");
 		},
-		
+
 		/**
 		 * Pane API
 		 */
@@ -448,7 +453,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 				initializeHistoryMenu();
 			}
 		},
-		
+
 		setFocus : function() {
 			this.editor.getTextView().focus();
 		}
@@ -457,10 +462,10 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	mPaneFactory.registerPane("scripted.editor", function(options) {
 		return new EditorPane(options);
 	});
-	
-	
+
+
 	return {
 		// exposed for testing
-		_initializeBreadcrumbs : initializeBreadcrumbs	
+		_initializeBreadcrumbs : initializeBreadcrumbs
 	};
 });
