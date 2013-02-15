@@ -19,9 +19,9 @@
 // Basic construction.  Some requestHandlers are used for
 // specific actions. Other URLs are assumed to be static content.
 
-function start(filesystem) {
+function start(filesystem, options) {
 
-var server = require("./server").configure(filesystem);
+var server = require("./server").configure(filesystem, options);
 var router = require("./router");
 var servlets = require("./servlets");
 

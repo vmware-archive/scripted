@@ -13,10 +13,12 @@
  *     Kris De Volder
  *     Christopher Johnson
  *     Scott Andrews
- *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
+ *     Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  ******************************************************************************/
 
-function configure(filesystem) {
+function configure(filesystem, options) {
+
+	var port = (options && options.port) || 7261;
 
 	var express = require('express');
 	var pathResolve = require('path').resolve;
@@ -67,8 +69,8 @@ function configure(filesystem) {
 
 		require('./servlets/application-servlet').install(app);
 
-		console.log('app.server = ' + app.server);
-		app.server.listen(7261, "127.0.0.1" /* only accepting connections from localhost */);
+		console.log('Server port = ' + port);
+		app.server.listen(port, "127.0.0.1" /* only accepting connections from localhost */);
 		console.log("Server has started.");
 	}
 
