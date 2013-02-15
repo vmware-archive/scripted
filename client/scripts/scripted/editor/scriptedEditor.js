@@ -31,8 +31,7 @@ define([
 	require, deref, mSaveHooks, when, fileapi,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
-	mIndexerService, mTextSearcher, mSelection, mCommands,
-	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
+	mIndexerService, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
 	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, infileSearchDialog, jshintloader, behaviourConfig, textUtils
