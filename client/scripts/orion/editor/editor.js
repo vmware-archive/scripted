@@ -425,8 +425,13 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			// was {
 //			if (rangeAnnotations.length === 0) { return null; }
 			// }
-			if (rangeAnnotations.length === 0 || (rangeAnnotations.length === 1 && rangeAnnotations[0].type === "scripted.annotation.markOccurrences")) { 
-				rangeAnnotations = hoverCallback(this.getText(), offset);
+			var promise;
+			if (rangeAnnotations.length === 0 ||
+					(rangeAnnotations.length === 1 &&
+					rangeAnnotations[0].type === "scripted.annotation.markOccurrences")) {
+				var hover = hoverCallback(this.getText(), offset);
+				rangeAnnotations = hover.hoverText;
+				promise = hover.promise;
 				if (rangeAnnotations === null) {
 					return null;
 				}
@@ -437,7 +442,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				contents: rangeAnnotations,
 				anchor: "left", //$NON-NLS-0$
 				x: pt.x + 10,
-				y: pt.y + 20
+				y: pt.y + 20,
+				
+				// SCRIPTED add asynchronous contents
+				promise: promise
+				// SCRIPTED end
 			};
 			return info;
 		},

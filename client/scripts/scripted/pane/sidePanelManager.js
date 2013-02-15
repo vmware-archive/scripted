@@ -23,18 +23,23 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils
 		if ( sidePanel.css('display') === 'none') {
 			return false;
 		}
-		sidePanel.hide();
-		sidePanel.trigger('close');
-		
-		$(document).trigger('sidePanelClosed', sidePanel);
 		// here, go into the pane factory and destroy all panes
 		var sidePanes = mPaneFactory.getSidePanes();
 		var destroyed = true;
-		for (var i = 0; i < sidePanes.length; i++) {
-			destroyed = destroyed && mPaneFactory.destroyPane(sidePanes[i], true);
+		sidePanes.forEach(function(pane) {
+			destroyed = destroyed && mPaneFactory.confirmNavigation(pane);
+		});
+		if (destroyed) {
+			sidePanel.hide();
+			sidePanel.trigger('close');
+			
+			$(document).trigger('sidePanelClosed', sidePanel);
+			sidePanes.forEach(function(pane) {
+				mPaneFactory.destroyPane(pane);
+			});
+			$(window).resize();
+			editorUtils.setFocus(false);
 		}
-		$(window).resize();
-		editorUtils.setFocus(false);
 		
 		return destroyed;
 	};
@@ -61,10 +66,23 @@ define(['scripted/utils/pageState', 'scripted/pane/paneFactory', "scripted/utils
 		return sidePanel.css('display') !== 'none';
 	};
 	
+	var confirmAll = function() {
+		var panes = mPaneFactory.getPanes();
+		var confirmed = true;
+		for (var i = 0; i < panes.length; i++) {
+			confirmed = mPaneFactory.confirmNavigation(panes[i]);
+			if (!confirmed) {
+				break;
+			}
+		}
+		return confirmed;
+	};
+	
 
 	return {
 		isSidePanelOpen : isSidePanelOpen,
 		showSidePanel: showSidePanel,
-		closeSidePanel: closeSidePanel
+		closeSidePanel: closeSidePanel,
+		confirmAll: confirmAll
 	};
 });

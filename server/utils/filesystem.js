@@ -22,10 +22,10 @@
 //   in server or browser environments).
 ///////////////////////////////////////////
 
-var nodeNatives = require('./node-natives');
+var nodeNatives = require('../jsdepend/node-natives');
 var when = require('when');
-var oneCache = require('./one-cache');
-var utils = require('./utils');
+var oneCache = require('../jsdepend/one-cache');
+var utils = require('../jsdepend/utils');
 
 var pathNormalize = utils.pathNormalize;
 var pathResolve = utils.pathResolve;
@@ -365,6 +365,14 @@ function withBaseDir(baseDir) {
 		return d.promise;
 	}
 
+	/**
+	 * Like node fs.createReadStream but automatically assumes encoding utf8.
+	 */
+	function createReadStream(handle) {
+		var file = handle2file(handle);
+		return fs.createReadStream(file, { encoding: 'utf8'});
+	}
+
 	return {
 		getUserHome:  getUserHome,
 		getScriptedHome: getScriptedHome,
@@ -379,7 +387,8 @@ function withBaseDir(baseDir) {
 		rename:       rename,
 		stat:         stat,
 		mkdir:        mkdir,
-		deleteResource: deleteResource
+		deleteResource: deleteResource,
+		createReadStream: createReadStream
 	};
 }
 

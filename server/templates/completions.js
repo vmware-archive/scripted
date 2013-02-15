@@ -10,9 +10,8 @@
  * Contributors:
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
- 
-/*jslint node:true */
-/*global setTimeout exports console*/
+
+/*global setTimeout console*/
 
 /**
  * This module loads up all scripted completions and caches them
@@ -21,14 +20,17 @@
  * File format of completions http://sublimetext.info/docs/en/extensibility/completions.html
  */
 
+function configure(filesystem) {
+
 var JSON5 = require('json5');
 var when = require('when');
 var path = require('path');
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
 var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
 
 var EXTENSION = ".scripted-completions";
 var EXTENSION_LEN = EXTENSION.length;
+
+var exports = {};
 
 exports.CompletionsProcessor = function(completionsFolders) {
 	if (completionsFolders) {
@@ -42,7 +44,7 @@ exports.CompletionsProcessor.prototype = {
 	extractScope : function(rawScope) {
 		// looks like this. We care about the html part
 		// "text.html - source - meta.tag, punctuation.definition.tag.begin"
-		 
+
 		if (!rawScope) {
 			return null;
 		}
@@ -58,7 +60,7 @@ exports.CompletionsProcessor.prototype = {
 	// determine the file locations where completions are stored
 	findCompletionsFiles : function(cb) {
 		var realFiles = [];
-		
+
 		var processDir = function(deferred, folder) {
 			// first go stat the directory to make sure it exists and is a dir
 			// were getting problems on windows when trying to list files
@@ -87,7 +89,7 @@ exports.CompletionsProcessor.prototype = {
 				deferred.resolve(realFiles);
 			});
 		};
-		
+
 		var deferreds = [];
 		for (var i = 0; i < this.completionsFolders.length; i++) {
 			console.log("About to process " + this.completionsFolders[i]);
@@ -97,8 +99,8 @@ exports.CompletionsProcessor.prototype = {
 		}
 		when.all(deferreds).then(function() { cb(realFiles); });
 	},
-	
-	
+
+
 	// finds the associated closing bracket
 	findClosingBracket : function(contents, start) {
 		var depth = 0;
@@ -139,11 +141,11 @@ exports.CompletionsProcessor.prototype = {
 		}
 		/** @type String */
 		var rawContents = rawCompletion.contents;
-		
+
 		// fix indentation
 		rawContents = rawContents.replace(/\n/g, "\n${lineStart}");
 		rawContents = rawContents.replace(/\t/g, "${indent}");
-		
+
 		var trigger = rawCompletion.trigger;
 		var isTemplate = rawCompletion.isTemplate;
 		var contents = "";
@@ -194,7 +196,7 @@ exports.CompletionsProcessor.prototype = {
 						} else {
 							name = "arg" + argNum;
 						}
-						
+
 						var offset = j;
 						var length = name.length;
 						if (!positions[argNum]) {
@@ -211,16 +213,16 @@ exports.CompletionsProcessor.prototype = {
 						contents += rawContents[i-1];
 					}
 					contents += rawContents[i];
-					
+
 				}
 			} else {
 				contents += rawContents[i];
 			}
 		}
-		
+
 		// first element is empty since it is escape position
 		positions.shift();
-		
+
 		// check for all position numbers and flatten arrays
 		for (i = 0; i < positions.length; i++) {
 			if (!positions[i] || positions[i].length === 0) {
@@ -233,11 +235,11 @@ exports.CompletionsProcessor.prototype = {
 		if (!trigger) {
 			trigger = contents;
 		}
-		
+
 		// now remove ugly variables from the description
 		var descContents = contents.replace(/\n\$\{lineStart\}/g, "\n");
 		descContents = descContents.replace(/\$\{indent\}/g, "\t");
-		
+
 		return {
 			proposal : contents,
 			description : trigger + " : " + descContents,
@@ -251,7 +253,7 @@ exports.CompletionsProcessor.prototype = {
 	findCompletions : function(fName) {
 		var deferred = when.defer();
 		var self = this;
-		
+
 		// Read the completions
 		dotscripted.parseJsonFile(fName, function(rawCompletions) {
 			console.log("Starting to find completions in " + fName);
@@ -267,7 +269,7 @@ exports.CompletionsProcessor.prototype = {
 					deferred.reject("Invalid scope");
 					return;
 				}
-				
+
 				var completionsArr = rawCompletions.completions;
 				if (!completionsArr) {
 					deferred.reject("No completions array");
@@ -291,4 +293,13 @@ exports.CompletionsProcessor.prototype = {
 		});
 		return deferred.promise;
 	}
-};
+
+}; //CompletionsProcessor.prototype
+
+return exports;
+
+
+} //configure
+
+exports.configure = configure; //Beware this is a different 'exports' than the one inside the
+      //configure function

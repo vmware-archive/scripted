@@ -13,7 +13,7 @@
  ******************************************************************************/
  /*global */
  /*jshint browser:true */
- 
+
 /**
  * This module handles all requests for localStorage.  It properly clears out storage
  * when required.
@@ -29,7 +29,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 	];
 
 	return {
-	
+
 		preferenceNavigatorVisible: "scripted.preference.navigatorVisible",
 		preferenceNavigatorWidth: "scripted.navigatorWidth",
 
@@ -40,14 +40,14 @@ define(["scriptedLogger"], function(scriptedLogger) {
 		safeStore: function(key, value, includeTimestamp, depth) {
 			try {
 				depth = depth ? depth : 0;
-				if (depth < 5) {
+				if (depth < thresholds.length) {
 					localStorage.setItem(key, value);
 				} else {
 					scriptedLogger.warn("Tried to add to local storage: " + key + " : " + value, "STORAGE");
 					scriptedLogger.warn("Tried too many times. Ignoring request.", "STORAGE");
 				}
 			} catch (e) {
-				if (e.name === "QUOTA_EXCEEDED_ERR") {
+				if (e.name.indexOf('QUOTA')>=0) { // Chrome: "QUOTA_EXCEEDED_ERR", FireFox: "NS_ERROR_DOM_QUOTA_REACHED", other browsers
 					scriptedLogger.warn("Tried to add to local storage: " + key + " : " + value, "STORAGE");
 					scriptedLogger.warn("Local storage quota exceeded. Purging parts of local storage and trying again", "STORAGE");
 					if (thresholds[depth]) {
@@ -59,10 +59,12 @@ define(["scriptedLogger"], function(scriptedLogger) {
 						// last try or else warn that there was a failure
 						this.unsafeStore(key, value);
 					}
+				} else {
+					scriptedLogger.error(e);
 				}
 			}
 		},
-		
+
 		safeStoreBoolean: function(key, value, includeTimestamp, depth) {
 			if (typeof value !== 'boolean') {
 				throw "safeStoreBoolean is for boolean values";
@@ -70,11 +72,11 @@ define(["scriptedLogger"], function(scriptedLogger) {
 			var toStore = value?'true':'false';
 			this.safeStore(key,toStore,includeTimestamp,depth);
 		},
-		
+
 		get : function(key) {
 			return localStorage.getItem(key);
 		},
-		
+
 		getBoolean : function(key) {
 			var value = this.get(key);
 			if (value) {
@@ -99,7 +101,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 				}
 			}
 		},
-		
+
 		// TODO FiXADE should be a call to the server to get the server time
 		generateTimeStamp : function() {
 			return new Date().getTime();
@@ -118,7 +120,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 					return true;
 				}
 			}
-			
+
 			var len = localStorage.length;
 			var keysToPurge = [];
 			var currentTime = this.generateTimeStamp();
@@ -132,13 +134,13 @@ define(["scriptedLogger"], function(scriptedLogger) {
 					}
 				}
 			}
-		
+
 			scriptedLogger.warn("Purging " + keysToPurge.length + " keys from local storage", "STORAGE");
 			for (i = 0; i < keysToPurge.length; i++) {
 				localStorage.removeItem(keysToPurge[i]);
 			}
 		},
-		
+
 		/**
 		 * Warning...this method is time consuming and is only meant for testing
 		 */

@@ -47,7 +47,7 @@ define(function (require) {
 		 * saving the contents of the editor and is given a chance to transform the text
 		 * in the editor.
 		 *
-		 * @param {function(text:String, path:String, configuration:function(...[String]):Object):[String]}
+		 * @param {function(text:String, path:String, configuration:function(...String):Object):String?} transformFun
 		 */
 		addSaveTransform: function (transformFun) {
 

@@ -42,7 +42,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 			throw err;
 		};
 		//TODO: XMLHttpRequest may not be defined in all environments.
-	var xhrobj = new XMLHttpRequest();
+		var xhrobj = new XMLHttpRequest();
 		try {
 			var url = '/get?file='+handle;
 			// console.log("url is "+url);
@@ -60,6 +60,32 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 		} catch (err) {
 			errback(err);
 		}
+	}
+	
+	/**
+	 * Gets a fragment of the contents of the file.  File name is specified by
+	 * handle, start and end refer to the text offsets in the file to grab
+	 * @param {String} handle
+	 * @param {Number} start
+	 * @param {Number} end
+	 * @param {function(String)} callback
+	 * @param {function(String)} errback
+	 * @return String
+	 */
+	// TODO would be nice if we could handle the fragment on the server side
+	function getContentsFragment(handle, start, end, callback, errback) {
+		if (start >= end) {
+			callback("");
+			return;
+		}
+	
+		var thisCallback = function(response) {
+			var realStart = response.length < start ? response.length : start;
+			var realEnd = response.length < end ? response.length : end;
+			callback(response.substring(realStart, realEnd));
+		};
+		
+		getContents(handle, thisCallback, errback);
 	}
 	
 	/**
@@ -107,6 +133,7 @@ define(['servlets/stub-maker'], function (mStubMaker) {
 	
 	return {
 		getContents: getContents,
+		getContentsFragment: getContentsFragment,
 		getContentsSync: getContentsSync,
 		listFiles: listFiles,
 		findFilesContaining: makeServletStub('/jsdepend/findFilesContaining', ['JSON', 'callback', 'errback'])

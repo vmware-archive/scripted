@@ -10,11 +10,11 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global console require*/
 
 var when = require('when');
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var filesystem = require('../utils/filesystem').withBaseDir(null);
 var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
 var getScriptedRcFile = dotscripted.getScriptedRcFile;
 var putScriptedRcFile = dotscripted.putScriptedRcFile;
@@ -28,7 +28,7 @@ function getData(req) {
 		buffer += data.toString();
 	});
 	req.on('end', function () {
-			
+
 	});
 	return d.promise;
 }

@@ -26,20 +26,21 @@ var SERVICE_NAME = 'ifsearch';
 var websockets = require('./websockets-servlet');
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
-var searchFile = require('../textsearch/searcher').searchFile;
-var mFswalk = require('../utils/fswalk-filtered');
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
 					  // Note that the walker can not be paused in the middle of a file
 					  // just yet (the contents of the file is not walked in a pausable way)
 					  // So the number of results may still exceed this limit.
-					  
+
 function debug_log(msg, obj) {
 //	console.log(msg + JSON.stringify(obj));
 }
-					  
-exports.install = function (server) {
+
+exports.install = function (server, filesystem) {
+
+	var searchFile = require('../textsearch/searcher').configure(filesystem);
+	var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 	websockets.install(server);
 
@@ -48,15 +49,15 @@ exports.install = function (server) {
 	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
 		//opening a websocket connection initiates a search.
-		
+
 		var maxResults = null; // set upon receipt of the initial query
 		                // can also be increased by a request for more results.
-		
+
 		if (LOG_SOCKET_COUNT) {
 			openSockets++;
 			//console.log('ifsearch socket opened ['+openSockets+']');
 		}
-		
+
 		var idCount = 1; //counter used to assing unique id's to all query results. This used to
 		                 // identify results for later 'revoke' events.
 
@@ -69,7 +70,7 @@ exports.install = function (server) {
 							   //Set when we have determined/received the search context.
 		var fswalk = null; // fswalk function configured based on search root. Set once when configured.
 		var options = {};
-		
+
 		/**
 		 * send data to the client. The data sent must be something that can be 'JSON.stringified'.
 		 */
@@ -97,17 +98,17 @@ exports.install = function (server) {
 			//console.log('isMatch('+query+') '+matching+' '+pre+'^'+rest+' '+oldResult.context);
 			return matching;
 		}
-		
+
 		function updateResult(result) {
 			//Search term already update by 'isMatch' check as a side effect.
 			//result.term = query;
-			
+
 			//The actual result object is being re-used so we don't need to
 			//update our map associating id's to result objects.
-			
+
 			send({update: [result]});
 		}
-		
+
 		function addResult(result) {
 			var id = identify(result);
 			if (!results[id]) {
@@ -120,7 +121,7 @@ exports.install = function (server) {
 				}
 			}
 		}
-		
+
 		function revokeResult(result) {
 			if (results[result.id]) {
 				delete results[result.id];
@@ -128,7 +129,7 @@ exports.install = function (server) {
 				resultCount--;
 			}
 		}
-		
+
 		function revokeAll() {
 			for (var id in results) {
 				if (results.hasOwnProperty(id)) {
@@ -138,7 +139,7 @@ exports.install = function (server) {
 			results = {};
 			resultCount = 0;
 		}
-		
+
 		function startSearch() {
 			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
@@ -152,9 +153,9 @@ exports.install = function (server) {
 			                    // stored in here. To resume the work, this function is
 			                    // called with no params.
 			var done = false; // Set to true when search has finished the whole walk
-			 
+
 			//console.log("starting search in: "+searchRoot);
-			
+
 			/**
 			 * Given a function that represents 'remaining work'. Either continue the work,
 			 * by calling this function. Or store the function for later resuming the work.
@@ -253,14 +254,14 @@ exports.install = function (server) {
 			// restarting the whole query seems acceptable.
 			return newQ.indexOf(oldQ)===0;
 		}
-		
+
 		function cancelActiveWalker() {
 			if (activeWalker) {
 				activeWalker.cancel();
 				activeWalker = null;
 			}
 		}
-		
+
 		var handlers = {
 			//initial query and other info needed to setup a search
 			query: function (sr, q, opts) {
@@ -270,7 +271,7 @@ exports.install = function (server) {
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('maxResults = '+maxResults);
-					mFswalk.forPath(sr, function (configured) {
+					mFswalk.forPath(sr).then(function (configured) {
 						fswalk = configured.asynchWalk;
 						activeWalker = startSearch();
 					});
@@ -287,7 +288,7 @@ exports.install = function (server) {
 					activeWalker.resume();
 				}
 			},
-			
+
 			//change the current query, possibly in midrun
 			requery: function (q) {
 				//console.log('change query '+query+' => ' + q);
@@ -340,12 +341,12 @@ exports.install = function (server) {
 				}
 			}
 		}
-		
+
 		conn.on('data', function (message) {
 			//console.log("message received: "+message);
 			receive(JSON.parse(message));
 		});
-		
+
 		conn.on('close', function () {
 			cancelActiveWalker();
 			if (LOG_SOCKET_COUNT) {
@@ -355,5 +356,5 @@ exports.install = function (server) {
 		});
 	});
 	//sockServer.installHandlers(server, {prefix: '/ifsearch'});
-	
+
 };

@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require exports __dirname console */
 
 //To run this test do this on the commandline:
@@ -19,7 +19,7 @@
 // 'cd ~'
 // 'npm install nodeunit'
 //2) run the tests
-// 'cd <this-directory>' 
+// 'cd <this-directory>'
 // 'nodeunit <this-filename>'
 
 // Good read about unit testing in node.js:
@@ -30,7 +30,7 @@
 // node --debug `which nodeunit` test/run.js
 
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 
 function addApi(into, from) {
 	for (var p in from) {
@@ -244,7 +244,7 @@ function findAmdConfigIn511Project(project) {
 	var context = project + '/client/app/game/restApi.js';
 	return function (test) {
 		var api = makeApi('511');
-		
+
 		api.getAmdConfig(context, function (amdConf) {
 			test.equals(
 				toCompareString(amdConf),

@@ -10,6 +10,8 @@
  * Contributors:
  *    Andrew Eisenberg - initial implementation
  *     Chris Johnson - functions
+ *      Andy Clement
+ *      Tony Georgiev - https://github.com/scripted-editor/scripted/pull/183
  ******************************************************************************/
 
 // implements the pane interface for editors
@@ -17,9 +19,9 @@
 /*jslint browser:true */
 define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory",
 "orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/dialogs/outlineDialog",
-"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", 'lib/json5', 'jquery'],
+"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", "scripted/utils/behaviourConfig", 'lib/json5', 'jquery'],
 function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOutlineDialog,
-	mLookInFilesDialog, mOsUtils) {
+	mLookInFilesDialog, mOsUtils, behaviourConfig) {
 
 	var FS_LIST_URL = "/fs_list/";
 	// FIXADE copied from navhistory
@@ -73,8 +75,22 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			historyMenu.append(newHistoryElem);
 		}
 	};
-
+	
+	var initializeBreadcrumbsTimeout;
+	
 	var initializeBreadcrumbs = function(path) {
+		if (behaviourConfig.getAsyncBreadcrumbConstruction()) {
+			clearTimeout(initializeBreadcrumbsTimeout);
+			initializeBreadcrumbsTimeout = setTimeout(function() {
+				initializeBreadcrumbsActual(path);
+			},300);
+		} else {
+			initializeBreadcrumbsActual(path);
+		}
+	};
+	
+
+	var initializeBreadcrumbsActual = function(path) {
 		var autoActivation = (window.scripted &&
 			window.scripted.config &&
 			window.scripted.config.ui &&

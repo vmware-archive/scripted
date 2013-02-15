@@ -221,8 +221,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 				second: "define('second', [], function() { return { aaa : 9 } });"
 			}));
 		testProposals(results, [
-			["fa", "fa : { aaa : Number }"],
-			["fb", "fb : { aaa : Number }"],
+			["fa", "fa : { aaa:Number }"],
+			["fb", "fb : { aaa:Number }"],
 			["", "---------------------------------"],
 			["Function()", "Function() : Function"]
 		]);
@@ -334,7 +334,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	
 	//////////////////////////////////////////////////////////
 	// tests for async require function
-	// note that async require calls are typically either in 
+	// note that async require calls are typically either in
 	// an html file or surrounded by a define
 	//////////////////////////////////////////////////////////
 	tests.testAMDRequire1Simple = function() {
@@ -521,7 +521,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		]);
 	};
 	
-	// I don't know if this one is valid syntax since jslint flags this with an error, 
+	// I don't know if this one is valid syntax since jslint flags this with an error,
 	// but we'll keep this test since esprima parses it properly and the result is correct
 	tests.testCommonJS7 = function() {
 		var results = computeContentAssist(
@@ -620,7 +620,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["ff1", "ff1 : Number"],
 			["", "---------------------------------"],
 			["ff2", "ff2 : Number"],
-			["ff3", "ff3 : { a : Number, b : Number }"]
+			["ff3", "ff3 : { a:Number, b:Number }"]
 		]);
 	};
 	tests.testCommonJSproto2 = function() {
@@ -636,7 +636,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["ff1", "ff1 : Number"],
 			["", "---------------------------------"],
 			["ff2", "ff2 : Number"],
-			["ff3", "ff3 : { a : Number, b : Number }"]
+			["ff3", "ff3 : { a:Number, b:Number }"]
 		]);
 	};
 	tests.testCommonJSproto3 = function() {
@@ -689,7 +689,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals(results, [
 			["toFixed(digits)", "toFixed(digits) : Number"]
-		]);	
+		]);
 	};
 	tests.testAMDSyncRequire2 = function() {
 		var results = computeContentAssist(

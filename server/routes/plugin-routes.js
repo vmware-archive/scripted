@@ -16,7 +16,7 @@
 var when = require('when');
 var express = require('express');
 
-var filesystem = require('../jsdepend/filesystem').withBaseDir(null);
+var filesystem = require('../utils/filesystem').withBaseDir(null);
 var pluginDiscovery = require('../plugin-support/plugin-discovery').configure(filesystem);
 var getPlugins = pluginDiscovery.getPlugins;
 

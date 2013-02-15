@@ -13,43 +13,48 @@
  ******************************************************************************/
 /*global exports require console __dirname */
 
-var eachLine = require('../utils/line-by-line').eachLine;
+function configure(filesystem) {
 
-/**
- * Search a file for a given term. Every time the term
- * is found matchFn is called with an object containing
- * info about the match.
- *
- * When processing of the file is completed. The doneFn
- * is called.
- */
-function searchFile(term, fullpath, matchFn, doneFn){
-	eachLine(fullpath,
-		//Called on each line of text
-		function (line, lineNumber, lineStart) {
-			var result;
-			var col = line.indexOf(term);
-			var offset = lineStart + col;
-			//Use while loop: can be more than one match on a single line
-			//Change to an if to only show first match in each line
-			while (col >= 0) {
-				matchFn({
-					file: fullpath,
-					offset: offset,
-					line: lineNumber+1,
-					col: col,
-					context: line,
-					text: term
-				});
-				col = line.indexOf(term, col+1);
-			}
-		},
-		//Called when done:
-		doneFn
-	);
+	var eachLine = require('../utils/line-by-line').configure(filesystem);
+
+	/**
+	 * Search a file for a given term. Every time the term
+	 * is found matchFn is called with an object containing
+	 * info about the match.
+	 *
+	 * When processing of the file is completed. The doneFn
+	 * is called.
+	 */
+	function searchFile(term, fullpath, matchFn, doneFn){
+		eachLine(fullpath,
+			//Called on each line of text
+			function (line, lineNumber, lineStart) {
+				var result;
+				var col = line.indexOf(term);
+				var offset = lineStart + col;
+				//Use while loop: can be more than one match on a single line
+				//Change to an if to only show first match in each line
+				while (col >= 0) {
+					matchFn({
+						file: fullpath,
+						offset: offset,
+						line: lineNumber+1,
+						col: col,
+						context: line,
+						text: term
+					});
+					col = line.indexOf(term, col+1);
+				}
+			},
+			//Called when done:
+			doneFn
+		);
+	}
+
+	return searchFile;
 }
 
-exports.searchFile = searchFile;
+exports.configure = configure;
 /*
 var rootdir = require("path").normalize(__dirname+"../../..")+"/";
 var term = "readdirSync";

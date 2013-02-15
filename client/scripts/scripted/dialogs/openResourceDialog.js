@@ -15,8 +15,9 @@
 /**
  * The Open File dialog.
  */
-define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client", "text!scripted/dialogs/openResourceDialog.html"],
-	function(dialogUtils, pagestate, isearch, dialogText) {
+define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client",
+		"text!scripted/dialogs/openResourceDialog.html","jquery","scripted/utils/pageState"],
+	function(dialogUtils, pagestate, isearch, dialogText, $, pageState) {
 	
 	/**
 	 * Convert from a path into an object containing the components of the path.
@@ -36,6 +37,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			'directory':parent
 		};
 	}
+	
 	
 	/**
 	 * Create a new search that will wire up results handling to the renderer and return it.
@@ -116,10 +118,22 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			//maps paths to dom elements showing them on screen. If a result is revoked this allows us to
 			//easily find and destroy it.
 		};
+		
+		var historyEntriesInTable = {};
 
 		return {
 			start: function (qry) {
 				queryName = qry;
+				var history = pageState.getHistory();
+				for (var h=history.length-1;h>=0;h--) {
+					var historyElement = history[h];
+					var segments = historyElement.path.split('/');
+					var name = segments[segments.length-1];
+					segments.splice(-1,1);
+					var parent = segments.join('/');
+					var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
+					this.add(resource);
+				}
 			},
 			revoke: function (path) {
 				var links;
@@ -140,6 +154,12 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				that.selected = 0;
 			},
 			add: function (resource) {
+				if (resource.path) {
+					var alreadyExists = results[resource.path];
+					if (alreadyExists) {
+						return;
+					}
+				}
 				var col;
 				var firstresult = false;
 				if (!foundValidHit) {
@@ -152,6 +172,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					$(resultsNode).append(table);
 					firstresult=true;
 				}
+			   
 				
 				// If previously displaying the message about no results, remove it
 				var noresultsMessage = $(".dialog_noresults_row",$(that.dialog));
@@ -161,7 +182,24 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			
 				var row = document.createElement('div');
 				$(row).addClass("dialog_results_row");
-				$(table).append(row);
+				if (resource.row_number) {
+					var kids = $(table).children();
+					$(table).prepend(row);
+					var linkSelected = $(".dialog_outline_row",$(that.dialog));
+					if (linkSelected && linkSelected.length!==0) {
+						// should only be one, if any...
+						for (var l=0;l<linkSelected.length;l++) {
+							$(linkSelected[l]).removeClass("dialog_outline_row");
+						}
+					}
+				} else {
+					$(table).append(row);
+				}
+				
+				
+				var upper = document.createElement('div');
+				var lower = document.createElement('div');
+				
 				if (resource.path) {
 					results[resource.path] = row;
 				}
@@ -182,8 +220,22 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				resourceLink.setAttribute('href', loc);
 				$(resourceLink).css("verticalAlign","middle");
 
-				row.appendChild(resourceLink);
-				appendPath(row, resource);
+				upper.appendChild(resourceLink);
+//				$(lower).append(document.createTextNode('lower'));
+				
+				var path = resource.folderName ? resource.folderName : resource.path;
+				// trim off the leading inferred fs root
+				if (path.indexOf(window.fsroot)===0) {
+					path = path.substring(window.fsroot.length);
+					if (path.length>0 && path.charAt(0)==='/') {
+						path = path.substring(1);
+					}
+				}
+				lower.appendChild(document.createTextNode(path + '\u00a0'));
+				$(lower).addClass('smallerText');
+				
+				$(row).append(upper);
+				$(row).append(lower);
 				
 				// On clicking the link in this row, change the editor contents
 				$("a",row).each(function(resourceLink) {
@@ -194,6 +246,21 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 						return false;
 					});
 				} );
+				$(row).off('click');
+				$(row).on('click.dialogs',function(evt) {
+					var click = new $.Event('click');
+					//Take care to retain modifier keys on simulated clicks!
+					click.shiftKey = evt.shiftKey;
+					click.ctrlKey = evt.ctrlKey;
+					click.altKey = evt.altKey;
+					click.metaKey = evt.metaKey;
+					// If this isn't done in a timeout block then on windows firefox(17.0.1) the return
+					// key seems to get into the editor and surface as a temporary newline in the
+					// text - it isn't really there (reload and it'll disappear), very annoying.
+					var link = $("a",this);				
+					setTimeout(function() { link.trigger(click);},0);
+					return false;
+				});
 			    var linkSelected = $(".dialog_outline_row",$(that.dialog));
 				if (!linkSelected || linkSelected.length===0) {
 					var links = $(".dialog_results_row",$(that.dialog));
@@ -250,7 +317,56 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 	    $(dialogId).css({top:dialogTop, left:dialogLeft}).show();
 	};
 	
+	/**
+	 * Convert a pattern that uses '*' into a regexp.
+	 *
+	 * @param String
+	 * @return RegExp
+	 */
+	var toRegexp= (function () {
+
+		var SPECIAL = /[\-\/\\\^\$+?.()|\[\]{}]/g;
+
+		function toRegexp(pat) {
+			pat = pat.replace(SPECIAL, "\\$&"); // First escape special chars, except for '*'.
+			var exp = '^' + pat.replace(/\*/g, '.*');
+			//console.log('regexp = '+exp);
+			return new RegExp(exp, 'i');
+		}
+
+		return toRegexp;
+
+	})();
+	
+	var updateHistoryEntries = function(text) {
+		var history = pageState.getHistory();
+		var regex = this.toRegexp(text);
+		var historyElement;
+		// revoke them all
+		for (var h=history.length-1;h>=0;h--) {
+			historyElement = history[h];
+			this.renderer.revoke(historyElement.path);
+		}
+		// add those back in that match the regex
+		for (h=history.length-1;h>=0;h--) {
+			historyElement = history[h];
+			var segments = historyElement.path.split('/');
+			var name = segments[segments.length-1];
+			segments.splice(-1,1);
+			var parent = segments.join('/');
+			var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
+			if (regex.test(name)) {
+				this.renderer.add(resource);
+			}
+		}
+	};
+	
 	var doSearch = function() {
+	
+// TODO	here you need to do the same algorithm as isearch to add the still valid entries and revoke those that don't match, the
+// add/revoke may need code adding to cope with things already there or that aren't there because it doesn't have a way to query if it is there.
+
+		
 		var text = $('#dialog_filename').val();
 		if (this.currentQuery !== null && this.currentQuery === text) {
 			return;
@@ -259,13 +375,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		var activeSearch = this.activeSearch;
 		this.currentQuery = text;
 		if (!activeSearch) {
-			var renderer = this.rendererFactory($('#dialog_openfile_results'));
-			this.activeSearch = this.startSearch(text,renderer);
+			this.renderer = this.rendererFactory($('#dialog_openfile_results'));
+			this.activeSearch = this.startSearch(text,this.renderer);
 			$('#dialog_openfile_results').scroll(function(evt) {
 				that.addMoreResultsNearScrollBottom();
 				$('#dialog_filename').focus(); // refocus after scrolling
 			});
 		} else {
+			this.updateHistoryEntries(text);
 			activeSearch.query(text);
 		}
 	};
@@ -282,7 +399,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			if (scrollHeight) {
 				var leftOver = (scrollHeight-scrollBottom)/scrollHeight;
 				if (leftOver<0.1) {
-					// Less than 10% of the elements displated below bottom of the
+					// Less than 10% of the elements displayed below bottom of the
 					// visible scroll area.
 					this.activeSearch.more(); // ask for more results
 				}
@@ -296,11 +413,13 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		this.addMoreResultsNearScrollBottom = addMoreResultsNearScrollBottom;
 		this.changeFile = changeFile;
 		this.closeDialog = closeDialog;
+		this.toRegexp = toRegexp;
 		this.activeElement = document.activeElement;
 		this.currentQuery = null;
 		this.dialog="#dialog_openfile";
 		this.selected = -1;
 		this.editor = editor;
+		this.updateHistoryEntries = updateHistoryEntries;
 		
 		var that = this;
 		
@@ -318,11 +437,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		$(this.dialog).off('keydown.dialogs');
 		$(this.dialog).on('keydown.dialogs',function( e ) {
 			var links, nextSelected, loopedRound;
-			if ((e.keyCode === $.ui.keyCode.UP || e.keyCode === $.ui.keyCode.DOWN)) {
+			if ((e.keyCode === 38/*UP*/ || e.keyCode === 40/*DOWN*/ || e.keyCode === 36/*HOME*/)) {
 				links = $(that.dialog).find(".dialog_results_row");
 				var currentSelection = that.selected;
 				loopedRound = false;
-				if (e.keyCode === $.ui.keyCode.DOWN) {
+				if (e.keyCode === 40/*DOWN*/) {
 					if (that.selected >= 0) {
 						nextSelected = that.selected===(links.length-1)?0:that.selected+1;
 						if (nextSelected===0) {
@@ -335,7 +454,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 						that.selected = 0;
 						$(links[0]).addClass('dialog_outline_row');
 					}
-				} else {
+				} else if (e.keyCode === 38/*UP*/) {
 					if (that.selected>0) {
 						nextSelected = that.selected-1;
 						$(links[that.selected]).removeClass('dialog_outline_row');
@@ -347,6 +466,13 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 						$(links[nextSelected]).addClass('dialog_outline_row');
 						that.selected = nextSelected;
 						loopedRound=true;
+					}
+				} else { // 36/HOME
+					if (that.selected!==0) {
+						nextSelected = 0;
+						$(links[that.selected]).removeClass('dialog_outline_row');
+						$(links[nextSelected]).addClass('dialog_outline_row');
+						that.selected = nextSelected;
 					}
 				}
 				
@@ -374,13 +500,13 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				if (isOffScreen) {
 					if (!wasOffScreen) {
 						// readjust scroll position
-						if (e.keyCode === $.ui.keyCode.DOWN) {
+						if (e.keyCode === 40/*DOWN*/) {
 							if (!loopedRound) {
 								r.scrollTop(scrollPositionOfResults + linkHeight);
 							} else {
 								r.scrollTop(0);
 							}
-						} else {
+						} else if (e.keyCode===38/*UP*/) {
 							// UP
 							if (!loopedRound) {
 								newPosition = scrollPositionOfResults - linkHeight;
@@ -392,6 +518,8 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 								newPosition = scrollAreaHeight - viewHeight;
 								r.scrollTop(newPosition);
 							}
+						} else { //36/HOME
+							r.scrollTop(0);
 						}
 					} else {
 						// it was previously off the screen and still is, but the user is doing key scrolling, so let's
@@ -404,7 +532,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					}
 				}
 				return false;
-			} else if (e.keyCode === $.ui.keyCode.ENTER) {
+			} else if (e.keyCode === 13/*ENTER*/) {
 				// Pressing ENTER triggers the button click on the selection
 				var results = $("a",$(that.dialog));
 				if (results && results.length>0) {
@@ -421,7 +549,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					setTimeout(function() { $(result).trigger(click);},0);
 				}
 				return false;
-		    } else if (e.keyCode === $.ui.keyCode.ESCAPE) {
+		    } else if (e.keyCode === 27/*ESCAPE*/) {
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
 				return false;

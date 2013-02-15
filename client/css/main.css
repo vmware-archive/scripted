@@ -794,7 +794,7 @@ a.dialog_button:hover {
 	font-weight: 300;
   position:absolute; 
   z-index:5000; 
-  width:400px; 
+  width:500px; 
 }
 
 .dialog_narrow {
@@ -868,6 +868,10 @@ a.dialog_button:hover {
   max-height: 500px;
 }
 
+.dialog .smallerText {
+  font-size:12px;
+}
+
 .dialog_outline_row {
 	background: #bbb;
 }
@@ -905,7 +909,7 @@ a.dialog_button:hover {
 .dialog_results_row {
 	border-bottom: 1px solid #DDD;
 	line-height: 20px;
-	max-height: 20px;
+	/*max-height: 20px;*/
 	padding-left: 15px
 }
 

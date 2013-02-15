@@ -1,5 +1,17 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 VMware, Inc. All Rights Reserved.
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Contributors:
+ *   Kris De Volder
+ ******************************************************************************/
 var reporter = require('nodeunit').reporters['default'];
-var filesystem = require('../../server/jsdepend/filesystem').withBaseDir(null);
+var filesystem = require('../../server/utils/filesystem').withBaseDir(null);
 var fswalk = require('../../server/jsdepend/fswalk').configure(filesystem).fswalk;
 var endsWith = require('../../server/jsdepend/utils').endsWith;
 var testFiles = [];

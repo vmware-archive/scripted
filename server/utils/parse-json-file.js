@@ -15,7 +15,7 @@
 define(function(require) {
 
 	function debug_log(msg) {
-		console.log(msg);
+		//console.log(msg);
 	}
 
 	var ALL_WHITE_SPACE = /^\s*$/;

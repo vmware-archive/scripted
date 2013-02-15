@@ -13,7 +13,7 @@
 
 //var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 var pathResolve = require('../../server/jsdepend/utils').pathResolve;
-var mFilesystem = require('../../server/jsdepend/filesystem');
+var mFilesystem = require('../../server/utils/filesystem');
 var each = require('../../server/utils/promises').each;
 
 function makeApi(relativeBaseDir) {

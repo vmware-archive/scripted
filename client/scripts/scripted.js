@@ -14,10 +14,10 @@
 define([
 		 "scripted/utils/pageState", "servlets/jsdepend-client",
 		 "scripted/exec/exec-console", "when", "scripted/editor/jshintdriver", "scripted/utils/storage",
-		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration'],
+		 "scripted/contextmenus/contextmenu", 'scripted/processConfiguration', 'scripted/utils/jshintloader'],
 
 function(
-	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration) {
+	mPageState, mJsdepend, mExecConsole, when, mJshintDriver, storage, contextMenu, processConfiguration, jshintloader) {
 
 	var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 	return {
@@ -44,13 +44,14 @@ function(
 					window.fsroot = dotScripted.fsroot;
 
 					// Start the search for .jshintrc
-					// must be called inside of getConf since jshint relies on dotScripted
+					// must be called inside of configReady since jshint relies on dotScripted
 
-					window.scripted.promises = {
-						"loadJshintrc": loadJshintrc(dotScripted.jshint, pageState)
-					};
+					when.chain(loadJshintrc(dotScripted.jshint,pageState),jshintloader.getDeferred().resolver);
 					
-					layoutManager.toggleNavigatorVisible(!isNavigatorOff(dotScripted));
+					var v = getNavigatorConfiguredValue(dotScripted);
+					if (typeof v !== 'undefined') {
+						layoutManager.toggleNavigatorVisible(v);
+					}
 
 					// Whether on screen or not, let's initialize it (could be smarter here but
 					// want it to appear quickly when requested).
@@ -85,10 +86,16 @@ function(
 				// can be garbage collected;
 				delete this.configReady;
 
-				function isNavigatorOff(dotScripted) {
-					return dotScripted && dotScripted.ui && dotScripted.ui.navigator===false;
+				function getNavigatorConfiguredValue(dotScripted) {
+					if (dotScripted && dotScripted.ui) {
+						var v = dotScripted.ui.navigator;
+						if (typeof v !== 'undefined') {
+							return v;
+						}
+					}
+					// return undefined
 				}
-
+				
 				/* Locate the nearest .jshintrc. It will look relative to the initially opened
 				 * location - so ok if the .jshintrc is at the project root. But if the file is
 				 * elsewhere in the tree it sometimes won't find it depending on what is opened.

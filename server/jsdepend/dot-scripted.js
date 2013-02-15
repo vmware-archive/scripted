@@ -126,11 +126,18 @@ function configure(filesystem) {
 	 * problem reading/parsing some or all of the configuration data.
 	 */
 	function getConfiguration(handle, callback) {
+		var d, p;
+		if (!callback) {
+			d = when.defer();
+			p = d.promise;
+			callback = function (r) { d.resolve(r); };
+		}
 		findAndParseDotScripted(handle, function (dotScripted) {
 			findAndParseScriptedRc(function (scriptedRc) {
 				callback(jsonMerge(defaults, scriptedRc, dotScripted));
 			});
 		});
+		return p;
 	}
 
 	function getScriptedRcDirLocation() {

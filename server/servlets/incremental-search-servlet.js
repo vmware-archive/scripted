@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global process require exports console*/
 
 var SERVICE_NAME = 'isearch';
@@ -23,10 +23,11 @@ var SERVICE_NAME = 'isearch';
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
+var filesystem = require('../utils/filesystem').withBaseDir(null); //TODO: plugable fs
 var websockets = require('./websockets-servlet');
 var toRegexp = require('../jsdepend/utils').toRegexp;
 var getFileName = require('../jsdepend/utils').getFileName;
-var mFswalk = require('../utils/fswalk-filtered');
+var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -41,12 +42,12 @@ exports.install = function (server) {
 	var sockServer = websockets.createSocket(SERVICE_NAME);
 	sockServer.on('connection', function (conn) {
 		var id = nextId++; // used for log messages only.
-		
+
 		//opening a websocket connection initiates a search.
-		
+
 		var maxResults = null; // set upon receipt of the initial query
 		                // can also be increased by a request for more results.
-		
+
 		if (LOG_SOCKET_COUNT) {
 			openSockets++;
 			console.log('isearch socket opened ['+openSockets+']');
@@ -58,20 +59,20 @@ exports.install = function (server) {
 		var fswalk = null; //Walk function. Needs to be configured based on searchRoot. Set once
 		                   //when configured.
 		var options = {};
-		
+
 		var results = {}; //The 'keys' of this map are the results we have already sent to the client.
 		var activeWalker = null; //the current walker, allows cancelation if we need to start a brand new walker.
 		var resultCount = 0; // Tracks number of results. Used to limit the number of results sent to the client.
-	
-	
-	
+
+
+
 		/**
 		 * send data to the client. The data sent must be something that can be 'JSON.stringified'.
 		 */
 		function send(json) {
 			conn.write(JSON.stringify(json));
 		}
-		
+
 		function addResult(path) {
 			if (!results[path]) {
 				results[path] = path;
@@ -89,12 +90,12 @@ exports.install = function (server) {
 				resultCount--;
 			}
 		}
-		
+
 		function isMatch(path) {
 			var name = getFileName(path);
 			return regexp.test(name);
 		}
-		
+
 		function startSearch() {
 			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
@@ -102,14 +103,14 @@ exports.install = function (server) {
 			if (!fswalk) {
 				console.error('Can not start search: the fswalk function is not yet configured');
 			}
-			
+
 			var canceled = false;
 			var paused = false; // Intially, set to true when pause is requested. Then when
 			                    // work is actually suspended, a 'work' function will be
 			                    // stored in here. To resume the work, this function is
 			                    // called with no params.
 			var done = false;   // Set to true when search has finished the whole walk.
-			
+
 			/**
 			 * Given a function that represents 'remaining work'. Either continue the work,
 			 * by calling this function. Or store the function for later resuming the work.
@@ -192,14 +193,14 @@ exports.install = function (server) {
 		function isMoreSpecificThan(newQ, oldQ) {
 			return newQ.indexOf(oldQ)>=0;
 		}
-		
+
 		function cancelActiveWalker() {
 			if (activeWalker) {
 				activeWalker.cancel();
 				activeWalker = null;
 			}
 		}
-		
+
 		var handlers = {
 			//initial query and other info needed to setup a search
 			query: function (sr, q, opts) {
@@ -210,7 +211,7 @@ exports.install = function (server) {
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('search options: '+JSON.stringify(options));
-					mFswalk.forPath(searchRoot, function (configured) {
+					mFswalk.forPath(searchRoot).then(function (configured) {
 						fswalk = configured.asynchWalk;
 						activeWalker = startSearch();
 					});
@@ -218,7 +219,7 @@ exports.install = function (server) {
 					console.error("multiple queries received on the same /isearch connection");
 				}
 			},
-			
+
 			//ask for more results: increases maxResults to be at least the current number
 			//of results plus 10%
 			more: function () {
@@ -290,7 +291,7 @@ exports.install = function (server) {
 			//console.log("isearch ["+id+"] << "+message);
 			receive(JSON.parse(message));
 		});
-		
+
 		conn.on('close', function () {
 			cancelActiveWalker();
 			if (LOG_SOCKET_COUNT) {
@@ -300,5 +301,5 @@ exports.install = function (server) {
 		});
 	});
 	//sockServer.installHandlers(server, {prefix: '/isearch'});
-	
+
 };

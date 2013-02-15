@@ -30,7 +30,7 @@
 // node --debug `which nodeunit` test/run.js
 
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
-var configuration = require('../../server/jsdepend/filesystem');
+var configuration = require('../../server/utils/filesystem');
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;

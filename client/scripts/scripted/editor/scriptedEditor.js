@@ -17,22 +17,25 @@
 /*jslint browser:true devel:true */
 
 define([
-	"require", "scripted/utils/deref", "scripted/editor/save-hooks", "when",
+	"require", "scripted/utils/deref", "scripted/editor/save-hooks", "when", "scripted/fileapi",
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
-	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", 
-	"scripted/utils/storage","layoutManager",
-	"scripted/inplacedialogs/infile-search", "scripted/exec/exec-keys",
-	"scripted/exec/exec-after-save", "jshint", "jquery"
-], function ( require, deref, mSaveHooks, when, mTextView, mKeyBinding, mEditor, mKeystroke,
+	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/utils/storage",
+	"layoutManager", "scripted/inplacedialogs/infile-search", "scripted/utils/jshintloader", "scripted/utils/behaviourConfig", "scripted/utils/textUtils",
+	"scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint", "jquery"
+], function (
+	require, deref, mSaveHooks, when, fileapi,
+	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
-	mIndexerService, mHtmlGrammar, mModuleVerifier,	mJshintDriver, mJsBeautify, mTextModel,
-	mProjectionModel, mCssContentAssist, mTemplateContentAssist, mMarkoccurrences,
-	tHelptext, themeManager, storage, layoutManager, infileSearchDialog
+	mIndexerService, mTextSearcher, mSelection, mCommands,
+	mParameterCollectors, mHtmlGrammar, mModuleVerifier,
+	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
+	mCssContentAssist, mTemplateContentAssist,
+	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, infileSearchDialog, jshintloader, behaviourConfig, textUtils
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -157,7 +160,7 @@ define([
 		var postSave = function (text) {
 			var problems = [];
 			if (!shouldExclude(filePath) && (isJS || isHTML)) {
-				window.scripted.promises.loadJshintrc.then(function completed() {
+				jshintloader.getDeferred().promise.then(function completed() {
 					if (!(isHTML || isJSON)) {
 						problems = mJshintDriver.checkSyntax('', text).problems;
 					}
@@ -287,6 +290,8 @@ define([
 				layoutManager.toggleNavigatorVisible();
 				return true;
 			},"Toggle Navigator");
+			// TODO move to a central place, don't need to do this for each editor
+			$('#nav_toggle').off('click');
 			$('#nav_toggle').on('click', function() {
 				editor.getTextView().invokeAction("Toggle Navigator",false);
 				return true;
@@ -534,9 +539,11 @@ define([
 				var remainingLength = offset - lineStart;
 				var child = line._lineDiv.firstChild;
 				while (child) {
-					remainingLength -= child.innerText.length;
-					if (remainingLength <= 0) {
-						break;
+					if (child.innerText) {
+						remainingLength -= child.innerText.length;
+						if (remainingLength <= 0) {
+							break;
+						}
 					}
 					child = child.nextSibling;
 				}
@@ -563,12 +570,30 @@ define([
 
 		editor.installTextView(function(buffer, offset) {
 			if (isJS) {
-				var hoverText = jsContentAssistant.computeHover(buffer, offset);
-//				return hoverText;
-				return hoverText ? "<pre>" + js_beautify(hoverText) + "</pre>" : hoverText;
-			} else {
-				return null;
+				var type = jsContentAssistant.computeHover(buffer, offset);
+				if (type) {
+					if (type.docRange) {
+						type.promise = when.defer();
+						if (type.path) {
+							var path = type.path;
+							fileapi.getContentsFragment(path, type.docRange[0], type.docRange[1],
+								function(text) {
+									text = textUtils.formatJSdoc(text);
+									type.promise.resolve(text);
+								}
+							);
+						} else {
+							setTimeout(function() {
+								var text = editor.getText(type.docRange[0], type.docRange[1]);
+								text = textUtils.formatJSdoc(text);
+								type.promise.resolve(text);
+							});
+						}
+					}
+					return type;
+				}
 			}
+			return {hoverText: null };
 		});
 		editor.setInput("Content", null, "No contents");
 
@@ -603,22 +628,15 @@ define([
 
         //Add exec key bindings defined based on what's in the .scripted file
         require('scripted/exec/exec-keys').installOn(editor);
+        
 
 		var xhrobj = new XMLHttpRequest();
-		try {
-			var url = '/get?file=' + filePath;
-			//console.log("Getting contents for " + url);
-			xhrobj.open("GET", url, false); // synchronous xhr
-
-			// set specific header to bypass the cache
-			// TODO FIXADE we should be saving the etag header of the original file request and caching it in local storage
-			// See http://en.wikipedia.org/wiki/HTTP_ETag
-			xhrobj.setRequestHeader('If-None-Match', ''+new Date().getTime());
-			xhrobj.send();
-			//xhrobj.onreadystatechange = function() {
+		
+        var editorLoadResponseHandler = function() {
 			if (xhrobj.readyState === 4) {
 				if (xhrobj.status === 200) {
 					editor.setInput("Content", null, xhrobj.responseText);
+					editor.getTextView().setReadonly(false);
 //						setTimeout(function() {
 //						window.comms.editor.send(JSON.stringify({"registereditor":window.location.search.substr(1)}));
 //						},3000);
@@ -626,8 +644,8 @@ define([
 					// are in the right order (so syntax highlighter then annotation handler)
 
 					syntaxHighlighter.highlight(filePath, editor);
-								// NEWEDITOR - doesn't have highlightAnnotations
-			// editor.highlightAnnotations();
+					// NEWEDITOR - doesn't have highlightAnnotations
+					// editor.highlightAnnotations();
 					postSave(xhrobj.responseText);
 
 					// force caret location if required
@@ -638,15 +656,15 @@ define([
 					if (xhrobj.status === 500 && xhrobj.responseText === 'File not found') {
 						// that is OK, start with an empty file
 						editor.setInput("Content", null, "");
+						editor.getTextView().setReadonly(false);
 						syntaxHighlighter.highlight(filePath, editor);
 									// NEWEDITOR - doesn't have highlightAnnotations
-			// editor.highlightAnnotations();
+						// editor.highlightAnnotations();
 						postSave(xhrobj.responseText);
 
 						// force caret location if required
 						//window.onpopstate();
 					} else if (xhrobj.status === 500 && xhrobj.responseText === 'File is a directory') {
-//						$('#editor').css('display','none');
 						// Set the editor to show some help, a la vim
 						editor.setInput("Content", null, tHelptext);
 						editor.getTextView().setReadonly(true);
@@ -661,11 +679,39 @@ define([
 						editor.loadResponse = "error";
 					} else {
 						editor.setInput("Content", null, xhrobj.responseText);
+						editor.getTextView().setReadonly(false);
 					}
 				}
 			}
-			//};
-			//xhrobj.send();
+        };
+        
+		try {
+			var url = '/get?file=' + filePath;
+			//console.log("Getting contents for " + url);
+			
+			// TODO switch to an event model, fire an event when content loaded and always run async
+			if (!behaviourConfig.getAsyncEditorContentLoading()) {
+				editor.getTextView().setReadonly(true);
+				xhrobj.open("GET", url, false); // false = synchronous xhr
+				// set specific header to bypass the cache
+				// TODO FIXADE we should be saving the etag header of the original file request and caching it in local storage
+				// See http://en.wikipedia.org/wiki/HTTP_ETag
+				xhrobj.setRequestHeader('If-None-Match', ''+new Date().getTime());
+				xhrobj.send();
+				editorLoadResponseHandler();
+			} else {
+				xhrobj.open("GET", url, true); // true = asynchronous xhr
+				// set specific header to bypass the cache
+				// TODO FIXADE we should be saving the etag header of the original file request and caching it in local storage
+				// See http://en.wikipedia.org/wiki/HTTP_ETag
+				xhrobj.setRequestHeader('If-None-Match', ''+new Date().getTime());
+				// xhrobj.send();
+				xhrobj.onreadystatechange = function() {
+					editorLoadResponseHandler();
+				};
+				editor.getTextView().setReadonly(true);
+				xhrobj.send();
+			}
 		} catch (e) {
 			console.log("xhr failed " + e);
 			editor.loadResponse = "failed - exception";

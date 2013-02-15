@@ -14,21 +14,23 @@
  ******************************************************************************/
 
 var fs = require('fs');
-var path = require('path');
-var getUserHome = require('../jsdepend/filesystem').withBaseDir(null).getUserHome;
+//var path = require('path');
+var pathResolve = require('../jsdepend/utils').pathResolve;
 
-var EDITOR_HTML = path.resolve(__dirname, '../../client/editor.html');
+var EDITOR_HTML = pathResolve(__dirname, '../../client/editor.html');
 
-exports.install = function (app) {
+exports.install = function (app, filesystem) {
+	var getUserHome = filesystem.getUserHome;
 
 	function sendEditor(req, res) {
 		res.header('Content-Type', 'text/html');
-		fs.createReadStream(EDITOR_HTML).pipe(res);
+		fs.createReadStream(EDITOR_HTML).pipe(res); //Yes, ok to use node 'fs' directly here.
+													// Not serving user content!
 	}
 
 	app.get('/editor', sendEditor);
 	app.get('/editor/:path(*)', sendEditor);
 	app.get('/', function (req, res) {
-		res.redirect('/editor/'+getUserHome());
+		res.redirect('/editor'+getUserHome());
 	});
 };
