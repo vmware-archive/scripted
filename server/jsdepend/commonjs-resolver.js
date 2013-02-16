@@ -66,11 +66,12 @@ function configure(conf) {
 			//2: enhanced resolver expects a directory as the 'context' not a file.
 			enhancedResolver(getDirectory(handle2file(context)), dep.name, function (err, result) {
 				if (err) {
-					console.log(err);
-					if (err.stack) {
-						console.log(err.stack);
-					}
+//					console.log(err);
+//					if (err.stack) {
+//						console.log(err.stack);
+//					}
 					dep.error = err;
+					dep.errorAsString = ""+err;
 				} else {
 					dep.path = file2handle(result);
 				}
