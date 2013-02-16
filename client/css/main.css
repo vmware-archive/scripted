@@ -280,7 +280,7 @@ footer{
 #breadcrumb > li{
 	height:36px;
 	float:left;
-	font-size:12px;
+	font-size:16px;
 	color: #ffffff;
 	line-height:36px;
 }
@@ -315,7 +315,7 @@ footer{
 	z-index:300;
 	cursor:pointer;
 	padding:5px;
-	font-size:12px;
+	font-size:16px;
 	border-bottom-left-radius:5px;
 	border-bottom-right-radius:5px;
 }
@@ -576,6 +576,10 @@ footer{
   z-index:3000;
 }
 
+.inplace_dialog input[type=text]:focus {
+	outline: none;
+}
+
 .inplace_dialog {
 	height:36px;
 	background-color: #323232;
@@ -588,11 +592,12 @@ footer{
 .inplace_dialog_options_menu {
 	position: absolute;
 	color: white;
+	cursor: pointer;
 	background-color: #707070;
 	width:160px;
 	left:870px;
 	top:59px;
-	height:132px;
+	height:153px;
 	font-size: 12px;
 	z-index:99999;
 	border-radius: 0px 5px 5px 5px;
@@ -602,6 +607,10 @@ footer{
 
 .inplace_dialog_options_menu .option {
 	padding: 2px;
+}
+
+.inplace_dialog_options_menu .option_checkbox {
+	cursor: pointer;
 }
 
 .inplace_dialog_options_menu span {
@@ -630,14 +639,14 @@ footer{
 .inplace_dialog .findtext_container {
 	position: absolute;
 	left: 36px;
-	top: 4px;
+	top: 2px;
 	display:inline;
 }
 
 .inplace_dialog .replacetext_container {
 	position: absolute;
 	left: 200px;
-	top: 4px;
+	top: 2px;
 	display:inline;
 }
 
