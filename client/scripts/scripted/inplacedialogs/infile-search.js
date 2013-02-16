@@ -15,7 +15,8 @@
  */
 define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!scripted/inplacedialogs/infile-search.html","orion/textview/annotations"],
 	function(dialogUtils, pagestate, dialogText, annotations) {
-		
+
+
 	function closeDialog() {
 		$("#dialogs").empty();
 		$(this._editor).focus();
@@ -23,7 +24,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		$(this._bar).off('widthchange.dialog');
 		this.removeCurrentAnnotation();
 	}
-	
+
 	var removeCurrentAnnotation = function(evt) {
 		var annotationModel = this._editor.getAnnotationModel();
 		if (annotationModel) {
@@ -46,11 +47,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		// so this clips at width of filename
 		dialog.width(editorDomNode.width());
 		dialog.height(bar.height());
-		
+
 		$("#replace_button").focus();
 		dialog.show();
 	};
-	
+
 	var resize = function(dialogId) {
 		var bar = $(this._bar);
 		var offsets = bar.offset();
@@ -87,11 +88,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			if (options.findAfterReplace === true || options.findAfterReplace === false) {
 				this._findAfterReplace = options.findAfterReplace;
 			}
-			
+
 			if (options.reverse === true || options.reverse === false) {
 				this._reverse = options.reverse;
 			}
-			
+
 			if (options.toolBarId) {
 				this._toolBarId = options.toolBarId;
 			}
@@ -103,26 +104,26 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			}
 		}
 	};
-	
+
 	var startUndo = function() {
 		if (this._undoStack) {
 			this._undoStack.startCompoundChange();
 		}
 	};
-		
+
 	var endUndo = function() {
 		if (this._undoStack) {
 			this._undoStack.endCompoundChange();
 		}
 	};
-	
+
 	var focus = function(shouldSelect) {
 		$('#findtext').focus();
 		if (shouldSelect) {
 			$('#findtext').select();
 		}
 	};
-	
+
 	var getSearchStartIndex = function(reverse, flag) {
 		var currentCaretPos = this._editor.getCaretOffset();
 		if(reverse) {
@@ -135,7 +136,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		}
 		return currentCaretPos > 0 ? currentCaretPos : 0;
 	};
-	
+
 	var replace = function() {
 		this.startUndo();
 		var newStr = $('#replacetext').val();
@@ -149,7 +150,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			this._doFind(searchStr, this.getSearchStartIndex(false), false, this._wrapSearch);
 		}
 	};
-	
+
 	var replaceAll = function() {
 		var searchStr = $('#findtext').val();
 		if(searchStr){
@@ -189,7 +190,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			}).bind(this), 100);
 		}
 	};
-		
+
 	var findNext = function(next, searchStr, incremental) {
 		this.setOptions({
 			reverse : !next
@@ -200,7 +201,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		}
 		return this._doFind(searchStr, startIndex,!next, this._wrapSearch);
 	};
-	
+
 	var _doFind = function(searchStr, startIndex, reverse, wrapSearch) {
 		var editor = this._editor;
 		var annotationModel = editor.getAnnotationModel();
@@ -250,7 +251,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		}
 		return result;
 	};
-	
+
 	var markAllOccurrences = function(singleResult) {
 		var annotationModel = this._editor.getAnnotationModel();
 		if(!annotationModel){
@@ -265,9 +266,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 				remove.push(annotation);
 			}
 		}
-		
+
 		var searchStr = $('#findtext').val();
-		
+
 		if(singleResult && searchStr) {
 			iter = this._editor.getModel().find({
 				string: searchStr,
@@ -283,7 +284,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		}
 		annotationModel.replaceAnnotations(remove, add);
 	};
-	
+
 	var keyupHandler = function(evt) {
 		if(this._incremental && !this._keyUpHandled){
 			this.findNext(true, null, true);
@@ -291,7 +292,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		this._keyUpHandled = false;
 		return true;
 	};
-	
+
 	var keydownHandler = function(evt, pressedInSearch){
 		var ctrlKeyName = this.isMac ? 'metaKey' : 'ctrlKey';
 		var otherKeyName = this.isMac ? 'ctrlKey' : 'metaKey';
@@ -309,13 +310,13 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			this.findNext(!evt.shiftKey);
 			return false;
 		}
-		
+
 		if (evt.keyCode===27/*ESC*/) {
 			this.closeDialog();
 			this._keyUpHandled = pressedInSearch;
 			return false;
 		}
-		
+
 		if( ctrlKey &&  evt.keyCode === 82 /*r*/){
 			this._keyUpHandled = pressedInSearch;
 			if(!pressedInSearch) {
@@ -328,7 +329,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 
 
 	var openDialog = function(editor, undoStack, selectionText, bar) {
-		
+
 		// TODO allow opening on different editor, close the current one and switch it to the new editor
 
 		// If already open, just focus on the search field and return
@@ -341,20 +342,22 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 				this.closeDialog();
 			}
 		}
-		
+
 		this._editor = editor;
 		this._undoStack = undoStack;
 		this._bar = bar;
-		
-		// These will currently reset when the dialog is reopened
-		this._showAllOccurrences = true; // Should the editor show all the matches
-		this._ignoreCase = true;
-		this._wrapSearch = true;
-		this._wholeWord = false;
-		this._incremental = true;
-		this._useRegExp = false;
-		this._findAfterReplace = true;
-		
+
+		// If not yet set, let's initialize them now
+		if (typeof this._showAllOccurrences === 'undefined') {
+			this._showAllOccurrences = true; // Should the editor show all the matches
+			this._ignoreCase = true;         // Is the search case sensitive?
+			this._wrapSearch = true;
+			this._wholeWord = false;
+			this._incremental = true;
+			this._useRegExp = false;
+			this._findAfterReplace = true;
+		}
+
 		this.isMac = navigator.platform.indexOf("Mac") !== -1;
 
 		this.dialog="#inplace_dialog_infile_search";
@@ -381,7 +384,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		$(bar).on('widthchange.dialog',function() {
 			that.resize(that.dialog);
 		});
-		
+
 		$(document)
 			.off('keydown.dialogs')
 			.on('keydown.dialogs', function(e){
@@ -392,9 +395,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 				}
 				return true;
 			});
-						
+
 		this.positionDialog(this.dialog);
-		
+
 		$('#replace_button').on('click',function(evt) {
 			that.replace();
 		});
@@ -405,7 +408,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 
 		// options hidden by default
 		$(".inplace_dialog_options_menu").hide();
-		
+
 		var setNode = function(node,value) {
 			if (value) {
 				$(node).attr('checked','true');
@@ -415,7 +418,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		$('.inplace_dialog_options_menu').mouseenter(function(evt) {
 			that.okToCloseOnMouseOut = true;
 		});
-		
+
 		$('.inplace_dialog_options_menu').mouseleave(function(evt) {
 			if (that.okToCloseOnMouseOut) {
 				$('.inplace_dialog_options_menu').hide();
@@ -423,7 +426,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 				return false;
 			}
 		});
-		
+
 		setNode('input[name=show_all]',this._showAllOccurrences);
 		setNode('input[name=case_sensitive]',!this._ignoreCase);
 		setNode('input[name=wrap_search]',this._wrapSearch);
@@ -431,7 +434,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		setNode('input[name=whole_word]',this._wholeWord);
 		setNode('input[name=regular_expression]',this._useRegExp);
 		setNode('input[name=find_after_replace]',this._findAfterReplace);
-		
+
 		$('input[name=show_all]').change(function() {
 			that._showAllOccurrences = $(this).is(':checked');
 		});
@@ -447,35 +450,35 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		});
 
 		$('input[name=wrap_search]').change(function() {
-			that._wrapSearch = !$(this).is(':checked');
+			that._wrapSearch = $(this).is(':checked');
 		});
 		$('#wrap_search_option').on('click',function(evt) {
 			$('input[name=wrap_search]').trigger('click');
 		});
 
 		$('input[name=incremental_search]').change(function() {
-			that._incremental = !$(this).is(':checked');
+			that._incremental = $(this).is(':checked');
 		});
 		$('#incremental_search_option').on('click',function(evt) {
 			$('input[name=incremental_search]').trigger('click');
 		});
 
 		$('input[name=whole_word]').change(function() {
-			that._wholeWord = !$(this).is(':checked');
+			that._wholeWord = $(this).is(':checked');
 		});
 		$('#whole_word_option').on('click',function(evt) {
 			$('input[name=whole_word]').trigger('click');
 		});
 
 		$('input[name=regular_expression]').change(function() {
-			that._useRegExp = !$(this).is(':checked');
+			that._useRegExp = $(this).is(':checked');
 		});
 		$('#regular_expression_option').on('click',function(evt) {
 			$('input[name=regular_expression]').trigger('click');
 		});
-		
+
 		$('input[name=find_after_replace]').change(function() {
-			that._findAfterReplace = !$(this).is(':checked');
+			that._findAfterReplace = $(this).is(':checked');
 		});
 		$('#find_after_replace_option').on('click',function(evt) {
 			$('input[name=find_after_replace]').trigger('click');
@@ -495,23 +498,23 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 				that.okToCloseOnMouseOut = false;
 			}
 		});
-		
+
 		$(".defaulttext").focus(function() {
 			if ($(this).val() === $(this)[0].title) {
 			    $(this).removeClass("defaultTextActive");
 			    $(this).val("");
 			}
 		});
-    
+
 		$(".defaulttext").blur(function() {
 			if ($(this).val() === "") {
 			    $(this).addClass("defaultTextActive");
 			    $(this).val($(this)[0].title);
 			}
 		});
-    
+
 		$(".defaulttext").blur();
-		
+
 		if (selectionText) {
 			$('#findtext').val(selectionText);
 			$('#findtext').removeClass("defaultTextActive");
@@ -520,7 +523,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			$('#findtext').removeClass("defaultTextActive");
 		}
 		this.focus(true);
-		
+
 		// Handle ENTER and ESCAPE keypresses on the dialog
 		$('#findtext').on('keydown.dialogs', function(evt) {
 			return keydownHandler.bind(that)(evt,true);
@@ -529,7 +532,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		$('#findtext').on('keyup.dialogs', function(evt) {
 			return keyupHandler.bind(that)(evt);
 		});
-		
+
 		$('#arrow_next').on('click',function(evt) {
 			that.findNext(true);
 		});
