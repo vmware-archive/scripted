@@ -80,6 +80,7 @@ header{
 
 #editor_wrapper{
 	height:100%;
+	background-color: #323232;
 }
 
 #navigator-container{ 
@@ -98,6 +99,8 @@ header{
 	border-right: 1px solid #646464;
 	*/
 }
+
+
 #navigator-wrapper ::-webkit-scrollbar-corner {
 	background-color: #323232;
 }
