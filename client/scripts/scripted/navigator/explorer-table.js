@@ -100,7 +100,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 					scriptedLogger.error("xhr failed " + e, "EXPLORER_TABLE");
 				}
 			}
-			
+
 		} else {
 			onComplete([]);
 		}
@@ -175,12 +175,12 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			case "image.gif":
 			case "image.ico":
 			case "image.tiff":
-			case "image.svg":				
+			case "image.svg":
 				var thumbnail = $('<img/>', {
 					src: item.Location
 				});
 				$(link).append(thumbnail);
-				
+
 				$(thumbnail).addClass("thumbnail");
 				break;
 			default:
@@ -194,7 +194,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 				} else {
 					var fileIcon = $('<span/>');
 					$(link).append(fileIcon);
-					
+
 					$(fileIcon).addClass("core-sprite-file_model modelDecorationSprite");
 				}
 			}
@@ -204,7 +204,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 
 		case 0:
 			var col = document.createElement('td');
-			
+
 			$(col).empty();
 			var span = $('<span/>', {
 				id: tableRow.id + "Actions"
@@ -228,12 +228,12 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			if (item.directory) {
 				span2 = $('<span/>');
 				$(span).append(span2);
-				
+
 				// When the directory name is clicked, simulate a keypress on the expand/collapse image
 				tableRow.onclick = function(event){
 					$(event.currentTarget).find('.modelDecorationSprite').click();
 				};
-				
+
 			} else {
 				span2 = $('<a/>', {
 					href: path
@@ -295,8 +295,16 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 		if (this.preferences) {
 			this.storageKey = this.preferences.listenForChangedSettings($.proxy(onStorage, this));
 		}
-		// TODO bad!!!
+		// TODO bad!! Still needed in context menues
 		window.explorer = this;
+
+		// highlight the current main editor in explorer when main editor is created
+		var self = this;
+		$(document).on('paneCreated', function(e, pane) {
+			if (self.model && pane.isMain && pane.paneId === 'scripted.editor') {
+				self.highlight(pane.editor.getFilePath());
+			}
+		});
 	}
 
 	FileExplorer.prototype = new mExplorer.Explorer();
@@ -310,7 +318,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			if (self.navHandler) {
 				self.navHandler.refreshModel(self.model);
 			}
-			
+
 			$.proxy(self.myTree.refreshAndExpand, self.myTree)(parent, children);
 		});
 	};
@@ -385,7 +393,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			}
 			$('.highlightrow').removeClass('highlightrow');
 		}
-	
+
 		var self = this;
 		var id = this.model.getIdFromString(fileintree);
 		this._highlightingId = id;
@@ -536,12 +544,12 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 								}
 								// return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 							});
-								
+
 //							response.children = response.children.sort(function (a,b) {
 //								return (a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 //							});
 						}
-						
+
 						place.treeRoot = response;
 						place.model = new Model(place.registry, place.treeRoot, null);
 						place.createTree(place.parentId, place.model, {
@@ -563,7 +571,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			}
 		}
 	};
-	
+
 	FileExplorer.prototype.fullRefresh = function(postRefresh) {
 		window.explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
 	};

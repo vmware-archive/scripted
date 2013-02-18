@@ -348,13 +348,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 					scrollToSelection(targetEditor);
 				}
 
-				if (target === EDITOR_TARGET.main) {
-					// if model not yet available, highlighting is handled elsewhere.
-					// TODO Yikes!  Yet another global variable.  We should make explorer non-global
-					if (explorer.model) {
-						explorer.highlight(filepath);
-					}
-				}
 				targetPane.updateContents(targetEditor);
 
 				// now add a history entry for the new page state
