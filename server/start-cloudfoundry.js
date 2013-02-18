@@ -18,7 +18,9 @@
 
 var path = require('path');
 
-var filesystem = require('../server/utils/filesystem').withBaseDir(path.resolve(__dirname, '../sandbox'));
+var filesystem = require('../server/utils/filesystem').withBaseDir(path.resolve(__dirname, '../sandbox'), {
+	userHome: '/user.home'
+});
 
 // Launch the server
 var server=require('../server/scriptedServer.js').start(filesystem, {

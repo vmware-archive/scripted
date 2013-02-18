@@ -13,7 +13,8 @@
 
 /*global require exports console module process */
 
-var nodefs = require('../plugable-fs/node-fs');
+var fs = require('fs');
+var subfs = require('../plugable-fs/sub-fs');
 var scriptedfs = require('../plugable-fs/scripted-fs');
 var pathResolve = require('../jsdepend/utils').pathResolve;
 
@@ -34,7 +35,7 @@ function ignore(name) {
 
 exports.withPrefix = require('../plugable-fs/prefixed-fs').withPrefix;
 exports.withBaseDir = function (baseDir, options) {
-	var corefs = nodefs.withBaseDir(baseDir);
+	var corefs = subfs.withBaseDir(baseDir, fs);
 	options = options || {};
 	if (!baseDir) {
 		//For backwards compatibiltiy and convenience, ensure we configure

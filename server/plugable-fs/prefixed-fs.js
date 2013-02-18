@@ -19,7 +19,11 @@
 var pathJoin = require('../jsdepend/utils').pathJoin;
 var pathIsPrefixOf = require('../jsdepend/utils').pathIsPrefixOf;
 
-function withPrefix(pathPrefix, wrappee) {
+/**
+ * Remap all files and directories on a filesystem, adding a prefix to
+ * each path.
+ */
+function withPrefix(pathPrefix, fs) {
 
 //	//Remove trailing slashes from the prefix.
 //	while (pathPrefix[pathPrefix.length-1]==='/') {
