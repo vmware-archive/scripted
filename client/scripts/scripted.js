@@ -62,6 +62,8 @@ function(
 					// Perform navigator context menu hook-up
 					contextMenu.initContextMenus('#navigator-wrapper');
 
+					$("#navigator-header").append(document.createTextNode(window.fsroot));
+
 					/*Side panel open/close*/
 					layoutManager.doLayout(fileExplorer, pageState);
 

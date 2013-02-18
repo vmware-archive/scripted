@@ -114,6 +114,9 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		var constructedPath = "", newCrumbElem, xhrobj, url;
 
 		for (var i = 0, len = crumbs.length; i < len; i++) {
+			if (i===0 && crumbs[i]===window.fsroot) {
+				continue;
+			}
 			newCrumbElem = $('<li class="light_gradient" data-id="'+i+'"><span>' + crumbs[i] + '</span></li>');
 			$('#breadcrumb').append(newCrumbElem);
 

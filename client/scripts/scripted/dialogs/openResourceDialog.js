@@ -18,7 +18,7 @@
 define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/incremental-search-client",
 		"text!scripted/dialogs/openResourceDialog.html","jquery","scripted/utils/pageState"],
 	function(dialogUtils, pagestate, isearch, dialogText, $, pageState) {
-	
+
 	/**
 	 * Convert from a path into an object containing the components of the path.
 	 * parseFile('a/b/c/D') returns {name:D, path:a/b/c/D, folderName:a/b/c, directory:a/b/c}'
@@ -37,8 +37,8 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			'directory':parent
 		};
 	}
-	
-	
+
+
 	/**
 	 * Create a new search that will wire up results handling to the renderer and return it.
 	 * @public
@@ -72,20 +72,20 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		});
 		return activeSearch;
 	}
-	
+
 	function makeIncrementalRenderer(resultsNode) {
 		var foundValidHit = false;
 		var queryName = null;
 		var table = null;
 		var that = this;
-	
+
 		//Helper function to append a path String to the end of a search result dom node
 		var appendPath = (function() {
 			//Map to track the names we have already seen. If the name is a key in the map, it means
 			//we have seen it already. Optionally, the value associated to the key may be a function'
 			//containing some deferred work we need to do if we see the same name again.
 			var namesSeenMap = {};
-			
+
 			function doAppend(domElement, resource) {
 				var path = resource.folderName ? resource.folderName : resource.path;
 				// trim off the leading inferred fs root
@@ -94,7 +94,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				}
 				domElement.appendChild(document.createTextNode(' - ' + path + ' '));
 			}
-			
+
 			function appendPath(domElement, resource) {
 				var name = resource.name;
 				if (namesSeenMap.hasOwnProperty(name)) {
@@ -118,7 +118,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			//maps paths to dom elements showing them on screen. If a result is revoked this allows us to
 			//easily find and destroy it.
 		};
-		
+
 		var historyEntriesInTable = {};
 
 		return {
@@ -127,12 +127,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				var history = pageState.getHistory();
 				for (var h=history.length-1;h>=0;h--) {
 					var historyElement = history[h];
-					var segments = historyElement.path.split('/');
-					var name = segments[segments.length-1];
-					segments.splice(-1,1);
-					var parent = segments.join('/');
-					var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
-					this.add(resource);
+					if (historyElement.path.charAt(historyElement.path.length-1)!=='/') {
+						var segments = historyElement.path.split('/');
+						var name = segments[segments.length-1];
+						segments.splice(-1,1);
+						var parent = segments.join('/');
+						var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
+						this.add(resource);
+					}
 				}
 			},
 			revoke: function (path) {
@@ -166,23 +168,25 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					// This must be the first one!
 					foundValidHit = true;
 					$(resultsNode).empty();
-					
+
 					table = document.createElement('div');
 					table.id = 'dialog_results';
 					$(resultsNode).append(table);
 					firstresult=true;
 				}
-			   
-				
+
+
 				// If previously displaying the message about no results, remove it
 				var noresultsMessage = $(".dialog_noresults_row",$(that.dialog));
 				if (noresultsMessage) {
 					noresultsMessage.remove();
 				}
-			
+
 				var row = document.createElement('div');
 				$(row).addClass("dialog_results_row");
 				if (resource.row_number) {
+					// it is a history element
+					$(row).addClass('dialog_history_row');
 					var kids = $(table).children();
 					$(table).prepend(row);
 					var linkSelected = $(".dialog_outline_row",$(that.dialog));
@@ -195,11 +199,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				} else {
 					$(table).append(row);
 				}
-				
-				
+
+
 				var upper = document.createElement('div');
 				var lower = document.createElement('div');
-				
+
 				if (resource.path) {
 					results[resource.path] = row;
 				}
@@ -218,11 +222,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				}
 
 				resourceLink.setAttribute('href', loc);
+				// Entries from history get an id tagged for use later
+				if (resource.row_number) {
+					$(resourceLink).attr('id',resource.path);
+				}
 				$(resourceLink).css("verticalAlign","middle");
 
 				upper.appendChild(resourceLink);
-//				$(lower).append(document.createTextNode('lower'));
-				
+
 				var path = resource.folderName ? resource.folderName : resource.path;
 				// trim off the leading inferred fs root
 				if (path.indexOf(window.fsroot)===0) {
@@ -233,10 +240,10 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				}
 				lower.appendChild(document.createTextNode(path + '\u00a0'));
 				$(lower).addClass('smallerText');
-				
+
 				$(row).append(upper);
 				$(row).append(lower);
-				
+
 				// On clicking the link in this row, change the editor contents
 				$("a",row).each(function(resourceLink) {
 					$(this).off('click');
@@ -257,7 +264,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 					// If this isn't done in a timeout block then on windows firefox(17.0.1) the return
 					// key seems to get into the editor and surface as a temporary newline in the
 					// text - it isn't really there (reload and it'll disappear), very annoying.
-					var link = $("a",this);				
+					var link = $("a",this);
 					setTimeout(function() { link.trigger(click);},0);
 					return false;
 				});
@@ -293,14 +300,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		}
 		$(this.activeElement).focus();
 	}
-	
+
 	/**
 	 * (re)size the mask - which should fill the screen whilst visible.
 	 */
 	var popupOrResizeMask = function(dialogId) {
 	    $('#dialog_mask').css({height:$(document).height(), width:$(document).width()}).show();
 	};
-	
+
 	/**
 	 * Position the dialog
 	 */
@@ -316,7 +323,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		}
 	    $(dialogId).css({top:dialogTop, left:dialogLeft}).show();
 	};
-	
+
 	/**
 	 * Convert a pattern that uses '*' into a regexp.
 	 *
@@ -337,7 +344,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		return toRegexp;
 
 	})();
-	
+
 	var updateHistoryEntries = function(text) {
 		var history = pageState.getHistory();
 		var regex = this.toRegexp(text);
@@ -350,23 +357,25 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		// add those back in that match the regex
 		for (h=history.length-1;h>=0;h--) {
 			historyElement = history[h];
-			var segments = historyElement.path.split('/');
-			var name = segments[segments.length-1];
-			segments.splice(-1,1);
-			var parent = segments.join('/');
-			var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
-			if (regex.test(name)) {
-				this.renderer.add(resource);
+			if (historyElement.path.charAt(historyElement.path.length-1)!=='/') {
+				var segments = historyElement.path.split('/');
+				var name = segments[segments.length-1];
+				segments.splice(-1,1);
+				var parent = segments.join('/');
+				var resource = {name: name , path: historyElement.path, folderName: parent, directory:false, row_number: h+1};
+				if (regex.test(name)) {
+					this.renderer.add(resource);
+				}
 			}
 		}
 	};
-	
+
 	var doSearch = function() {
-	
+
 // TODO	here you need to do the same algorithm as isearch to add the still valid entries and revoke those that don't match, the
 // add/revoke may need code adding to cope with things already there or that aren't there because it doesn't have a way to query if it is there.
 
-		
+
 		var text = $('#dialog_filename').val();
 		if (this.currentQuery !== null && this.currentQuery === text) {
 			return;
@@ -406,7 +415,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 			}
 		}
 	}
-	
+
 	var openDialog = function(editor, changeFile, onCancel) {
 		this.startSearch = startSearch;
 		this.rendererFactory = makeIncrementalRenderer;
@@ -420,9 +429,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		this.selected = -1;
 		this.editor = editor;
 		this.updateHistoryEntries = updateHistoryEntries;
-		
+
 		var that = this;
-		
+
 		$("#dialogs").append('<div id="dialog_mask"></div>');
 		$("#dialogs").append(dialogText);
 
@@ -475,7 +484,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 						that.selected = nextSelected;
 					}
 				}
-				
+
 				// This code adjust the scroll bars to try and ensure the selection
 				// stays on screen
 				var r = $("#dialog_openfile_results");
@@ -484,14 +493,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				var linkHeight = $(links[0]).outerHeight();
 				var scrollAreaHeight = dialog_results.height();
 				var viewHeight = $(r).height();
-				
+
 				var viewWidth = dialog_results.width();
 				var scrollWidth = dialog_results.get(0).scrollWidth;
 				// if horizontal scrollbar is on, adjust our viewport
 				if (scrollWidth>viewWidth) {
 					viewHeight-=linkHeight;
 				}
-				
+
 				var pos = ((that.selected+1)*linkHeight);
 				var oldpos = ((currentSelection+1)*linkHeight);
 				var wasOffScreen = (oldpos-scrollPositionOfResults)>viewHeight || oldpos<=scrollPositionOfResults;
@@ -553,6 +562,19 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				// Pressing ESCAPE closes the dialog (and mask) and refocuses to the original element
 				that.closeDialog();
 				return false;
+			} else if (e.keyCode === 46/*DELETE*/) {
+				var all_links = $("a",$(that.dialog));
+				if (all_links && all_links.length>0) {
+					var selected_link = all_links[(that.selected===-1)?0:that.selected];
+					var id = selected_link.id;
+					// History related results have an id
+					if (id) {
+						console.log(selected_link.id);
+						pageState.removeHistoryEntry(selected_link.id);
+						that.renderer.revoke(selected_link.id);
+						return false;
+					}
+				}
 			}
 		});
 
@@ -561,7 +583,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 		$(this.dialog).on('keyup.dialogs',function( e ) {
 			doSearch.bind(that)();
 		});
-		
+
 		$(this.dialog).off('click.dialogs');
 		$(this.dialog).on('click.dialogs',function() {
 			    $('#dialog_filename').focus();
@@ -574,11 +596,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "servlets/in
 				popupOrResizeMask(that.dialog);
 			}
 		});
-		
+
 		popupOrResizeMask(this.dialog);
-		
+
 		positionDialog(this.dialog);
-		
+
 	    $('#dialog_filename').focus();
     };
 

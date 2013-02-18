@@ -329,6 +329,10 @@ footer{
 	width:100%;
 }
 
+.breadcrumb_menu li {
+	padding: 2px 0px;
+}
+
 .contentassist > div{
 	white-space:nowrap;
 }
@@ -342,11 +346,20 @@ footer{
 }
 
 /*
-	Navigator styles
-*/
+ * Navigator styles
+ */
 .secondaryColumn {/*
 	padding:0 2px;*/
 	width:100%;
+}
+
+#navigator-header {
+	overflow: hidden;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size: 12px;
+	color: #eee;
+	text-align: center;
+	padding: 4px 0px 4px 0px;
 }
 
 .arrow {
@@ -883,10 +896,21 @@ a.dialog_button:hover {
 
 .dialog .smallerText {
   font-size:12px;
+  color: #666;
 }
 
 .dialog_outline_row {
 	background: #bbb;
+}
+
+.dialog_history_row a {
+	font-weight: bold;
+	color: #333;
+}
+
+
+.dialog_results_row a {
+	color: #333;
 }
 
 .dialog_results_list div {

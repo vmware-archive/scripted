@@ -260,6 +260,20 @@ define(['scripted/utils/storage', 'scriptedLogger', 'lib/json5'], function(stora
 			editorPrefix = prefix;
 		},
 
+		/**
+		 * An entry with the specified path will be removed from the history
+		 * if it exists.
+		 */
+		removeHistoryEntry: function(path) {
+			var scriptedHistory = this.getHistory();
+			for (var i = 0; i < scriptedHistory.length; i++) {
+				if (scriptedHistory[i].path === path) {
+					scriptedHistory.splice(i,1);
+				}
+			}
+			this.setHistory(scriptedHistory);
+		},
+
 		storeScriptedHistory : function(histItem) {
 			var scriptedHistory = this.getHistory();
 			for (var i = 0; i < scriptedHistory.length; i++) {
