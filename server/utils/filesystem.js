@@ -14,7 +14,7 @@
 /*global require exports console module process */
 
 var fs = require('fs');
-var subfs = require('../plugable-fs/sub-fs');
+var mappedFs = require('../plugable-fs/mapped-fs');
 var scriptedfs = require('../plugable-fs/scripted-fs');
 var pathResolve = require('../jsdepend/utils').pathResolve;
 
@@ -33,13 +33,12 @@ function ignore(name) {
 	return result;
 }
 
-exports.withPrefix = require('../plugable-fs/prefixed-fs').withPrefix;
 exports.withBaseDir = function (baseDir, options) {
-	var corefs = subfs.withBaseDir(baseDir, fs);
+	var corefs = mappedFs.withBaseDir(baseDir, fs);
 	options = options || {};
 	if (!baseDir) {
-		//For backwards compatibiltiy and convenience, ensure we configure
-		// userHome and scriptedHome
+		//For 'raw' nodejs fs ensure automatically configure
+		//userHome and scriptedHome
 		options.userHome = options.userHome || process.env[(process.platform === 'win32') ? 'USERPROFILE' : 'HOME'];
 		options.scriptedHome = options.scriptedHome || pathResolve(__dirname, '../..');
 	}

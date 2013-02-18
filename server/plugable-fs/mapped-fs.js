@@ -27,6 +27,7 @@ function withBaseDir(baseDir, fs) {
 	function idFun(x) { return x; }
 
 	var fs_handle2file, fs_file2handle;
+
 	if (fs === nodefs) {
 		fs_handle2file = idFun;
 		fs_file2handle = idFun;
@@ -41,9 +42,9 @@ function withBaseDir(baseDir, fs) {
 			baseDir += '/';
 		}
 	}
-	var encoding = 'UTF-8';
 
 	function noExistError(funName, handle) {
+		//Return something similar to what node fs returns when a file does not exist.
 		var err = new Error('[Error: ENOENT, '+funName+' '+JSON.stringify(handle)+']');
 		err.errno = 34;
 		err.code = 'ENOENT';
