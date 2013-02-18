@@ -54,13 +54,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		this.range = range;
 		this.path = path;
 	};
-	
+
 	// From ecma script manual 262 section 15
 	// the global object when not in browser or node
 	var Global = function() {};
 	Global.prototype = {
 		$$proto : new Definition("Object"),
-		
+
 		decodeURI : new Definition("?String:uri"),
 		encodeURI : new Definition("?String:uri"),
 		'eval' : new Definition("?Object:toEval"),
@@ -88,7 +88,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		// not included since not meant to be referenced directly
 		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError
 	};
-	
+
 	// Node module
 	var Module = function() {};
 	Module.prototype = {
@@ -135,12 +135,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		__filename: new Definition("String"),
 		__dirname: new Definition("String")
 	};
-	
+
 	var Window = function() {};
 	Window.prototype = {
 		// copied from Global
 		$$proto : new Definition("Object"),
-		
+
 		decodeURI : new Definition("?String:uri"),
 		encodeURI : new Definition("?String:uri"),
 		'eval' : new Definition("?Object:toEval"),
@@ -303,14 +303,14 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		Event : new Definition("*Event:type"),
 		Node : new Definition("*Node:")
 	};
-	
+
 	var initialGlobalProperties = [];
 	for (var prop in Global) {
 		if (Global.hasOwnProperty(prop)) {
 			initialGlobalProperties.push(prop);
 		}
 	}
-	
+
 	for (prop in Window) {
 		if (Window.hasOwnProperty(prop)) {
 			initialGlobalProperties.push(prop);
@@ -321,7 +321,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 	 * A prototype that contains the common built-in types
 	 */
 	var Types = function(globalObjName) {
-	
+
 		// this object can be touched by clients
 		// and so must not be in the prototype
 		// the global 'this'
@@ -332,7 +332,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		} else {
 			this.Global = new Global();
 		}
-		
+
 		// TODO FIXADE should be declared on prototype
 		this.clearDefaultGlobal = function() {
 			for (var i = 0; i < initialGlobalProperties.length; i++) {
@@ -366,7 +366,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$_$isPrototypeOf: new Definition("?Boolean:object"),
 			$_$propertyIsEnumerable: new Definition("?Boolean:property")
 		},
-		
+
 		/**
 		 * See 15.3.4 Properties of the Function Prototype Object
 		 */
@@ -410,7 +410,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			reduceRight : new Definition("?Array:callbackFn,[initialValue]"),
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.5.4 Properties of the String Prototype Object
 		 */
@@ -437,7 +437,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.6.4 Properties of the Boolean Prototype Object
 		 */
@@ -445,7 +445,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.7.4 Properties of the Number Prototype Object
 		 */
@@ -455,17 +455,17 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			toFixed : new Definition("?Number:digits"),
 			toPrecision : new Definition("?Number:digits"),
 			// do we want to include NaN, MAX_VALUE, etc?
-		
+
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.8.1 15.8.2 Properties and functions of the Math Object
 		 * Note that this object is not used as a prototype to define other objects
 		 */
 		Math : {
 			$$isBuiltin: true,
-		
+
 			// properties
 			E : new Definition("Number"),
 			LN2 : new Definition("Number"),
@@ -475,7 +475,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			PI : new Definition("Number"),
 			SQRT1_2 : new Definition("Number"),
 			SQRT2 : new Definition("Number"),
-		
+
 			// Methods
 			abs : new Definition("?Number:val"),
 			acos : new Definition("?Number:val"),
@@ -498,7 +498,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$proto : new Definition("Object")
 		},
 
-		
+
 		/**
 		 * See 15.9.5 Properties of the Date Prototype Object
 		 */
@@ -511,7 +511,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			toJSON : new Definition("?Object:key"),
 			toLocaleDateString : new Definition("?String:"),
 			toLocaleTimeString : new Definition("?String:"),
-			
+
 			getTime : new Definition("?Number:"),
 			getTimezoneOffset : new Definition("?Number:"),
 
@@ -531,7 +531,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			getUTCMonth : new Definition("?Number:"),
 			getDate : new Definition("?Number:"),
 			getUTCDate : new Definition("?Number:"),
-			
+
 			setTime : new Definition("?Number:"),
 			setTimezoneOffset : new Definition("?Number:"),
 
@@ -551,10 +551,10 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			setUTCMonth : new Definition("?Number:month,[date]"),
 			setDate : new Definition("?Number:date"),
 			setUTCDate : new Definition("?Number:gate"),
-			
+
 			$$proto : new Definition("Object")
 		},
-		
+
 		/**
 		 * See 15.10.6 Properties of the RexExp Prototype Object
 		 */
@@ -569,17 +569,17 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			ignoreCase : new Definition("Boolean"),
 			multiline : new Definition("Boolean"),
 			lastIndex : new Definition("Boolean"),
-			
+
 			exec : new Definition("?Array:str"),
 			test : new Definition("?Boolean:str"),
-			
+
 			$$proto : new Definition("Object")
 		},
-		
+
 		"?RegExp:" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
-		
+
 			$1 : new Definition("String"),
 			$2 : new Definition("String"),
 			$3 : new Definition("String"),
@@ -594,8 +594,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			input : new Definition("String"),
 			name : new Definition("String")
 		},
-		
-		
+
+
 		/**
 		 * See 15.11.4 Properties of the Error Prototype Object
 		 * We don't distinguish between kinds of errors
@@ -615,7 +615,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			callee : new Definition("Function"),
 			length : new Definition("Number"),
-			
+
 			$$proto : new Definition("Object")
 		},
 
@@ -629,12 +629,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			stringify : new Definition("?String:obj"),
 			$$proto : new Definition("Object")
 		},
-		
+
 		"undefined" : {
 			$$isBuiltin: true
 		},
-		
-		
+
+
 		///////////////////////////////////////////////////
 		// Node specific types
 		///////////////////////////////////////////////////
@@ -642,7 +642,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		Process : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-		
+
 			on: new Definition("?undefined:kind,callback"),
 
 			abort: new Definition("?undefined:"),
@@ -672,7 +672,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			uptime: new Definition("?Number:"),
 			hrtime: new Definition("?Array:") // Array.<Number>
 		},
-		
+
 		// See http://nodejs.org/api/stream.html
 		// Stream is a wierd one since it is built into the stream module,
 		// but this module isn't always around, so must explicitly define it.
@@ -680,9 +680,9 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 			// combines readable and writable streams
-			
+
 			// readable
-			
+
 			// events
 			data: new Definition("?undefined:data"),
 			error: new Definition("?undefined:exception"),
@@ -705,16 +705,16 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			destroy: new Definition("?undefined:"),
 			destroySoon: new Definition("?undefined:")
 		},
-		
+
 		///////////////////////////////////////////////////
 		// Browser specific types
 		///////////////////////////////////////////////////
-		
+
 		// https://developer.mozilla.org/en/DOM/window.screen
 		Screen : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			availTop : new Definition("Number"),
 			availLeft : new Definition("Number"),
 			availHeight : new Definition("Number"),
@@ -732,22 +732,22 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		BarInfo : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			visible : new Definition("Boolean")
 		},
-		
+
 		// http://w3c-test.org/webperf/specs/NavigationTiming/
 		// incomplete
 		Performance : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/window.navigator
 		Navigator : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			// properties
 			appName : new Definition("String"),
 			appVersion : new Definition("String"),
@@ -760,13 +760,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			platform : new Definition("String"),
 			plugins : new Definition("String"),
 			userAgent : new Definition("String"),
-			
+
 			// methods
 			javaEnabled : new Definition("?Boolean:"),
 			registerContentHandler : new Definition("?undefined:mimType,url,title"),
 			registerProtocolHandler : new Definition("?undefined:protocol,url,title")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeTypeArray.html
 		MimeTypeArray : {
 			$$isBuiltin: true,
@@ -774,7 +774,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			item : new Definition("?MimeType:index"),
 			namedItem : new Definition("?MimeType:name")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeType.html
 		MimeType : {
 			$$isBuiltin: true,
@@ -783,7 +783,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			type : new Definition("String"),
 			enabledPlugin : new Definition("Plugin")
 		},
-		
+
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/Plugin.html
 		Plugin : {
 			$$isBuiltin: true,
@@ -794,30 +794,30 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			item : new Definition("?MimeType:index"),
 			namedItem : new Definition("?MimeType:name")
 		},
-		
+
 		// http://dvcs.w3.org/hg/dap/raw-file/tip/network-api/Overview.html#the-connection-interface
 		Connection : {
 			$$isBuiltin: true,
 			bandwidth : new Definition("Number"),
 			metered : new Definition("Boolean"),
-			
+
 			onchange : new Definition("Function")
 		},
-		
+
 		// http://dev.w3.org/html5/webstorage/#storage-0
 		Storage : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
 			length : new Definition("Number"),
-			
+
 			key : new Definition("?String:idx"),
 			getItem : new Definition("?String:key"),
 			setItem : new Definition("?undefined:key,value"),
 			removeItem : new Definition("?undefined:key"),
 			clear : new Definition("?undefined:")
 		},
-		
+
 		// http://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#interface-xmlhttprequest
 		XMLHttpRequest : {
 			$$isBuiltin: true,
@@ -833,7 +833,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			upload : new Definition("Object"), // not right
 			send : new Definition("?undefined:[data]"),
 			abort : new Definition("?undefined:"),
-			
+
 			// response
 			getResponseHeader : new Definition("?String:header"),
 			getAllResponseHeaders : new Definition("?String:"),
@@ -846,7 +846,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			status : new Definition("Number"),
 			statusText : new Definition("String")
 		},
-		
+
 		// http://www.w3.org/TR/workers/
 		Worker : {
 			$$isBuiltin: true,
@@ -856,13 +856,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			postMessage : new Definition("?undefined:message,[transfer]"),
 			onmessage : new Definition("?undefined:")
 		},
-		
+
 		// http://www.w3.org/TR/workers/#messageport
 		MessagePort : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// http://www.whatwg.org/specs/web-apps/current-work/multipage//network.html#websocket
 		WebSocket : {
 			$$isBuiltin: true,
@@ -872,15 +872,15 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			onopen : new Definition("EventHandler"),
 			onerror : new Definition("EventHandler"),
 			onclose : new Definition("EventHandler"),
-			
+
 			readyState : new Definition("Number"),
 			extensions : new Definition("String"),
 			protocol : new Definition("String"),
-			
+
 			close : new Definition("?undefined:[reason]"),
 			send :  new Definition("?undefined:data")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/Console
 		Console : {
 			$$isBuiltin: true,
@@ -904,12 +904,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// https://developer.mozilla.org/en/DOM/Event
 		Event : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			// properties
 			bubbles : new Definition("Boolean"),
 			cancelable : new Definition("Boolean"),
@@ -921,43 +921,43 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			target : new Definition("Object"),
 			timeStamp : new Definition("Number"),
 			isTrusted : new Definition("Boolean"),
-			
+
 			// methods
 			initEvent : new Definition("?undefined:type,bubbles,cancelable"),
 			preventDefault : new Definition("?undefined:"),
 			stopImmediatePropagation : new Definition("?undefined:"),
 			stopPropagation : new Definition("?undefined:")
 		},
-		
+
 		"?Event:" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
-			
+
 			CAPTURING_PHASE : new Definition("Number"),
 			AT_TARGET : new Definition("Number"),
 			BUBBLING_PHASE : new Definition("Number")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#documenttype
 		DocumentType : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			name : new Definition("String"),
 			publicId : new Definition("String"),
 			systemId : new Definition("String"),
-			
+
 			before : new Definition("?undefined:nodeOrString"),
 			after : new Definition("?undefined:nodeOrString"),
 			replace : new Definition("?undefined:nodeOrString"),
 			remove : new Definition("?undefined:")
 		},
-		
+
 		// see http://www.whatwg.org/specs/web-apps/current-work/multipage/history.html#the-history-interface
 		History : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			length : new Definition("Number"),
 			state : new Definition("Object"),
 
@@ -967,13 +967,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			pushState : new Definition("?undefined:data,title,url"),
 			replaceState : new Definition("?undefined:data,title,url")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#document (complete)
 		// see http://www.w3.org/TR/html5/dom.html#documents-in-the-dom (incomplete)
 		Document : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			implementation : new Definition("DOMImplementation"),
 			URL : new Definition("String"),
 			documentURI : new Definition("String"),
@@ -1005,18 +1005,18 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			prepend : new Definition("?undefined:[nodes]"),
 			append : new Definition("?undefined:[nodes]")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#domimplementation
 		DOMImplementation : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			createDocumentType : new Definition("?DocumentType:qualifiedName,publicId,systemId"),
 			createDocument : new Definition("?Document:namespace,qualifiedName,doctype"),
 			createHTMLDocument : new Definition("?Document:title"),
 			hasFeature : new Definition("?Boolean:feature")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#node
 		Node : {
 			$$isBuiltin: true,
@@ -1050,7 +1050,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			lookupNamespaceURI : new Definition("?String:prefix"),
 			isDefaultNamespace : new Definition("?Boolean:namespace")
 		},
-		
+
 		// Constants declared on Node
 		"?Node:" : {
 			$$isBuiltin: true,
@@ -1075,12 +1075,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			DOCUMENT_POSITION_CONTAINED_BY : new Definition("Number"),
 			DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC : new Definition("Number")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#element
 		Element : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			namespaceURI : new Definition("String"),
 			prefix : new Definition("String"),
 			localName : new Definition("String"),
@@ -1121,12 +1121,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			replace : new Definition("?undefined:[nodes]"),
 			remove : new Definition("?undefined:")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#attr
 		Attr : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
-			
+
 			isId : new Definition("Boolean"),
 			name : new Definition("String"),
 			value : new Definition("String"),
@@ -1134,22 +1134,22 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			prefix : new Definition("String"),
 			localName : new Definition("String")
 		},
-		
+
 		// see http://www.w3.org/TR/dom/#interface-nodelist
 		NodeList : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			item : new Definition("Node"),
 			length : new Definition("Number")
 		},
-		
+
 		// incomplete
 		DOMApplicationCache : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// incomplete
 		CSSStyleDeclaration : {
 			$$isBuiltin: true,
@@ -1164,7 +1164,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		Location : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			assign : new Definition("?undefined:url"),
 			replace : new Definition("?undefined:url"),
 			reload : new Definition("?undefined:"),
@@ -1178,12 +1178,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			search : new Definition("String"),
 			hash : new Definition("String")
 		},
-		
+
 		// see http://dvcs.w3.org/hg/editing/raw-file/tip/editing.html#selections
 		Selection : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
-			
+
 			anchorNode : new Definition("Node"),
 			anchorOffset : new Definition("Number"),
 			focusNode : new Definition("Node"),
@@ -1206,33 +1206,33 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			removeRange : new Definition("?undefined:range"),
 			removeAllRanges : new Definition("?undefined:")
 		},
-		
+
 		// see http://www.w3.org/TR/html5/the-html-element.html#the-html-element
 		// incomplete
 		HTMLElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Element"),
-			
+
 			id : new Definition("String"),
 			title : new Definition("String"),
 			lang : new Definition("String"),
 			dir : new Definition("String"),
 			className : new Definition("String")
 		},
-		 
+
 		// see http://www.w3.org/TR/html5/the-img-element.html#htmlimageelement
 		// incomplete
 		HTMLImageElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("HTMLElement")
 		},
-		 
+
 		// incomplete
 		HTMLOptionElement : {
 			$$isBuiltin: true,
 			$$proto : new Definition("HTMLElement")
 		},
-		 
+
 		// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75708506
 		HTMLCollection : {
 			$$isBuiltin: true,
@@ -1241,19 +1241,19 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			item : new Definition("?Element:index"),
 			namedItem : new Definition("?Element:name")
 		},
-		
+
 		// incomplete
 		NodeIterator : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// incomplete
 		TreeWalker : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Object")
 		},
-		
+
 		// http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-documentfragment
 		DocumentFragment : {
 			$$isBuiltin: true,
@@ -1268,19 +1268,19 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// incomplete
 		ProcessingInstruction : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// incomplete
 		Comment : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node")
 		},
-		
+
 		// see http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#ranges
 		Range: {
 			$$isBuiltin: true,
@@ -1320,7 +1320,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 
 			intersectsNode : new Definition("?Boolean:node")
 		},
-		
+
 		"?Range:" : {
 			$$isBuiltin: true,
 			START_TO_START : new Definition("Number"),
@@ -1328,8 +1328,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			END_TO_END : new Definition("Number"),
 			END_TO_START : new Definition("Number")
 		},
-		
-		
+
+
 		// incomplete
 		DOMTokenList: {
 			$$isBuiltin: true,
@@ -1343,7 +1343,7 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			remove : new Definition("?undefined:token"),
 			toggle : new Definition("?Boolean:token")
 		}
-		
+
 // HTML constructors
 // http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-33759296
 /*
@@ -1564,31 +1564,31 @@ SVGPathSeg
 SVGFEFuncAElement
 */
 	};
-	
+
 	var protoLength = "~proto".length;
 	return {
 		Types : Types,
 		Definition : Definition,
-		
+
 		// now some functions that handle types signatures, styling, and parsing
-		
+
 		/** constant that defines generated type name prefixes */
 		GEN_NAME : "gen~",
-	
+
 
 		// type parsing
 		isArrayType : function(typeName) {
 			return typeName.substr(0, "Array.<".length) === "Array.<";
 		},
-		
+
 		isFunctionOrConstructor : function(typeName) {
 			return typeName.charAt(0) === "?" || typeName.charAt(0) === "*";
 		},
-		
+
 		isPrototype : function(typeName) {
 			return typeName.charAt(0) === "*" && typeName.substr( - protoLength, protoLength) === "~proto";
 		},
-		
+
 		findReturnTypeEnd : function(fnType) {
 			if (this.isFunctionOrConstructor(fnType)) {
 				// walk the string and for every ? or *, find the corresponding :, until we reach the
@@ -1596,25 +1596,25 @@ SVGFEFuncAElement
 				var depth = 1;
 				var index = 1;
 				var len = fnType.length;
-				
+
 				while (index < len) {
 					if (this.isFunctionOrConstructor(fnType.charAt(index))) {
 						depth++;
 					} else if (fnType.charAt(index) === ":") {
 						depth--;
 					}
-					
+
 					if (depth === 0) {
 						// found it
 						return index;
 					}
-					
+
 					index++;
 				}
 			}
 			return -1;
 		},
-		
+
 		removeParameters : function(fnType) {
 			var index = this.findReturnTypeEnd(fnType);
 			if (index >= 0) {
@@ -1624,7 +1624,7 @@ SVGFEFuncAElement
 			// or just not a function type
 			return fnType;
 		},
-		
+
 		/**
 		 * if the type passed in is a function type, extracts the return type
 		 * otherwise returns as is
@@ -1638,14 +1638,14 @@ SVGFEFuncAElement
 			// or just not a function type
 			return fnType;
 		},
-	
+
 		/**
 		 * returns a parameterized array type with the given type parameter
 		 */
 		parameterizeArray : function(parameterType) {
 			return "Array.<" + parameterType + ">";
 		},
-		
+
 		/**
 		 * If this is a parameterized array type, then extracts the type,
 		 * Otherwise object
@@ -1696,7 +1696,7 @@ SVGFEFuncAElement
 			}
 			return result;
 		},
-		
+
 		/**
 		 * Best effort to recursively convert from a jsdoc type specification to a scripted type name.
 		 *
@@ -1726,7 +1726,7 @@ SVGFEFuncAElement
 			if (!jsdocType) {
 				return null;
 			}
-		
+
 			var i;
 			switch (jsdocType.type) {
 				case 'NullableLiteral':
@@ -1745,7 +1745,7 @@ SVGFEFuncAElement
 						return this.convertJsDocType(jsdocType.elements[0], env);
 					}
 					return "Object";
-					
+
 				case 'RestType':
 					return "Array.<" + this.convertJsDocType(jsdocType.expression, env) + ">";
 				case 'ArrayType':
@@ -1801,7 +1801,7 @@ SVGFEFuncAElement
 				case 'OptionalType':
 				case 'NullableType':
 					return this.convertJsDocType(jsdocType.expression, env);
-					
+
 				case 'NameExpression':
 					var name = jsdocType.name;
 					name = name.trim();
@@ -1838,15 +1838,15 @@ SVGFEFuncAElement
 
 		// type styling
 		styleAsProperty : function(prop, useHtml) {
-			return useHtml ? "<span style=\"color: red;font-weight:bold;\">" + prop + "</span>": prop;
+			return useHtml ? "<span style=\"color: blue;font-weight:bold;\">" + prop + "</span>": prop;
 		},
 		styleAsType : function(type, useHtml) {
-			return useHtml ? "<span style=\"color: blue;font-weight:bold;\">" + type + "</span>": type;
+			return useHtml ? "<span style=\"color: green;font-weight:bold;\">" + type + "</span>": type;
 		},
 		styleAsOther : function(text, useHtml) {
 			return useHtml ? "<span style=\"font-style:italic;\">" + text + "</span>": text;
 		},
-		
+
 		/**
 		 * creates a human readable type name from the name given
 		 */
@@ -1871,7 +1871,7 @@ SVGFEFuncAElement
 						var argName = typeSplit > 0 ? arg.substring(0, typeSplit) : arg;
 						argName = self.styleAsProperty(argName, useHtml);
 						var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
-						
+
 						if (argSig) {
 							var sig = self.createReadableType(argSig, env, true, depth+1, useHtml);
 							if (sig === "{  }") {
@@ -1883,7 +1883,7 @@ SVGFEFuncAElement
 							argsSigs.push(argName);
 						}
 					});
-					
+
 					// note the use of the ⇒ &rArr; char here.  Must use the char directly since js_render will format it otherwise
 					return prefix + "(" + argsSigs.join(", ") +
 						(useHtml ? ")<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;", depth+1) + "⇒ " : ") ⇒ ") +
@@ -1898,7 +1898,7 @@ SVGFEFuncAElement
 					// don't show inner types
 					return this.styleAsOther("{...}", useHtml);
 				}
-				
+
 				// create a summary
 				var type = env.findType(typeName);
 				var res = "{ ";
