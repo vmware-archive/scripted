@@ -10,15 +10,15 @@
  * Contributors:
  *     Andy Clement
  ******************************************************************************/
- 
+
 /**
  * Some tests can tweak the default behaviour to reduce amount of asynchronous stuff going on, making them
  * easier to write (assuming they are not testing for the async behaviour)
  */
 define(function() {
 
-	var asyncBreadcrumbConstruction = true;
-	var asyncEditorContentLoading = true;
+	var asyncBreadcrumbConstruction = false;
+	var asyncEditorContentLoading = false;
 
 	var getAsyncBreadcrumbConstruction = function() {
 		return asyncBreadcrumbConstruction;
@@ -32,7 +32,7 @@ define(function() {
 	var setAsyncEditorContentLoading = function(b) {
 		asyncEditorContentLoading = b;
 	};
-	
+
 	return {
 		getAsyncBreadcrumbConstruction: getAsyncBreadcrumbConstruction,
 		getAsyncEditorContentLoading: getAsyncEditorContentLoading,
