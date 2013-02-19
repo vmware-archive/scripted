@@ -87,6 +87,9 @@ header{
 	height:100%;
 	overflow:auto;
 	border-top: 5px;
+	margin-bottom: 20px;
+	/*
+	*/
 }
 
 #navigator-wrapper{
@@ -353,13 +356,19 @@ footer{
 	width:100%;
 }
 
-#navigator-header {
-	overflow: hidden;
+#status_root {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size:12px;
+	color:#666;
+	float:left;
+	padding: 0px 0px 0px 4px;
+	/*
+	overflow: hidden;
 	font-size: 12px;
 	color: #eee;
 	text-align: center;
 	padding: 4px 0px 4px 0px;
+	*/
 }
 
 .arrow {

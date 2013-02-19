@@ -47,7 +47,7 @@ function(
 					// must be called inside of configReady since jshint relies on dotScripted
 
 					when.chain(loadJshintrc(dotScripted.jshint,pageState),jshintloader.getDeferred().resolver);
-					
+
 					var v = getNavigatorConfiguredValue(dotScripted);
 					if (typeof v !== 'undefined') {
 						layoutManager.toggleNavigatorVisible(v);
@@ -62,7 +62,7 @@ function(
 					// Perform navigator context menu hook-up
 					contextMenu.initContextMenus('#navigator-wrapper');
 
-					$("#navigator-header").append(document.createTextNode(window.fsroot));
+					$("#status_root").append(document.createTextNode("Project root:"+window.fsroot));
 
 					/*Side panel open/close*/
 					layoutManager.doLayout(fileExplorer, pageState);
@@ -73,7 +73,7 @@ function(
 						mExecConsole.error("Problems getting scripted configuration:\n"+dotScripted.error);
 					}
 				});
-				
+
 				function initializeNavigator(fileExplorer) {
 					var pageState = mPageState.extractPageStateFromUrl(window.location.toString());
 					fileExplorer.loadResourceList(window.fsroot /*pageParams.resource*/ , false, function() {
@@ -97,7 +97,7 @@ function(
 					}
 					// return undefined
 				}
-				
+
 				/* Locate the nearest .jshintrc. It will look relative to the initially opened
 				 * location - so ok if the .jshintrc is at the project root. But if the file is
 				 * elsewhere in the tree it sometimes won't find it depending on what is opened.
