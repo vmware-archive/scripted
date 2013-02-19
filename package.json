@@ -37,7 +37,7 @@
         "node-static": "0.5.9",
         "optimist": "0.3.5",
         "rest": "0.8.4",
-		"serv": "git+https://github.com/aclement/serv.git#livereload",
+		"serv": "https://github.com/aclement/serv/archive/master.tar.gz",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "1.6.1",
