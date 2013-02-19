@@ -154,7 +154,6 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 	var toggleSidePanel = function() {
 		var sidePanelOpen = mSidePanelManager.isSidePanelOpen();
 		var mainEditor = editorUtils.getMainEditor();
-		var subEditor = editorUtils.getSubEditor();
 
 		storeAllState(true);
 		if (sidePanelOpen) {
@@ -175,6 +174,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 				range:[sel.start, sel.end],
 				scroll: mainEditor.getScroll()
 			}, "sub").then(function() {
+				var subEditor = editorUtils.getSubEditor();
 				subEditor.getTextView().focus();
 			});
 		}
@@ -287,7 +287,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
 		var deferred = when.defer();
-		
+
 		if (mainEditor) {
 			// if any editor exists at all, save the state.
 			mainItem = mPageState.generateHistoryItem(mainEditor);
