@@ -172,18 +172,21 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	};
 
 	tests.asyncTestHistorycrumb1 = function() {
-		setup();
-		var historyMenu = $("#history_menu");
-		// history should be empty because no navigation happened
-		assert.equal(historyMenu.children().length, 0);
-
-		// already on foo.js, navigate to itself
-		mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
-		$(document).one('breadcrumbsInitialized', function() {
-			historyMenu = $("#history_menu");
-
+		setup().then(function() {
+			var historyMenu = $("#history_menu");
+			// history should be empty because no navigation happened
 			assert.equal(historyMenu.children().length, 0);
-			assert.start();
+
+			// already on foo.js, navigate to itself
+			mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
+			$(document).one('breadcrumbsInitialized', function() {
+				historyMenu = $("#history_menu");
+
+				assert.equal(historyMenu.children().length, 1);
+				assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
+				assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#0,0");
+				assert.start();
+			});
 		});
 	};
 
