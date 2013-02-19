@@ -57,7 +57,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 	var initializeHistoryMenu = function() {
 		var historyCrumb = $('#historycrumb');
 		if (!historyCrumb.html()) {
-			historyCrumb = $('<li id="historycrumb" data-id="-1"><span><img src="/images/icon.png" /></span></li>');
+			historyCrumb = $('<li id="historycrumb" data-id="-1"><span float="right" class="awesome">\uf015</span></li>');
 			$('#breadcrumb').append(historyCrumb);
 		}
 		var historyMenu = $('<ul id="history_menu" class="breadcrumb_menu" data-id="-1"></ul>');

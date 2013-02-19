@@ -311,6 +311,12 @@ footer{
 	top: 3px;
 }
 
+
+#breadcrumb #historycrumb {
+	padding: 0px 0px 0px 0px;
+	font-size: 18px;
+}
+
 .breadcrumb_menu{
 	display:none;
 	position:absolute;
@@ -1155,4 +1161,6 @@ a.keybinding_button {
     cursor: pointer;
 }
 
-
+.awesome {
+	font-family: "FontAwesome";
+}

@@ -7,3 +7,8 @@
 	font-family: InconsolataBoldEmbedded;
 	src: url("../fonts/Inconsolata-Bold.ttf") 
 }
+
+@font-face {
+	font-family: 'FontAwesome';
+	src: url("../fonts/fontawesome-webfont.ttf") 
+}
