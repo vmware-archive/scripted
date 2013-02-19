@@ -13,7 +13,7 @@
 	config.paths['servlets/jsdepend-client'] = '../tests/client/indexer/stub-jsdepend';
 	require(config);
 	require(["jquery"],function() {
-		$('document').ready(function() {
+		$(document).ready(function() {
 			// stub out the jsdepend server calls
 			require(["tests/client/nodeunit-shim", 
 			         "scripted/utils/pageState",

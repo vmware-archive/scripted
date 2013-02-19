@@ -33,7 +33,7 @@
 	
 	require(config);
 	require(["jquery"],function() {
-		$('document').ready(function() {
+		$(document).ready(function() {
 			// first ensure that the url is correct
 			window.setTimeout(function() {
 				fixUrl();		
@@ -42,15 +42,16 @@
 					"tests/client/templates/templatesTest", 
 					"scripted/utils/pageState", 
 					"tests/client/common/testutils"],
-					
 					function(navHistoryTests, templatesTest, pageState, testutils) {
 						pageState._setEditorPrefix(window.location.pathname + '?');
-						module('Templates tests');
-						testutils.runTests(templatesTest);
-						module('Nav History tests');
-						testutils.runTests(navHistoryTests);
-						
-						QUnit.start();
+						$(document).on('layoutComplete', function() {
+							module('Templates tests');
+							testutils.runTests(templatesTest);
+							module('Nav History tests');
+							testutils.runTests(navHistoryTests);
+							
+							QUnit.start();
+					});
 				});
 			});
 		});
