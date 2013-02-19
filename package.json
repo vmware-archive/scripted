@@ -43,7 +43,8 @@
         "when": "1.6.1",
         "rest": "0.8.4",
         "express": "3.0.6",
-		"bower": "0.6.8"
+		"bower": "0.6.8",
+		"fake-fs": "https://github.com/tgeorgiev/node-fake-fs/archive/master.tar.gz"
 	},
 	"devDependencies": {
 		"nodeunit": "0.7.4"

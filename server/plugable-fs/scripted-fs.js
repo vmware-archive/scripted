@@ -290,6 +290,8 @@ function configure(fs, options) {
 			if (err) {
 				errback(err);
 			} else {
+				console.log('readdir: '+handle);
+				console.log('=> '+files);
 				callback(files);
 			}
 		});

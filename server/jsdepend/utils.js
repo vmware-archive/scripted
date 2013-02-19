@@ -354,13 +354,14 @@ function mapFilter(arr, f) {
  * an optional trailing slash at the end of the prefix path.
  */
 function pathIsPrefixOf(prefix, path) {
-	//Remove any trailing slahses from prefix
-	while (prefix[prefix.length]==='/') {
+	//Remove any trailing slashes from prefix
+	while (prefix[prefix.length-1]==='/') {
 		prefix = prefix.substring(0, prefix.length-1);
 	}
-	if (startsWith(prefix, path)) {
-		//It could be path prefix... the only caveat is maybe our prefix stops in the
-		// midle of a path segment. So check for that
+	if (startsWith(path, prefix)) {
+		//It is prefix... stringwise, so probably a path prefix...
+		// But... the caveat still to check is that
+		// maybe our prefix stops in the midle of a path segment.
 		return path.length===prefix.length || path[prefix.length]==='/';
 	}
 	return false;
