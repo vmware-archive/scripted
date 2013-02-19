@@ -507,8 +507,13 @@ define([
 			domNode: domNode
 		});
 
-		////////////////////////////////////////
-		// Add extra functions to editor
+		////////////////////////////////////////////////
+		// Add extra functions and properties to editor
+		/**
+		 * Promise that gets resolved once the editor's contents are loaded
+		 */
+		editor.editorLoadedPromise = when.defer();
+
 		editor.getFilePath = function() {
 			return filePath;
 		};
@@ -681,6 +686,9 @@ define([
 						editor.getTextView().setReadonly(false);
 					}
 				}
+				
+				// editor is loaded let everyone who cares about it know this.
+				editor.editorLoadedPromise.resolve(editor);
 			}
         };
         

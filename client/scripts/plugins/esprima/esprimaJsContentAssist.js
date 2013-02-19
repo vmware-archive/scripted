@@ -829,7 +829,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		case "AssignmentExpression":
 			var rightMost = findRightMost(node.left);
 			var qualName = env.getQualifiedName() + findDottedName(node.left);
-			if (rightMost && rightMost.type === "Identifier" || rightMost.type === "Literal") {
+			if (rightMost && (rightMost.type === "Identifier" || rightMost.type === "Literal")) {
 				if (!rightMost.extras) {
 					rightMost.extras = {};
 				}
