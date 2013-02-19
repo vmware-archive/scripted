@@ -44,18 +44,33 @@ The only pre-req for trying it out is that you have Node.js installed. Grab it f
 The team has been testing with a range of versions from 0.6 to 0.8 but haven't tested all of them exhaustively. It is recommended
 that you try to use the latest (0.8.16 at time of writing).
 
-Using the Node Package Manager (`npm`) the very easiest way to try it out is:
+### Installing the most recent release via npm
 
     npm install -g scripted
 
-(possibly with a `sudo` prefix on linux/mac). There are no further steps if installing via this route and `scr` command will immediately be available to launch Scripted.
+(possibly with a `sudo` prefix on linux/mac). This will install the most recently published release. There are no further steps if installing via this route and `scr` command will immediately be available to launch Scripted.
 
-Or you can grab the most recent packaged release from here:
+### Installing the very latest code via npm
+
+This will install directly from master.
+
+    npm install -g https://github.com/scripted-editor/scripted/tarball/master
+
+(again possibly with a `sudo`).
+
+### Download a packaged zip
 
 [Version 0.3.0 zip](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip)<br>
 [Version 0.3.0 Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_3_0/scripted_0_3_0.html)
 
-OR you can live on the bleeding edge by either cloning the repository:
+Once unzipped, ensure the bin folder contents are executable on mac/linux:
+    chmod 755 bin/*
+
+And add the bin folder to your PATH.
+	mac/linux: export PATH=<pathToUnzipLocationOrClone>/bin:$PATH
+	win: set PATH=<pathToUnzipLocationOrClone>\bin;%PATH%
+
+### Clone the repository and install it or run from it:
 
 	git clone https://github.com/scripted-editor/scripted
 	cd scripted
@@ -70,29 +85,12 @@ commands from the root of your clone.
     git clean -fxd
     npm install   
 
-or grabbing the latest repo contents as a zip:
 
-	https://github.com/scripted-editor/scripted/zipball/master
+### Running it
 
-If unpacking an archive make sure the files in the bin folder are executable on mac/linux:
-
-	chmod 755 bin/*
-
-And finally add the bin folder to your path:
-
-Mac/Linux:
-
-	export PATH=<pathToUnzipLocationOrClone>/bin:$PATH
-
-Win:
-
-	set PATH=<pathToUnzipLocationOrClone>\bin;%PATH%
-
-then launch it:
+Whatever route you took to installing it, just run:
 
 	scr myfile.js
-
-(you can use `scripted` to launch it if you'd prefer to type more characters...)
 
 When working with Scripted, think about it like using `vi`/`emacs`. From wherever you are in your terminal window you 
 can launch Scripted and start editing a file.
