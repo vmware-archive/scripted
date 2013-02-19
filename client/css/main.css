@@ -80,12 +80,16 @@ header{
 
 #editor_wrapper{
 	height:100%;
+	background-color: #323232;
 }
 
 #navigator-container{ 
 	height:100%;
 	overflow:auto;
 	border-top: 5px;
+	margin-bottom: 20px;
+	/*
+	*/
 }
 
 #navigator-wrapper{
@@ -98,6 +102,8 @@ header{
 	border-right: 1px solid #646464;
 	*/
 }
+
+
 #navigator-wrapper ::-webkit-scrollbar-corner {
 	background-color: #323232;
 }
@@ -326,6 +332,10 @@ footer{
 	width:100%;
 }
 
+.breadcrumb_menu li {
+	padding: 2px 0px;
+}
+
 .contentassist > div{
 	white-space:nowrap;
 }
@@ -339,11 +349,26 @@ footer{
 }
 
 /*
-	Navigator styles
-*/
+ * Navigator styles
+ */
 .secondaryColumn {/*
 	padding:0 2px;*/
 	width:100%;
+}
+
+#status_root {
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size:12px;
+	color:#666;
+	float:left;
+	padding: 0px 0px 0px 4px;
+	/*
+	overflow: hidden;
+	font-size: 12px;
+	color: #eee;
+	text-align: center;
+	padding: 4px 0px 4px 0px;
+	*/
 }
 
 .arrow {
@@ -880,10 +905,21 @@ a.dialog_button:hover {
 
 .dialog .smallerText {
   font-size:12px;
+  color: #666;
 }
 
 .dialog_outline_row {
 	background: #bbb;
+}
+
+.dialog_history_row a {
+	font-weight: bold;
+	color: #333;
+}
+
+
+.dialog_results_row a {
+	color: #333;
 }
 
 .dialog_results_list div {

@@ -22,7 +22,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 		navigatorVisible = true;
 		storage.safeStoreBoolean(storage.preferenceNavigatorVisible,navigatorVisible);
 	}
-	
+
 	// parameter is optional. No parameter = switch state. Parameter = force state.
 	var toggleNavigatorVisible = function(isVisible) {
 		if (typeof isVisible !== 'undefined' ) {
@@ -33,16 +33,16 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 		storage.safeStoreBoolean(storage.preferenceNavigatorVisible,navigatorVisible);
 		this.updatePageElements();
 	};
-	
+
 	/* Position the pieces of the page */
 	var updatePageElements =  function() {
-	
+
 		var editorNode = $(this.editorNode);  // injected through wire
 		var breadcrumb = $('#breadcrumb');
 		var nav = $('#navigator-wrapper');
 		var helpPanel = $('#help_panel');
 		var main = $('#main');
-		
+
 		var footer_height = $('footer').outerHeight();
 		var header_height = $('header').outerHeight();
 		var breadcrumb_height = $('#breadcrumb').outerHeight();
@@ -60,22 +60,22 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			}
 			nav.width(storedWidth);
 			nav.resize();
-			breadcrumb.width(editorNode.width());
+//			breadcrumb.width(editorNode.width());
 			breadcrumb.css('margin-left',editorNode.css('margin-left'));
 			breadcrumb.trigger('widthchange');
 		} else {
 			nav.hide();
 			editorNode.css('margin-left', 0);
 			editorNode.css("left", "0px");
-			breadcrumb.width(editorNode.width());
+//			breadcrumb.width(editorNode.width());
 			breadcrumb.css('margin-left',editorNode.css('margin-left'));
 			breadcrumb.trigger('widthchange');
 		}
 	};
-	
-	
+
+
 	return {
-	
+
 		toggleNavigatorVisible: toggleNavigatorVisible,
 
 		/*
@@ -140,14 +140,14 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			require(['scripted/keybindings/keyhelp'], function(mKeyHelp) {
 				//console.log('Keybindings help-panel is ready');
 			});
-			
+
 			// add live reloading support
 			require(['scripted/application-manager']);
-			
+
 			require(['scripted/editor/themeManager']);
 
 			$('#side_toggle').on('click', mNavHistory.toggleSidePanel);
-			
+
 			var footer_height = $('footer').outerHeight();
 			var header_height = $('header').outerHeight();
 			var breadcrumb_height = $('#breadcrumb').outerHeight();
@@ -169,7 +169,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 
 				$('#main').height(main_height);
 				$('#side_panel').height(main_height);
-				
+
 				var sideHeight = $('#side_panel').height();
 				var subeditorMargin = parseInt($('.subeditor_wrapper').css('margin-top'), 10);
 
@@ -178,7 +178,7 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 				$('.subeditor_wrapper').height() - $('.subeditor_titlebar').height());
 
 				editorNode.height(editor_height);
-				breadcrumb.width(editorNode.width());
+			//	breadcrumb.width(editorNode.width());
 				breadcrumb.css('margin-left',editorNode.css('margin-left'));
 				breadcrumb.trigger('widthchange');
 				var side_width = ($('#side_panel').css('display') === 'block') ? $('#side_panel').width() : 0;
@@ -227,6 +227,6 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			// if we ever add an anchor tag anywhere, we can use that instead of this fix.
 			editorUtils.getMainEditor().cursorFix(editorNode);
 		}
-		
+
 	};
 });
