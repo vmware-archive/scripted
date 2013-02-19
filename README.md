@@ -56,17 +56,17 @@ This will install directly from master.
 
     npm install -g https://github.com/scripted-editor/scripted/tarball/master
 
-(again possibly with a `sudo`).
+(again possibly with a `sudo`). Master is under constant development so you may see a hiccup or two but we try to keep it fully functional.
 
 ### Download a packaged zip
 
 [Version 0.3.0 zip](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip)<br>
 [Version 0.3.0 Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_3_0/scripted_0_3_0.html)
 
-Once unzipped, ensure the bin folder contents are executable on mac/linux:
-    chmod 755 bin/*
+Once unzipped, ensure the bin folder contents are executable on mac/linux: `chmod 755 bin/*`
 
 And add the bin folder to your PATH.
+
 	mac/linux: export PATH=<pathToUnzipLocationOrClone>/bin:$PATH
 	win: set PATH=<pathToUnzipLocationOrClone>\bin;%PATH%
 
