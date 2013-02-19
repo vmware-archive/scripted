@@ -818,21 +818,6 @@ a:hover {
 	min-width: 600px;
 }
 
-.contentassist {
-	display: none;
-	background-color: white;
-	position: fixed;
-	top: 100px;
-	left: 100px;
-	border: 2px inset #DDD;
-	z-index:10;
-	cursor: default;
-	overflow: auto;
-	height: 150px;
-	width: 300px;
-	resize: both;
-}
-
 .contentassist:focus {
 	border: 2px solid #666;
 }
