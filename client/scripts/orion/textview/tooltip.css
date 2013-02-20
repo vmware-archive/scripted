@@ -6,12 +6,12 @@
 
 /* Styles for the view tooltips */
 .textviewTooltip {
-	font-family: monospace;
-	font-size: 10pt;
+	font-family: "InconsolataEmbedded", monospace;
+	font-size: 12pt;
 	background-color: InfoBackground;
 	color: InfoText;
-	padding: 2px;
-	border-radius: 4px;
+	padding: 2px 2px 3px 2px;
+	border-radius: 3px;
 	border: 1px solid black;
 	z-index: 1000; /* must be 1000 or greater else floats behind resizable handles */
 	position: fixed;
