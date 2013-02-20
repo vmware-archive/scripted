@@ -11,9 +11,9 @@
  *     Andrew Eisenberg
  *     Brian Cavalier
  ******************************************************************************/
-define(['require', "jquery", "scripted/utils/navHistory", "scripted/utils/pageState",
+define(['require', "jquery", "jquery_ui", "scripted/utils/navHistory", "scripted/utils/pageState",
 		"scripted/utils/editorUtils", "scripted/utils/storage", "scripted/exec/exec-on-load"],
-function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) {
+function(require, jQuery, jqueryUi, mNavHistory, mPageState, editorUtils, storage, execOnLoad) {
 
 	// Initialize navigator state
 	var navigatorVisible = false;
