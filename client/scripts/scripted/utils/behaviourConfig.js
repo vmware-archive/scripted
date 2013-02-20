@@ -17,8 +17,8 @@
  */
 define(function() {
 
-	var asyncBreadcrumbConstruction = false;
-	var asyncEditorContentLoading = false;
+	var asyncBreadcrumbConstruction = true;
+	var asyncEditorContentLoading = true;
 
 	var getAsyncBreadcrumbConstruction = function() {
 		return asyncBreadcrumbConstruction;
