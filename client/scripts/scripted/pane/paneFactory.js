@@ -31,17 +31,17 @@
 
 define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 	var paneRegistry = {};
-	
+
 	var panes = [];
-	
+
 	// sustom confirm navigation support.  Usable for testing to disable popups
 	var confirmer;
-	
+
 	return {
 		registerPane : function(id, callback) {
 			paneRegistry[id] = callback;
 		},
-		
+
 		createPane : function(id, kind, options) {
 			if (!paneRegistry.hasOwnProperty(id)) {
 				throw new Error("Unknown pane kind: " + id);
@@ -58,13 +58,13 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 				var pane = paneRegistry[id](options);
 				panes.push(pane);
 				pane.paneId = id;
-				
+
 				if (kind === "main") {
 					pane.isMain = true;
-					
+
 					// TODO perform a check to ensure only one main at a time
 				}
-				
+
 				$(document).trigger('paneCreated', pane);
 				return pane;
 			} catch (e) {
@@ -72,7 +72,7 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 				return null;
 			}
 		},
-		
+
 		getMainPane : function() {
 			for (var i = 0; i < panes.length; i++) {
 				if (panes[i].isMain) {
@@ -80,7 +80,7 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 				}
 			}
 		},
-		
+
 		getSidePanes : function() {
 			var subPanes = [];
 			for (var i = 0; i < panes.length; i++) {
@@ -90,7 +90,7 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 			}
 			return subPanes;
 		},
-		
+
 		getPanes : function(id) {
 			if (!id) {
 				return panes;
@@ -100,7 +100,7 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 				});
 			}
 		},
-		
+
 		/**
 		 * Shortcut for getting the first pane of the given kind
 		 * null if doesn't exist.  If isMain, then returns only the main
@@ -120,7 +120,7 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 			}
 			return null;
 		},
-		
+
 		destroyPane : function(pane, confirm) {
 			var found = false;
 			for (var i = 0; i < panes.length; i++) {
@@ -135,14 +135,14 @@ define(['scriptedLogger', 'jquery'], function(scriptedLogger) {
 					break;
 				}
 			}
-			
+
 			if (found) {
 				$(document).trigger('paneDestroyed', pane);
 			} else {
 				throw new Error("Tried to remove a pane that doesn't exist");
 			}
 		},
-		
+
 		_setNavigationConfirmer : function(callback) {
 			confirmer = callback;
 		},

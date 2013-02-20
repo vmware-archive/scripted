@@ -19,9 +19,9 @@
 /*jslint browser:true */
 define(["scripted/keybindings/keybinder", "scripted/editor/scriptedEditor", "scripted/pane/paneFactory", "scripted/utils/navHistory",
 "orion/textview/keyBinding", "scripted/utils/pageState", "scripted/dialogs/openResourceDialog", "scripted/dialogs/outlineDialog",
-"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", "scripted/utils/behaviourConfig", 'lib/json5', 'jquery'],
+"scripted/dialogs/lookInFilesDialog", "scripted/utils/os", "scripted/utils/behaviourConfig", 'when', 'lib/json5', 'jquery'],
 function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState, mOpenResourceDialog, mOutlineDialog,
-	mLookInFilesDialog, mOsUtils, behaviourConfig) {
+	mLookInFilesDialog, mOsUtils, behaviourConfig, when) {
 
 	var FS_LIST_URL = "/fs_list/";
 	// FIXADE copied from navhistory
@@ -223,6 +223,12 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 			$(this).addClass('light_gradient');
 			$(this).removeClass('light_gradient_active');
 		});
+
+		// event raise async so that event handlers can be
+		// added after the initial call to initializing breadcrumbs
+		setTimeout(function() {
+			$(document).trigger('breadcrumbsInitialized');
+		});
 	};
 
 	var attachSearchClient = function(editor) {
@@ -415,6 +421,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		installPageStateListener(editor);
 		this.editor = editor;
 		this.kind = kind;
+
 	};
 
 	EditorPane.prototype = {
@@ -450,11 +457,17 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		 * Pane API
 		 */
 		updateContents : function(newContents) {
+			// bad? creating a new promise, what about those holding on to old promises?
 			this.editor = newContents;
 			if (this.kind === EDITOR_TARGET.main) {
 				initializeBreadcrumbs(newContents.getFilePath());
 			} else {
 				initializeHistoryMenu();
+				// raise event asynchronously so that event handlers
+				// can be added
+				setTimeout(function() {
+					$(document).trigger('breadcrumbsInitialized');
+				});
 			}
 		},
 
@@ -470,6 +483,6 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 
 	return {
 		// exposed for testing
-		_initializeBreadcrumbs : initializeBreadcrumbs
+		_initializeBreadcrumbs : initializeBreadcrumbsActual
 	};
 });

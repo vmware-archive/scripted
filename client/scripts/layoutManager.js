@@ -226,6 +226,10 @@ function(require, $, mNavHistory, mPageState, editorUtils, storage, execOnLoad) 
 			// Fix disappearing caret
 			// if we ever add an anchor tag anywhere, we can use that instead of this fix.
 			editorUtils.getMainEditor().cursorFix(editorNode);
+
+
+			// All done!
+			$(document).trigger("layoutComplete");
 		}
 
 	};
