@@ -30,8 +30,7 @@ var each = promiseUtils.each;
 var findFirst = promiseUtils.findFirst;
 var findFirstIndex = promiseUtils.findFirstIndex;
 var noExistError = require('./fs-errors').noExistError;
-
-//TODO: All the functions in this module need unit testing of some kind.
+var isDirError = require('./fs-errors').isDirError;
 
 function compose() {
 
@@ -115,6 +114,16 @@ function compose() {
 	}
 
 	/**
+	 * @return {Promise} that resolves to true if the handle exists and is a directory, false otherwise.
+	 */
+	function isDirectory(fs, handle) {
+		return stat(fs, handle).then(
+			function /*ok*/(stats) { return stats.isDirectory(); },
+			function /*error*/() { return false; }
+		);
+	}
+
+	/**
 	 * Pass a promise result or err to a nodejs style callback function.
 	 */
 	function nodeCallback(promise, callback) {
@@ -146,6 +155,21 @@ function compose() {
 	 * until one of the fss accepts the write operation as valid.
 	 */
 	function okToWrite(handle) {
+		console.log('>>> okToWrite '+handle);
+
+		//TODO: the logic here may not be quite correct.
+		// Consider situation like this
+		//   fs1 is empty and writable
+		//   fs2 has a directory '/foo'
+		// cfs = compose(fs1, fs2)
+		//
+		// cfs.writeFile('/foo')
+		// This operation should probably fail with 'EISDIR' error
+		// But the logic below will allow it to be written on fs1.
+		// The effect of this will be that fs2:/foo dir will be shadowed
+		// so from perspective of cfs it is as if the directory was overwitten by
+		// a file.
+
 		//Rationale for the algorithm used below:
 
 		//a) Starting from the leftmost filesystem, we can try to write on
@@ -157,21 +181,35 @@ function compose() {
 		//   visable on the composite fs since it will be 'shadowed'
 		//   by whatever is on the filesystem from b.
 
-		return findFirstIndex(subsystems, function (fs) {
+		var result = findFirstIndex(subsystems, function (fs) {
 			return exists(fs, handle);
 		}).then(
 			//The handle EXISTS on one of the subsystems
 			function (i) {
+				console.log('okToWrite '+handle+' found index = '+i);
 				//All the subsystems upto and including the first system
 				//where the handle exists.
 				return subsystems.slice(0, i+1);
 			},
 			//The handle does NOT exist on any subsystem
 			function () {
+				console.log('okToWrite '+handle+' NOT found index');
 				//Ok to try all of them.
 				return subsystems;
 			}
 		);
+
+		result.then(function (result) {
+				console.log('okToWrite '+ handle+ ' => '+result.map(function (x) {
+					return x.toString();
+				}));
+			},
+			function (err) {
+				console.log('okToWrite '+ handle+ ' ERROR => '+err);
+			}
+		);
+
+		return result;
 	}
 
 	/**
@@ -277,22 +315,42 @@ function compose() {
 			}
 
 			nodeCallback(
-				findFirstIndex(subsystems, function (fs) {
-					return exists(fs, handle);
-				}).otherwise(function () {
-					//Handle doesn't exist on any of the subsystems so ok to try all of them
-					return subsystems;
-				}).then(function (subsystems) {
+				okToWrite(handle).then(function (subsystems) {
 					//We now only have the subsystems that are ok to try from left to right.
-					return until(subsystems, function (fs) {
-						var subArgs = args.slice(); //Watch out, called more than once
-													// don't mutate the original!
-						subArgs.unshift(fs);
-						return writeFile.apply(fs, subArgs);
+					//BUT... if the handle currently represents a directory then we
+					//shouldn't be allowed to write a file to it!
+
+					//TODO: similar case for readonly file on last fs?
+					//But it may just make sense to allow overwriting the file by writing to
+					//'shadow' fs that is composed in front of it.
+					//Tricky bit with that would be that stating the cfs may make it appear
+					//as if the file is read-only while it is actually not.
+
+					return isDirectory(subsystems[subsystems.length-1], handle).then(function (isDir) {
+						if (isDir) {
+							return when.reject(isDirError('writeFile', handle));
+						} else {
+							return until(subsystems, function (fs) {
+								var subArgs = args.slice(); //Watch out, called more than once
+															// don't mutate the original!
+								subArgs.unshift(fs);
+								console.log('>>> writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)));
+								var result = writeFile.apply(fs, subArgs);
+								result.then(
+									function () {
+										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' => OK');
+									},
+									function (err) {
+										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' ERROR = '+err);
+									}
+								);
+								return result;
+							});// END until
+						}//END if isDir else
 					});
 				}),
 				callback
-			);
+			);//END nodeCallback
 		},
 		unlink: compositeDeletion(unlink),
 		rmdir: compositeDeletion(rmdir)
