@@ -253,7 +253,7 @@ exports.findCompletions4 = function(test) {
 		testResourcesFolder + path.sep + "test4.scripted-completions").then(
 		function(res) {
 			var completions = res.completions;
-			test.equals(completions.length, 6);  // one invalid completion
+			test.equals(completions.length, 8);  // one invalid completion
 			var i = 0;
 
 			var completion = '<dl>\n${lineStart}${indent}<dt>First definition</dt> <dd>First explanation</dd>\n${lineStart}${indent}<dt>Second definition</dt> <dd>Second explanation</dd>\n${lineStart}</dl>';
@@ -338,6 +338,28 @@ exports.findCompletions4 = function(test) {
 //			]);
 //			test.ok(!completions[i].escapePosition);
 //			i++;
+
+			completion = "{ $ref: 'name' } }";
+			completionDesc = "{ $ref: 'name' } }";
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "ref");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("name"), length:"name".length }
+			]);
+			test.equals(completions[i].escapePosition, "{ $ref: 'name' }".length);
+			i++;
+
+			completion = "{ ${ref: 'name' } }";
+			completionDesc = "{ ${ref: 'name' } }";
+			test.equals(completions[i].proposal, completion);
+			test.equals(completions[i].description, completions[i].trigger + " : " + completionDesc);
+			test.equals(completions[i].trigger, "ref");
+			test.deepEqual(completions[i].positions, [
+				{offset: completion.indexOf("name"), length:"name".length }
+			]);
+			test.equals(completions[i].escapePosition, "{ ${ref: 'name' }".length);
+			i++;
 
 
 

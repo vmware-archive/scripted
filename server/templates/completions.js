@@ -208,8 +208,8 @@ exports.CompletionsProcessor.prototype = {
 					}
 				} else {
 					i--;
-					j++;
 					if (isNamed) {
+						j++;
 						contents += rawContents[i-1];
 					}
 					contents += rawContents[i];
