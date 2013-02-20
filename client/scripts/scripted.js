@@ -60,7 +60,7 @@ function(
 					processConfiguration(dotScripted);
 
 					// Perform navigator context menu hook-up
-					contextMenu.initContextMenus('#navigator-wrapper');
+					contextMenu.setExplorerContextMenu('#navigator-wrapper', fileExplorer);
 
 					$("#status_root").append(document.createTextNode("Project root:"+window.fsroot));
 

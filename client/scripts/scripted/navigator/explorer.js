@@ -633,7 +633,7 @@ exports.SelectionRenderer = (function(){
 		$(tableRow).addClass("treeTableRow");
 		
 		// Attach context menus to tree elements
-		mContextMenu.initContextMenus(tableRow);
+		mContextMenu.setExplorerContextMenu(tableRow, this.explorer);
 		
 		// Mark it as type directory
 	    $(tableRow).attr("resourceType", item.directory ? "dir" : "file");

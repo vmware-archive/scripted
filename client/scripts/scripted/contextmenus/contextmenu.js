@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @license Copyright (c) 2012 VMware, Inc. All Rights Reserved. THIS FILE IS
+ * @license Copyright (c) 2012 - 2013 VMware, Inc. All Rights Reserved. THIS FILE IS
  *          PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  *          ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  *          CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT. You can obtain a
@@ -119,7 +119,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 			// Handle ESCAPE keypresses on the dialog
 			$(window).on('keyup.' + contextMenuClass, function(e) {
 
-				if (e.keyCode === 27/*ESCAPE*/) {
+				if (e.keyCode === 27 /*ESCAPE*/) {
 					hideContextMenu(contextMenu);
 				}
 			});
@@ -182,7 +182,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 	/**
 	 * nodecontext to which the context menus should be attached too.It should be a DOM element.
 	 */
-	var initContextMenus = function(nodeContext) {
+	var setContextMenu = function(nodeContext, contextMenuProvider) {
 
 			var error = null;
 			if (!nodeContext) {
@@ -201,7 +201,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 
 				function(e) {
 					var menus = contextMenuProvider.getContextMenusForSelection(
-					nodeContext, e);
+					nodeContext);
 					if (menus) {
 						var cmenu = createContextMenu(
 						menus, e);
@@ -220,8 +220,16 @@ function(contextMenuProvider, scriptedLogger, $) {
 
 		};
 
+	var setExplorerContextMenu = function(nodeContext, explorer) {
+			var provider = contextMenuProvider.getContextMenuProvider({
+				part: explorer
+			});
+			setContextMenu(nodeContext, provider);
+		};
+
 	return {
-		initContextMenus: initContextMenus,
+		setContextMenu: setContextMenu,
+		setExplorerContextMenu: setExplorerContextMenu,
 		loggingCategory: loggingCategory
 	};
 
