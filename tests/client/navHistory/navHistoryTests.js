@@ -25,8 +25,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	window.scripted.config = window.scripted.config || {};
 	window.explorer = window.explorer || {};
 
-//	behaviourConfig.setAsyncBreadcrumbConstruction(false);
-//	behaviourConfig.setAsyncEditorContentLoading(false);
+	behaviourConfig.setAsyncBreadcrumbConstruction(true);
+	behaviourConfig.setAsyncEditorContentLoading(true);
 
 	var testResourceRootClosingSlash = mTestutils.discoverTestRoot();
 	var testResourcesRootOpeningSlash = (os.name === "windows" ? '/' : "") +  mTestutils.discoverTestRoot();
@@ -241,6 +241,9 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			assert.equal(historyMenu.children().length, 0);
 			editorUtils.getMainEditor().setSelection(10, 20);
 
+
+			// hmmmm...looks like there is a chance that the editor contents is not loaded before
+			// the breadcrumbsInitialized event gets fired. Maybe need to add a then() on the editorLoadedPromise
 			mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 			$(document).one('breadcrumbsInitialized', function() {
 				editorUtils.getMainEditor().setSelection(15, 25);
@@ -268,30 +271,32 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 
 			$(document).one('breadcrumbsInitialized', function() {
-				editorUtils.getMainEditor().setSelection(15, 25);
-				mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
-				$(document).one('breadcrumbsInitialized', function() {
-					editorUtils.getMainEditor().setSelection(5, 10);
-					mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
+				editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+					editorUtils.getMainEditor().setSelection(15, 25);
+					mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
 					$(document).one('breadcrumbsInitialized', function() {
-
-						editorUtils.getMainEditor().setSelection(6, 7);
-						// this one is not stored in history yet
+						editorUtils.getMainEditor().setSelection(5, 10);
 						mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
 						$(document).one('breadcrumbsInitialized', function() {
-							editorUtils.getMainEditor().setSelection(6, 8);
-							historyMenu = $("#history_menu");
 
-							assert.equal(historyMenu.children().length, 3);
-							if (historyMenu.children().length == 3) {
-								assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-								assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#6,7");
-								assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-								assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
-								assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-								assert.equal(historyMenu.children()[2].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
-							}
-							assert.start();
+							editorUtils.getMainEditor().setSelection(6, 7);
+							// this one is not stored in history yet
+							mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
+							$(document).one('breadcrumbsInitialized', function() {
+								editorUtils.getMainEditor().setSelection(6, 8);
+								historyMenu = $("#history_menu");
+
+								assert.equal(historyMenu.children().length, 3);
+								if (historyMenu.children().length == 3) {
+									assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
+									assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#6,7");
+									assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
+									assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
+									assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
+									assert.equal(historyMenu.children()[2].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
+								}
+								assert.start();
+							});
 						});
 					});
 				});
@@ -306,40 +311,38 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 			// history should be empty because no navigation happened
 			assert.equal(historyMenu.children().length, 0);
 			editorUtils.getMainEditor().setSelection(10, 20);
-
 			mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js", shiftKey:true });
 			$(document).one('breadcrumbsInitialized', function() {
-				editorUtils.getSubEditor().setSelection(15, 25);
-		//		$(editorUtils.getMainEditor()._domNode).find('.textview').scrollTop(10);
-		//		var scrollTop1 = $(editorUtils.getMainEditor()._domNode).find('.textview').scrollTop();
-				mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js", shiftKey:true });
-				$(document).one('breadcrumbsInitialized', function() {
-					editorUtils.getSubEditor().setSelection(5, 10);
-					mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js", shiftKey:true });
+				editorUtils.getSubEditor().editorLoadedPromise.then(function() {
+					editorUtils.getSubEditor().setSelection(15, 25);
+					mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js", shiftKey:true });
 					$(document).one('breadcrumbsInitialized', function() {
-						editorUtils.getSubEditor().setSelection(6, 7);
-				//		$(editorUtils.getMainEditor()._domNode).find('.textview').scrollTop(12);
-				//		var scrollTop2 = $(editorUtils.getMainEditor()._domNode).find('.textview').scrollTop();
-
-						// this one is not stored in history yet
-						mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
+						editorUtils.getSubEditor().setSelection(5, 10);
+						mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js", shiftKey:true });
 						$(document).one('breadcrumbsInitialized', function() {
-							// must capture an extra breadcrumbsInitialized event
-							$(document).one('breadcrumbsInitialized', function() {
-								editorUtils.getMainEditor().setSelection(6, 8);
-								historyMenu = $("#history_menu");
+							editorUtils.getSubEditor().setSelection(6, 7);
 
-								// TODO the scroll positions are a bit brittle and don't seem to work on firefox at all.
-								assert.equal(historyMenu.children().length, 3);
-								if (historyMenu.children().length == 3) {
-									assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
-									assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#6,7");
-									assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
-									assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
-									assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
-									assert.equal(historyMenu.children()[2].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
-								}
-								assert.start();
+							// this one is not stored in history yet
+							mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "foo.js" });
+							$(document).one('breadcrumbsInitialized', function() {
+								// not exactly sure why this is necessary. I think there
+								// is an extra breadcrumbsInitialized event being raise on FF and Chrome, but not phantom
+								// so must wait for a timeout to ensure all initialization events are done.
+								setTimeout(function() {
+									editorUtils.getMainEditor().setSelection(6, 8);
+									historyMenu = $("#history_menu");
+
+									assert.equal(historyMenu.children().length, 3);
+									if (historyMenu.children().length == 3) {
+										assert.equal(historyMenu.children()[0].children[0].innerHTML, "foo.js");
+										assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#6,7");
+										assert.equal(historyMenu.children()[1].children[0].innerHTML, "baz.js");
+										assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "baz.js" + "#5,10");
+										assert.equal(historyMenu.children()[2].children[0].innerHTML, "bar.js");
+										assert.equal(historyMenu.children()[2].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
+									}
+									assert.start();
+								}, 2000);
 							});
 						});
 					});
@@ -706,6 +709,40 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		oddUrlTest("bar.js", "?" + testResourceRootClosingSlash + "bar.js#{main:{range:[10,20]}}", [10,20]);
 	};
 
+	// with sub editor
+	tests.asyncTestPageSetup6 = function() {
+		setup().then(function() {
+			changeLocation("?" + testResourceRootClosingSlash + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourceRootClosingSlash + "baz.js\",range:[9,10]}");
+			editorUtils.getSubEditor().editorLoadedPromise.then(function() {
+				editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+					changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
+					editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+						testLocation("foo.js", [5,7]).then(function() {
+							$(document).one('pageSetupComplete', function() {
+								editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+									testLocation("bar.js", [20,21], "baz.js", [9,10]).then(function() {
+										$(document).one('pageSetupComplete', function() {
+											testLocation("foo.js", [0,0]).then(function() {
+												$(document).one('pageSetupComplete', function() {
+													testLocation("bar.js", [20,21], "baz.js", [9,10]).then(function() {
+														assert.start();
+													});
+												});
+												history.forward();
+											});
+										});
+										history.back();
+									});
+								});
+							});
+							history.back();
+						});
+					});
+				});
+			});
+		});
+	};
+
 	tests.asyncTestPageSetup1 = function() {
 		setup();
 		changeLocation("?" + testResourceRootClosingSlash + "bar.js");
@@ -808,39 +845,6 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 							});
 							history.back();
 						});
-					});
-				});
-			});
-		});
-	};
-
-	// with sub editor
-	tests.asyncTestPageSetup6 = function() {
-		setup();
-		changeLocation("?" + testResourceRootClosingSlash + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourceRootClosingSlash + "baz.js\",range:[9,10]}");
-		editorUtils.getSubEditor().editorLoadedPromise.then(function() {
-			editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-				changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
-				editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-					testLocation("foo.js", [5,7]).then(function() {
-						$(document).one('pageSetupComplete', function() {
-							editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-								testLocation("bar.js", [20,21], "baz.js", [9,10]).then(function() {
-									$(document).one('pageSetupComplete', function() {
-										testLocation("foo.js", [0,0]).then(function() {
-											$(document).one('pageSetupComplete', function() {
-												testLocation("bar.js", [20,21], "baz.js", [9,10]).then(function() {
-													assert.start();
-												});
-											});
-											history.forward();
-										});
-									});
-									history.back();
-								});
-							});
-						});
-						history.back();
 					});
 				});
 			});
