@@ -154,12 +154,13 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		setup();
 		refreshBreadcrumbAndHistory(testResourcesRootOpeningSlash + "bar.js");
 		var breadcrumbs = $('#breadcrumb');
-		assert.equal(breadcrumbs.children().length, 3);
+		assert.equal(breadcrumbs.children().length, 2);
 		assert.equal(breadcrumbs.children()[0], $('#historycrumb')[0]);
 
+/* breadcrumb no longer includes inferred root
 		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>" + testResourcesRootNoClosingSlash + "</span>");
-
-		assert.equal(breadcrumbs.children()[2].innerHTML, "<span>bar.js</span>");
+*/
+		assert.equal(breadcrumbs.children()[1].innerHTML, "<span>bar.js</span>");
 		assert.start();
 	};
 
