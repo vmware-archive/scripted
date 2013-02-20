@@ -159,6 +159,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 			editor.reportStatus("");
 			editor.reportStatus("Replacing all...", "progress");
 			var newStr = $('#replacetext').val();
+			if ($('#replacetext').hasClass('defaultTextActive')) {
+				newStr = '';
+			}
 			window.setTimeout((function() {
 				var startPos = 0;
 				var number = 0, lastResult;
