@@ -77,6 +77,11 @@ function withBaseDir(baseDir, fs) {
  *
  * Trying to access any path that doesn't actually begin with the pathPrefix
  * will result in a 'ENOEXIST' error.
+ *
+ * Note that a file system create by this operation is a bit 'strange' as it has subdirectories
+ * but doesn't have a 'root'. More precisely, accessing '/'  will give a ENOENT error. In order
+ * to make this filesystem 'complete' it will need to be composed with another fs that provides
+ * a 'mount point'.
  */
 function withPrefix(pathPrefix, fs) {
 
