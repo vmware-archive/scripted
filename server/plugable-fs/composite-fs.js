@@ -27,6 +27,8 @@ var promiseUtils = require('../utils/promises');
 
 var until = promiseUtils.until;
 var each = promiseUtils.each;
+var findFirst = promiseUtils.findFirst;
+var findFirstIndex = promiseUtils.findFirstIndex;
 var noExistError = require('./fs-errors').noExistError;
 
 //TODO: All the functions in this module need unit testing of some kind.
@@ -36,24 +38,39 @@ function compose() {
 	var subsystems = Array.prototype.slice.call(arguments);
 
 	/**
-	 * Convert a node-style one-arg fs function with callback to promised form function
-	 * that accepts both a fs and an argument and returns a promise.
+	 * Convert a node-style function with a single callback as the last argument
+	 * into a promised form function. The signature of the original
+	 * nodefs function is modified as follows.
+	 *   - fs parameter added as first argument.
+	 *   - callback parameter removed.
+	 *   - returns a promise instead.
 	 */
-	function promisedOneArgFunction(fname) {
-		var pf = function (fs, handle) {
+	function promisedFunction(fname) {
+		var pf = function (fs) {
+
+			//Fetch remaining args into an array
+			var args = Array.prototype.slice.call(arguments, 1);
+
 			//console.log('>>> '+fname + ' : ' +handle);
 			var d = when.defer();
-			var f = fs[fname].bind(fs); // raw node fs doesn't need the bind, but
-										// some libraries like fake-fs do. Without
-										// it they will have the wrong 'this' object when
-										// we are calling their fs operations.
-			f(handle, function (err, result) {
+			var f = fs[fname];
+			if (!f) {
+				throw new Error("No function "+fname+" on filesystem "+fs);
+			}
+
+			function callback(err, result) {
 				if (err) {
 					d.reject(err);
 				} else {
 					d.resolve(result);
 				}
-			});
+			}
+			args.push(callback); //Add the callback function as the last argument.
+			f.apply(fs, args);  // raw node doesn't need fs to be passed for 'this' but
+								// some libraries like fake-fs do. Without
+								// it they will have the wrong 'this' object when
+								// we are calling their fs operations.
+
 //			d.then(function (result) {
 //				console.log('<<< '+fname + ' : ' +handle + ' = '+result);
 //			}, function (err) {
@@ -66,15 +83,17 @@ function compose() {
 		return pf;
 	}
 
+
 	// We define version of fs calbacky functions that return promises... because they
 	// are much easier to compose.
 
-	var stat = promisedOneArgFunction('stat');
-	var unlink = promisedOneArgFunction('unlink');
-	var readFile = promisedOneArgFunction('readFile');
-	var readdir = promisedOneArgFunction('readdir');
-	var mkdir = promisedOneArgFunction('mkdir');
-	var rmdir = promisedOneArgFunction('rmdir');
+	var stat = promisedFunction('stat');
+	var unlink = promisedFunction('unlink');
+	var readFile = promisedFunction('readFile');
+	var readdir = promisedFunction('readdir');
+	var writeFile = promisedFunction('writeFile');
+	var mkdir = promisedFunction('mkdir');
+	var rmdir = promisedFunction('rmdir');
 
 	//TODO: var rename //Careful: // Not a 'one arg' function!
 	//TODO: var createReadStream // Careful: not a callbacky function!
@@ -86,7 +105,7 @@ function compose() {
 	 * Returns a promise that resolves to true or false depending on
 	 * whether a given path exists on a given filesystem.
 	 *
-	 * @{Promise.Boolean}
+	 * @return {Promise.Boolean}
 	 */
 	function exists(fs, handle) {
 		return stat(fs, handle).then(
@@ -101,20 +120,58 @@ function compose() {
 	function nodeCallback(promise, callback) {
 		promise.then(
 			function (result) {
+//				console.log('nodeCallback ' +callback);
 				callback(/*noerror*/null, result);
 			},
 			function (error) {
 				callback(error);
 			}
 		).otherwise(function (err) {
-			//Add an otherwise here to make it easier to diagnose broken test code.
-			//Without this errors thrown by the callback will be swallowed without a trace by the
-			//when library.
+			//Add an otherwise here to make it easier to diagnose broken code.
+			//Without this errors thrown by the calls to the callback above are likely to
+			//be swallowed without a trace by the when library.
+			//Since when library will swallow (convert to a reject) anything thrown in here as well
+			//the only way to make sure there's a trace of this error is to log it here.
 			console.log(err);
 			if (err.stack) {
 				console.log(err.stack);
 			}
+			return when.reject(err); //Stay rejected although this is probably swallowed anyway.
 		});
+	}
+
+	/**
+	 * Determine which subsystems are 'ok to write'. This means that they are
+	 * candidates for trying to perform a write operation in left to right order
+	 * until one of the fss accepts the write operation as valid.
+	 */
+	function okToWrite(handle) {
+		//Rationale for the algorithm used below:
+
+		//a) Starting from the leftmost filesystem, we can try to write on
+		//   any of the filesystems where the handle does not yet exist.
+		//b) When we hit a filesystem where the handle does exist, we can
+		//   try that one as well.
+		//c) Any systems beyond the one found in b should not be tried
+		//   the effect to writing to that subsystem will not be
+		//   visable on the composite fs since it will be 'shadowed'
+		//   by whatever is on the filesystem from b.
+
+		return findFirstIndex(subsystems, function (fs) {
+			return exists(fs, handle);
+		}).then(
+			//The handle EXISTS on one of the subsystems
+			function (i) {
+				//All the subsystems upto and including the first system
+				//where the handle exists.
+				return subsystems.slice(0, i+1);
+			},
+			//The handle does NOT exist on any subsystem
+			function () {
+				//Ok to try all of them.
+				return subsystems;
+			}
+		);
 	}
 
 	/**
@@ -133,13 +190,15 @@ function compose() {
 	 *      be passed to the callback function.
 	 *
 	 * Rationale:
-	 *   b)calling a deletion operation on a composite fs, a caller
-	 * will expect that on a succeful completion, the file/dir no longer exists
-	 * on the composite filesystem. For this to be true it will have to be
-	 * removed from all subfilesystems.
 	 *
-	 *  a) To be consistent with node fs, trying to delete something that doesn't
-	 *     exists should result in an error.
+	 *   a) To be consistent with node fs, trying to delete something that doesn't
+	 *      exists should result in an error.
+	 *
+	 *   b) calling a deletion operation on a composite fs, a caller
+	 *      will expect that on a succeful completion, the file/dir no longer exists
+	 *      on the composite filesystem. For this to be true it will have to be
+	 *      removed from all subfilesystems.
+	 *
 	 */
 	function compositeDeletion(deleteOp) {
 		return function (handle, callback) {
@@ -169,22 +228,76 @@ function compose() {
 	return {
 		stat: function (handle, callback) {
 			//console.log('>>> composite stat : '+handle);
+			//TODO: merging ctime, atime etc across composite fs if we care about
+			//     these attributes.
 			nodeCallback(
+				//Take the leftmost fs.stat result that doesn't reject.
 				until(subsystems, function (fs) {
 					return stat(fs, handle);
 				}),
-				function (err, stats) {
-					//console.log('<<< composite stat : '+err + ', '+stats);
-					callback(err, stats);
-				}
+				callback
+			);
+		},
+		readFile: function (handle /*, [encoding], callback*/) {
+			var args = Array.prototype.slice.call(arguments);
+//			console.log('>>> composite readFile: '+JSON.stringify(args));
+			var callback = args.pop(); //callback is always last argument no matter how many args
+			                           //are passed.
+//			console.log('>>> callback: '+callback);
+			nodeCallback(
+				//Perform the readFile on the leftMost fs where the handle exists.
+				findFirst(subsystems, function (fs) {
+					return exists(fs, handle);
+				}).then(
+					//handle exist on at least one fs
+					function (fs) {
+						//OK to use and mutate args here. This function only
+						//called once!
+						args.unshift(fs);
+	//					console.log('>>> readFile: '+fs+ ', '+JSON.stringify(args));
+						return readFile.apply(fs, args);
+					},
+					//handle doesn't exist on any fs
+					function () {
+						return when.reject(noExistError('readFile', handle));
+					}
+				),
+				callback
+			);
+		},
+		writeFile: function (handle, contents /*, [encoding], [callback]*/) {
+			var args = Array.prototype.slice.call(arguments);
+			var callback = args[args.length-1];
+			if (typeof(callback)!=='function') {
+				//Watch out the callback is optional in node api!
+				callback = function () {};
+			} else {
+				//Remove the callback arg
+				args.pop();
+			}
+
+			nodeCallback(
+				findFirstIndex(subsystems, function (fs) {
+					return exists(fs, handle);
+				}).otherwise(function () {
+					//Handle doesn't exist on any of the subsystems so ok to try all of them
+					return subsystems;
+				}).then(function (subsystems) {
+					//We now only have the subsystems that are ok to try from left to right.
+					return until(subsystems, function (fs) {
+						var subArgs = args.slice(); //Watch out, called more than once
+													// don't mutate the original!
+						subArgs.unshift(fs);
+						return writeFile.apply(fs, subArgs);
+					});
+				}),
+				callback
 			);
 		},
 		unlink: compositeDeletion(unlink),
 		rmdir: compositeDeletion(rmdir)
 //		rmdir: convertArg(fs.rmdir, 0),
-//		readFile: convertArg(fs.readFile, 0),
 //		readdir: convertArg(fs.readdir, 0),
-//		writeFile: convertArg(fs.writeFile, 0),
 //		mkdir: convertArg(fs.mkdir, 0),
 //		createReadStream: convertArg(fs.createReadStream, 0),
 //		rename: convertArg(convertArg(fs.rename, 0), 1),

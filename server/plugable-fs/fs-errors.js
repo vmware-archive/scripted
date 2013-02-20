@@ -11,6 +11,9 @@
  *   Kris De Volder
  ******************************************************************************/
 
+/**
+ * Create something that looks like a node fs 'ENOENT' error.
+ */
 function noExistError(funName, handle) {
 	//Return something similar to what node fs returns when a file does not exist.
 	var err = new Error('[Error: ENOENT, '+funName+' '+JSON.stringify(handle)+']');
@@ -20,6 +23,4 @@ function noExistError(funName, handle) {
 	return err;
 }
 
-return {
-	noExistError: noExistError
-};
+exports.noExistError = noExistError;

@@ -11,7 +11,9 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
-var until = require('../../server/utils/promises').until;
+var promiseUtils = require('../../server/utils/promises');
+var until = promiseUtils.until;
+var findFirst = promiseUtils.findFirst;
 var when = require('when');
 
 exports.emptyArray = function (test) {
@@ -123,6 +125,134 @@ exports.promiseArray = function (test) {
 		},
 		function (err) {
 			test.ok(false, "Should resolve but it rejects");
+		}
+	);
+};
+
+/**
+ * Helper that works like the 'when' function but also adds some basic boilerplate
+ * to avoid errors being swallowed by the when library.
+ *
+ * Use this as the last call to the when library inside a test.
+ * Errors not yet captured at this point will be logged and make the test
+ * fail.
+ */
+function run(test) {
+	return function(promise, thn, els) {
+		return when(promise, thn, els).otherwise(function (err) {
+			if (err) {
+				console.log(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+			}
+			test.ok(false);
+		}).always(function () {
+			test.done();
+		});
+	};
+}
+
+exports.findFirstOnEmpty = function (test) {
+	run(test)(
+		findFirst([], function (el) {
+			return el > 0;
+		}),
+		function (result) {
+			test.ok(false, 'Should have rejected but found: '+result);
+		},
+		function (err) {
+			//Expected behavior: Can't find anything in an empty array.
+			test.ok(true);
+		}
+	);
+};
+
+exports.findFirstMatchesOnFirst = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return el > 5;
+		}),
+		function (found) {
+			test.equals(10, found);
+		}
+	);
+};
+
+exports.findFirstMatchesOnLast = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return el > 25;
+		}),
+		function (found) {
+			test.equals(30, found);
+		}
+	);
+};
+
+exports.findFirstNoMatch = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return el > 100;
+		}),
+		function (found) {
+			test.ok(false, 'Should reject but found: '+found);
+		},
+		function (err) {
+			//Expected behavior: reject because no element matches the test.
+			test.ok(true);
+		}
+	);
+};
+
+// The same tests again but with the predicate using rejections to signify
+// 'false' and resolving to true values instead of returning them.
+
+/**
+ * Helper function to convert boolean value to a rejected/resolved
+ * promise.
+ */
+function false2reject(bool) {
+	if (bool) {
+		return when.resolve(bool);
+	} else {
+		return when.reject(bool);
+	}
+}
+
+exports.findFirstResolvesOnFirst = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return false2reject(el > 5);
+		}),
+		function (found) {
+			test.equals(10, found);
+		}
+	);
+};
+
+exports.findFirstResolvesOnLast = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return false2reject(el > 25);
+		}),
+		function (found) {
+			test.equals(30, found);
+		}
+	);
+};
+
+exports.findFirstRejectsAll = function (test) {
+	run(test)(
+		findFirst([10,20,30], function (el) {
+			return false2reject(el > 100);
+		}),
+		function (found) {
+			test.ok(false, 'Should reject but found: '+found);
+		},
+		function (err) {
+			//Expected behavior: reject because no element matches the test.
+			test.ok(true);
 		}
 	);
 };

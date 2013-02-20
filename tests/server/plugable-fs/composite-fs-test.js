@@ -91,6 +91,169 @@ exports.statCompositeOfThree = function (test) {
 			test.done();
 		}
 	);
+};
+
+//readFile case where rightFs has the file and leftFs has a dir instead
+exports.readFileCaseFileDir = function (test) {
+	var fs1 = new Fs();
+	fs1.file('/foo', 'This is foo on fs1');
+
+	var fs2 = new Fs();
+	fs2.dir('/foo');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(!err, ""+err);
+		if (err && err.stack) {
+			console.log(err.stack);
+		}
+		test.equals('This is foo on fs1', data);
+		test.done();
+	});
+};
+
+//readFile case where rightFs has the file and leftFs also has a file
+exports.readFileCaseFileFile = function (test) {
+	var fs1 = new Fs();
+	fs1.file('/foo', 'This is foo on fs1');
+
+	var fs2 = new Fs();
+	fs2.file('/foo', 'foo on fs2 should be ignored');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(!err, ""+err);
+		test.equals('This is foo on fs1', data);
+		test.done();
+	});
+};
+
+//readFile case where rightFs has the file and leftFs has not
+exports.readFileCaseFileNothing = function (test) {
+	var fs1 = new Fs();
+	fs1.file('/foo', 'This is foo on fs1');
+
+	var fs2 = new Fs();
+	//nothing on fs2
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(!err, ""+err);
+		test.equals('This is foo on fs1', data);
+		test.done();
+	});
+};
+
+//readFile case where rightFs has a dir file and leftFs has a file
+exports.readFileCaseDirFile = function (test) {
+	var fs1 = new Fs();
+	fs1.dir('/foo');
+
+	var fs2 = new Fs();
+	fs2.file('/foo', 'foo on fs2 should be ignored');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(err); //There should be an error
+		test.equals('EISDIR', err.code);
+		test.ok(!data); //There shouldn't be data
+		test.done();
+	});
+};
+
+//readFile case where rightFs has a dir file and leftFs also has a dir
+exports.readFileCaseDirDir = function (test) {
+	var fs1 = new Fs();
+	fs1.dir('/foo');
+
+	var fs2 = new Fs();
+	fs2.dir('/foo');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(err); //There should be an error
+		test.equals('EISDIR', err.code);
+		test.ok(!data); //There shouldn't be data
+		test.done();
+	});
+};
+
+//readFile case where rightFs has a dir file and leftFs has nothing
+exports.readFileCaseDirNothing = function (test) {
+	var fs1 = new Fs();
+	fs1.dir('/foo');
+
+	var fs2 = new Fs();
+	//fs2 nothing
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(err); //There should be an error
+		test.equals('EISDIR', err.code);
+		test.ok(!data); //There shouldn't be data
+		test.done();
+	});
+};
+
+//readFile case where rightFs has nothing and leftFs has a file
+exports.readFileCaseNothingFile = function (test) {
+	var fs1 = new Fs();
+	// nothing
+
+	var fs2 = new Fs();
+	fs2.file('/foo', 'foo on fs2 should be found');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(!err, ""+err);
+		test.equals('foo on fs2 should be found', data);
+		test.done();
+	});
+};
+
+//readFile case where rightFs has nothing and leftFs has a file
+exports.readFileCaseNothingDir = function (test) {
+	var fs1 = new Fs();
+	// nothing
+
+	var fs2 = new Fs();
+	fs2.dir('/foo');
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+		test.ok(err); //There should be an error
+		test.equals('EISDIR', err.code);
+		test.ok(!data); //There shouldn't be data
+		test.done();
+	});
+};
+
+//readFile case where rightFs has nothing and leftFs also has nothing
+exports.readFileCaseNothingNothing = function (test) {
+	var fs1 = new Fs();
+	// nothing
+
+	var fs2 = new Fs();
+	// nothing
+
+	var cfs = compose(fs1, fs2);
+	cfs.readFile('/foo', 'utf8', function (err, data) {
+//		console.log(err);
+//		if (err && err.stack) {
+//			console.log(err.stack);
+//		}
+		test.ok(err); //There should be an error
+		test.equals('ENOENT', err.code);
+		test.ok(!data); //There shouldn't be data
+		test.done();
+	});
+};
+
+//writeFile test with thre disjoint fss try to write to each of the
+// three different fss and check that it worked out!
+exports.writeFileThreeDisjointFss = function (test) {
+
 
 
 };
+

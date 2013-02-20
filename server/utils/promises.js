@@ -74,11 +74,66 @@
 			);
 		}
 
+		/**
+		 * Turns falsy values into rejections and leaves truthy values and
+		 * already rejected promises alone.
+		 */
+		function rejectFalsy(v) {
+			return when(v, function (v) {
+				return v || when.reject(v);
+			});
+		}
+
+		/**
+		 * Promise-aware function to find the first element of an array,
+		 * going from left to right, that returns or resolves to a true value.
+		 * <p>
+		 * Predicate may either return a rejected promise or a promise that
+		 * resolves to a falsy value. Both will be treated as 'falsy'.
+		 * <p>
+		 * @return {Promise} that resolves when element is found or rejects when
+		 *         it is not found.
+		 */
+		function findFirst(array, pred) {
+			return findFirstIndex(array, pred).then(function (i) {
+				return array[i];
+			});
+		}
+
+		/**
+		 * Like findFirst but instead of the actual value found it resolves to an index in the
+		 * array.
+		 */
+		function findFirstIndex(array, _pred) {
+			var predName = _pred.name || 'anonymous function';
+			var index = 0; //Yuck: Keep track of where we are in the array by side effect!
+			function pred(v) {
+				var i = index++;
+				return when(v, _pred).then(
+					function (isMatch) {
+						if (isMatch) {
+							return when.resolve(i);
+						} else {
+							//Might as well include an explanation message.
+							return when.reject('Rejected:' + v + 'because: '+ predName + ' returned '+isMatch);
+						}
+					},
+					function () {
+						//Might as well include an explanation message.
+						return when.reject('Rejected:' + v + 'because: '+ predName + ' rejected it.');
+					}
+				);
+			}
+			return until(array, pred);
+		}
+
 		return {
 			until: until,
 			orMap: until, // just another name I like to use.
 			or:	or,
-			each: each
+			each: each,
+			findFirst: findFirst,
+			findFirstIndex: findFirstIndex
 		};
 	});
 
