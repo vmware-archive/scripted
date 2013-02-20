@@ -23,7 +23,6 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	// TODO remove globals
 	window.scripted = window.scripted || {};
 	window.scripted.config = window.scripted.config || {};
-	window.explorer = window.explorer || {};
 
 	behaviourConfig.setAsyncBreadcrumbConstruction(true);
 	behaviourConfig.setAsyncEditorContentLoading(true);

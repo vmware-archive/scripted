@@ -13,7 +13,7 @@
 
 /*global define esprima console setTimeout doctrine*/
 define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/esprima", "doctrine/doctrine"], function(mEsprimaPlugin, assert) {
-	
+
 	//////////////////////////////////////////////////////////
 	// helpers
 	//////////////////////////////////////////////////////////
@@ -30,14 +30,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, lintOptions);
 		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true });
 	}
-	
+
 	function testProposal(proposal, text, description) {
 		assert.equal(proposal.proposal, text, "Invalid proposal text");
 		if (description) {
 			assert.equal(proposal.description, description, "Invalid proposal description");
 		}
 	}
-	
+
 	function stringifyExpected(expectedProposals) {
 		var text = "";
 		for (var i = 0; i < expectedProposals.length; i++)  {
@@ -45,7 +45,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		}
 		return text;
 	}
-	
+
 	function stringifyActual(actualProposals) {
 		var text = "";
 		for (var i = 0; i < actualProposals.length; i++) {
@@ -53,11 +53,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		}
 		return text;
 	}
-	
+
 	function testProposals(actualProposals, expectedProposals) {
 		assert.equal(actualProposals.length, expectedProposals.length,
 			"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals));
-			
+
 		for (var i = 0; i < actualProposals.length; i++) {
 			testProposal(actualProposals[i], expectedProposals[i][0], expectedProposals[i][1]);
 		}
@@ -135,7 +135,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("x", "x");
 		assert.equal(results.length, 0);
 	};
-	
+
 	// non-inferencing content assist
 	tests["test Empty File Content Assist"] = function() {
 		var results = computeContentAssist("");
@@ -368,7 +368,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	tests["test no dupe 1"] = function() {
 		var results = computeContentAssist(
 				"var coo = 9; var other = function(coo) { c/**/ }", "c");
@@ -376,7 +376,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["coo", "coo : {  }"]
 		]);
 	};
-	
+
 	tests["test no dupe 2"] = function() {
 		var results = computeContentAssist(
 				"var coo = { }; var other = function(coo) { coo = 9;\nc/**/ }", "c");
@@ -384,7 +384,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["coo", "coo : Number"]
 		]);
 	};
-	
+
 	tests["test no dupe 3"] = function() {
 		var results = computeContentAssist(
 				"var coo = function () { var coo = 9; \n c/**/};", "c");
@@ -392,7 +392,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["coo", "coo : Number"]
 		]);
 	};
-	
+
 	tests["test no dupe 4"] = function() {
 		var results = computeContentAssist(
 				"var coo = 9; var other = function () { var coo = function() { return 9; }; \n c/**/};", "c");
@@ -400,7 +400,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["coo()", "coo() : Number"]
 		]);
 	};
-	
+
 	tests["test scopes 1"] = function() {
 		// only the outer foo is available
 		var results = computeContentAssist(
@@ -653,8 +653,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
-	
+
+
 	// all inferencing based content assist tests here
 	tests["test Object inferencing with Variable"] = function() {
 		var results = computeContentAssist("var t = {}\nt.h", "h");
@@ -696,7 +696,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toString()", "toString() : String"]
 		]);
 	};
-	
+
 	tests["test Data flow Object Literal inferencing"] = function() {
 		var results = computeContentAssist("var s = { hhh : 1, hh2 : 8}\nvar t = s;\nt.h", "h");
 		testProposals(results, [
@@ -730,14 +730,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["concat(array)", "concat(array) : String"]
 		]);
 	};
-	
+
 	tests["test Simple this"] = function() {
 		var results = computeContentAssist("var ssss = 4;\nthis.ss", "ss");
 		testProposals(results, [
 			["ssss", "ssss : Number"]
 		]);
 	};
-	
+
 	tests["test Object Literal inside"] = function() {
 		var results = computeContentAssist("var x = { the : 1, far : this.th/**/ };", "th");
 		testProposals(results, [
@@ -785,7 +785,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	// not working since for loop is not storing slocs of var ii
 	tests["test for loop 1"] = function() {
 		var results = computeContentAssist("for (var ii=0;i/**/<8;ii++) { ii }", "i");
@@ -856,8 +856,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["message", "message : String"]
 		]);
 	};
-	
-	
+
+
 	tests["test get global var"] = function() {
 		// should infer that we are referring to the globally defined xxx, not the param
 		var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { this.xxx.toF/**/}", "toF");
@@ -865,7 +865,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test get local var"] = function() {
 		// should infer that we are referring to the locally defined xxx, not the global
 		var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { xxx.toF/**/}", "toF");
@@ -965,7 +965,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test constructor 4"] = function() {
 		var results = computeContentAssist(
 		"var Fun = function () {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
@@ -975,7 +975,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test constructor 5"] = function() {
 		var results = computeContentAssist(
 		"var x = { Fun : function () { this.xxx = 9;	this.uuu = this.xxx; } }\n" +
@@ -985,7 +985,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test constructor 6"] = function() {
 		var results = computeContentAssist(
 		"var x = { Fun : function () { this.xxx = 9;	this.uuu = this.xxx; } }\n" +
@@ -994,7 +994,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test constructor 7"] = function() {
 		var results = computeContentAssist(
 		"var Fun = function () {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
@@ -1005,7 +1005,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test constructor 8"] = function() {
 		var results = computeContentAssist(
 		"var FunOrig = function () {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
@@ -1016,7 +1016,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	// functions should not be available outside the scope that declares them
 	tests["test constructor 9"] = function() {
 		var results = computeContentAssist(
@@ -1027,7 +1027,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Inner()", "Inner() : Inner"]
 		]);
 	};
-	
+
 	// should be able to reference functions using qualified name
 	tests["test constructor 10"] = function() {
 		var results = computeContentAssist(
@@ -1037,7 +1037,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Inner()", "Inner() : outer.Inner"]
 		]);
 	};
-	
+
 	tests["test Function args 1"] = function() {
 		var results = computeContentAssist(
 		"var ttt, uuu;\nttt(/**/)");
@@ -1155,7 +1155,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	// check that function args don't get assigned the same type
 	tests["test function args 4"] = function() {
 		var results = computeContentAssist(
@@ -1164,7 +1164,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["foo", "foo : Number"]
 		]);
 	};
-	
+
 	// check that function args don't get assigned the same type
 	tests["test function args 5"] = function() {
 		var results = computeContentAssist(
@@ -1173,7 +1173,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["foo", "foo : String"]
 		]);
 	};
-	
+
 	// FIXADE failing since we do not handle constructors that are not identifiers
 //	tests["test constructor 5"] = function() {
 //		var results = computeContentAssist(
@@ -1194,8 +1194,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
-	
+
+
 	tests["test nested object expressions 1"] = function() {
 		var results = computeContentAssist(
 		"var ttt = { xxx : { yyy : { zzz : 1} } };\n" +
@@ -1220,7 +1220,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function expression 1"] = function() {
 		var results = computeContentAssist(
 		"var ttt = function(a, b, c) { };\ntt", "tt");
@@ -1270,7 +1270,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["apply(func, [argArray])", "apply(func, [argArray]) : Object"]
 		]);
 	};
-	
+
 	tests["test globals 1"] = function() {
 		var results = computeContentAssist("/*global faaa */\nfa", "fa");
 		testProposals(results, [
@@ -1289,7 +1289,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 		]);
 	};
-	
+
 	tests["test globals 4"] = function() {
 		var results = computeContentAssist("/*global  \t\n faaa:true \t\t\n faaa2:false  */\nfa", "fa");
 		testProposals(results, [
@@ -1297,7 +1297,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["faaa2", "faaa2 : {  }"]
 		]);
 	};
-	
+
 	tests["test globals 5"] = function() {
 		var results = computeContentAssist("/*global  \t\n faaa:true, \t\t\n faaa2:false,  */\nfa", "fa");
 		testProposals(results, [
@@ -1305,9 +1305,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["faaa2", "faaa2 : {  }"]
 		]);
 	};
-	
-	
-	
+
+
+
 	////////////////////////////
 	// tests for complex names
 	////////////////////////////
@@ -1343,7 +1343,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["ttt", "ttt : { aa:Number, bb:Number, cc:Number }"]
 		]);
 	};
-	
+
 	////////////////////////////
 	// tests for broken syntax
 	////////////////////////////
@@ -1362,7 +1362,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	tests["test broken after dot 2"] = function() {
 		var results = computeContentAssist("var ttt = { ooo:8};\nif (ttt.) { ttt }", "", "var ttt = { ooo:8};\nif (ttt.".length);
 		testProposals(results, [
@@ -1436,13 +1436,13 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	tests["test broken after dot 5"] = function() {
 		var results = computeContentAssist(
 			"var first = {ooo:9};\n" +
 			"first.\n" +
 			"var jjj;", "",
-	
+
 			("var first = {ooo:9};\n" +
 			"first.").length);
 
@@ -1458,14 +1458,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
-	
+
+
 	tests["test broken after dot 6"] = function() {
 		var results = computeContentAssist(
 			"var first = {ooo:9};\n" +
 			"first.\n" +
 			"if (x) { }", "",
-	
+
 			("var first = {ooo:9};\n" +
 			"first.").length);
 
@@ -1481,7 +1481,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	// test return types of various simple functions
 	tests["test function return type 1"] = function() {
 		var results = computeContentAssist(
@@ -1490,7 +1490,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type 1a"] = function() {
 		// complete on a function, not a number
 		var results = computeContentAssist(
@@ -1499,7 +1499,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"]
 		]);
 	};
-	
+
 	tests["test function return type 2"] = function() {
 		var results = computeContentAssist(
 			"function first() { return 9; };\nfirst().toF", "toF");
@@ -1507,7 +1507,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type 3"] = function() {
 		var results = computeContentAssist(
 			"var obj = { first : function () { return 9; } };\nobj.first().toF", "toF");
@@ -1515,7 +1515,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type 4"] = function() {
 		var results = computeContentAssist(
 			"function first() { return { ff : 9 }; };\nfirst().ff.toF", "toF");
@@ -1523,7 +1523,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type 5"] = function() {
 		var results = computeContentAssist(
 			"function first() { return function() { return 9; }; };\nvar ff = first();\nff().toF", "toF");
@@ -1531,7 +1531,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type 6"] = function() {
 		var results = computeContentAssist(
 			"function first() { return function() { return 9; }; };\nfirst()().toF", "toF");
@@ -1539,7 +1539,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	// now test different ways that functions can be constructed
 	tests["test function return type if 1"] = function() {
 		var results = computeContentAssist(
@@ -1548,7 +1548,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type if 2"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1557,7 +1557,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type while"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1566,7 +1566,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type do/while"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1575,7 +1575,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type for"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1584,7 +1584,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type for in"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1593,7 +1593,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type try 1"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1602,7 +1602,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type try 2"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1611,7 +1611,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type try 3"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1620,7 +1620,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type try 4"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1629,7 +1629,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type switch 1"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1638,7 +1638,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type switch 2"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1647,7 +1647,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type switch 3"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1656,7 +1656,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type nested block 1"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1665,7 +1665,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test function return type nest block 2"] = function() {
 		// always choose the last return statement
 		var results = computeContentAssist(
@@ -1681,7 +1681,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["first()", "first() : { a:Number, b:String }"]
 		]);
 	};
-	
+
 	tests["test function return type obj literal 2"] = function() {
 		var results = computeContentAssist(
 			"function first () {" +
@@ -1718,11 +1718,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aa", "aa : Number"]
 		]);
 	};
-	
+
 	///////////////////////////////////////////////
 	// Some tests for implicitly defined variables
 	///////////////////////////////////////////////
-	
+
 	// should see xxx as an object
 	tests["test implicit1"] = function() {
 		var results = computeContentAssist(
@@ -1731,7 +1731,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxx", "xxx : {  }"]
 		]);
 	};
-	
+
 	tests["test implicit2"] = function() {
 		var results = computeContentAssist(
 			"xxx.yyy = 0;\nxxx.yy", "yy");
@@ -1739,7 +1739,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["yyy", "yyy : Number"]
 		]);
 	};
-	
+
 	tests["test implicit3"] = function() {
 		var results = computeContentAssist(
 			"xxx;\n xxx.yyy = 0;\nxxx.yy", "yy");
@@ -1747,7 +1747,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["yyy", "yyy : Number"]
 		]);
 	};
-	
+
 	tests["test implicit4"] = function() {
 		var results = computeContentAssist(
 			"xxx = 0;\nxx", "xx");
@@ -1755,7 +1755,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxx", "xxx : Number"]
 		]);
 	};
-	
+
 	// implicits are available in the global scope
 	tests["test implicit5"] = function() {
 		var results = computeContentAssist(
@@ -1764,7 +1764,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxx", "xxx : Number"]
 		]);
 	};
-	
+
 	// implicits are available in the global scope
 	tests["test implicit6"] = function() {
 		var results = computeContentAssist(
@@ -1773,7 +1773,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxx", "xxx : Number"]
 		]);
 	};
-	
+
 	// should see an implicit even if it comes after the invocation location
 	tests["test implicit7"] = function() {
 		var results = computeContentAssist(
@@ -1790,8 +1790,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxx", "xxx : Number"]
 		]);
 	};
-	
-	
+
+
 	// not really an implicit variable, but
 	tests["test implicit9"] = function() {
 		var results = computeContentAssist(
@@ -1799,8 +1799,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 		]);
 	};
-	
-	
+
+
 	///////////////////////////////////////////////
 	// Binary and unary expressions
 	///////////////////////////////////////////////
@@ -1928,7 +1928,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aaa()", "aaa() : Boolean"]
 		]);
 	};
-	
+
 	///////////////////////////////////////////////
 	// Mucking around with a constructor function's prototype
 	///////////////////////////////////////////////
@@ -2016,7 +2016,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["obj", "obj : { inner:{ Fun:new() ⇒ obj.inner.Fun } }"]
 		]);
 	};
-	
+
 	tests["test dotted constructor5"] = function() {
 		var results = computeContentAssist(
 			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
@@ -2026,7 +2026,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["obj", "obj : { inner:{ Fun:new() ⇒ obj.inner.Fun } }"]
 		]);
 	};
-	
+
 	tests["test dotted constructor6"] = function() {
 		var results = computeContentAssist(
 			"var obj = { inner : {  } }\nobj.inner.inner2 = { Fun : function() { } }\nnew obj", "obj");
@@ -2036,7 +2036,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["obj", "obj : { inner:{ inner2:{...} } }"]
 		]);
 	};
-	
+
 	// assign to another---should only have one proposal since we don't change the type name
 	tests["test dotted constructor7"] = function() {
 		var results = computeContentAssist(
@@ -2047,7 +2047,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["inner", "inner : { Fun:new() ⇒ obj.inner.Fun }"]
 		]);
 	};
-	
+
 	// assign sub-part to another---should only have one proposal since we don't change the type name
 	tests["test dotted constructor8"] = function() {
 		var results = computeContentAssist(
@@ -2089,7 +2089,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 		]);
 	};
-	
+
 	// TODO FIXADE this is wrong, but we're still going to test it
 	// constructor declared as a member available in global scope
 	tests["test constructor in constructor BAD"] = function() {
@@ -2100,7 +2100,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Fn()", "Fn() : obj.Fn"]
 		]);
 	};
-	
+
 	// Not ideal, but a constructor being used from a constructed object is not dotted, but should be
 	tests["test constructor in constructor Not Ideal"] = function() {
 		var results = computeContentAssist(
@@ -2112,9 +2112,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Inner()", "Inner() : Inner"]
 		]);
 	};
-	
-	
-	
+
+
+
 
 	// should not be able to redefine or add to global types
 	tests["test global redefine1"] = function() {
@@ -2145,7 +2145,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Window"]
 		]);
 	};
-	
+
 	tests["test browser2"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:false*/\n" +
@@ -2155,7 +2155,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"]
 		]);
 	};
-	
+
 	// regular stuff should still work in the browser
 	tests["test browser3"] = function() {
 		var results = computeContentAssist(
@@ -2165,7 +2165,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["stringify(obj)", "stringify(obj) : String"]
 		]);
 	};
-	
+
 	tests["test browser4"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2234,7 +2234,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xx", "xx : Number"]
 		]);
 	};
-	
+
 	tests["test browser10"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true*/\n" +
@@ -2244,7 +2244,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Window"]
 		]);
 	};
-	
+
 	// browser takes higher precedence than node
 	tests["test browser11"] = function() {
 		var results = computeContentAssist(
@@ -2255,7 +2255,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Window"]
 		]);
 	};
-	
+
 	// browser takes higher precedence than node
 	tests["test browser12"] = function() {
 		var results = computeContentAssist(
@@ -2266,7 +2266,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Window"]
 		]);
 	};
-	
+
 	// configuration from lint options
 	tests["test browser13"] = function() {
 		var results = computeContentAssist(
@@ -2276,8 +2276,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Window"]
 		]);
 	};
-	
-	
+
+
 	// configuration from lint options overridden by options
 	tests["test browser13"] = function() {
 		var results = computeContentAssist(
@@ -2288,9 +2288,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Global"]
 		]);
 	};
-	
-	
-	
+
+
+
 	// Node awareness
 	tests["test node1"] = function() {
 		var results = computeContentAssist(
@@ -2321,7 +2321,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["this", "this : Module"]
 		]);
 	};
-	
+
 	tests["test node4"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
@@ -2332,7 +2332,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
-	
+
 	tests["test node5"] = function() {
 		var results = computeContentAssist(
 			"/*jslint node:false*/\n" +
@@ -2425,7 +2425,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/\n" +
@@ -2436,7 +2436,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2447,7 +2447,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2458,7 +2458,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		// This is actually a bug.  We incorrectly recognize //* comments as jsdoc coments
 		tests["test simple jsdoc5"] = function() {
 			var results = computeContentAssist(
@@ -2470,7 +2470,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc6"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/\n" +
@@ -2482,7 +2482,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc7"] = function() {
 			var results = computeContentAssist(
 				"/** @type String*/" +
@@ -2494,7 +2494,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc8"] = function() {
 			var results = computeContentAssist(
 				"/** @returns String\n@type Number*/\n" +
@@ -2504,7 +2504,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-		
+
 		tests["test simple jsdoc9"] = function() {
 			var results = computeContentAssist(
 				"/** @param String f\n@type Number*/\n" +
@@ -2514,7 +2514,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-		
+
 		tests["test simple jsdoc10"] = function() {
 			var results = computeContentAssist(
 				"/** @return Number*/\n" +
@@ -2524,7 +2524,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx()", "xx() : Number"]
 			]);
 		};
-		
+
 		tests["test simple jsdoc11"] = function() {
 			var results = computeContentAssist(
 				"/** @type String\n@return Number*/\n" +
@@ -2534,7 +2534,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx()", "xx() : Number"]
 			]);
 		};
-		
+
 		// @type overrides @return
 		tests["test simple jsdoc12"] = function() {
 			var results = computeContentAssist(
@@ -2546,7 +2546,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String"]
 			]);
 		};
-	
+
 		// @type overrides @return
 		tests["test simple jsdoc13"] = function() {
 			var results = computeContentAssist(
@@ -2558,7 +2558,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["ss", "ss : {  }"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc14"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2569,7 +2569,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx()", "xx : String"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc15"] = function() {
 			var results = computeContentAssist(
 				"var xx;\n" +
@@ -2580,7 +2580,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["ss", "ss : {  }"]
 			]);
 		};
-	
+
 		tests["test simple jsdoc14"] = function() {
 			var results = computeContentAssist(
 				"/** @type Number*/\n" +
@@ -2592,7 +2592,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-	
+
 		// the complex types tag
 		tests["test type union jsdoc1"] = function() {
 			var results = computeContentAssist(
@@ -2604,7 +2604,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String"]
 			]);
 		};
-		
+
 		tests["test type nullable jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {?String}*/\n" +
@@ -2614,7 +2614,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String"]
 			]);
 		};
-		
+
 		tests["test type non-nullable jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {!String}*/\n" +
@@ -2624,7 +2624,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String"]
 			]);
 		};
-		
+
 		tests["test type array jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {[]}*/\n" +
@@ -2634,7 +2634,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Array"]
 			]);
 		};
-		
+
 		tests["test type parameterized jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {Array.<String>}*/\n" +
@@ -2645,7 +2645,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : String[]"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo}}*/\n" +
@@ -2655,7 +2655,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo", "foo : Object"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:String}}*/\n" +
@@ -2665,7 +2665,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo", "foo : String"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:string,foo2:number}}*/\n" +
@@ -2676,7 +2676,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo2", "foo2 : Number"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo2:number}}}*/\n" +
@@ -2686,7 +2686,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo2", "foo2 : Number"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"function Flart() { this.xx = 9; }\n" +
@@ -2697,7 +2697,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx", "xx : Number"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc6"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function()}}}*/\n" +
@@ -2707,7 +2707,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo()", "foo() : Object"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc7"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number)}}}*/\n" +
@@ -2717,7 +2717,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo(a, b)", "foo(a, b) : Object"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc8"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number):Number}}}*/\n" +
@@ -2727,7 +2727,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo(a, b)", "foo(a, b) : Number"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc9"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:{foo:function(a:String,b:Number):{len:Number}}}}*/\n" +
@@ -2737,7 +2737,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo(a, b)", "foo(a, b) : { len:Number }"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc10"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:function(a:String,b:Number):{len:function():Number}}}*/\n" +
@@ -2747,7 +2747,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["len()", "len() : Number"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc11"] = function() {
 			var results = computeContentAssist(
 				"/** @type {{foo:function():IDontExist}}*/\n" +
@@ -2757,7 +2757,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo()", "foo() : Object"]
 			]);
 		};
-		
+
 		tests["test type record jsdoc12"] = function() {
 			var results = computeContentAssist(
 				"var Flart = function() {}" +
@@ -2768,7 +2768,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["foo()", "foo() : Flart"]
 			]);
 		};
-		
+
 		// the param tag
 		tests["test param jsdoc1"] = function() {
 			var results = computeContentAssist(
@@ -2780,7 +2780,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx2", "xx2 : Number"]
 			]);
 		};
-		
+
 		tests["test param jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @param {Number} xx2\n@param {String} xx1\n */" +
@@ -2791,7 +2791,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx2", "xx2 : Number"]
 			]);
 		};
-		
+
 		tests["test param jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(String,Number):Number} xx2\n */" +
@@ -2802,7 +2802,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx1", "xx1 : {  }"]
 			]);
 		};
-		
+
 		tests["test param jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,Number):Number} xx2\n */" +
@@ -2813,7 +2813,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx1", "xx1 : {  }"]
 			]);
 		};
-		
+
 		tests["test param jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,?Number):Number} xx2\n */" +
@@ -2824,7 +2824,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["xx1", "xx1 : {  }"]
 			]);
 		};
-		
+
 		// the return tag
 		tests["test return jsdoc1"] = function() {
 			var results = computeContentAssist(
@@ -2836,7 +2836,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["flart(xx1, xx2)", "flart(xx1, xx2) : (a:String, arg1:Number) ⇒ Number"]
 			]);
 		};
-		
+
 		tests["test return jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @return {function(String):Number} xx2\n */" +
@@ -2846,7 +2846,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["other(String)", "other(String) : Number"]
 			]);
 		};
-	
+
 		// reassignment
 		tests["test reassignment jsdoc1"] = function() {
 			var results = computeContentAssist(
@@ -2857,7 +2857,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["flar", "flar : Number"]
 			]);
 		};
-	
+
 		// TODO this one is an open question.  Should we allow reassignment of
 		// explicitly typed variables and parameters?  Currently, we do.
 		tests["test reassignment jsdoc2"] = function() {
@@ -2870,7 +2870,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["flar", "flar : String"]
 			]);
 		};
-	
+
 		// reassignment shouldn't happen here since uninteresting type is being assigned
 		tests["test reassignment jsdoc3"] = function() {
 			var results = computeContentAssist(
@@ -2882,7 +2882,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["flar", "flar : Number"]
 			]);
 		};
-		
+
 		// SCRIPTED-138 jsdoc support for functions parameters that are in object literals
 		tests["test object literal fn param jsdoc1"] = function() {
 			var results = computeContentAssist(
@@ -2917,7 +2917,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["res", "res : String"]
 			]);
 		};
-		
+
 		tests["test dotted constructor jsdoc type 1"] = function() {
 			var results = computeContentAssist(
 				"var obj = { Fun : function() {} };\n" +
@@ -2934,7 +2934,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["yyy", "yyy : Number"]
 			]);
 		};
-		
+
 		// arrays and array types
 		tests["test array type1"] = function() {
 			var results = computeContentAssist(
@@ -2999,7 +2999,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["toFixed(digits)", "toFixed(digits) : Number"]
 			]);
 		};
-		
+
 		tests["test jsdoc on property decl1"] = function() {
 			var results = computeContentAssist(
 				"var jjj = {};/** @type {Number} */\n" +
@@ -3017,7 +3017,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			]);
 		};
 	}
-	
+
 	/////////////////////////////////////
 	// various tests for reassignment
 	// reassignments are only performed
@@ -3034,23 +3034,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	 Object -> { } yes
 	 Object -> {a} yes
 	 Object -> any yes
-	 
+
 	 { } -> undefined no
 	 { } -> Object no
 	 { } -> {a} yes
 	 { } -> any yes
-	 
+
 	 {a} -> undefined no
 	 {a} -> Object no
 	 {a} -> { } no
 	 {a} -> any yes
-	 
+
 	 any -> undefined no
 	 any -> Object no
 	 any -> { } no
 	 any -> {a} yes
 	*/
-	
+
 	//undefined
 	tests["test reassignment undef->Obj"] = function() {
 		var results = computeContentAssist(
@@ -3126,7 +3126,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["a", "a : Number"]
 		]);
 	};
-	
+
 	// { }
 	tests["test reassignment { }->undefined"] = function() {
 		var results = computeContentAssist(
@@ -3164,7 +3164,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["a", "a : Number"]
 		]);
 	};
-	
+
 	// {a}
 	tests["test reassignment {a}->undefined"] = function() {
 		var results = computeContentAssist(
@@ -3211,7 +3211,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["a", "a : Number"]
 		]);
 	};
-	
+
 	// any
 	tests["test reassignment any->undefined"] = function() {
 		var results = computeContentAssist(
@@ -3258,7 +3258,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["a", "a : String"]
 		]);
 	};
-	
+
 	///////////////////////////////////////////////////
 	// testing default jslint options
 	///////////////////////////////////////////////////
@@ -3267,7 +3267,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	var jsOptions1Global = {"global": [ "aaa" ]};
 	var jsOptions2Globals = {"global": [ "aaa", "aab"]};
 	var jsOptionsAndGlobals = {"global": [ "aaa", "aab"], "options": { "browser": true }};
-	
+
 	tests["test browser:true in options"] = function() {
 		var results = computeContentAssist(
 			"wind", "wind", null, jsOptionsBrowser);
@@ -3275,21 +3275,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["window", "window : Window"]
 		]);
 	};
-	
+
 	tests["test browser:false in options"] = function() {
 		var results = computeContentAssist(
 			"wind", "wind", null, jsOptionsNoBrowser);
 		testProposals(results, [
 		]);
 	};
-	
+
 	tests["test browser:true in options overriden by browser:false in text"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:false */\nwind", "wind", null, jsOptionsBrowser);
 		testProposals(results, [
 		]);
 	};
-	
+
 	tests["test browser:false in options overriden by browser:true in text"] = function() {
 		var results = computeContentAssist(
 			"/*jslint browser:true */\nwind", "wind", null, jsOptionsNoBrowser);
@@ -3297,7 +3297,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["window", "window : Window"]
 		]);
 	};
-	
+
 	tests["test 1 global in options"] = function() {
 		var results = computeContentAssist(
 			"aa", "aa", null, jsOptions1Global);
@@ -3305,7 +3305,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aaa", "aaa : {  }"]
 		]);
 	};
-	
+
 	tests["test 2 globals in options"] = function() {
 		var results = computeContentAssist(
 			"aa", "aa", null, jsOptions2Globals);
@@ -3314,7 +3314,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aab", "aab : {  }"]
 		]);
 	};
-	
+
 	tests["test 2 globals in options and in text"] = function() {
 		var results = computeContentAssist(
 			"/*global aac */\naa", "aa", null, jsOptions2Globals);
@@ -3324,7 +3324,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aac", "aac : {  }"]
 		]);
 	};
-	
+
 	tests["test globals and browser1"] = function() {
 		var results = computeContentAssist(
 			"aa", "aa", null, jsOptionsAndGlobals);
@@ -3333,7 +3333,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aab", "aab : {  }"]
 		]);
 	};
-	
+
 	tests["test globals and browser2"] = function() {
 		var results = computeContentAssist(
 			"wind", "wind", null, jsOptionsAndGlobals);
@@ -3341,18 +3341,18 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["window", "window : Window"]
 		]);
 	};
-	
+
 	// SCRIPTED-100
 	tests["test obj literal with underscore"] = function() {
 		var results = computeContentAssist(
 			"var obj = { _myFun : function() { this._/**/ } }", "_");
-			
+
 		testProposals("_", results, [
 			// inferred as object type since invocation request is happening inside of object literal.
 			["_myFun", "_myFun : Object"]
 		]);
 	};
-	
+
 	// SCRIPTED-170
 	tests["test obj literal with underscore"] = function() {
 		var results = computeContentAssist(
@@ -3392,7 +3392,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	// computed member expressions
 	tests["test computed member expressions1"] = function() {
 		var results = computeContentAssist(
@@ -3402,7 +3402,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["bar", "bar : Number"]
 		]);
 	};
-	
+
 	tests["test computed member expressions2"] = function() {
 		var results = computeContentAssist(
 			"var foo = { at: { bar: 0} };\n" +
@@ -3410,7 +3410,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 		]);
 	};
-	
+
 	tests["test computed member expressions3"] = function() {
 		var results = computeContentAssist(
 			"var foo = { at: { bar: 0} };\n" +
@@ -3418,7 +3418,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 		]);
 	};
-	
+
 	tests["test computed member expressions4"] = function() {
 		var results = computeContentAssist(
 			"var foo = { at: { bar: 0} };\n" +
@@ -3427,7 +3427,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toFixed(digits)", "toFixed(digits) : Number"]
 		]);
 	};
-	
+
 	tests["test computed member expressions5"] = function() {
 		var results = computeContentAssist(
 			"var foo = { at: { bar: 0} };\n" +
@@ -3442,7 +3442,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
+
 	tests["test computed member expressions6"] = function() {
 		var results = computeContentAssist(
 			"var x = 0;\n" +
@@ -3462,8 +3462,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["prototype", "prototype : Object"]
 		]);
 	};
-	
-	
+
+
 	/////////////////////////////////////
 	// full file inferencing
 	/////////////////////////////////////
@@ -3533,7 +3533,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["y", "y : Number"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 9"] = function() {
 		var results = computeContentAssist(
 			"function a() {\n" +
@@ -3561,7 +3561,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fff", "fff : String"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 11a"] = function() {
 		var results = computeContentAssist(
 			"var x = {};\n" +
@@ -3591,7 +3591,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fff", "fff : String"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 12"] = function() {
 		var results = computeContentAssist(
 			"function a() {\n" +
@@ -3739,7 +3739,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fff", "fff : String"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 23"] = function() {
 		var results = computeContentAssist(
 			"function a() {\n" +
@@ -3815,7 +3815,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fff", "fff : {  }"]
 		]);
 	};
-	
+
 	// Not gonna work because of recursive
 	tests["test full file inferecing 28"] = function() {
 		var results = computeContentAssist(
@@ -3857,7 +3857,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["fff", "fff : {  }"]
 		]);
 	};
-	
+
 	// Not gonna work because of recursive
 	tests["test full file inferecing 31"] = function() {
 		var results = computeContentAssist(
@@ -3868,7 +3868,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Function()", "Function() : Function"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 32"] = function() {
 		var results = computeContentAssist(
 			"x/**/\n" +
@@ -3877,7 +3877,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["x()", "x() : String"]
 		]);
 	};
-	
+
 	tests["test full file inferecing 33"] = function() {
 		var results = computeContentAssist(
 			"var xxx = {\n" +
@@ -3899,7 +3899,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["aaa", "aaa : String"]
 		]);
 	};
-	
+
 	/////////////////////////////////////
 	// property read inferencing
 	//
@@ -3914,7 +3914,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["lll", "lll : {  }"]
 		]);
 	};
-	
+
 	tests["test property read after"] = function() {
 		var results = computeContentAssist(
 			"var xxx;\n" +
@@ -3924,7 +3924,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["lll", "lll : {  }"]
 		]);
 	};
-	
+
 	tests["test property read global before"] = function() {
 		var results = computeContentAssist(
 			"lll++;\n" +
@@ -3933,7 +3933,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["lll", "lll : {  }"]
 		]);
 	};
-	
+
 	tests["test property read global after"] = function() {
 		var results = computeContentAssist(
 			"ll/**/;\n" +
@@ -3942,7 +3942,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["lll", "lll : {  }"]
 		]);
 	};
-	
+
 	/////////////////////////////////////
 	// Array parameterization
 	/////////////////////////////////////
@@ -4073,7 +4073,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xxyz", "xxyz : Number"]
 		]);
 	};
-	
+
 	// https://github.com/scripted-editor/scripted/issues/65
 	tests["test loosely match 1"] = function() {
 		var results = computeContentAssist(
@@ -4103,6 +4103,39 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var getAnotherThing = 0;\n" +
 			"getAN", "getAN");
 		testProposals(results, [
+		]);
+	};
+
+	// Issue 221 problems with navigating to proto definitions inside of constructors
+	tests['test proto ref in this1']  = function() {
+		var results = computeContentAssist(
+			"function TextView () {\n" +
+			"	this._init/**/;\n" +
+			"}\n" +
+			"TextView.prototype = {\n" +
+			"	_init: function() { }\n" +
+			"};", "_init");
+		testProposals(results, [
+			["_init()", "_init() : undefined"]
+		]);
+	};
+	tests['test proto ref in this2']  = function() {
+		var results = computeContentAssist(
+			"function TextView () {\n" +
+			"	this._init/**/;\n" +
+			"}\n" +
+			"TextView.prototype._init = function() { };", "_init");
+		testProposals(results, [
+			["_init()", "_init() : undefined"]
+		]);
+	};
+	tests['test proto ref in this3']  = function() {
+		var results = computeContentAssist(
+			"function TextView () { }\n" +
+			"TextView.prototype._init = function() { };\n" +
+			"new TextView()._init/**/", "_init");
+		testProposals(results, [
+			["_init()", "_init() : undefined"]
 		]);
 	};
 
