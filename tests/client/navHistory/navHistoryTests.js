@@ -35,6 +35,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	var getFileContents = mTestutils.getFileContents;
 
 	function setup() {
+		console.log("Starting");
 		var panes = mPaneFactory.getSidePanes();
 		for (var i = 0; i < panes.length; i++) {
 			mPaneFactory.destroyPane(panes[i]);
@@ -57,7 +58,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	function testLocation(mainPath, mainSel, subPath, subSel) {
 		var deferred = when.defer();
 		editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-			assert.equal(editorUtils.getMainEditor().getFilePath(), testResourceRootClosingSlash +  mainPath);
+			assert.equal(editorUtils.getMainEditor().getFilePath(), testResourceRootClosingSlash +  mainPath,
+			"Results: " + editorUtils.getMainEditor().getFilePath() + " and " + testResourceRootClosingSlash +  mainPath);
 			assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start: mainSel[0], end: mainSel[1]});
 			if (subPath) {
 				editorUtils.getSubEditor().editorLoadedPromise.then(function() {
