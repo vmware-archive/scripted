@@ -182,7 +182,7 @@ define([
 				});
 			}
 			setEditorTitle(editor, fileName);
-			
+
 		};
 
 		/**
@@ -283,7 +283,7 @@ define([
 				$('#help_open').click();
 				return true;
 			});
-			
+
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F2'), "Toggle Navigator");
 			editor.getTextView().setAction("Toggle Navigator",function() {
 				layoutManager.toggleNavigatorVisible();
@@ -295,7 +295,7 @@ define([
 				editor.getTextView().invokeAction("Toggle Navigator",false);
 				return true;
 			});
-			
+
 			// No keybinding by default
 			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
 				syntaxHighlighter.toggleWhitespacesVisible();
@@ -439,7 +439,7 @@ define([
 		var syntaxHighlighter = {
 			styler: null,
 			visibleWhitespace: false,
-			
+
 			toggleWhitespacesVisible: function(visible) {
 				if (this.styler && this.styler.setWhitespacesVisible) {
 					this.visibleWhitespace = !this.visibleWhitespace;
@@ -529,7 +529,7 @@ define([
 		editor.setScroll = function(newScroll) {
 			$(this._domNode).find('.textview').scrollTop(newScroll);
 		};
-		
+
 		/**
 		 * @return Array.<String> the array of css classes applied to the span at the current offset
 		 * will tell you the location (eg- inside comment, etc) at the location
@@ -543,22 +543,23 @@ define([
 				var remainingLength = offset - lineStart;
 				var child = line._lineDiv.firstChild;
 				while (child) {
-					if (child.innerText) {
-						remainingLength -= child.innerText.length;
+					var text = child.innerText || child.textContent;
+					if (text) {
+						remainingLength -= text.length;
 						if (remainingLength <= 0) {
 							break;
 						}
 					}
 					child = child.nextSibling;
 				}
-				
+
 				if (child) {
 					return child.classList;
 				}
 			}
 			return [];
 		};
-		
+
 		// end extra editor functions
 		////////////////////////////////////////
 
@@ -632,10 +633,10 @@ define([
 
         //Add exec key bindings defined based on what's in the .scripted file
         require('scripted/exec/exec-keys').installOn(editor);
-        
+
 
 		var xhrobj = new XMLHttpRequest();
-		
+
         var editorLoadResponseHandler = function() {
 			if (xhrobj.readyState === 4) {
 				if (xhrobj.status === 200) {
@@ -686,16 +687,16 @@ define([
 						editor.getTextView().setReadonly(false);
 					}
 				}
-				
+
 				// editor is loaded let everyone who cares about it know this.
 				editor.editorLoadedPromise.resolve(editor);
 			}
         };
-        
+
 		try {
 			var url = '/get?file=' + filePath;
 			//console.log("Getting contents for " + url);
-			
+
 			// TODO switch to an event model, fire an event when content loaded and always run async
 			if (!behaviourConfig.getAsyncEditorContentLoading()) {
 				editor.getTextView().setReadonly(true);
@@ -750,7 +751,7 @@ define([
 		editor.type = editorType;
 
 		require("scripted/exec/exec-after-save").installOn(editor);
-		
+
 		themeManager.applyCurrentTheme(editor);
 
 		return editor;
