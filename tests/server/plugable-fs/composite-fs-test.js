@@ -13,9 +13,10 @@
 
 var Fs = require('fake-fs');
 var compose = require('../../../server/plugable-fs/composite-fs').compose;
-var each = require('when');
+var withPrefix = require('../../../server/plugable-fs/mapped-fs').withPrefix;
 var mapk = require('../../../server/jsdepend/utils').mapk;
 var toCompareString = require('../../../server/jsdepend/utils').toCompareString;
+var eachk = require('../../../server/jsdepend/utils').eachk;
 
 exports.statLeftFsWins = function (test) {
 
@@ -249,11 +250,91 @@ exports.readFileCaseNothingNothing = function (test) {
 	});
 };
 
-//writeFile test with thre disjoint fss try to write to each of the
-// three different fss and check that it worked out!
+//writeFile test with three fss that are overlapping emanating from a writable root.
+//But each subfs has different directories.
+//Try to write to each of the directories. Then check that the data
+// ended up in the right file system and not the other ones.
+exports.writeFileThreeOverlappingFss = function (test) {
+
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, k) {
+			cfs.writeFile('/'+name+'/data.txt', 'Some data for '+name, 'utf8', function (err) {
+				test.ok(!err);
+				if (err) {
+					console.log(err);
+					if (err.stack) {
+						console.log(err.stack);
+					}
+				}
+				k();
+			});
+		},
+		function () {
+			//Get here means we tried to write each file
+			// Check that each data ended up in the right sub file system and
+			// not the other ones.
+			for (var i = 0; i < names.length; i++) {
+				var name = names[i];
+				var fs = fss[i];
+				//console.log('fs '+name+' = ' + JSON.stringify(fs, null, '  '));
+				test.equals('Some data for '+name,
+					fs.readFileSync('/'+name+'/data.txt', 'utf8')
+				);
+			}
+			test.done();
+		}
+	);
+};
+
+//Similar to the 'three overlapping fss' test but this time the three filesystems
+// are remapped with a withPrefix mapping to be totally disjoint from one another.
 exports.writeFileThreeDisjointFss = function (test) {
 
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		return new Fs();
+	});
+	var prefixedFss = [];
+	fss.forEach(function (fs, i) {
+		prefixedFss[i] = withPrefix('/'+names[i], fs);
+	});
+	var cfs = compose.apply(null, prefixedFss);
 
-
+	eachk(names,
+		function (name, k) {
+			cfs.writeFile('/'+name+'/data.txt', 'Some data for '+name, 'utf8', function (err) {
+				test.ok(!err);
+				if (err) {
+					console.log(err);
+					if (err.stack) {
+						console.log(err.stack);
+					}
+				}
+				k();
+			});
+		},
+		function () {
+			//Get here means we tried to write each file
+			// Check that each data ended up in the right sub file system and
+			// not the other ones.
+			for (var i = 0; i < names.length; i++) {
+				var name = names[i];
+				var fs = fss[i];
+				//console.log('fs '+name+' = ' + JSON.stringify(fs, null, '  '));
+				test.equals('Some data for '+name,
+					fs.readFileSync('/data.txt', 'utf8')
+				);
+			}
+			test.done();
+		}
+	);
 };
 

@@ -92,14 +92,14 @@ function withPrefix(pathPrefix, fs) {
 	 * Convert an 'external' path to a path on the target filesystem.
 	 */
 	function handle2file(handle) {
-		console.log('withPrefix '+pathPrefix+' handle2file '+JSON.stringify(handle));
+		//console.log('withPrefix '+pathPrefix+' handle2file '+JSON.stringify(handle));
 		if (pathIsPrefixOf(pathPrefix, handle)) {
 			//Note: we already made sure that pathPrefix always ends with a '/'
 			//So the 'substring' operation removes the slash and we have to put it back.
 			//This is more elegant than having to special case for the root path '/'.
 			return '/' + handle.substring(pathPrefix.length);
 		} else {
-			console.log(JSON.stringify(pathPrefix)+' is not a prefix of '+JSON.stringify(handle));
+			//console.log(JSON.stringify(pathPrefix)+' is not a prefix of '+JSON.stringify(handle));
 		}
 		//return undefined;
 	}
@@ -160,17 +160,20 @@ function configure(options) {
 	 * it to the actual function.
 	 */
 	function convertArg(f, i) {
+		if (!f) {
+			return; //Target fs doesn't provide this function so we can't either provide it either.
+		}
 		var convertedFun = function () {
 			var args = Array.prototype.slice.call(arguments);
-			console.log('>> '+f.name+ ' ' +JSON.stringify(args));
+			//console.log('>> '+f.name+ ' ' +JSON.stringify(args));
 			var callback = getCallback(args);
 			var arg = args[i];
 			var converted = arg && handle2file(arg);
-			console.log('>> '+f.name+ ' arg = ' +JSON.stringify(converted));
+			//console.log('>> '+f.name+ ' arg = ' +JSON.stringify(converted));
 			if (!converted) {
 				//This handle is not valid on this filesystem
 				var err = noExistError(f.name, arg);
-				console.log('>> '+f.name+ ' err = ' +err);
+				//console.log('>> '+f.name+ ' err = ' +err);
 				if (callback) {
 					return callback(err);
 				} else {
@@ -179,7 +182,7 @@ function configure(options) {
 			} else {
 				//ok: we mapped the argument
 				args[i] = converted;
-				return f.apply(null, args);
+				return f.apply(this, args);
 			}
 		};
 		convertedFun.name = f.name;
@@ -197,7 +200,18 @@ function configure(options) {
 		};
 	}
 
-	return {
+	function bind(exports, self) {
+		var bound = {};
+		for (var p in exports) {
+			if (exports.hasOwnProperty(p)) {
+				var f = exports[p];
+				bound[p] = (typeof(exports[p]) === 'function') ? f.bind(self) : f;
+			}
+		}
+		return bound;
+	}
+
+	var prebindExports = {
 		stat: convertArg(fs.stat, 0),
 		unlink: convertArg(fs.unlink, 0),
 		rmdir: convertArg(fs.rmdir, 0),
@@ -210,6 +224,7 @@ function configure(options) {
 		handle2file: compose(fs_handle2file, handle2file),
 		file2handle: compose(file2handle, fs_file2handle)
 	};
+	return bind(prebindExports, fs);
 }
 
 exports.configure = configure;
