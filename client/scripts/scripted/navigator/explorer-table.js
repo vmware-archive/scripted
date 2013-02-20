@@ -295,8 +295,6 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 		if (this.preferences) {
 			this.storageKey = this.preferences.listenForChangedSettings($.proxy(onStorage, this));
 		}
-		// TODO bad!! Still needed in context menues
-		window.explorer = this;
 
 		// highlight the current main editor in explorer when main editor is created
 		var self = this;
@@ -573,7 +571,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 	};
 
 	FileExplorer.prototype.fullRefresh = function(postRefresh) {
-		window.explorer.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
+		this.loadResourceList(window.fsroot/*pageParams.resource*/, true, postRefresh);
 	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
