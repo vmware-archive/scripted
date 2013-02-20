@@ -9,6 +9,8 @@
 		{ trigger : "table", contents: "${1:$selection}}" }, // first closing
 		{ trigger : "table", contents: "${1:${{selection}}}" }, // third closing
 		{ trigger : "table", contents: "${1:${{}}selection{{}}}" }, // fifth closing
-		{ trigger : "table", contents: "${1:${{selection}}" } // invalid
+		{ trigger : "table", contents: "${1:${{selection}}" }, // invalid
+		{ trigger : "ref", contents: "{ $ref: '${1:name}' }$0 }" }, // Issue #210
+		{ trigger : "ref", contents: "{ ${ref: '${1:name}' }$0 }" } // Issue #210
     ]
 }
