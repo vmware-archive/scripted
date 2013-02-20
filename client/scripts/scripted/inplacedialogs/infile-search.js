@@ -339,6 +339,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		var dialogNode = $(this.dialog);
 		if (dialogNode.length>0) {
 			if (this._editor === editor) {
+				// Update the search text
+				if (selectionText) {
+					$('#findtext').val(selectionText);
+					$('#findtext').removeClass("defaultTextActive");
+				}
 				this.focus();
 				return;
 			} else {
