@@ -338,3 +338,116 @@ exports.writeFileThreeDisjointFss = function (test) {
 	);
 };
 
+// A test to see whether writing a file only considers subfs's upto the first one
+// where the handle exists.
+exports.writeOnlyConsidersUptoFirstExist = function (test) {
+	var fs1 = new Fs();
+
+	var fs2 = new Fs();
+	fs2.dir('/foo/target');
+	fs2.dir('/bar');
+
+	var fs3 = new Fs();
+	fs3.dir('/foo');
+
+	var cfs = compose(fs1, fs2, fs3);
+
+	cfs.writeFile('/foo/target', 'Some nice text', 'utf8', function (err) {
+		//Can't write to fs1: It doesn't have directory '/foo'
+		//Can't write to fs2: It already has directory '/foo/target'.
+		//Could write to fs3 but shouldn't write: fs2 will shadow the effect.
+		test.ok(err); //Should have an error
+		test.equals('EISDIR', err.code); //The error from fs2 which is logical since
+									     //on the cfs '/foo/target' is directory so
+									     //it can't be overwritten by a file.
+		//Double check the directory is still there
+		cfs.stat('/foo/target', function (err, stats) {
+			test.ok(!err);
+			test.ok(stats.isDirectory());
+
+			//Double check that fs3 didn't accidentally get the file
+			fs3.readFile('/foo/target', function (err) {
+				test.ok(err);
+				test.equals('ENOENT', err.code);
+				test.done();
+			});
+		});
+	});
+};
+
+// A test to see whether writing a file only considers subfs's upto the first one
+// where the handle exists.
+exports.writeOnlyConsidersUptoFirstExist = function (test) {
+	var fs1 = new Fs();
+	fs1.toString = function () {return 'fs1';};
+
+	var fs2 = new Fs();
+	fs2.toString = function () {return 'fs2';};
+	fs2.dir('/foo/target');
+	fs2.dir('/bar');
+
+	var fs3 = new Fs();
+	fs3.dir('/foo');
+	fs3.toString = function () {return 'fs3';};
+
+	var cfs = compose(fs1, fs2, fs3);
+
+	cfs.writeFile('/foo/target', 'Some nice text', 'utf8', function (err) {
+		//Can't write to fs1: It doesn't have directory '/foo'
+		//Can't write to fs2: It already has directory '/foo/target'.
+		//Could write to fs3 but shouldn't write: fs2 will shadow the effect.
+		test.ok(err); //Should have an error
+		//console.log('writeFile /foo/target err = '+err);
+		test.equals('EISDIR', err.code); //The error from fs2 which is logical since
+									     //on the cfs '/foo/target' is directory so
+									     //it can't be overwritten by a file.
+		//Double check the directory is still there
+		cfs.stat('/foo/target', function (err, stats) {
+			test.ok(!err);
+			test.ok(stats.isDirectory());
+
+			//Double check that fs3 didn't accidentally get the file
+			fs3.readFile('/foo/target', function (err) {
+				test.ok(err);
+				test.equals('ENOENT', err.code);
+				test.done();
+			});
+		});
+	});
+};
+
+//Test simplar to the previous one but test a special case where
+// It shouldn't be allowed to write an 'earlier' filesystem
+// because, althuough it will work, it will have the composited effect
+// of 'overwriting' a directory on a later filesystem. Generally,
+// this not consistent with normal filesystems where overwiting directories
+// with files is not allowed.
+exports.writeFileShouldntShadowADirectory = function (test) {
+	var fs1 = new Fs();
+
+	var fs2 = new Fs();
+	fs2.dir('/bar');
+
+	var fs3 = new Fs();
+	fs3.dir('/foo');
+
+	var cfs = compose(fs1, fs2, fs3);
+
+	var targets = ['/bar', '/foo'];
+
+	eachk(targets, function (target, k) {
+			cfs.writeFile(target, function (err) {
+				//Writing the target file to fs2 would work but shouldn't be allowed
+				//because a directory already exists on fs2 or fs3.
+				//console.dir(err);
+				test.ok(err);
+				test.equals('EISDIR', err.code);
+			});
+			k();
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+

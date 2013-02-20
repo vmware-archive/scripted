@@ -23,4 +23,18 @@ function noExistError(funName, handle) {
 	return err;
 }
 
+/**
+ * Create something that looks like a node fs 'EISDIR' error.
+ */
+function isDirError(funName, handle) {
+	//Return something similar to what node fs returns when a file does not exist.
+	var err = new Error('[Error: EISDIR, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 28;
+	err.code = 'EISDIR';
+	err.path = handle;
+	return err;
+}
+
+
+exports.isDirError = isDirError;
 exports.noExistError = noExistError;
