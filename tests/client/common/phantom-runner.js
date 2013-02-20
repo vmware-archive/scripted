@@ -16,7 +16,7 @@
 
 (function() {
 	'use strict';
-	
+
 
 	var args = require('system').args;
 
@@ -42,13 +42,15 @@
 		var result,
 			failed;
 
-		
+
 		if (message) {
 			if (message.name === 'QUnit.done') {
 				result = message.data;
 				failed = !result || result.failed;
 
 				phantom.exit(failed ? 1 : 0);
+			} else {
+				console.log(JSON.stringify(message));
 			}
 		}
 	};
@@ -97,7 +99,9 @@
 
 				current_test_assertions.push('Failed assertion: ' + response);
 			});
-
+			QUnit.testStart(function(details) {
+				console.log('Test starting: ' + details.name);
+			});
 			QUnit.testDone(function(result) {
 				var i,
 					len,
@@ -109,6 +113,8 @@
 					for (i = 0, len = current_test_assertions.length; i < len; i++) {
 						console.log('    ' + current_test_assertions[i]);
 					}
+				} else {
+					console.log('Test passed: ' + name);
 				}
 
 				current_test_assertions.length = 0;
