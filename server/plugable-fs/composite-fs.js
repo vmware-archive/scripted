@@ -153,22 +153,15 @@ function compose() {
 	 * Determine which subsystems are 'ok to write'. This means that they are
 	 * candidates for trying to perform a write operation in left to right order
 	 * until one of the fss accepts the write operation as valid.
+	 *
+	 * IMPORTANT: this function doesn't check whether the handle on the final
+	 *    filesystem, if it exists, is in fact ok to write. E.g. if it is
+	 *    a directory entry then it shouldn't be allowed to overwrite it
+	 *    with a file (not even implicitly by shadowing it on a sibling fs)
+	 *    It is the responsibility of the caller to check for this case.
 	 */
 	function okToWrite(handle) {
-		console.log('>>> okToWrite '+handle);
-
-		//TODO: the logic here may not be quite correct.
-		// Consider situation like this
-		//   fs1 is empty and writable
-		//   fs2 has a directory '/foo'
-		// cfs = compose(fs1, fs2)
-		//
-		// cfs.writeFile('/foo')
-		// This operation should probably fail with 'EISDIR' error
-		// But the logic below will allow it to be written on fs1.
-		// The effect of this will be that fs2:/foo dir will be shadowed
-		// so from perspective of cfs it is as if the directory was overwitten by
-		// a file.
+		//console.log('>>> okToWrite '+handle);
 
 		//Rationale for the algorithm used below:
 
@@ -186,28 +179,28 @@ function compose() {
 		}).then(
 			//The handle EXISTS on one of the subsystems
 			function (i) {
-				console.log('okToWrite '+handle+' found index = '+i);
+				//console.log('okToWrite '+handle+' found index = '+i);
 				//All the subsystems upto and including the first system
 				//where the handle exists.
 				return subsystems.slice(0, i+1);
 			},
 			//The handle does NOT exist on any subsystem
 			function () {
-				console.log('okToWrite '+handle+' NOT found index');
+				//console.log('okToWrite '+handle+' NOT found index');
 				//Ok to try all of them.
 				return subsystems;
 			}
 		);
 
-		result.then(function (result) {
-				console.log('okToWrite '+ handle+ ' => '+result.map(function (x) {
-					return x.toString();
-				}));
-			},
-			function (err) {
-				console.log('okToWrite '+ handle+ ' ERROR => '+err);
-			}
-		);
+//		result.then(function (result) {
+//				console.log('okToWrite '+ handle+ ' => '+result.map(function (x) {
+//					return x.toString();
+//				}));
+//			},
+//			function (err) {
+//				console.log('okToWrite '+ handle+ ' ERROR => '+err);
+//			}
+//		);
 
 		return result;
 	}
@@ -323,7 +316,7 @@ function compose() {
 					//TODO: similar case for readonly file on last fs?
 					//But it may just make sense to allow overwriting the file by writing to
 					//'shadow' fs that is composed in front of it.
-					//Tricky bit with that would be that stating the cfs may make it appear
+					//Tricky with scenario would be that stating the cfs may make it appear
 					//as if the file is read-only while it is actually not.
 
 					return isDirectory(subsystems[subsystems.length-1], handle).then(function (isDir) {
@@ -332,18 +325,18 @@ function compose() {
 						} else {
 							return until(subsystems, function (fs) {
 								var subArgs = args.slice(); //Watch out, called more than once
-															// don't mutate the original!
+															// don't mutate the original args!
 								subArgs.unshift(fs);
-								console.log('>>> writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)));
+								//console.log('>>> writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)));
 								var result = writeFile.apply(fs, subArgs);
-								result.then(
-									function () {
-										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' => OK');
-									},
-									function (err) {
-										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' ERROR = '+err);
-									}
-								);
+//								result.then(
+//									function () {
+//										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' => OK');
+//									},
+//									function (err) {
+//										console.log('<<< writeFile '+fs+', '+JSON.stringify(subArgs.slice(1)) + ' ERROR = '+err);
+//									}
+//								);
 								return result;
 							});// END until
 						}//END if isDir else
@@ -351,11 +344,10 @@ function compose() {
 				}),
 				callback
 			);//END nodeCallback
-		},
-		unlink: compositeDeletion(unlink),
-		rmdir: compositeDeletion(rmdir)
-//		rmdir: convertArg(fs.rmdir, 0),
+		}
 //		readdir: convertArg(fs.readdir, 0),
+//		unlink: compositeDeletion(unlink), Commented out because not tested probably not working
+//		rmdir: compositeDeletion(rmdir) Commented out because not tested probably not working
 //		mkdir: convertArg(fs.mkdir, 0),
 //		createReadStream: convertArg(fs.createReadStream, 0),
 //		rename: convertArg(convertArg(fs.rename, 0), 1),

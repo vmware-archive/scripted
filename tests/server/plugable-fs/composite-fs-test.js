@@ -397,7 +397,7 @@ exports.writeOnlyConsidersUptoFirstExist = function (test) {
 		//Can't write to fs2: It already has directory '/foo/target'.
 		//Could write to fs3 but shouldn't write: fs2 will shadow the effect.
 		test.ok(err); //Should have an error
-		console.log('writeFile /foo/target err = '+err);
+		//console.log('writeFile /foo/target err = '+err);
 		test.equals('EISDIR', err.code); //The error from fs2 which is logical since
 									     //on the cfs '/foo/target' is directory so
 									     //it can't be overwritten by a file.
@@ -439,7 +439,7 @@ exports.writeFileShouldntShadowADirectory = function (test) {
 			cfs.writeFile(target, function (err) {
 				//Writing the target file to fs2 would work but shouldn't be allowed
 				//because a directory already exists on fs2 or fs3.
-				console.dir(err);
+				//console.dir(err);
 				test.ok(err);
 				test.equals('EISDIR', err.code);
 			});
