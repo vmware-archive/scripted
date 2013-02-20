@@ -732,12 +732,18 @@ define([
 				$('#contentassist').css('font-family', window.scripted.config.ui.font);
 				editorUpdateRequired = true;
 			}
+			// Apply the UI font size to other things if it isn't set explicitly for those elements
+			var uiFontSizeSpecified;
 			if(window.scripted.config.ui && window.scripted.config.ui.font_size){
-				$('.textviewContainer').css('font-size', window.scripted.config.ui.font_size);
+				uiFontSizeSpecified = window.scripted.config.ui.font_size;
+				$('.textviewContainer').css('font-size', uiFontSizeSpecified);
 				editorUpdateRequired = true;
 			}
 			if(window.scripted.config.ui && window.scripted.config.ui.content_assist_font_size){
 				$('#contentassist').css('font-size', window.scripted.config.ui.content_assist_font_size);
+				editorUpdateRequired = true;
+			} else if (uiFontSizeSpecified) {
+				$('#contentassist').css('font-size', uiFontSizeSpecified);
 				editorUpdateRequired = true;
 			}
 			if (editorUpdateRequired) {

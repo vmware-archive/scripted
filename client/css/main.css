@@ -494,12 +494,14 @@ footer{
 	position: fixed;
 	top: 100px;
 	left: 100px;
-	border: 2px inset #DDD;
-	z-index:10;
+	border: 3px solid #808080;
+	z-index:3000;
 	cursor: default;
 	overflow: auto;
-	height: 150px;
-	width: 300px;
+	height: 200px;
+	width: 450px;
+	border-radius: 3px;
+	resize: both;
 }
 
 /*

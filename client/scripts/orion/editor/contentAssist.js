@@ -530,7 +530,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				node = util.createElement(document, "hr");
 			} else {
 				div.className = this.calculateClasses(proposal.style, isSelected);
-				node = document.createTextNode(this.getDisplayString(proposal));
+				var displayString = this.getDisplayString(proposal);
+				if (displayString.length>96) {
+					displayString = displayString.substring(0,93)+"...";
+				}
+				node = document.createTextNode(displayString);
 				if (isSelected) {
 					this.parentNode.setAttribute("aria-activedescendant", div.id);
 				}
@@ -639,8 +643,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.isShowing = false;
 		},
 		position: function() {
-			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
+			// Allow for a prefix in positioning the content assist, avoids it moving along as chars are typed
+			var caretLocation = this.textView.getLocationAtOffset(this.contentAssist.getPrefixStart(this.textView.getCaretOffset()));
+			// previous computation for left hand side of contentassist window
+			//this.textView.getLocationAtOffset(this.textView.getCaretOffset());
 			caretLocation.y += this.textView.getLineHeight();
+			caretLocation.x-=6; // two lots of 3 padding around the element
 			this.textView.convert(caretLocation, "document", "page");
 			this.parentNode.style.position = "fixed";
 			this.parentNode.style.left = caretLocation.x + "px";
