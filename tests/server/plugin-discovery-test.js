@@ -18,7 +18,10 @@ var each = require('../../server/utils/promises').each;
 
 function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
-	var filesystem = mFilesystem.withBaseDir(baseDir);
+	var filesystem = mFilesystem.withBaseDir(baseDir, {
+		userHome: 'user.home',
+		scriptedHome: 'scripted.home'
+	});
 	var api = require('../../server/plugin-support/plugin-discovery').configure(filesystem);
 	api.parseJsonFile = require('../../server/utils/parse-json-file').configure(filesystem);
 

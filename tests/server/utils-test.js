@@ -90,3 +90,33 @@ exports.getFileName = function (test) {
 	test.equals(f("/ho/ha/hi/foo.txt"), "foo.txt");
 	test.done();
 };
+
+function logit(f) {
+	return function (a, b) {
+		var r = f(a,b);
+		console.log(f.name + ' ' +JSON.stringify([a, b]) + ' => '+r);
+		return r;
+	};
+}
+
+exports.pathIsPrefixOf = function (test) {
+	var f = require('../../server/jsdepend/utils').pathIsPrefixOf;
+//	f = logit(f); //To more easily see what the test is actually doing
+	//Some tests involving the root path '/'
+	test.equals(true, f('/', '/'));
+	test.equals(true, f('/', '/foo/bar'));
+	test.equals(false, f('/foo/bar', '/'));
+	test.equals(true, f('/abc', '/abc'));
+
+	//Some tests involving optional trailing slashes
+	test.equals(true, f('/abc', '/abc/def'));
+	test.equals(false, f('/abc/def', '/abc'));
+	test.equals(true, f('/abc/', '/abc/'));
+	test.equals(true, f('/abc',  '/abc'));
+	test.equals(true, f('/abc/', '/abc'));
+	test.equals(true, f('/abc',  '/abc/'));
+	test.equals(false, f('/abc', '/abcdef')); //not path prefix if ended in middled of segment!
+
+
+	test.done();
+};

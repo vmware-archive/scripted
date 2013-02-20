@@ -17,6 +17,10 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
+var testCase = require('./plugable-fs/composite-fs-test.js')
+	.statNeitherLeftOrRightHas;
+//	.statLeftFsWins;
+
 //var testCase = require('./completions-test')
 //	.findCompletionsFiles;
 
@@ -53,9 +57,9 @@
 //var testCase = require('./plugin-discovery-test')
 //	.one;
 
-var testCase = require('./resolver-test')
+//var testCase = require('./resolver-test')
 //	.sloppyMode;
-	.commonjsRefs;
+//	.commonjsRefs;
 //	.pathAwarenessSimple;
 //	.subPackageImport;
 //	.voloSample;

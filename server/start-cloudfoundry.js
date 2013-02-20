@@ -18,7 +18,20 @@
 
 var path = require('path');
 
-var filesystem = require('../server/utils/filesystem').withBaseDir(path.resolve(__dirname, '../sandbox'));
+var mappedFs = require('../server/plugable-fs/mapped-fs');
+var scriptedFs = require('../server/plugable-fs/scripted-fs');
+
+var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
+//var amoeba = mappedFs.withPrefix('/amo/eba', sandbox);
+
+var filesystem = scriptedFs.configure(sandbox, {
+	userHome: '/amo/eba/user.home',
+	scriptedHome: '/scripted.home'
+});
+
+//var filesystem = require('../server/utils/filesystem').withBaseDir(), {
+//	userHome: '/user.home'
+//});
 
 // Launch the server
 var server=require('../server/scriptedServer.js').start(filesystem, {

@@ -349,6 +349,25 @@ function mapFilter(arr, f) {
 	return arr.map(f).filter(function (x) { return x; });
 }
 
+/**
+ * Checks whether one path is a prefix of another path being tolerant of
+ * an optional trailing slash at the end of the prefix path.
+ */
+function pathIsPrefixOf(prefix, path) {
+	//Remove any trailing slashes from prefix
+	while (prefix[prefix.length-1]==='/') {
+		prefix = prefix.substring(0, prefix.length-1);
+	}
+	if (startsWith(path, prefix)) {
+		//It is prefix... stringwise, so probably a path prefix...
+		// But... the caveat still to check is that
+		// maybe our prefix stops in the midle of a path segment.
+		return path.length===prefix.length || path[prefix.length]==='/';
+	}
+	return false;
+}
+
+exports.pathIsPrefixOf = pathIsPrefixOf;
 exports.toCompareString = toCompareString;
 exports.orMap = orMap;
 exports.pathJoin = pathJoin;
