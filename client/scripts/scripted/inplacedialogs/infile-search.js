@@ -57,7 +57,9 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		var offsets = bar.offset();
 		var dialog = $(dialogId);
 		dialog.css({top:offsets.top,left:offsets.left});
-		dialog.width(bar.width());
+		// Using editor width rather than bar width, fixing the size of the bar(titlebar) can
+		// cause problems when 'zooming' in the browser
+		dialog.width($(this._editor._domNode).width());
 		var neww = dialog.width();
 		dialog.height(bar.height());
 		var left = $('#options').offset().left;
