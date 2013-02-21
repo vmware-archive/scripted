@@ -13,8 +13,10 @@
 
 var promiseUtils = require('../../server/utils/promises');
 var until = promiseUtils.until;
+var filter = promiseUtils.filter;
 var findFirst = promiseUtils.findFirst;
 var when = require('when');
+var toCompareString = require('../../server/jsdepend/utils').toCompareString;
 
 exports.emptyArray = function (test) {
 	when(
@@ -130,7 +132,7 @@ exports.promiseArray = function (test) {
 };
 
 /**
- * Helper that works like the 'when' function but also adds some basic boilerplate
+ * Create a helper that works like the 'when' function but also adds some basic boilerplate
  * to avoid errors being swallowed by the when library.
  *
  * Use this as the last call to the when library inside a test.
@@ -257,3 +259,16 @@ exports.findFirstRejectsAll = function (test) {
 	);
 };
 
+exports.filter = function (test) {
+	run(test)(
+		filter([1, 101, 2, 102], function (x) {
+			return when.resolve(x < 50);
+		}),
+		function (result) {
+			test.equals(toCompareString(result), toCompareString([
+				1, 2
+			]));
+		}
+	);
+
+};

@@ -15,7 +15,6 @@
  * Create something that looks like a node fs 'ENOENT' error.
  */
 function noExistError(funName, handle) {
-	//Return something similar to what node fs returns when a file does not exist.
 	var err = new Error('[Error: ENOENT, '+funName+' '+JSON.stringify(handle)+']');
 	err.errno = 34;
 	err.code = 'ENOENT';
@@ -27,7 +26,6 @@ function noExistError(funName, handle) {
  * Create something that looks like a node fs 'EISDIR' error.
  */
 function isDirError(funName, handle) {
-	//Return something similar to what node fs returns when a file does not exist.
 	var err = new Error('[Error: EISDIR, '+funName+' '+JSON.stringify(handle)+']');
 	err.errno = 28;
 	err.code = 'EISDIR';
@@ -35,6 +33,18 @@ function isDirError(funName, handle) {
 	return err;
 }
 
+/**
+ * Create something that looks like a node fs 'ENOTDIR' error.
+ */
+function isNotDirError(funName, handle) {
+	var err = new Error('[Error: ENOTDIR, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 27;
+	err.code = 'ENOTDIR';
+	err.path = handle;
+	return err;
+}
 
 exports.isDirError = isDirError;
+exports.isNotDirError = isNotDirError;
+
 exports.noExistError = noExistError;

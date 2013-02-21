@@ -18,6 +18,10 @@ var mapk = require('../../../server/jsdepend/utils').mapk;
 var toCompareString = require('../../../server/jsdepend/utils').toCompareString;
 var eachk = require('../../../server/jsdepend/utils').eachk;
 
+/////////////////////////////////////////
+// stat
+/////////////////////////////////////////
+
 exports.statLeftFsWins = function (test) {
 
 	var fs1 = new Fs();
@@ -93,6 +97,10 @@ exports.statCompositeOfThree = function (test) {
 		}
 	);
 };
+
+////////////////////////////////////
+// readFile
+////////////////////////////////////
 
 //readFile case where rightFs has the file and leftFs has a dir instead
 exports.readFileCaseFileDir = function (test) {
@@ -249,6 +257,10 @@ exports.readFileCaseNothingNothing = function (test) {
 		test.done();
 	});
 };
+
+/////////////////////////////////////////
+// writeFile
+/////////////////////////////////////////
 
 //writeFile test with three fss that are overlapping emanating from a writable root.
 //But each subfs has different directories.
@@ -450,4 +462,198 @@ exports.writeFileShouldntShadowADirectory = function (test) {
 		}
 	);
 };
+
+/////////////////////////////////////////
+// readdir
+/////////////////////////////////////////
+
+//Test that if a dir just exists on one of the subfss it can be read.
+exports.readdirFromMultipleSubFs = function (test) {
+	//Set up three fss with differently named subdirs on each
+	// each with a slightly different contents in the dir.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name+'-fs';
+		};
+		fs.dir('/'+name);
+		fs.file('/'+name+'/'+name+'.txt', 'Some '+name+'-y text!');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	//Now try to read each dir from the composite fs.
+	eachk(names, function (name, k) {
+			cfs.readdir('/'+name, function (err, entries) {
+//				console.log('readdir /'+name+ ' result received');
+//				console.log('   err = '+err);
+//				console.log('   entries = '+JSON.stringify(entries));
+				test.ok(!err);
+				if (err) {
+					console.log(err);
+					if (err.stack) {
+						console.log(err.stack);
+					}
+				}
+				test.equals(toCompareString(entries), toCompareString(
+					[name+'.txt']
+				));
+				k();
+			});
+		},
+		function () {
+			//Also try reading a dir that exists on none of the fss
+			cfs.readdir('/notexist', function (err, names) {
+				test.ok(err);
+				if (err) {
+					test.equals('ENOENT', err.code);
+				}
+				test.done();
+			});
+		}
+	);
+};
+
+//Test that if a dir is shadowed by a file, it will be treated as a file.
+exports.readdirShadowedByAFile = function (test) {
+	var fs1 = new Fs();
+	fs1.file('/foo', 'Nice foo');
+
+	var fs2 = new Fs();
+	fs2.dir('/foo');
+	fs2.file('/foo/foo.txt', 'More foo');
+
+	var cfs = compose(fs1, fs2);
+
+	cfs.readdir('/foo', function (err, names) {
+		test.ok(err);
+		if (err) {
+			test.equals('ENOTDIR', err.code);
+		}
+		test.done();
+	});
+};
+
+//Test that if a dir exists on several fss then their entries are
+//getting merged.
+exports.readdirMerged = function (test) {
+	//Set up three fss with a 'shared' subdirs on each
+	// each with a slightly different contents in the dir.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + ' -fs';
+		};
+		fs.dir('/shared');
+		fs.file('/shared/'+name+'.txt', 'Some '+name+'-y text!');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.readdir('/shared', function (err, entries) {
+		test.ok(Array.isArray(entries));
+		if (Array.isArray(entries)) {
+			entries.sort();
+			test.equals(toCompareString(entries), toCompareString([
+				'bar.txt', 'foo.txt', 'zor.txt'
+			]));
+		}
+		test.done();
+	});
+};
+
+//Test that dir merging doesn't produce duplicate entries if an entry exists in
+//both fss.
+exports.readdirMergedDuplicates = function (test) {
+	//Set up three fss with a 'shared' subdirs on each
+	// each with a slightly different contents in the dir.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		fs.file('/shared/'+name+'.txt', 'Some '+name+'-y text!');
+		fs.file('/shared/duplicate.txt', 'Do not repeat. I said... "Do not repeat"!');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.readdir('/shared', function (err, entries) {
+		test.ok(Array.isArray(entries));
+		if (Array.isArray(entries)) {
+			test.equals(4, entries.length); //Don't think sorting removes dups, but just in case.
+			entries.sort();
+			test.equals(toCompareString(entries), toCompareString([
+				'bar.txt', 'duplicate.txt', 'foo.txt', 'zor.txt'
+			]));
+		}
+		test.done();
+	});
+};
+
+//Test that empty dirs don't crash the readdir merger.
+exports.readdirMergedEmpties = function (test) {
+	//Set up three fss with a 'shared' subdirs on each
+	// each with a slightly different contents in the dir.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		//Leave the dir empty
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.readdir('/shared', function (err, entries) {
+		test.ok(Array.isArray(entries));
+		if (Array.isArray(entries)) {
+			test.equals(0, entries.length); //Don't think sorting removes dups, but just in case.
+			test.equals(toCompareString(entries), "[]");
+		}
+		test.done();
+	});
+};
+
+//Test that shadowed dirs are ignored in the merging process.
+exports.readdirMergedShadowed = function (test) {
+	var names = ['foo', 'bar', 'shadow', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		if (name==='shadow') {
+			fs.file('/shared'); //This should shadow out the dir in 'zor' fs
+		} else {
+			fs.dir('/shared');
+			fs.file('/shared/'+name+'.txt', 'Some '+name+'-y text!');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.readdir('/shared', function (err, entries) {
+		test.ok(Array.isArray(entries));
+		if (Array.isArray(entries)) {
+			entries.sort();
+			test.equals(toCompareString(entries), toCompareString([
+				'bar.txt',
+				'foo.txt'
+				//'zor' is blocked by shadow file
+			]));
+		}
+		test.done();
+	});
+};
+
+//Deselect a bunch of tests
+//for (var property in exports) {
+//	if (exports.hasOwnProperty(property)) {
+//		if (property.indexOf('readdirMerged')>=0) {
+//		} else {
+//			delete exports[property];
+//		}
+//	}
+//}
+
+
+
 

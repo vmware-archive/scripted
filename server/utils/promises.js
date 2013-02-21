@@ -48,6 +48,32 @@
 			});
 		}
 
+		/**
+		 * Promise aware array filter. Constructs an array of only the
+		 * elements of target array for which predicate resolves to a truthy
+		 * value.
+		 *
+		 * If the predicate rejects on any element then the whole operation rejects.
+		 * (i.e. rejections don't count as 'falsy' in this operation.)
+		 */
+		function filter(array, pred) {
+//			console.log('entering filter ');
+			return when.reduce(array,
+				function (result, next) {
+//					console.log('filtering '+JSON.stringify(result)+', '+next);
+					return when(pred(next), function (isGood) {
+						if (isGood) {
+//							console.log('adding a good one: '+next);
+							result.push(next);
+//						} else {
+//							console.log('skipping a bad one: '+next);
+						}
+						return result;
+					});
+				},
+				[]
+			);
+		}
 
 		/**
 		 * Variable arity function that accepts any number of 'Actions' as arguments.
@@ -132,6 +158,7 @@
 			orMap: until, // just another name I like to use.
 			or:	or,
 			each: each,
+			filter: filter,
 			findFirst: findFirst,
 			findFirstIndex: findFirstIndex
 		};

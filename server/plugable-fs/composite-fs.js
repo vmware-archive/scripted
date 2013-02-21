@@ -25,6 +25,7 @@
 var when = require('when');
 var promiseUtils = require('../utils/promises');
 
+var filter = promiseUtils.filter;
 var until = promiseUtils.until;
 var each = promiseUtils.each;
 var findFirst = promiseUtils.findFirst;
@@ -130,9 +131,11 @@ function compose() {
 		promise.then(
 			function (result) {
 //				console.log('nodeCallback ' +callback);
+//				console.log('nodeCallback result = ' +result);
 				callback(/*noerror*/null, result);
 			},
 			function (error) {
+//				console.log('nodeCallback error = ' +error);
 				callback(error);
 			}
 		).otherwise(function (err) {
@@ -233,7 +236,7 @@ function compose() {
 	 */
 	function compositeDeletion(deleteOp) {
 		return function (handle, callback) {
-			var fss = when.filter(subsystems, function (fs) {
+			var fss = filter(subsystems, function (fs) {
 				//A filesystem is only interesting to 'unlink' operation
 				//if the handle we are trying to unlink exists on that
 				//filesystem.
@@ -344,8 +347,88 @@ function compose() {
 				}),
 				callback
 			);//END nodeCallback
+		},
+		readdir: function (handle, callback) {
+
+			function readdirHelper(subsystems) {
+				//When we get here, we know that:
+				//  - have at least one subsystem where the handle exists
+				//  - subsystems already filtered to only those fss where the handle exists.
+				var entries = {};
+				var done = false;
+				return each(subsystems, function (fs, index) {
+					//console.log('reading dir on '+fs.toString());
+					return readdir(fs, handle).then(
+						function (names) {
+							//console.log('reading dir on '+fs.toString() + ' => '+JSON.stringify(names));
+							names.forEach(function (name) {
+								entries[name] = true;
+							});
+						},
+						function (err) {
+							//console.log('reading dir on '+fs.toString() + ' => ERROR: '+err);
+							if (err && err.code === 'ENOTDIR') {
+								//This entry will shadow later ones so should stop
+								//acumulating entries now.
+								if (index===0) {
+									//If this is the first entry, then the
+									// 'composite' handle looks like 'not a dir' from
+									// the outside. So we should keep the error.
+									return when.reject(err);
+								} else {
+									//not first one. So at least one real dir before this.
+									//Stop now to return what we got so far.
+									return when.reject('done'); //Hack to 'escape' out of 'each' loop.
+								}
+							} else {
+								//Propagate unexpected error
+								return when.reject(err);
+							}
+						}
+					);
+				}).otherwise(function (err) {
+					// 'done' is not a real error but a hack to jump out of the loop above
+					if (err !== 'done') {
+						return when.reject(err);
+					}
+				}).then(function () {
+					//console.log('composed entries: '+JSON.stringify(entries, null, '  '));
+					return entries;
+				});
+			}
+
+			nodeCallback(
+				filter(subsystems, function (fs) {
+					//The only subystems that matter are those where the handle exists.
+					return exists(fs, handle);
+				}).then(function (subsystems) {
+//					console.log('readdir filtered fss: '+subsystems.map(function (fs) {
+//						return fs.toString();
+//					}));
+					if (subsystems.length===0) {
+						//Ensure correct error is produced when no subfs has the handle.
+						return when.reject(noExistError('readdir', handle));
+					} else {
+						return readdirHelper(subsystems).then(function (entriesMap) {
+//							console.log('composed entries received: '+JSON.stringify(
+//								entriesMap, null, '  '
+//							));
+							var entries = []; //Need results as an array
+							for (var name in entriesMap) {
+								if (entriesMap.hasOwnProperty(name)) {
+									entries.push(name);
+								}
+							}
+//							console.log('composed entries as array: '+JSON.stringify(
+//								entries, null, '  '
+//							));
+							return entries;
+						});
+					}
+				}),
+				callback
+			);
 		}
-//		readdir: convertArg(fs.readdir, 0),
 //		unlink: compositeDeletion(unlink), Commented out because not tested probably not working
 //		rmdir: compositeDeletion(rmdir) Commented out because not tested probably not working
 //		mkdir: convertArg(fs.mkdir, 0),
@@ -360,5 +443,4 @@ function compose() {
 } // function compose
 
 exports.compose = compose;
-
 
