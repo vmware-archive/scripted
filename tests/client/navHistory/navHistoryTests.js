@@ -59,7 +59,8 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 		editorUtils.getMainEditor().editorLoadedPromise.then(function() {
 			assert.equal(editorUtils.getMainEditor().getFilePath(), testResourceRootClosingSlash +  mainPath,
 			"Results: " + editorUtils.getMainEditor().getFilePath() + " and " + testResourceRootClosingSlash +  mainPath);
-			assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start: mainSel[0], end: mainSel[1]});
+
+			assert.deepEqual(editorUtils.getMainEditor().getSelection(), {start: mainSel[0], end: mainSel[1]}, "Main editor selection should be equal");
 			if (subPath) {
 				editorUtils.getSubEditor().editorLoadedPromise.then(function() {
 
@@ -67,7 +68,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 						assert.fail('Expected a subeditor');
 					} else {
 						assert.equal(editorUtils.getSubEditor().getFilePath(), testResourceRootClosingSlash + subPath);
-						assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start: subSel[0], end: subSel[1]});
+						assert.deepEqual(editorUtils.getSubEditor().getSelection(), {start: subSel[0], end: subSel[1]}, "Sub editor selection should be equal");
 					}
 					deferred.resolve();
 				});
@@ -246,21 +247,24 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 
 			// hmmmm...looks like there is a chance that the editor contents is not loaded before
 			// the breadcrumbsInitialized event gets fired. Maybe need to add a then() on the editorLoadedPromise
-			mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
-			$(document).one('breadcrumbsInitialized', function() {
-				editorUtils.getMainEditor().setSelection(15, 25);
-				mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
+			// for now, just add a timeout
+			setTimeout(function() {
+				mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "bar.js" });
 				$(document).one('breadcrumbsInitialized', function() {
-					historyMenu = $("#history_menu");
+					editorUtils.getMainEditor().setSelection(15, 25);
+					mNavHistory.handleNavigationEvent({testTarget : testResourcesRootOpeningSlash + "baz.js" });
+					$(document).one('breadcrumbsInitialized', function() {
+						historyMenu = $("#history_menu");
 
-					assert.equal(historyMenu.children().length, 2);
-					assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
-					assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
-					assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
-					assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#10,20");
-					assert.start();
+						assert.equal(historyMenu.children().length, 2);
+						assert.equal(historyMenu.children()[0].children[0].innerHTML, "bar.js");
+						assert.equal(historyMenu.children()[0].children[0].attributes[0].value, urlPathPrefix + "bar.js" + "#15,25");
+						assert.equal(historyMenu.children()[1].children[0].innerHTML, "foo.js");
+						assert.equal(historyMenu.children()[1].children[0].attributes[0].value, urlPathPrefix + "foo.js" + "#10,20");
+						assert.start();
+					});
 				});
-			});
+			}, 2000);
 		});
 	};
 
@@ -714,14 +718,15 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 	// with sub editor
 	tests.asyncTestPageSetup6 = function() {
 		setup().then(function() {
-			changeLocation("?" + testResourceRootClosingSlash + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourceRootClosingSlash + "baz.js\",range:[9,10]}");
-			editorUtils.getSubEditor().editorLoadedPromise.then(function() {
-				editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-					changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
+			// failing occasionally. add timeout to help ensure all previous events are finished before starting this test
+			setTimeout(function() {
+				changeLocation("?" + testResourceRootClosingSlash + "bar.js#main:{range:[20,21]},side:{path:\"" + testResourceRootClosingSlash + "baz.js\",range:[9,10]}");
+				editorUtils.getSubEditor().editorLoadedPromise.then(function() {
 					editorUtils.getMainEditor().editorLoadedPromise.then(function() {
-						testLocation("foo.js", [5,7]).then(function() {
-							$(document).one('pageSetupComplete', function() {
-								editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+						changeLocation("?" + testResourceRootClosingSlash + "foo.js#5,7");
+						editorUtils.getMainEditor().editorLoadedPromise.then(function() {
+							testLocation("foo.js", [5,7]).then(function() {
+								$(document).one('pageSetupComplete', function() {
 									testLocation("bar.js", [20,21], "baz.js", [9,10]).then(function() {
 										$(document).one('pageSetupComplete', function() {
 											testLocation("foo.js", [0,0]).then(function() {
@@ -736,12 +741,12 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 										history.back();
 									});
 								});
+								history.back();
 							});
-							history.back();
 						});
 					});
 				});
-			});
+			}, 2000);
 		});
 	};
 
