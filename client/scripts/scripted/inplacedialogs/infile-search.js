@@ -18,7 +18,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 
 
 	function closeDialog() {
-		$("#dialogs").empty();
+		$("#infile_search_dialog").remove();
 		$(this._editor).focus();
 //		$(this.activeElement).focus();
 		$(this._bar).off('widthchange.dialog');
@@ -37,7 +37,10 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 	 * Position the dialog
 	 */
 	var positionDialog = function(dialogId) {
-		$("#dialogs").append(dialogText);
+		var infile_search_dialog = document.createElement('div');
+		infile_search_dialog.id='infile_search_dialog';
+		$(infile_search_dialog).append(dialogText);
+		$("#non-modal-dialogs").append(infile_search_dialog);
 		var bar = $(this._bar);
 		var editorDomNode = $(this._editor._domNode);
 		var offsets = bar.offset();
@@ -346,7 +349,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 					$('#findtext').val(selectionText);
 					$('#findtext').removeClass("defaultTextActive");
 				}
-				this.focus();
+				this.focus(true);
 				return;
 			} else {
 				this.closeDialog();
