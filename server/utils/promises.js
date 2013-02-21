@@ -105,6 +105,7 @@
 		 * already rejected promises alone.
 		 */
 		function rejectFalsy(v) {
+			//TODO: not used anymore, remove?
 			return when(v, function (v) {
 				return v || when.reject(v);
 			});

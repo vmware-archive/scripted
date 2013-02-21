@@ -356,12 +356,49 @@ function configure(fs, options) {
 		return d.promise;
 	}
 
+	var fs_createReadStream = fs.createReadStream || fakeCreateReadStream;
+	var Stream = require('stream');
+
+	/**
+	 * A 'fake' implementation of createReadStream. It's not a true stream but
+	 * just fetches all the data from the filesystem all at once and sends it
+	 * as a single data event.
+	 */
+	function fakeCreateReadStream(handle, options) {
+		var stream = new Stream();
+		if (options && (options.start || options.end)) {
+			//Must use nextTick to allow client a chance to attach their listeners.
+			process.nextTick(function () {
+				stream.emit('error', new Error('options start and end are not supported'));
+			});
+		}
+		function callback(err, data) {
+			if (err) {
+				stream.emit('error', err);
+			} else {
+				stream.emit('data', data);
+				stream.emit('end');
+			}
+		}
+		//Watch out some types of fs implementation, with 'in memory' representations
+		// may call the callback in the same tick so that leaves client code
+		// no chance to attach their listeners!
+		process.nextTick(function () {
+			if (options && options.encoding) {
+				fs.readFile(handle, options.encoding, callback);
+			} else {
+				fs.readFile(handle, callback);
+			}
+		});
+		return stream;
+	}
+
 	/**
 	 * Like node fs.createReadStream but automatically assumes our default encoding.
 	 */
 	function createReadStream(handle) {
 		var file = handle2file(handle);
-		return fs.createReadStream(file, { encoding: encoding});
+		return fs_createReadStream(file, { encoding: encoding});
 	}
 
 	return {

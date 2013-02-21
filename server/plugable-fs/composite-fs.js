@@ -96,8 +96,6 @@ function compose() {
 	var rmdir = promisedFunction('rmdir');
 
 	//TODO: var rename //Careful: // Not a 'one arg' function!
-	//TODO: var createReadStream // Careful: not a callbacky function!
-	//TODO: var writeFile //Careful: Not a 'one arg' function!
 	//TODO: var handle2file: ??? get the 'file' on the leftmost filesystem where it exists.
 	//TODO:	var file2handle: ??? get the 'handle' on the leftmost filesystem where it exists.
 
@@ -428,8 +426,11 @@ function compose() {
 				}),
 				callback
 			);
-		}
-//		unlink: compositeDeletion(unlink), Commented out because not tested probably not working
+		},
+		createReadStream: undefined, //TODO: scripted-fs defines a 'fake version' of this if
+								     // it is not defined. We should provide
+									 // a real implementation here if the sub-fss implement it.
+//		unlink: compositeDeletion(unlink)
 //		rmdir: compositeDeletion(rmdir) Commented out because not tested probably not working
 //		mkdir: convertArg(fs.mkdir, 0),
 //		createReadStream: convertArg(fs.createReadStream, 0),

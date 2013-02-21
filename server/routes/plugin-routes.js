@@ -21,7 +21,7 @@ exports.install = function (app, filesystem) {
 	//TDO: when create read stream is actually implemented on the composite fs maybe we can
 	// use it again.
 
-	//var createReadStream = filesystem.createReadStream;
+	var createReadStream = filesystem.createReadStream;
 	var isFile = filesystem.isFile;
 	var getContents = filesystem.getContents;
 
@@ -60,14 +60,15 @@ exports.install = function (app, filesystem) {
 					return next();
 				}
 				//TODO: proper mime type determination
-				return getContents(dir + req.path).then(function (data) {
-					res.header('Content-Type', 'text/plain');
-					res.write(data);
-					res.end();
-				});
 
-//				res.header('Content-Type', 'text/plain');
-//				createReadStream(dir + req.path).pipe(res);
+//				return getContents(dir + req.path).then(function (data) {
+//					res.header('Content-Type', 'text/plain');
+//					res.write(data);
+//					res.end();
+//				});
+
+				res.header('Content-Type', 'text/plain');
+				createReadStream(dir + req.path).pipe(res);
 			}).otherwise(function (err) {
 				console.log(err);
 				if (err.stack) {
