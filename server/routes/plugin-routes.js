@@ -18,8 +18,12 @@ var express = require('express');
 
 exports.install = function (app, filesystem) {
 
-	var createReadStream = filesystem.createReadStream;
+	//TDO: when create read stream is actually implemented on the composite fs maybe we can
+	// use it again.
+
+	//var createReadStream = filesystem.createReadStream;
 	var isFile = filesystem.isFile;
+	var getContents = filesystem.getContents;
 
 	var pluginDiscovery = require('../plugin-support/plugin-discovery').configure(filesystem);
 	var getPlugins = pluginDiscovery.getPlugins;
@@ -56,8 +60,23 @@ exports.install = function (app, filesystem) {
 					return next();
 				}
 				//TODO: proper mime type determination
+				return getContents(dir + req.path).then(function (data) {
+					res.header('Content-Type', 'text/plain');
+					res.write(data);
+					res.end();
+				});
+
+//				res.header('Content-Type', 'text/plain');
+//				createReadStream(dir + req.path).pipe(res);
+			}).otherwise(function (err) {
+				console.log(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+				res.status(500);
 				res.header('Content-Type', 'text/plain');
-				createReadStream(dir + req.path).pipe(res);
+				res.write(''+err);
+				res.end();
 			});
 		};
 	}

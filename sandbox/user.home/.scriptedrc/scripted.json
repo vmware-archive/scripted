@@ -2,5 +2,8 @@
 	"jshint" : {
 		"global" : ["console", "define", "exports", "module", "process", "__dirname",
 					"require", "$", "window"]
+	},
+	plugins: {
+		'trailing-white-space': true
 	}
 }
