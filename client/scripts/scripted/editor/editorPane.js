@@ -116,6 +116,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 		for (var i = 0, len = crumbs.length; i < len; i++) {
 			// Uncomment when the tests bloody well behave with this change in, stupid things.
 			if (i===0 && crumbs[i]===window.fsroot) {
+				constructedPath = window.fsroot+'/';
 				continue;
 			}
 			newCrumbElem = $('<li class="light_gradient" data-id="'+i+'"><span>' + crumbs[i] + '</span></li>');
