@@ -211,6 +211,17 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 					}
 				}
 			}
+
+			// if the given definition is already highlighted in the current editor,
+			// then ignore the navigate request
+			if ((target === editor.type) && filepath === editor.getFilePath()) {
+				var sel = editor.getSelection();
+				if (defnrange[0] <= sel.start && defnrange[1] >= sel.end) {
+					editor.setSelection(defnrange[0], defnrange[1]);
+					return;
+				}
+			}
+
 			navigate({path:filepath, range:defnrange}, target, true);
 		}
 	};
