@@ -20,20 +20,32 @@ var path = require('path');
 
 var mappedFs = require('../server/plugable-fs/mapped-fs');
 var scriptedFs = require('../server/plugable-fs/scripted-fs');
+var compose = require('../server/plugable-fs/composite-fs').compose;
+
+var withBaseDir = mappedFs.withBaseDir;
+var withPrefix = mappedFs.withPrefix;
+
+var scriptedHomeLocation = path.resolve(__dirname, '..');
 
 var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
+
+var scriptedHome = withPrefix('/scripted.home',
+	withBaseDir(scriptedHomeLocation)
+);
 //var amoeba = mappedFs.withPrefix('/amo/eba', sandbox);
 
-var filesystem = scriptedFs.configure(sandbox, {
-	userHome: '/amo/eba/user.home',
+//All of our files, with the 'slim' node-like API:
+var corefs = compose(
+	sandbox,
+	scriptedHome
+);
+
+//Now wrap that to create our 'fat' API that scripted uses throughout.
+var filesystem = scriptedFs.configure(corefs, {
+	userHome: '/user.home',
 	scriptedHome: '/scripted.home'
 });
 
-//var filesystem = require('../server/utils/filesystem').withBaseDir(), {
-//	userHome: '/user.home'
-//});
-
-// Launch the server
 var server=require('../server/scriptedServer.js').start(filesystem, {
 	port: 8123
 });
