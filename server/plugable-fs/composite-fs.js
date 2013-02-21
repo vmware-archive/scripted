@@ -427,7 +427,7 @@ function compose() {
 				callback
 			);
 		},
-		createReadStream: undefined, //TODO: scripted-fs defines a 'fake version' of this if
+		createReadStream: undefined  //TODO: scripted-fs defines a 'fake version' of this if
 								     // it is not defined. We should provide
 									 // a real implementation here if the sub-fss implement it.
 //		unlink: compositeDeletion(unlink)
