@@ -97,14 +97,15 @@ function withPrefix(pathPrefix, fs) {
 	 * Convert an 'external' path to a path on the target filesystem.
 	 */
 	function handle2file(handle) {
-		//console.log('withPrefix '+pathPrefix+' handle2file '+JSON.stringify(handle));
+//		console.log('withPrefix '+pathPrefix+' handle2file '+JSON.stringify(handle));
 		if (pathIsPrefixOf(pathPrefix, handle)) {
 			//Note: we already made sure that pathPrefix always ends with a '/'
 			//So the 'substring' operation removes the slash and we have to put it back.
 			//This is more elegant than having to special case for the root path '/'.
+//			console.log('withPrefix added ==> '+ '/' + handle.substring(pathPrefix.length));
 			return '/' + handle.substring(pathPrefix.length);
-		} else {
-			//console.log(JSON.stringify(pathPrefix)+' is not a prefix of '+JSON.stringify(handle));
+//		} else {
+//			console.log(JSON.stringify(pathPrefix)+' is not a prefix of '+JSON.stringify(handle));
 		}
 		//return undefined;
 	}
