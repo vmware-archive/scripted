@@ -43,6 +43,7 @@ var noExistError = require('./fs-errors').noExistError;
 var isDirError = require('./fs-errors').isDirError;
 var isNotDirError = require('./fs-errors').isNotDirError;
 var accessPermisssionError = require('./fs-errors').accessPermisssionError;
+var existsError = require('./fs-errors').existsError;
 
 function compose() {
 
@@ -491,8 +492,33 @@ function compose() {
 					//All of the fss are indeed directories => proceed!
 				}
 			);
-		})
-//		mkdir: convertArg(fs.mkdir, 0),
+		}),
+		mkdir: function (handle /*, [options], callback */) {
+			var args = Array.prototype.slice.call(arguments);
+			var callback = args[args.length-1];
+			if (typeof(callback)!=='function') {
+				//Watch out the callback is optional in node api!
+				callback = function () {};
+			} else {
+				//Remove the callback arg
+				args.pop();
+			}
+			nodeCallback(
+				exists(cfs, handle).then(function (isExist) {
+					if (isExist) {
+						return when.reject(existsError('mkdir', handle));
+					}
+				}).then(function () {
+					return until(subsystems, function (fs) {
+						//May be called multiple times so do NOT mutate original args.
+						var subargs = args.slice();
+						subargs.unshift(fs);
+						return mkdir.apply(fs, subargs);
+					});
+				}),
+				callback
+			);
+		}
 //		rename: convertArg(convertArg(fs.rename, 0), 1),
 //		handle2file: compose(fs_handle2file, handle2file),
 //		file2handle: compose(file2handle, fs_file2handle)

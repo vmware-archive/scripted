@@ -1090,6 +1090,126 @@ exports.rmdirFileWithShadowDir = function (test) {
 	});
 };
 
+/////////////////////////////////////////////////////////////////
+// mkdir
+/////////////////////////////////////////////////////////////////
+
+//Test most basic case: we can create a directory as a subdir of a directory that
+// exists on a single sub-file system.
+exports.mkdirSingle = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, next) {
+			var subdir = '/'+name+'/subdir-of-'+name;
+			cfs.mkdir(subdir, function (err) {
+				test.ok(!err);
+				//The dir should now exist
+				cfs.stat(subdir, function (err, stat) {
+					test.ok(!err);
+					test.ok(stat && stat.isDirectory());
+					next();
+				});
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+
+};
+
+//Test creating a directory fails if a file or dir already exists.
+exports.mkdirExists = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, next) {
+			var subdir = '/'+name;
+			cfs.mkdir(subdir, function (err) {
+				test.ok(err);
+				if (err) {
+					test.equals('EEXIST', err.code);
+				}
+				next();
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test creating a directory fails if parent not exist
+exports.mkdirParentNoExist = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.mkdir('/bogus/subdir', function (err) {
+		test.ok(err);
+		if (err) {
+			test.equals('ENOENT', err.code);
+		}
+		test.done();
+	});
+};
+
+//Test creating directory if parent exists on multiple subfs
+exports.mkdirMultipleParents = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		if (name!=='bar') {
+			//For some variablity, don't create the dir on one of the fss.
+			fs.dir('/shared');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var subdir = '/shared/subdir';
+	cfs.mkdir(subdir, function (err) {
+		test.ok(!err);
+		if (err) {
+			console.log(err);
+		}
+		cfs.stat(subdir, function (err, stat) {
+			test.ok(!err);
+			test.ok(stat.isDirectory());
+			test.done();
+		});
+	});
+};
+
 
 //Deselect a bunch of tests
 //for (var property in exports) {
