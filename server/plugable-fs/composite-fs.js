@@ -28,10 +28,13 @@ var promiseUtils = require('../utils/promises');
 var filter = promiseUtils.filter;
 var until = promiseUtils.until;
 var each = promiseUtils.each;
+var not = promiseUtils.not;
 var findFirst = promiseUtils.findFirst;
 var findFirstIndex = promiseUtils.findFirstIndex;
 var noExistError = require('./fs-errors').noExistError;
 var isDirError = require('./fs-errors').isDirError;
+var isNotDirError = require('./fs-errors').isNotDirError;
+var accessPermisssionError = require('./fs-errors').accessPermisssionError;
 
 function compose() {
 
@@ -231,33 +234,46 @@ function compose() {
 	 *      on the composite filesystem. For this to be true it will have to be
 	 *      removed from all subfilesystems.
 	 *
+	 * @param permCheck Additional permission checker function that is
+	 *    given access to the 'interesting' filesystems before actually doing any
+	 *    deletions.
+	 *
+	 *    The permsission check function may reject if it deems that the
+	 *    operation should not proceed.
 	 */
-	function compositeDeletion(deleteOp) {
+	function compositeDeletion(deleteOp, permCheck) {
 		return function (handle, callback) {
+//			console.log('>>> unlink '+handle);
 			var fss = filter(subsystems, function (fs) {
 				//A filesystem is only interesting to 'unlink' operation
 				//if the handle we are trying to unlink exists on that
 				//filesystem.
 				return exists(fs, handle);
 			}).then(function (fss) {
-				if (fss.length>=1) {
-					//Got at least one interesting fs... so ok to try and unlink
-					return fss;
-				} else {
-					//There's no fs that contains the requested handle, so we can't unlink!
-					return when.reject(noExistError(deleteOp.name, handle));
-				}
+				return permCheck(fss, handle).then(function () {
+	//				console.log('>>> unlink interesting fss = '+fss.map(function (fs) {
+	//					return fs.toString();
+	//				}));
+					if (fss.length>=1) {
+	//					console.log('>>> unlink OK to try');
+						//Got at least one interesting fs... so ok to try and unlink
+						return fss;
+					} else {
+						//There's no fs that contains the requested handle, so we can't unlink!
+						return when.reject(noExistError(deleteOp.name, handle));
+					}
+				});
 			});
 			//Try to delete from all 'interesting' file systems
 			var deleteAll = each(fss, function (fs) {
-				deleteOp(fs, handle);
+				return deleteOp(fs, handle);
 			});
 			//Leave promises world and return back to node style callbacks.
 			nodeCallback(deleteAll, callback);
 		};
 	}
 
-	return {
+	var cfs = {
 		stat: function (handle, callback) {
 			//console.log('>>> composite stat : '+handle);
 			//TODO: merging ctime, atime etc across composite fs if we care about
@@ -427,19 +443,55 @@ function compose() {
 				callback
 			);
 		},
-		createReadStream: undefined  //TODO: scripted-fs defines a 'fake version' of this if
-								     // it is not defined. We should provide
+		createReadStream: undefined, //TODO: scripted-fs defines a 'fake version' of this if
+								     // it is not defined. We should be able to provide
 									 // a real implementation here if the sub-fss implement it.
-//		unlink: compositeDeletion(unlink)
-//		rmdir: compositeDeletion(rmdir) Commented out because not tested probably not working
+
+		unlink: compositeDeletion(unlink, function /*permChecker*/(fss, handle) {
+			//We have to produce special case errors if one of the subfss defines the handle
+			//as a directory.
+			return findFirst(fss, function (fs) {
+				return isDirectory(fs, handle);
+			}).then(
+				function (dirFs) {
+					//At least one of the fss, dirFs, defines handle as a dir
+					//This means the operation should be disallowed.
+					return when.reject(fss[0]===dirFs
+						? isDirError('unlink', handle)
+						: accessPermisssionError('unlink', handle)
+					);
+				},
+				function () {
+					//None of the fss is a directory... proceed!
+				}
+			);
+		}),
+		rmdir: compositeDeletion(rmdir, function /*permChecker*/(fss, handle) {
+			//We have to produce special case errors if one of the subfss does not
+			//define the handle as a directory.
+			return findFirst(fss, function (fs) {
+				return not(isDirectory(fs, handle));
+			}).then(
+				function (fs) {
+					//At least one of the fss, dirFs, defines handle as a not a dir
+					return when.reject(fss[0]===fs
+						? isNotDirError('rmdir', handle)
+						: accessPermisssionError('rmdir', handle)
+					);
+				},
+				function () {
+					//All of the fss are indeed directories => proceed!
+				}
+			);
+		})
 //		mkdir: convertArg(fs.mkdir, 0),
-//		createReadStream: convertArg(fs.createReadStream, 0),
 //		rename: convertArg(convertArg(fs.rename, 0), 1),
 //		handle2file: compose(fs_handle2file, handle2file),
 //		file2handle: compose(file2handle, fs_file2handle)
 
 	};
 
+	return cfs;
 
 } // function compose
 

@@ -44,7 +44,39 @@ function isNotDirError(funName, handle) {
 	return err;
 }
 
+
+/**
+ * Create an error similar to node fs 'EACCES'. Note that there's also 'EPERM' which
+ * probably is subtly different. The most interesting info I found about this was here:
+ *
+ * http://www.manpagez.com/man/1/hdiutil/osx-10.4.php
+ *
+ *   EACCES and EPERM are subtly different.  The latter
+ *   "operation not permitted" tends to refer to an operation
+ *   that cannot be performed, often due to an incorrect
+ *   effective user ID.  On the other hand, "permission denied"
+ *   tends to mean that a particular access mode prevented the operation.
+ *
+ */
+function accessPermissionError(funName, handle) {
+	var err = new Error('[Error: EACCES, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 3;
+	err.code = 'EACCES';
+	err.path = handle;
+	return err;
+}
+
+function dirNotEmptyError(funName, handle) {
+	var err = new Error('[Error: ENOTEMPTY, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 53;
+	err.code = 'ENOTEMPTY';
+	err.path = handle;
+	return err;
+}
+
 exports.isDirError = isDirError;
 exports.isNotDirError = isNotDirError;
+exports.dirNotEmptyError = dirNotEmptyError;
 
 exports.noExistError = noExistError;
+exports.accessPermisssionError = accessPermissionError;
