@@ -1,0 +1,9 @@
+{	
+	"name": "marker-adding-plugin",
+	"version": "0.1",
+	"description": "Scripted plugin to add markers in the editor",
+	"main": "marker-adding-plugin",
+	"scripted": {
+		"plugin": true
+	}
+}

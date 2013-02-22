@@ -26,6 +26,11 @@ define(function (require) {
 
 	var saveHooks = require('scripted/editor/save-hooks');
 
+	var editorUtils = require('scripted/utils/editorUtils');
+	var annotationModule = require('orion/textview/annotations');
+
+	var annotationManager = require('scripted/editor/annotationManager');
+
 	/**
 	 * Create an accessor function to easily navigate a typical JSON like
 	 * configuration object. The function acceps a variable number of arguments,
@@ -41,7 +46,6 @@ define(function (require) {
 	}
 
 	return {
-
 		/**
 		 * Add a save transform function. The function is called just prior to
 		 * saving the contents of the editor and is given a chance to transform the text
@@ -103,7 +107,81 @@ define(function (require) {
 		 */
 		setAction: function (actionID, spec) {
 			actions.setAction(actionID, spec);
+		},
+
+		/**
+		 * Load the supplied css data.
+		 *
+		 * @param {String} css
+		 */
+		loadCss: function(css) {
+			var textnode = document.createTextNode(css);
+			var cssref = document.createElement("style");
+			cssref.setAttribute("rel","stylesheet");
+			cssref.setAttribute("type","text/css");
+			cssref.appendChild(textnode);
+			document.getElementsByTagName("head")[0].appendChild(cssref);
+		},
+		
+		/**
+		 * Register a new annotation type. The name should use a dotted form, e.g. example.foo
+		 * and the 'foo' will be used as a class for associated styling.
+		 * The optional lineStyling determines if occurrences of this annotation will
+		 * style the entire line or just a range on a line.
+		 *
+		 * @param {String} annotationTypeName
+		 * @param {Boolean} [lineStyling] true if this annotation styles the line
+		 */
+		registerAnnotationType: function(annotationTypeName, lineStyling) {
+			annotationManager.registerAnnotationType(annotationTypeName,lineStyling);
+		},
+		
+		// TODO this API feels a little odd, maybe it would be better if it took two lists of annotations
+		// but that means the caller will have to mess around locating them.
+		/**
+		 * Remove existing annotations of the specified types and add the new supplied annotations.
+		 *
+		 * @param [String] existingTypes array of names of existing annotation types to be removed
+		 * @param [{text:String,type:String,start:?Number,end:?Number,line:?Number}] newAnnotations the array of new annotations to add
+		 */
+		replaceAnnotations: function(existingTypes, newAnnotations) {
+			var editor = editorUtils.getCurrentEditor();
+			annotationManager.ensureEditorConfiguredWithAnnotations(editor);
+			var annotationModel = editor.getAnnotationModel();
+			var textModel = annotationModel.getTextModel();
+			var toRemove = [];
+			if (existingTypes) {
+				var existingIter = annotationModel.getAnnotations(0,textModel.getCharCount());
+				while (existingIter.hasNext()) {
+					var existingAnno = existingIter.next();
+					for (var e=0; e<existingTypes.length; e++) {
+						if (existingAnno.type===existingTypes[e]) {
+							toRemove.push(existingAnno);
+							break;
+						}
+					}
+				}
+			}
+			var orionAnnotations = [];
+			for (var a =0;a<newAnnotations.length;a++) {
+				var annotation = newAnnotations[a];
+				var start,end;
+				if (annotation.start) {
+					start = annotation.start;
+					if (annotation.end) {
+						end = annotation.end;
+					} else {
+						end = start+1;
+					}
+				} else {
+					start = textModel.getLineStart(annotation.line-1);
+					end = start+1;
+				}
+				orionAnnotations.push(annotationModule.AnnotationType.createAnnotation(annotation.type,start,end,annotation.text));
+			}
+			annotationModel.replaceAnnotations(toRemove,orionAnnotations);
 		}
+
 	};
 
 });

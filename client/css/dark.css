@@ -15,7 +15,20 @@
 }
 /* html uses token string with a hyphen, DOH */
 .dark .token-string {
-	color: #dddd00;
+	color: #b58900; /* solarize yellow */ /*dddd00;*/
+}
+
+/* html:entity-name-tag eg. <html>*/
+.dark .entity-name-tag {
+	color: #6c71c4; /* solarize violet */
+}
+
+.dark .entity-other-attribute-name {
+	color: #2aa198; /* solarize cyan */
+	/*
+	color: #cb4b16; /* solarize orange 
+	color: #859900; /* solarize green 
+	*/
 }
 
 .dark .token_keyword {

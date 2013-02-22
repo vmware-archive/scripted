@@ -10,7 +10,7 @@
  *     Derivative of Orions jslintdriver
  *     Andy Clement - changed to invoke jshint
  *******************************************************************************/
- 
+
 /*jshint browser:true*/
 /*global JSHINT define */
 define(["jshint"], function () {
@@ -22,13 +22,15 @@ define(["jshint"], function () {
 	defaults = [ "undef", "newcap", "smarttabs" ];
 	defaultIndent = 3;
 
-	bogus = ["Dangerous comment"];
+	// TODO fsroot should be fixed in a better way, basically jshint is complaining that we stuffed a property in
+	// its config block, we shouldn't do that
+	bogus = ["Dangerous comment","Bad option: 'fsroot'"];
 	// TODO: i18n
 
 	warnings = [
 		["Expected '{'", "Statement body should be inside '{ }' braces."]
 	];
-	
+
 	errors = [
 		"Missing semicolon",
 		"Extra comma",
@@ -91,7 +93,7 @@ define(["jshint"], function () {
 			}
 		});
 	}
-	
+
 	function jshint(contents) {
 		JSHINT(contents, localConfig.options, localConfig.options.predef);
 		return JSHINT.data();

@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util', "orion/textview/tooltip"], function(messages, mKeyBinding, mEventTarget, Deferred, util, mTooltip) {
 
 	// SCRIPTED
 	var autoActivation = (window.scripted &&
@@ -626,6 +626,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.hide();
 				return;
 			}
+			mTooltip.Tooltip.getTooltip(this.textView).hide();
 			this.parentNode.innerHTML = "";
 			for (var i = 0; i < this.proposals.length; i++) {
 				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
