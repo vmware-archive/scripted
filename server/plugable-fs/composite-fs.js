@@ -21,6 +21,14 @@
 // For file-based request the filesystems are considered left-to-right
 // so that the first file system from the left that 'has the file' takes
 // priority.
+//
+// When subsystems define a mix of files / dirs for a given handle
+// the siutation is amibguous. We try to resolve these conflicts logically
+// as much as possible by assuming left-most filesystem has priority.
+// The semantics of composition and particularly mutation operations
+// like writeFile, unlink, rmdir are not always clear however
+// and it is probably best to avoid these situations by only composing file
+// systems that are mostly disjoint.
 
 var when = require('when');
 var promiseUtils = require('../utils/promises');
