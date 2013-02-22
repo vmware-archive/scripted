@@ -121,7 +121,15 @@ define([
         return false;
     }
     
-/*
+    /* Beginnings of vi mode, plan of attack
+     * Function key to toggle it on/off
+     * Intercept keys of interest, keypresses handled here, how to route ESC in here?
+     * Add the first commands to get in out of the mode ('i', 'a')
+     * Add movement commands hjkl
+     * ...
+     * Persist on/off setting in storage (like navigator F2 toggle)
+     * Configurable via .scripted
+     */
     function ViMode(editor) {
 		this.editor = editor;
 		this.mode = 0; // 0=command 1=insert
@@ -129,7 +137,10 @@ define([
     
     ViMode.prototype = {
 		// http://hea-www.harvard.edu/~fine/Tech/vi.html
-		
+
+		getMode: function() {
+			if (this.mode===0) { return "command"; } else { return "insert"; }
+		},
 		actionMoveLeft: function() {
 //			this.editor.getTextView()
 		},
@@ -166,7 +177,6 @@ define([
 			return false;
 		}
     };
-*/
 
 	var makeEditor = function(domNode, filePath, editorType){
 		var editor;
@@ -325,22 +335,23 @@ define([
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
 			
-/*
+			/*
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
 			editor.getTextView().setAction("Toggle VI mode",function() {
 				var kphandler = editor.getTextView().getKeyPressHandler();
 				if (kphandler) {
 					console.log("vi mode OFF");
+					$('#status_mode').empty();
 					editor.getTextView().setKeyPressHandler();
 				} else {
 					console.log("vi mode ON");
-					editor.getTextView().setKeyPressHandler(new ViMode(editor));
+					var vimode = new ViMode(editor);
+					$('#status_mode').append(document.createTextNode("vi mode: "+vimode.getMode()));
+					editor.getTextView().setKeyPressHandler(vimode);
 				}
 				return true;
 			},"Toggle VI mode");
-*/
-				
-			
+			*/
 
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "scriptedKeyHelp");
 			editor.getTextView().setAction("scriptedKeyHelp", function() {

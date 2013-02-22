@@ -525,7 +525,7 @@ a:hover {
  	min-height: 30px;
  	background: #ffffff;
 }
-
+/*
 #status{
 	height:14px;
 	color:#ffffff;
@@ -534,6 +534,7 @@ a:hover {
 	bottom:2px;
 	z-index:15;
 }
+*/
 
 .pageTitle {
 	font-size: 12pt;

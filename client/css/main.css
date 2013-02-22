@@ -197,11 +197,6 @@ footer{
 	clear:both;
 }
 
-#status{
-	font-size:12px;
-	color:#666;
-	float:right;
-}
 
 .main_gradient{
 	background: -webkit-gradient(linear, left top, left bottom, from(#393737), to(#272626)); /* webkit */
@@ -356,20 +351,37 @@ footer{
 	width:100%;
 }
 
-#status_root {
+
+/* TODO bring font setting up to a higher level common node */
+
+/* Containing element for the status bar contents that float on the right */
+#status_right {
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size:12px;
+	color:#666;
+	float: right;
+}
+
+#status_left {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 	font-size:12px;
 	color:#666;
 	float:left;
-	padding: 0px 0px 0px 4px;
-	/*
-	overflow: hidden;
-	font-size: 12px;
-	color: #eee;
-	text-align: center;
-	padding: 4px 0px 4px 0px;
-	*/
 }
+
+/* Display editor mode */
+#status_mode {
+	margin-left: 40px;
+}
+
+#status{
+}
+
+#status_root {
+	padding: 0px 0px 0px 4px;
+}
+
+
 
 .arrow {
   border-color: transparent white transparent transparent;
