@@ -120,6 +120,53 @@ define([
         }
         return false;
     }
+    
+/*
+    function ViMode(editor) {
+		this.editor = editor;
+		this.mode = 0; // 0=command 1=insert
+    }
+    
+    ViMode.prototype = {
+		// http://hea-www.harvard.edu/~fine/Tech/vi.html
+		
+		actionMoveLeft: function() {
+//			this.editor.getTextView()
+		},
+
+		handleKeyPress: function(e) {
+			var key = (e.charCode !== undefined ? e.charCode : e.keyCode);
+			console.log("keycode is "+key);
+//			if (mode === 1) {
+//				return false;
+//			}
+			if (key > 31) {
+				var ch = String.fromCharCode(key); // TODO use keycode directly?
+				
+//				switch (ch) {
+//					case 'h': // Move left one char
+//						this.actionMoveLeft();
+//						return true;
+//					case 'j': // Move down one line
+//						this.actionMoveDownLine();
+//						return true;
+//					case 'k': // Move up one line
+//						this.actionMoveUpLine();
+//						return true;
+//					case 'l': // Move right one char
+//						this.actionMoveRight();
+//						return true;
+//
+//					default:
+//					return false;
+//				}
+				console.log("press for "+String.fromCharCode(key));
+//					this._doContent(String.fromCharCode (key));
+			}
+			return false;
+		}
+    };
+*/
 
 	var makeEditor = function(domNode, filePath, editorType){
 		var editor;
@@ -277,6 +324,23 @@ define([
 			// create keybindings for source editing
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
+			
+/*
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
+			editor.getTextView().setAction("Toggle VI mode",function() {
+				var kphandler = editor.getTextView().getKeyPressHandler();
+				if (kphandler) {
+					console.log("vi mode OFF");
+					editor.getTextView().setKeyPressHandler();
+				} else {
+					console.log("vi mode ON");
+					editor.getTextView().setKeyPressHandler(new ViMode(editor));
+				}
+				return true;
+			},"Toggle VI mode");
+*/
+				
+			
 
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "scriptedKeyHelp");
 			editor.getTextView().setAction("scriptedKeyHelp", function() {

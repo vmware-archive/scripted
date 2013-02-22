@@ -1131,17 +1131,29 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			var selection = editor.getSelection();
 			if (selection.start === selection.end) {
 				var model = editor.getModel();
+					
 				var lineIndex = model.getLineAtOffset(selection.start);
 				var lineText = model.getLine(lineIndex, true);
 				var lineStart = model.getLineStart(lineIndex);
 				var index = 0, end = selection.start - lineStart, c;
 				while (index < end && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; }
-				if (index > 0) {
+				var lastCharWasOpenCurly = (end>0 && lineText.length>0 && (lineText.charAt(end-1)==='{'));
+				if (index > 0 || lastCharWasOpenCurly) {
+					
 					//TODO still wrong when typing inside folding
 					var prefix = lineText.substring(0, index);
 					index = end;
-					while (index < lineText.length && ((c = lineText.charCodeAt(index++)) === 32 || c === 9)) { selection.end++; }
-					editor.setText(model.getLineDelimiter() + prefix, selection.start, selection.end);
+					while (index < lineText.length && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; selection.end++; }
+
+					// Coding Enhancements: if pressing enter after a '{' auto add the extra whitespace to indent by 1
+					var textToInsert = model.getLineDelimiter()+prefix;
+					if (lastCharWasOpenCurly) {
+						var options = this.textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+						var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+						textToInsert+=text;
+					}
+					
+					editor.setText(textToInsert, selection.start, selection.end);
 					return true;
 				}
 			}

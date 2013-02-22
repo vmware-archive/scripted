@@ -1066,6 +1066,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	}
 
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
+		
+		setKeyPressHandler: function (keyPressHandler) {
+			this._keypressHandler = keyPressHandler;
+		},
+		getKeyPressHandler: function () {
+			return this._keypressHandler;
+		},
 		/**
 		 * Adds a ruler to the text view at the specified position.
 		 * <p>
@@ -2756,6 +2763,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_handleKeyPress: function (e) {
+			if (this._keypressHandler) {
+				var handled =  this._keypressHandler.handleKeyPress(e);
+				if (handled) {
+					return true;
+				}
+			}
 			/*
 			* Feature in Embedded WebKit.  Embedded WekKit on Mac runs in compatibility mode and
 			* generates key press events for these Unicode values (Function keys).  This does not
