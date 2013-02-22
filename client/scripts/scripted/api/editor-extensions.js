@@ -122,7 +122,7 @@ define(function (require) {
 			cssref.appendChild(textnode);
 			document.getElementsByTagName("head")[0].appendChild(cssref);
 		},
-		
+
 		/**
 		 * Register a new annotation type. The name should use a dotted form, e.g. example.foo
 		 * and the 'foo' will be used as a class for associated styling.
@@ -135,9 +135,14 @@ define(function (require) {
 		registerAnnotationType: function(annotationTypeName, lineStyling) {
 			annotationManager.registerAnnotationType(annotationTypeName,lineStyling);
 		},
-		
+
 		// TODO this API feels a little odd, maybe it would be better if it took two lists of annotations
 		// but that means the caller will have to mess around locating them.
+		// TODO this api doesn't belong here. It is an operation on an editor instance.
+		// This api here is more of a place to add hooks to the editor 'class' that uniformally affect
+		// all current and future editors behavior rather than the state of a single editor instance.
+		// In this respect also, using 'getCurrentEditor' may be fragile and actions may not be added to
+		// the right editor.
 		/**
 		 * Remove existing annotations of the specified types and add the new supplied annotations.
 		 *
