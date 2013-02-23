@@ -23,6 +23,7 @@ function(
 	return {
 
 			init: function() {
+				// TODO Bad!!! remove this global variable`
 				window.scripted = {};
 
 				var d;

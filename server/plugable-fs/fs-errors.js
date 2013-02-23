@@ -74,9 +74,27 @@ function dirNotEmptyError(funName, handle) {
 	return err;
 }
 
+function existsError(funName, handle) {
+	var err = new Error('[Error: EEXIST, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 47;
+	err.code = 'EEXIST';
+	err.path = handle;
+	return err;
+}
+
+function crossFSError(funName, handle) {
+	var err = new Error('[Error: EXDEV, '+funName+' '+JSON.stringify(handle)+']');
+	err.errno = 52;
+	err.code = 'EXDEV';
+	err.path = handle;
+	return err;
+}
+
 exports.isDirError = isDirError;
 exports.isNotDirError = isNotDirError;
 exports.dirNotEmptyError = dirNotEmptyError;
 
+exports.existsError = existsError;
 exports.noExistError = noExistError;
 exports.accessPermisssionError = accessPermissionError;
+exports.crossFSError = crossFSError;

@@ -1090,6 +1090,368 @@ exports.rmdirFileWithShadowDir = function (test) {
 	});
 };
 
+/////////////////////////////////////////////////////////////////
+// mkdir
+/////////////////////////////////////////////////////////////////
+
+//Test most basic case: we can create a directory as a subdir of a directory that
+// exists on a single sub-file system.
+exports.mkdirSingle = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, next) {
+			var subdir = '/'+name+'/subdir-of-'+name;
+			cfs.mkdir(subdir, function (err) {
+				test.ok(!err);
+				//The dir should now exist
+				cfs.stat(subdir, function (err, stat) {
+					test.ok(!err);
+					test.ok(stat && stat.isDirectory());
+					next();
+				});
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+
+};
+
+//Test creating a directory fails if a file or dir already exists.
+exports.mkdirExists = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, next) {
+			var subdir = '/'+name;
+			cfs.mkdir(subdir, function (err) {
+				test.ok(err);
+				if (err) {
+					test.equals('EEXIST', err.code);
+				}
+				next();
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test creating a directory fails if parent not exist
+exports.mkdirParentNoExist = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.mkdir('/bogus/subdir', function (err) {
+		test.ok(err);
+		if (err) {
+			test.equals('ENOENT', err.code);
+		}
+		test.done();
+	});
+};
+
+//Test creating directory if parent exists on multiple subfs
+exports.mkdirMultipleParents = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		if (name!=='bar') {
+			//For some variablity, don't create the dir on one of the fss.
+			fs.dir('/shared');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var subdir = '/shared/subdir';
+	cfs.mkdir(subdir, function (err) {
+		test.ok(!err);
+		if (err) {
+			console.log(err);
+		}
+		cfs.stat(subdir, function (err, stat) {
+			test.ok(!err);
+			test.ok(stat.isDirectory());
+			test.done();
+		});
+	});
+};
+
+///////////////////////////////////////////////
+// rename
+///////////////////////////////////////////////
+
+//Simplest case: rename an existing file to a new valid name
+exports.renameExistingFileOK = function (test) {
+	var names = ['foo', 'bar'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/shared');
+		fs.file('/shared/'+name+'.txt', 'Text for '+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names, function (name, next) {
+		var source = '/shared/'+name+'.txt';
+		var sourceContent = 'Text for '+name;
+		var target = '/shared/'+name+'.js';
+		cfs.rename(source, target, function (err) {
+			test.ok(!err);
+			if (err) {
+				console.log(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+			}
+
+			//Check that source is gone and target has its contents.
+			cfs.stat(source, function (err) {
+				test.ok(err);
+				if (err) {
+					test.equals('ENOENT', err.code);
+				}
+
+				cfs.readFile(target, 'utf8', function (err, contents) {
+					test.ok(!err);
+					test.equals(sourceContent, contents);
+				});
+			});
+
+			next();
+		});
+	}, function () {
+		test.done();
+	});
+};
+
+//rename a file that exists on multiple subfs.
+exports.renameExistingMultiFileOK = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/shared');
+		if ('bar'!==name) {
+			//This file will exist on 'foo' and 'zor' fs but not 'bar'
+			fs.file('/shared/replica.txt', 'Text for '+name);
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var source = '/shared/replica.txt';
+	var sourceContent = 'Text for foo'; //has the contents of the leftmost fs
+	var target = '/shared/replica.js';
+	cfs.rename(source, target, function (err) {
+		test.ok(!err);
+		if (err) {
+			console.log(err);
+			if (err.stack) {
+				console.log(err.stack);
+			}
+		}
+
+		//Check that source is gone and target has its contents.
+		cfs.stat(source, function (err) {
+			test.ok(err);
+			if (err) {
+				test.equals('ENOENT', err.code);
+			}
+
+			cfs.readFile(target, 'utf8', function (err, contents) {
+				test.ok(!err);
+				test.equals(sourceContent, contents);
+			});
+		});
+		test.done();
+	});
+};
+
+//rename a file that doesn't exist
+exports.renameNoExist = function (test) {
+	var names = ['foo', 'bar'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/shared');
+		fs.file('/shared/'+name+'.txt', 'Text for '+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	cfs.rename('/shared/bogus', '/shared/smogus', function (err) {
+		test.ok(err);
+		if (err) {
+			test.equals('ENOENT', err.code);
+		}
+		test.done();
+	});
+};
+
+//rename a file so it moves directories on the same fs
+exports.renameMoveFileWithinFs = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/shared');
+		fs.dir('/'+name);
+		fs.file('/'+name+'/'+name+'.txt', 'Text for '+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names, function (name, next) {
+		var source = '/'+name+'/'+name+'.txt';
+		var target = '/shared/'+name+'.txt';
+		var sourceContent = 'Text for '+name;
+		cfs.rename(source, target, function (err) {
+			test.ok(!err);
+			if (err) {
+				console.log(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+			}
+
+			//Check that source is gone and target has its contents.
+			cfs.stat(source, function (err) {
+				test.ok(err);
+				if (err) {
+					test.equals('ENOENT', err.code);
+				}
+
+				cfs.readFile(target, 'utf8', function (err, contents) {
+					test.ok(!err);
+					test.equals(sourceContent, contents);
+				});
+			});
+			next();
+		});
+
+	}, function () {
+		test.done();
+	});
+};
+
+//rename a file so it ends up on a different sub fs
+// This is not currently supported, but we want a predictable error!
+exports.renameFileToDifferentFs = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		fs.file('/'+name+'/'+name+'.txt', 'Text for '+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var source = '/foo/foo.txt';
+	var target = '/bar/foo.txt';
+	cfs.rename(source, target, function (err) {
+		test.ok(err);
+		if (!err) {
+			//diagnostically interesting?
+			console.log('fss = ' + JSON.stringify(fss, null, '  '));
+		}
+		if (err) {
+			test.equals('EXDEV', err.code);
+			//See http://www.tutorialspoint.com/unix_system_calls/rename.htm
+			// Node fs seems to mostly follow these unixy error codes. So this seems somewhat logical
+			// as an error code for trying to move files between different filesystems.
+
+			//Example of an actual error that I'm getting using raw fs renaming between os-level
+			//mount points is this:
+			//{ [Error: EXDEV, rename 'readme.txt']
+			//  errno: 52,
+			//  code: 'EXDEV',
+			//  path: 'readme.txt' }
+		}
+		test.done();
+	});
+
+};
+
+//rename a file to move it to a non-existen directory
+exports.renameParentNoExist = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		//fs.dir('/noexist'); //This *should* indeed be commented out :-)
+		fs.dir('/'+name);
+		fs.file('/'+name+'/'+name+'.txt', 'Text for '+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names, function (name, next) {
+		var source = '/'+name+'/'+name+'.txt';
+		var target = '/noexist/'+name+'.txt';
+		cfs.rename(source, target, function (err) {
+			test.ok(err);
+			if (err) {
+				test.equals('ENOENT', err.code);
+			}
+			next();
+		});
+	}, function () {
+		test.done();
+	});
+};
+
+//rename a file that shadows a dir on another subfs.
+
+//Repeat all of the above for directories?
+
 
 //Deselect a bunch of tests
 //for (var property in exports) {

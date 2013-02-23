@@ -31,6 +31,8 @@ define(function (require) {
 
 	var annotationManager = require('scripted/editor/annotationManager');
 
+	var EditorAPI = require('scripted/api/editor-wrapper');
+
 	/**
 	 * Create an accessor function to easily navigate a typical JSON like
 	 * configuration object. The function acceps a variable number of arguments,
@@ -106,7 +108,13 @@ define(function (require) {
 		 * @param {{handler:function(Editor),name:?String,global:?Boolean}} spec
 		 */
 		setAction: function (actionID, spec) {
-			actions.setAction(actionID, spec);
+			var spectAdapter = Object.create(spec, {
+				handler : { writable:false, configurable:false, enumerable: true,
+					value: function(editor) {
+						return spec.handler(new EditorAPI(editor));
+				} }
+			});
+			actions.setAction(actionID, spectAdapter);
 		},
 
 		/**
@@ -122,7 +130,7 @@ define(function (require) {
 			cssref.appendChild(textnode);
 			document.getElementsByTagName("head")[0].appendChild(cssref);
 		},
-		
+
 		/**
 		 * Register a new annotation type. The name should use a dotted form, e.g. example.foo
 		 * and the 'foo' will be used as a class for associated styling.
@@ -135,9 +143,14 @@ define(function (require) {
 		registerAnnotationType: function(annotationTypeName, lineStyling) {
 			annotationManager.registerAnnotationType(annotationTypeName,lineStyling);
 		},
-		
+
 		// TODO this API feels a little odd, maybe it would be better if it took two lists of annotations
 		// but that means the caller will have to mess around locating them.
+		// TODO this api doesn't belong here. It is an operation on an editor instance.
+		// This api here is more of a place to add hooks to the editor 'class' that uniformally affect
+		// all current and future editors behavior rather than the state of a single editor instance.
+		// In this respect also, using 'getCurrentEditor' may be fragile and actions may not be added to
+		// the right editor.
 		/**
 		 * Remove existing annotations of the specified types and add the new supplied annotations.
 		 *

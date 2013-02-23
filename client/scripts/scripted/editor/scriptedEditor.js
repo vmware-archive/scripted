@@ -683,43 +683,6 @@ define([
 			return extension;
 		};
 
-		editor.getScroll = function() {
-			return $(this._domNode).find('.textview').scrollTop();
-		};
-		editor.setScroll = function(newScroll) {
-			$(this._domNode).find('.textview').scrollTop(newScroll);
-		};
-
-		/**
-		 * @return Array.<String> the array of css classes applied to the span at the current offset
-		 * will tell you the location (eg- inside comment, etc) at the location
-		 */
-		mTextView.TextView.prototype.getPartitionType = function(offset) {
-			var model = this.getModel();
-			var lineNum = model.getLineAtOffset(offset);
-			var line = this._getLine(lineNum);
-			if (line._lineDiv) {
-				var lineStart = model.getLineStart(lineNum);
-				var remainingLength = offset - lineStart;
-				var child = line._lineDiv.firstChild;
-				while (child) {
-					var text = child.innerText || child.textContent;
-					if (text) {
-						remainingLength -= text.length;
-						if (remainingLength <= 0) {
-							break;
-						}
-					}
-					child = child.nextSibling;
-				}
-
-				if (child) {
-					return child.classList;
-				}
-			}
-			return [];
-		};
-
 		// end extra editor functions
 		////////////////////////////////////////
 
@@ -922,6 +885,83 @@ define([
 
 		return editor;
 	};
+
+
+	///////////////////////////////////////////////////////
+	// augment the Editor prototype with extra functions
+	mEditor.Editor.prototype.getScroll = function() {
+		return $(this._domNode).find('.textview').scrollTop();
+	};
+	mEditor.Editor.prototype.setScroll = function(newScroll) {
+		$(this._domNode).find('.textview').scrollTop(newScroll);
+	};
+
+	/**
+	 * @return Array.<String> the array of css classes applied to the span at the current offset
+	 * will tell you the location (eg- inside comment, etc) at the location
+	 */
+	mTextView.TextView.prototype.getPartitionType = function(offset) {
+		var model = this.getModel();
+		var lineNum = model.getLineAtOffset(offset);
+		var line = this._getLine(lineNum);
+		if (line._lineDiv) {
+			var lineStart = model.getLineStart(lineNum);
+			var remainingLength = offset - lineStart;
+			var child = line._lineDiv.firstChild;
+			while (child) {
+				var text = child.innerText || child.textContent;
+				if (text) {
+					remainingLength -= text.length;
+					if (remainingLength <= 0) {
+						break;
+					}
+				}
+				child = child.nextSibling;
+			}
+
+			if (child) {
+				return child.classList;
+			}
+		}
+		return [];
+	};
+
+	/**
+	 * Creates a linked editing mode for the current editor
+	 * The linked mode is empty and must be filled in.
+	 * @see mEditorFeatures.LinkedMode
+	 */
+	mEditor.Editor.prototype.createLinkedMode = function() {
+		return new mEditorFeatures.LinkedMode(this);
+	};
+
+	/**
+	 * Returns the line index at the given character offset.
+	 * <p>
+	 * The valid offsets are 0 to char count inclusive. The line index for
+	 * char count is <code>line count - 1</code>. Returns <code>-1</code> if
+	 * the offset is out of range.
+	 * </p>
+	 *
+	 * @param {Number} offset a character offset.
+	 * @returns {Number} the zero based line index or <code>-1</code> if out of range.
+	 */
+	mEditor.Editor.prototype.getLineAtOffset = function(offset) {
+		var model = this.getTextView().getModel();
+		return model.getLineAtOffset(offset);
+	};
+
+	mEditor.Editor.prototype.getCurrentLineRange = function(offset) {
+		var model = this.getTextView().getModel();
+		var line = model.getLineAtOffset(offset);
+		return {
+			start: model.getLineStart(line),
+			end: model.getLineEnd(line)
+		};
+	};
+
+	// End extra editor errors
+	///////////////////////////////////////////////////////
 
 	return {
 		makeEditor: makeEditor

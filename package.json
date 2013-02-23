@@ -44,9 +44,10 @@
         "rest": "0.8.4",
         "express": "3.0.6",
 		"bower": "0.6.8",
-		"fake-fs": "https://github.com/kdvolder/node-fake-fs/archive/rmdir-not-empty.tar.gz"
+		"mime": "1.2.9"
 	},
 	"devDependencies": {
+		"fake-fs": "https://github.com/eldargab/node-fake-fs/archive/50f54e9551d9ece5578213564268021d4976db26.tar.gz",
 		"nodeunit": "0.7.4"
 	},
 	"license": "EPL",

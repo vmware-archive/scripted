@@ -15,6 +15,7 @@
 
 var when = require('when');
 var express = require('express');
+var mime = require('mime');
 
 exports.install = function (app, filesystem) {
 
@@ -59,15 +60,7 @@ exports.install = function (app, filesystem) {
 				if (!isFile) {
 					return next();
 				}
-				//TODO: proper mime type determination
-
-//				return getContents(dir + req.path).then(function (data) {
-//					res.header('Content-Type', 'text/plain');
-//					res.write(data);
-//					res.end();
-//				});
-
-				res.header('Content-Type', 'text/plain');
+				res.header('Content-Type', mime.lookup(req.path));
 				createReadStream(dir + req.path).pipe(res);
 			}).otherwise(function (err) {
 				console.log(err);

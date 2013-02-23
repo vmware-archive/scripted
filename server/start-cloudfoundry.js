@@ -32,15 +32,14 @@ var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
 var scriptedHome = withPrefix('/scripted.home',
 	withBaseDir(scriptedHomeLocation)
 );
-//var amoeba = mappedFs.withPrefix('/amo/eba', sandbox);
 
-//All of our files, with the 'slim' node-like API:
+//All of our files, with the 'slim' node-like fs API:
 var corefs = compose(
 	sandbox,
 	scriptedHome
 );
 
-//Now wrap that to create our 'fat' API that scripted uses throughout.
+//Now wrap that to create our 'fat' API that scripted uses throughout its codebase.
 var filesystem = scriptedFs.configure(corefs, {
 	userHome: '/user.home',
 	scriptedHome: '/scripted.home'
