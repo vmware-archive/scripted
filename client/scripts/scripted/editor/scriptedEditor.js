@@ -157,8 +157,8 @@ define([
 		},
 		handleKeyPress: function(e) {
 			var key = (e.charCode !== undefined ? e.charCode : e.keyCode);
-			console.log("press for "+String.fromCharCode(key));
-			console.log("keycode is "+key);
+//			console.log("press for "+String.fromCharCode(key));
+//			console.log("keycode is "+key);
 			// important keys 125:}
 			if (this.unindent_after_close_curly && key===125) {
 				var editor = this.editor;
