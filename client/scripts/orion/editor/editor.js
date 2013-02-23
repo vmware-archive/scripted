@@ -164,6 +164,16 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		getKeyModes: function() {
 			return this._keyModes;
 		},
+		pushKeyMode: function(keyMode) {
+			this._keyModes.splice(0,0,keyMode);
+		},
+		removeKeyMode: function(keyMode) {
+			for (var k=0;k<this._keyModes.length;k++) {
+				if (this._keyModes[k]===keyMode) {
+					this._keyModes.splice(k,1);
+				}
+			}
+		},
 
 		/**
 		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.

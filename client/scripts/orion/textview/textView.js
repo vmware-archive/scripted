@@ -1068,7 +1068,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
 		
 		addKeyPressHandler: function (keyPressHandler) {
-			if (!this._keyPressHandler) {
+			if (!this._keyPressHandlers) {
 				this._keyPressHandlers = [];
 			}
 			this._keyPressHandlers.splice(0,0,keyPressHandler);
@@ -1076,8 +1076,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		getKeyPressHandlers: function () {
 			return this._keyPressHandlers;
 		},
-		removeKeyPressHandler: function() {
-			console.log("nyi textView.removeKeyPressHandler()");
+		removeKeyPressHandler: function(keyPressHandler) {
+			for (var i=0;i<this._keyPressHandlers.length;i++) {
+				if (this._keyPressHandlers[i]==keyPressHandler) {
+					this._keyPressHandlers.splice(i,1);
+					return true;
+				}
+			}
+			return false;
 		},
 		clearKeyPressHandlers: function() {
 			this._keyPressHandlers = [];
@@ -1152,7 +1158,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <p>All methods in the view that take or return a position are in the document coordinate space.</p>
 		 *
 		 * @param rect the rectangle to convert.
-		 * @param rect.x the x of the rectangle.
+		 * @param rect.x the x of the rectangle.a
 		 * @param rect.y the y of the rectangle.
 		 * @param rect.width the width of the rectangle.
 		 * @param rect.height the height of the rectangle.
