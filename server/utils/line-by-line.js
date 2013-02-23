@@ -69,7 +69,9 @@ function configure(filesystem) {
 		function destroy(explanation) {
 			if (stream) {
 				//can only destroy once!
-				stream.destroy();
+				if (typeof(stream.destroy)==='function') {
+					stream.destroy();
+				}
 				stream = null;
 				doneFun(explanation);
 			}
