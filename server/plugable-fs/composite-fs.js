@@ -44,6 +44,9 @@ var isDirError = require('./fs-errors').isDirError;
 var isNotDirError = require('./fs-errors').isNotDirError;
 var accessPermisssionError = require('./fs-errors').accessPermisssionError;
 var existsError = require('./fs-errors').existsError;
+var crossFSError = require('./fs-errors').crossFSError;
+
+var getDirectory = require('../jsdepend/utils').getDirectory;
 
 function compose() {
 
@@ -106,6 +109,7 @@ function compose() {
 	var writeFile = promisedFunction('writeFile');
 	var mkdir = promisedFunction('mkdir');
 	var rmdir = promisedFunction('rmdir');
+	var rename = promisedFunction('rename');
 
 	//TODO: var rename //Careful: // Not a 'one arg' function!
 	//TODO: var handle2file: ??? get the 'file' on the leftmost filesystem where it exists.
@@ -518,8 +522,56 @@ function compose() {
 				}),
 				callback
 			);
+		},
+		rename: function (source, target, callback) {
+			nodeCallback(
+				exists(cfs, target).then(function (targetExists) {
+					if (targetExists) {
+						//Note: standard nodefs actually happily overwrites target file if
+						//it already exists! That's not so great so we change that
+						//behavior here!
+						return when.reject(existsError('rename '+source, target));
+					}
+				}).then(function () {
+					//A rename, from the point of view of the 'source' file/dir
+					//should behave much like a delete. I.e. to be succeed, it should
+					//succeed on all subfs where the source exists.
+					return filter(subsystems, function (fs) {
+						return exists(fs, source);
+					}).then(function (fss) {
+						if (!fss.length) {
+							return when.reject(noExistError('rename', source));
+						}
+						return each(fss, function (fs) {
+							return rename(fs, source, target);
+						}).otherwise(function (err) {
+							//Need some special handling to detect error caused by 'crossFS rename'
+							//and transform the error to what is expected.
+							if (err && err.code === 'ENOENT') {
+								var parent = getDirectory(target);
+								//if there's no parent, we were trying to rename '/'.
+								//That seems a very strange thing to do... so probably can't
+								//reach here with that kind of error but better safe than sorry!
+								if (parent) {
+									return exists(cfs, parent).then(function (parentExists) {
+										if (parentExists) {
+											//If parent exists we can only get ENOENT because
+											//it does not exist on the same subfs. So the
+											//rename is in fact trying to move something to another
+											//fs.
+											return when.reject(crossFSError('rename '+source, target));
+										}
+										return when.reject(err);
+									});
+								}
+							}
+							return when.reject(err);
+						});
+					});
+				}),
+				callback
+			);
 		}
-//		rename: convertArg(convertArg(fs.rename, 0), 1),
 //		handle2file: compose(fs_handle2file, handle2file),
 //		file2handle: compose(file2handle, fs_file2handle)
 
