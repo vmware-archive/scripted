@@ -21,7 +21,7 @@ define([], function() {
 	//  Can we somehow share this code between client and server.
 	//  Also, there's probably other inlined bits of code on the client side
 	//  that do the same thing.
-	
+
 	//Get the parent directory of a given handle (which could be a file or a dir name).
 	function getDirectory(handle) {
 		if (handle.length===3 && handle.substring(1)===':/') {
@@ -46,11 +46,11 @@ define([], function() {
 				//What we want instead is 'C:/'
 				return result+'/';
 			} else {
-				return result;
+				return result || '/';
 			}
 		}
 	}
-	
+
 	function getLastSegmentFromPath(handle) {
 		if (typeof handle === 'string') {
 
@@ -63,11 +63,11 @@ define([], function() {
 		}
 		return null;
 	}
-	
+
 	function getPathSeparator() {
 	   return '/';
 	}
-	
+
 	return {
 		getDirectory: getDirectory,
 		getLastSegmentFromPath: getLastSegmentFromPath,
