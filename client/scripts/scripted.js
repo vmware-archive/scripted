@@ -41,6 +41,22 @@ function(
 
 				this.configReady.then(function (dotScripted) {
 					window.scripted.config = dotScripted;
+					// TODO temporary whilst flushing out bugs in auto indent - forces them ON unless the user has turned them off.
+					// Not yet clear what the defaults will be.
+					if (window.scripted.config.editor) {
+						if (!window.scripted.config.editor.unindent_after_close_curly) {
+							window.scripted.config.editor.unindent_after_close_curly = true;
+						}
+						if (!window.scripted.config.editor.indent_after_open_curly) {
+							window.scripted.config.editor.indent_after_open_curly = true;
+						}
+					} else {
+						window.scripted.config.editor = {
+							unindent_after_close_curly: true,
+							indent_after_open_curly: true
+						};
+					}
+					
 					window.fsroot = dotScripted.fsroot;
 
 					// Start the search for .jshintrc
@@ -130,6 +146,7 @@ function(
 					});
 					return deferred.promise;
 				}
+
 			}
 		};
 

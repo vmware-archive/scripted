@@ -1067,11 +1067,20 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
 		
-		setKeyPressHandler: function (keyPressHandler) {
-			this._keypressHandler = keyPressHandler;
+		addKeyPressHandler: function (keyPressHandler) {
+			if (!this._keyPressHandler) {
+				this._keyPressHandlers = [];
+			}
+			this._keyPressHandlers.splice(0,0,keyPressHandler);
 		},
-		getKeyPressHandler: function () {
-			return this._keypressHandler;
+		getKeyPressHandlers: function () {
+			return this._keyPressHandlers;
+		},
+		removeKeyPressHandler: function() {
+			console.log("nyi textView.removeKeyPressHandler()");
+		},
+		clearKeyPressHandlers: function() {
+			this._keyPressHandlers = [];
 		},
 		/**
 		 * Adds a ruler to the text view at the specified position.
@@ -2763,10 +2772,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_handleKeyPress: function (e) {
-			if (this._keypressHandler) {
-				var handled =  this._keypressHandler.handleKeyPress(e);
-				if (handled) {
-					return true;
+			if (this._keyPressHandlers) {
+				for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
+					var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
+					if (handled) {
+						if (e.preventDefault) { e.preventDefault(); }
+						return false;
+					}
 				}
 			}
 			/*
@@ -3394,6 +3406,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true}, true);
 				}
 			} else {
+				console.log("textinput: "+e.data);
 				this._doContent(e.data);
 			}
 			e.preventDefault();

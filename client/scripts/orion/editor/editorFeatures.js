@@ -1145,12 +1145,14 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					index = end;
 					while (index < lineText.length && ((c = lineText.charCodeAt(index)) === 32 || c === 9)) { index++; selection.end++; }
 
-					// Coding Enhancements: if pressing enter after a '{' auto add the extra whitespace to indent by 1
+					// EditorExtras: if pressing enter after a '{' auto add the extra whitespace to indent by 1
 					var textToInsert = model.getLineDelimiter()+prefix;
 					if (lastCharWasOpenCurly) {
-						var options = this.textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
-						var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
-						textToInsert+=text;
+						if (window.scripted.config && window.scripted.config.editor && window.scripted.config.editor.indent_after_open_curly) {
+							var options = this.textView.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+							var text = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+							textToInsert+=text;
+						}
 					}
 					
 					editor.setText(textToInsert, selection.start, selection.end);

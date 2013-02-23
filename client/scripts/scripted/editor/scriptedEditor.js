@@ -34,7 +34,8 @@ define([
 	mIndexerService, mHtmlGrammar, mModuleVerifier,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
-	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager, infileSearchDialog, jshintloader, behaviourConfig, textUtils
+	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager,
+	infileSearchDialog, jshintloader, behaviourConfig, textUtils
 ) {
 	var determineIndentLevel = function(editor, startPos, options){
 		var model = editor.getTextView().getModel();
@@ -121,6 +122,87 @@ define([
         return false;
     }
     
+    function ExtendedEditorFeatures(editor) {
+		this.editor = editor;
+		// TODO make initing these a one off?
+		if (scripted.config.editor) {
+			this.unindent_after_close_curly = scripted.config.editor.unindent_after_close_curly;
+		}
+    }
+    
+    // EditorExtras - this string marks the changes through the code for editor 'smarts'
+    // - auto indent when pressing return after {
+    // - auto unindent when closing } on a whitespace only line
+    
+    ExtendedEditorFeatures.prototype = {
+		_endsWith: function(string, suffix) {
+			if (string.length>suffix.length) {
+				if (string.substring(string.length-suffix.length)===suffix) {
+					return true;
+				}
+			}
+			return false;
+		},
+		_isAllWhitespace: function(linetext) {
+			for (var i=0;i<linetext.length;i++) {
+				var ch = linetext.charAt(i);
+				if (ch!==' ' && ch!=='\t') {
+					return false;
+				}
+			}
+			return true;
+		},
+		_isWhitespace: function(char) {
+			return char===' ' || char==='\t';
+		},
+		handleKeyPress: function(e) {
+			var key = (e.charCode !== undefined ? e.charCode : e.keyCode);
+			console.log("press for "+String.fromCharCode(key));
+			console.log("keycode is "+key);
+			// important keys 125:}
+			if (this.unindent_after_close_curly && key===125) {
+				var editor = this.editor;
+				var textview = editor.getTextView();
+				var selection = editor.getSelection();
+				if (selection.start===selection.end) {
+					var model = editor.getModel();
+					var caretPos = editor.getCaretOffset();
+					var lineNum = model.getLineAtOffset(caretPos);
+					if (lineNum>0) {
+						var linetext = model.getLine(lineNum,false);
+						var options = textview.getOptions("tabSize", "expandTab"); //$NON-NLS-1$ //$NON-NLS-0$
+						var tabtext = options.expandTab ? new Array(options.tabSize + 1).join(" ") : "\t"; //$NON-NLS-1$ //$NON-NLS-0$
+						if (this._isAllWhitespace(linetext)) {
+							if (this._endsWith(linetext,tabtext)) {
+								// check the previous line
+								var unindent = false;
+								
+								var previouslinetext=model.getLine(lineNum-1,false);
+								var previouslinelength = previouslinetext.length;
+								// If the line before starts with the same amount of whitespace, probably worth unindenting:
+								if (previouslinelength>linetext.length && previouslinetext.indexOf(linetext)===0) {
+									unindent = true;
+								}
+								// if the line before ends with a '}' use the same amount of whitespace as it:
+								if (previouslinelength>0 && previouslinetext.charAt(previouslinetext.length-1)==='{') {
+									unindent = true;
+									// unindent to same level
+								}
+								
+								if (unindent) {
+									// replace the 'tab' with the '}' and be done.
+									textview._modifyContent({text: '}', start: selection.start-tabtext.length, end: selection.end, _ignoreDOMSelection: true}, true);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
+		}
+    };
+        
     /* Beginnings of vi mode, plan of attack
      * Function key to toggle it on/off
      * Intercept keys of interest, keypresses handled here, how to route ESC in here?
@@ -177,6 +259,8 @@ define([
 			return false;
 		}
     };
+    
+
 
 	var makeEditor = function(domNode, filePath, editorType){
 		var editor;
@@ -334,24 +418,6 @@ define([
 			// create keybindings for source editing
 			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist, linkedMode);
 			keyModeStack.push(codeBindings);
-			
-			/*
-			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
-			editor.getTextView().setAction("Toggle VI mode",function() {
-				var kphandler = editor.getTextView().getKeyPressHandler();
-				if (kphandler) {
-					console.log("vi mode OFF");
-					$('#status_mode').empty();
-					editor.getTextView().setKeyPressHandler();
-				} else {
-					console.log("vi mode ON");
-					var vimode = new ViMode(editor);
-					$('#status_mode').append(document.createTextNode("vi mode: "+vimode.getMode()));
-					editor.getTextView().setKeyPressHandler(vimode);
-				}
-				return true;
-			},"Toggle VI mode");
-			*/
 
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F1'), "scriptedKeyHelp");
 			editor.getTextView().setAction("scriptedKeyHelp", function() {
@@ -370,6 +436,25 @@ define([
 				editor.getTextView().invokeAction("Toggle Navigator",false);
 				return true;
 			});
+			
+//			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
+//			editor.getTextView().setAction("Toggle VI mode",function() {
+//				var kphandler = editor.getTextView().getKeyPressHandler();
+//				if (kphandler) {
+//					console.log("vi mode OFF");
+//					$('#status_mode').empty();
+//					editor.getTextView().removeKeyPressHandler(vimode);
+//				} else {
+//					console.log("vi mode ON");
+//					var vimode = new ViMode(editor);
+//					$('#status_mode').append(document.createTextNode("vi mode: "+vimode.getMode()));
+//					editor.getTextView().addKeyPressHandler(vimode);
+//				}
+//				return true;
+//			},"Toggle VI mode");
+
+			
+			editor.getTextView().addKeyPressHandler(new ExtendedEditorFeatures(editor));
 
 			// No keybinding by default
 			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
