@@ -180,13 +180,14 @@ define([
 								var previouslinetext=model.getLine(lineNum-1,false);
 								var previouslinelength = previouslinetext.length;
 								// If the line before starts with the same amount of whitespace, probably worth unindenting:
-								if (previouslinelength>linetext.length && previouslinetext.indexOf(linetext)===0) {
+								if (previouslinelength>linetext.length && previouslinetext.indexOf(linetext)===0 &&
+									!this._isWhitespace(previouslinetext.charAt(linetext.length))) {
 									unindent = true;
 								}
-								// if the line before ends with a '}' use the same amount of whitespace as it:
+								// if the line before ends with a '{' unindent
 								if (previouslinelength>0 && previouslinetext.charAt(previouslinetext.length-1)==='{') {
 									unindent = true;
-									// unindent to same level
+									// TODO unindent to same level?
 								}
 								
 								if (unindent) {
@@ -437,24 +438,27 @@ define([
 				return true;
 			});
 			
-//			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
-//			editor.getTextView().setAction("Toggle VI mode",function() {
-//				var kphandler = editor.getTextView().getKeyPressHandler();
-//				if (kphandler) {
-//					console.log("vi mode OFF");
-//					$('#status_mode').empty();
-//					editor.getTextView().removeKeyPressHandler(vimode);
-//				} else {
-//					console.log("vi mode ON");
-//					var vimode = new ViMode(editor);
-//					$('#status_mode').append(document.createTextNode("vi mode: "+vimode.getMode()));
-//					editor.getTextView().addKeyPressHandler(vimode);
-//				}
-//				return true;
-//			},"Toggle VI mode");
-
-			
 			editor.getTextView().addKeyPressHandler(new ExtendedEditorFeatures(editor));
+
+			// added after ExtendedEditorFeatures so it has priority:
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
+			editor.getTextView().setAction("Toggle VI mode",function() {
+				var vimode = editor.vimode;
+				if (vimode) {
+					console.log("vi mode OFF");
+					$('#status_mode').empty();
+					var b = editor.getTextView().removeKeyPressHandler(editor.vimode);
+					editor.vimode = null;
+					console.log("removed it?"+b);
+				} else {
+					console.log("vi mode ON");
+					editor.vimode = new ViMode(editor);
+					$('#status_mode').append(document.createTextNode("vi mode: "+editor.vimode.getMode()));
+					editor.getTextView().addKeyPressHandler(editor.vimode);
+				}
+				return true;
+			},"Toggle VI mode");
+
 
 			// No keybinding by default
 			editor.getTextView().setAction("Toggle Visible Whitespace", function() {
