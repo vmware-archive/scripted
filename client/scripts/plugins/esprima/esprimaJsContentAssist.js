@@ -577,20 +577,51 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	/**
 	 * Finds the closest doc comment to this node
 	 * @param {{range:Array.<Number>}} node
-	 * @param {Array.<String>} comments
+	 * @param {Array.<{range:Array.<Number>}>} doccomments
 	 * @return {{value:String,range:Array.<Number>}}
 	 */
 	function findAssociatedCommentBlock(node, doccomments) {
-//		look for closest doc comment that is before the start of this node
-//		just shift all the other ones
+		// look for closest doc comment that is before the start of this node
+		// just shift all the other ones
 		var candidate;
 		while (doccomments.length > 0 && doccomments[0].range[0] < node.range[0]) {
 			candidate = doccomments.shift();
 		}
-		return candidate ? candidate : { value : null };
+		return candidate || { value : null };
 	}
 
 
+	/**
+	 * Extracts all doccomments that fall inside the given range.
+	 * Side effect is to remove the array elements
+	 * @param Array.<{range:Array.<Number}>> doccomments
+	 * @param Array.<Number> range
+	 * @return {{value:String,range:Array.<Number>}} array elements that are removed
+	 */
+	function extractDocComments(doccomments, range) {
+		var start = 0, end = 0, i, docStart, docEnd;
+		for (i = 0; i < doccomments.length; i++) {
+			docStart = doccomments[i].range[0];
+			docEnd = doccomments[i].range[1];
+			if (!isBefore(docStart, range) || !isBefore(docEnd, range)) {
+				break;
+			}
+		}
+
+		if (i < doccomments.length) {
+			start = i;
+			for (i = i; i < doccomments.length; i++) {
+				docStart = doccomments[i].range[0];
+				docEnd = doccomments[i].range[1];
+				if (!inRange(docStart, range, true) || !inRange(docEnd, range, true)) {
+					break;
+				}
+			}
+			end = i;
+		}
+
+		return doccomments.splice(start, end-start);
+	}
 
 	/**
 	 * This function takes the current AST node and does the first inferencing step for it.
@@ -927,6 +958,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		case "Program":
 			if (env.defer) {
 				// finally, we can infer the deferred target function
+
+				// now use the comments that we deferred until later
+				env.comments = env.deferredComments;
+
 				var defer = env.defer;
 				env.defer = null;
 				env.targetType = null;
@@ -2214,6 +2249,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					var environment = createEnvironment({ buffer: buffer, uid : "local", offset : offset, indexer : this.indexer, globalObjName : findGlobalObject(root.comments, this.lintOptions), comments : root.comments });
 					// must defer inferring the containing function block until the end
 					environment.defer = completionKind.toDefer;
+					if (environment.defer) {
+						// remove these comments from consideration until we are inferring the deferred
+						environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
+					}
 					var target = this._doVisit(root, environment);
 					var proposalsObj = { };
 					createInferredProposals(target, environment, completionKind.kind, context.prefix, offset - context.prefix.length, proposalsObj);
@@ -2301,6 +2340,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				delete environment.defer;
 			}
 
+			if (environment.defer) {
+				// remove these comments from consideration until we are inferring the deferred
+				environment.deferredComments = extractDocComments(environment.comments, environment.defer.range);
+			}
 
 			var target = this._doVisit(root, environment);
 			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';

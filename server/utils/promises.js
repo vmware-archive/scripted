@@ -154,7 +154,22 @@
 			return until(array, pred);
 		}
 
+		/**
+		 * Apply boolean negation operator to a promise's resolve value. Rejections do not
+		 * count as false. I.e: conceptually:
+		 *
+		 *  not(false) => true
+		 *  not(true) => false
+		 *  not(error) => error
+		 */
+		function not(p) {
+			return when(p, function (v) {
+				return !v;
+			});
+		}
+
 		return {
+			not: not,
 			until: until,
 			orMap: until, // just another name I like to use.
 			or:	or,

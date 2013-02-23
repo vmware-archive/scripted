@@ -541,5 +541,94 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
+	tests.testFullFileJSDoc1 = function() {
+		var contents =
+			"var a = function() {\n" +
+		    "    return {\n" +
+		    "        /**\n" +
+		    "         * Returns editor's content\n" +
+		    "         * @return {String}\n" +
+		    "         */\n" +
+		    "        getContent: function() {}" +
+		    "    };\n" +
+			"};\n" +
+			"function a() {}";
+		doSameFileTest(
+			contents, "getContent",
+			"?String:","getContent : () ⇒ String", 0,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
+	};
+
+	tests.testFullFileJSDoc2 = function() {
+		var contents =
+			"var a = function() {\n" +
+		    "    return {\n" +
+		    "        before: function() {}," +
+		    "        /**\n" +
+		    "         * Returns editor's content\n" +
+		    "         * @return {String}\n" +
+		    "         */\n" +
+		    "        getContent: function() {}" +
+		    "    };\n" +
+			"};\n" +
+			"function a() {}";
+		doSameFileTest(
+			contents, "getContent",
+			"?String:","getContent : () ⇒ String", 0,
+			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
+	};
+
+	tests.testFullFileJSDoc3 = function() {
+		var contents =
+			"var a = function() {\n" +
+		    "    return {\n" +
+		    "        /**\n" +
+		    "         * nuthin\n" +
+		    "         */\n" +
+		    "        before: function() {}," +
+		    "        /**\n" +
+		    "         * Returns editor's content\n" +
+		    "         * @return {String}\n" +
+		    "         */\n" +
+		    "        getContent: function() {}," +
+		    "        /**\n" +
+		    "         * nuthin\n" +
+		    "         */\n" +
+		    "        after: function() {}" +
+		    "    };\n" +
+			"};\n" +
+		    "/**\n" +
+		    " * nuthin\n" +
+		    " */\n" +
+			"function a() {}";
+		doSameFileTest(
+			contents, "getContent",
+			"?String:","getContent : () ⇒ String", 0,
+			[contents.indexOf("/**", contents.indexOf("before")), contents.indexOf("*/", contents.indexOf("before"))+2]);
+	};
+	tests.testFullFileJSDoc4 = function() {
+		var contents =
+			"var a = function() {\n" +
+		    "    return {\n" +
+		    "        /**\n" +
+		    "         * nuthin\n" +
+		    "         */\n" +
+		    "        before: function() {}," +
+		    "        /**\n" +
+		    "         * Returns editor's content\n" +
+		    "         * @return {String}\n" +
+		    "         */\n" +
+		    "        getContent: function() {}" +
+		    "    };\n" +
+			"};\n" +
+		    "/**\n" +
+		    " * nuthin\n" +
+		    " */\n" +
+			"function a() {}";
+		doSameFileTest(
+			contents, "getContent",
+			"?String:","getContent : () ⇒ String", 0,
+			[contents.indexOf("/**", contents.indexOf("before")), contents.indexOf("*/", contents.indexOf("before"))+2]);
+	};
 	return tests;
 });

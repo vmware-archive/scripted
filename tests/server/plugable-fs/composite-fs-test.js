@@ -644,10 +644,457 @@ exports.readdirMergedShadowed = function (test) {
 	});
 };
 
+////////////////////////////////////////////////
+// unlink (aka 'delete file' )
+////////////////////////////////////////////////
+
+//Test most basic scenario: a file exists on only one subfs, it unlinks succesfully.
+exports.unlinkSingleFile = function (test) {
+
+	//Create three file systems with a DIFFERENT file on each.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		fs.file('/shared/'+name+'.txt');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, k) {
+			var file = '/shared/'+name+'.txt';
+			cfs.unlink(file, function (err) {
+				test.ok(!err);
+				if (err && err.stack) {
+					console.log(err.stack);
+				}
+				//Is the file is really gone?
+				cfs.stat(file, function (err, stat) {
+					test.ok(err);
+					if (err) {
+						test.equals('ENOENT', err.code);
+					}
+					k();
+				});
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test that unlink works also when file exists on multiple fss.
+// The most logical semantics is to truly remove the file from the cfs.
+// So it should be removed from all subsfss.
+exports.unlinkMultipleFiles = function (test) {
+	//Create three file systems with a the SAME file on each.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		fs.file('/shared/delete-me.txt');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var file = '/shared/delete-me.txt';
+	cfs.unlink(file, function (err) {
+		test.ok(!err);
+		if (err && err.stack) {
+			console.log(err.stack);
+		}
+		//Is the file is really gone?
+		cfs.stat(file, function (err, stat) {
+			test.ok(err);
+			if (err) {
+				test.equals('ENOENT', err.code);
+			}
+			test.done();
+		});
+	});
+};
+
+//Test that unlink works also when file exists on multiple fss.
+//Variation on the previous test. Now one the fss doesn't have the file.
+exports.unlinkMultipleFiles2 = function (test) {
+	//Create three file systems with a the SAME file on each.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		if (name!=='bar') {
+			fs.file('/shared/delete-me.txt');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var file = '/shared/delete-me.txt';
+	cfs.unlink(file, function (err) {
+		test.ok(!err);
+		if (err && err.stack) {
+			console.log(err.stack);
+		}
+		//Is the file is really gone?
+		cfs.stat(file, function (err, stat) {
+			test.ok(err);
+			if (err) {
+				test.equals('ENOENT', err.code);
+			}
+			test.done();
+		});
+	});
+};
+
+//Test that trying to delete a file that doesn't exist produces
+// expected error.
+exports.unlinkNoExist = function (test) {
+	//Create three file systems with a the SAME file on each.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		fs.file('/shared/delete-me.txt');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var file = '/shared/bogus.txt';
+	cfs.unlink(file, function (err) {
+		test.ok(err);
+		if (err) {
+			//console.log(err);
+			test.equals(err.code, 'ENOENT');
+		}
+		test.done();
+	});
+};
+
+//Test that trying to 'unlink' a directory produces
+// expected error.
+exports.unlinkDir = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.dir('/'+name);
+		if (name==='bar') {
+			//Add some variation by leaving 'bar' dir empty
+		} else {
+			fs.file('/'+name+'/filler.txt');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, k) {
+			//console.log('unlinking '+name);
+			var file = '/'+name;
+			cfs.unlink(file, function (err) {
+				//console.log('unlinking '+name+' => '+err);
+				test.ok(err);
+				if (err) {
+					test.equals('EISDIR', err.code);
+				}
+				k();
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test corner case: if a file exists on the cfs, but it also exist
+//as a 'shadowed' directory on a subfile system then there's no
+//way to legally remove it because:
+//  a) removing just the file will reveal the directory creating the appearance
+//     that the file became a directory.
+//  b) deleting the directory is illegal since unlink is only supposed to delete files.
+//We model this as a 'permissions problem'.
+exports.unlinkFileWithShadowDir = function (test) {
+	var fs1 = new Fs();
+	fs1.file('/delete-me');
+
+	var fs2 = new Fs();
+	fs2.dir('/delete-me'); //Actually can't delete via unlink since its a dir
+
+	var cfs = compose(fs1, fs2);
+
+	cfs.unlink('/delete-me', function (err) {
+		test.ok(err);
+		if (err) {
+			test.equals('EACCES', err.code);
+		}
+		test.done();
+	});
+};
+
+/////////////////////////////////////////
+// rmdir
+/////////////////////////////////////////
+
+//Test most basic scenario: a dir exists on only one subfs, it rmdirs succesfully
+//if it is empty.
+exports.rmdirSingleDir = function (test) {
+
+	//Create three file systems with a DIFFERENT dir
+	//Only one of the dirs is empty.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/'+name);
+		if ('bar'===name) {
+			//leave dir empty
+		} else {
+			fs.file('/'+name+'/'+name+'.txt');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, k) {
+			var dir = '/'+name;
+			cfs.rmdir(dir, function (err) {
+				if (name==='bar') { //bar is empty
+					//Delete should be ok.
+					test.ok(!err);
+					if (err && err.stack) {
+						console.log(err.stack);
+					}
+					//Is the dir really gone?
+					cfs.stat(dir, function (err, stat) {
+						test.ok(err);
+						if (err) {
+							test.equals('ENOENT', err.code);
+						}
+						k();
+					});
+				} else { //not empty dir
+					//Shouldn't allow to delete!
+					test.ok(err);
+					if (err) {
+						test.equals(err.code, 'ENOTEMPTY');
+					}
+					//double check that dir, in fact, was not deleted!
+					cfs.stat(dir, function (err, stat) {
+						test.ok(!err);
+						if (err) {
+							console.log(err);
+						}
+						test.ok(stat);
+						if (stat) {
+							test.ok(stat.isDirectory());
+						}
+						k();
+					});
+				}
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test that rmdir works also when dir exists on multiple fss.
+//The most logical semantics is to truly remove the dir from the cfs.
+//So it should be removed from all subsfss.
+//This of course should only be allowed if the dir is empty on
+//each subfs.
+exports.rmdirMultipleDirs = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/empty-dir');
+		fs.dir('/not-empty-dir');
+		fs.file('/not-empty-dir/'+name+'.txt');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var targets = ['/not-empty-dir', '/empty-dir'];
+	eachk(targets,
+		function (target, next) {
+			cfs.rmdir(target, function (err) {
+				var empty = '/empty-dir' === target;
+				if (empty) {
+					//Should not get an error
+					test.ok(!err);
+					if (err && err.stack) {
+						console.log(err.stack);
+					}
+					//Dir should be removed now
+					cfs.stat(target, function (err, stat) {
+						test.ok(err);
+						test.equals('ENOENT', err.code);
+						next();
+					});
+				} else { //Not empty:
+					//Should get an error
+					test.ok(err);
+					if (err) {
+						test.equals('ENOTEMPTY', err.code);
+					}
+					//The dir should NOT be removed!
+					cfs.stat(target, function (err, stat) {
+						test.ok(!err);
+						test.ok(stat.isDirectory());
+						next();
+					});
+				}
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test that rmdir works also when file exists on multiple fss.
+//Variation on the previous test. Now one the fss doesn't have the dirs.
+exports.rmdirMultipleFiles2 = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		if ('bar'===name) {
+			//Leave empty
+		} else {
+			fs.dir('/empty-dir');
+			fs.dir('/not-empty-dir');
+			fs.file('/not-empty-dir/'+name+'.txt');
+		}
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var targets = ['/not-empty-dir', '/empty-dir'];
+	eachk(targets,
+		function (target, next) {
+			cfs.rmdir(target, function (err) {
+				var empty = '/empty-dir' === target;
+				if (empty) {
+					//Should not get an error
+					test.ok(!err);
+					if (err && err.stack) {
+						console.log(err.stack);
+					}
+					//Dir should be removed now
+					cfs.stat(target, function (err, stat) {
+						test.ok(err);
+						test.equals('ENOENT', err.code);
+						next();
+					});
+				} else { //Not empty:
+					//Should get an error
+					test.ok(err);
+					if (err) {
+						test.equals('ENOTEMPTY', err.code);
+					}
+					//The dir should NOT be removed!
+					cfs.stat(target, function (err, stat) {
+						test.ok(!err);
+						test.ok(stat.isDirectory());
+						next();
+					});
+				}
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test that trying to delete a dir that doesn't exist produces
+// expected error.
+exports.rmdirNoExist = function (test) {
+	//Create three file systems with a the SAME file on each.
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.dir('/shared');
+		fs.file('/shared/delete-me.txt');
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	var file = '/bad/bogus';
+	cfs.rmdir(file, function (err) {
+		test.ok(err);
+		if (err) {
+			//console.log(err);
+			test.equals(err.code, 'ENOENT');
+		}
+		test.done();
+	});
+};
+
+//Test that trying to 'rmdir' a file produces
+// expected error.
+exports.rmdirFile = function (test) {
+	var names = ['foo', 'bar', 'zor'];
+	var fss = names.map(function (name) {
+		var fs = new Fs();
+		fs.toString = function () {
+			return name + '-fs';
+		};
+		fs.file('/'+name);
+		return fs;
+	});
+	var cfs = compose.apply(null, fss);
+
+	eachk(names,
+		function (name, k) {
+			//console.log('rmdiring '+name);
+			var file = '/'+name;
+			cfs.rmdir(file, function (err) {
+				//console.log('rmdiring '+name+' => '+err);
+				test.ok(err);
+				if (err) {
+					test.equals('ENOTDIR', err.code);
+				}
+				k();
+			});
+		},
+		function () {
+			test.done();
+		}
+	);
+};
+
+//Test corner case: if a dir exists on the cfs, but it also exist
+//as a 'shadowed' file on a subfile system then there's no
+//way to legally remove it because: yada yada (see similar explanation with equivalen case in unlink)
+exports.rmdirFileWithShadowDir = function (test) {
+	var fs1 = new Fs();
+	fs1.dir('/delete-me');
+
+	var fs2 = new Fs();
+	fs2.file('/delete-me'); //Actually can't delete via rmdir since its a file
+
+	var cfs = compose(fs1, fs2);
+
+	cfs.rmdir('/delete-me', function (err) {
+		test.ok(err);
+		if (err) {
+			test.equals('EACCES', err.code);
+		}
+		test.done();
+	});
+};
+
+
 //Deselect a bunch of tests
 //for (var property in exports) {
 //	if (exports.hasOwnProperty(property)) {
-//		if (property.indexOf('readdirMerged')>=0) {
+//		if (property.indexOf('rmdirMultipleDirs')>=0) {
 //		} else {
 //			delete exports[property];
 //		}
