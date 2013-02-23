@@ -31,6 +31,8 @@ define(function (require) {
 
 	var annotationManager = require('scripted/editor/annotationManager');
 
+	var EditorAPI = require('scripted/api/editor-wrapper');
+
 	/**
 	 * Create an accessor function to easily navigate a typical JSON like
 	 * configuration object. The function acceps a variable number of arguments,
@@ -106,7 +108,13 @@ define(function (require) {
 		 * @param {{handler:function(Editor),name:?String,global:?Boolean}} spec
 		 */
 		setAction: function (actionID, spec) {
-			actions.setAction(actionID, spec);
+			var spectAdapter = Object.create(spec, {
+				handler : { writable:false, configurable:false, enumerable: true,
+					value: function(editor) {
+						return spec.handler(new EditorAPI(editor));
+				} }
+			});
+			actions.setAction(actionID, spectAdapter);
 		},
 
 		/**

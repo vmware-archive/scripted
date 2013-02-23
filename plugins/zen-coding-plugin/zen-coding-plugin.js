@@ -19,19 +19,16 @@
 define(function(require) {
 	var TAB_POS = "${0}";
 
-	require('jquery');
-	require('zen');
+	var lib = require('./emmet-full');  // TODO consider using emmet-full.min
 
 	var setKeyBinding = require('scripted/api/keybinder').setKeyBinding;
 	var setAction = require('scripted/api/editor-extensions').setAction;
-	var textUtils = require('scripted/utils/textUtils');
-	var editorFeatures = require('orion/editor/editorFeatures');
 
-	var createProxy = function(editor) {
+	var createProxy = function(editorAPI) {
 			return emmet.exec(function(req, _) {
 				var res = req('resources');
 				var utils = req('utils');
-				res.setVariable('indentation', textUtils.indent());
+				res.setVariable('indentation', editorAPI.getIndent());
 				utils.setNewline('\n');
 				return {
 					/**
@@ -41,11 +38,11 @@ define(function(require) {
 					 * to current caret position
 					 * @return {Object}
 					 * @example
-					 * var selection = editor.getSelectionRange();
+					 * var selection = editorAPI.getSelectionRange();
 					 * alert(selection.start + ', ' + selection.end);
 					 */
 					getSelectionRange: function() {
-						var sel = editor.getSelection();
+						var sel = editorAPI.getSelection();
 						return {
 							start: sel.start,
 							end: sel.end
@@ -56,16 +53,16 @@ define(function(require) {
 					 * Creates selection from <code>start</code> to <code>end</code> character
 					 * indexes. If <code>end</code> is ommited, this method should place caret
 					 * and <code>start</code> index
-					 * @param {Number} start
-					 * @param {Number} [end]
+					 * @param Number start
+					 * @param Number end
 					 * @example
-					 * editor.createSelection(10, 40);
+					 * editorAPI.createSelection(10, 40);
 					 *
 					 * //move caret to 15th character
-					 * editor.createSelection(15);
+					 * editorAPI.createSelection(15);
 					 */
 					createSelection: function(start, end) {
-						editor.setSelection(start, end);
+						editorAPI.setSelection(start, end);
 					},
 
 					/**
@@ -73,20 +70,12 @@ define(function(require) {
 					 * and <code>end</code> properties
 					 * @return {Object}
 					 * @example
-					 * var range = editor.getCurrentLineRange();
+					 * var range = editorAPI.getCurrentLineRange();
 					 * alert(range.start + ', ' + range.end);
 					 */
 					getCurrentLineRange: function() {
 						var selStart = this.getCaretPos();
-						var model = editor.getTextView().getModel();
-						var line = model.getLineAtOffset(selStart);
-
-						var result = {
-							start: model.getLineStart(line),
-							end: model.getLineEnd(line)
-						};
-
-						return result;
+						return editorAPI.getCurrentLineRange(selStart);
 					},
 
 					/**
@@ -133,18 +122,27 @@ define(function(require) {
 					 * @param {Number} [end] End index of editor's content
 					 * @param {Boolean} [no_indent] Do not auto indent <code>value</code>
 					 */
-					replaceContent: function(value, start, end, noIndent) {
+					replaceContent: function(value, start, end, no_indent) {
+						if (!start && !end) {
+							start = 0;
+							end = editorAPI.getText().length;
+						}
+						if (!end) {
+							end = start;
+						}
 
-						if (!noIndent) {
-							var leading = textUtils.leadingWhitespace(editor.getTextView().getText(), start);
+						if (!no_indent) {
+							var leading = editorAPI.getLeadingWhitespace(start);
 							var regex = new RegExp('\n', "g");
 							value = value.replace(regex, "\n" + leading);
 						}
-						editor.getTextView().setText(value, start, end);
+
+						value = utils.unescapeText(value);
+						editorAPI.setText(value, start, end);
 
 						var pos = value.indexOf(TAB_POS);
 						if (pos !== -1) {
-							var linkedMode = new editorFeatures.LinkedMode(editor);
+							var linkedMode = editorAPI.createLinkedMode();
 							var linkedModeModel = {
 								groups: []
 							};
@@ -166,13 +164,12 @@ define(function(require) {
 					 * @return {String}
 					 */
 					getContent: function() {
-						return editor.getText();
+						return editorAPI.getText();
 					},
 
 					getSyntax: function() {
-						return editor.getContentType();
+						return editorAPI.getContentType();
 					},
-
 
 					getProfileName: function() {
 						return this.getSyntax();
@@ -186,7 +183,7 @@ define(function(require) {
 					getSelection: function() {
 						var sel = this.getSelectionRange();
 						if (sel) {
-							return editor.getText(sel.start, sel.end);
+							return editorAPI.getText(sel.start, sel.end);
 						}
 						return '';
 					},
@@ -197,7 +194,7 @@ define(function(require) {
 					 * @since 0.65
 					 */
 					getFilePath: function() {
-						return editor.getFilePath();
+						return editorAPI.getFilePath();
 					}
 				};
 			});
@@ -212,19 +209,25 @@ define(function(require) {
 			var r = emmet.require;
 			return r('actions').run(name, [proxy]);
 		} catch (e) {
-			console.warn(e.message);
-			console.warn(e.stack);
+			if (e.constructor.name === 'Error') {
+				console.warn(e.message);
+				console.warn(e.stack);
+			} else {
+				// emmet likes to throw strings
+				console.warn(e);
+			}
 			return false;
 		}
 	}
 
 	function registerEmmetAction(name, key) {
 		var zenName = "Zen " + name;
-		setKeyBinding("Ctrl+Shift+" + key, zenName);
-		setAction('zenCodingPlugin.'+name, {
+		var zenID = 'zenCodingPlugin.' + name;
+		setKeyBinding("Ctrl+Shift+" + key, zenID);
+		setAction(zenID, {
 			name: zenName,
-			handler: function(editor) {
-				runEmmetAction(name, editor);
+			handler: function(editorAPI) {
+				runEmmetAction(name, editorAPI);
 				return false;
 			}
 		});
@@ -240,6 +243,4 @@ define(function(require) {
 	registerEmmetAction("select_next_item", ++i);
 	registerEmmetAction("select_previous_item", ++i);
 	registerEmmetAction("split_join_tag", ++i);
-
-	console.log('Zen Coding Plugin Loaded');
 });

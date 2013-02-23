@@ -1,0 +1,9 @@
+{	
+	"name": "zen-coding-plugin",
+	"version": "0.9",
+	"description": "A Scripted plugin that adds Zen Coding (aka emmet) support to the editor. For more information on emmet, see http://emmet.io",
+	"main": "zen-coding-plugin",
+	"scripted": {
+		"plugin": true
+	}
+}
