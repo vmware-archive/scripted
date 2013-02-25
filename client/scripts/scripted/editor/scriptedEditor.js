@@ -452,6 +452,7 @@ define([
 			editor.getTextView().addKeyPressHandler(new ExtendedEditorFeatures(editor));
 
 			// added after ExtendedEditorFeatures so it has priority:
+			/*
 			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F7'), "Toggle VI mode");
 			editor.getTextView().setAction("Toggle VI mode",function() {
 				var vimode = editor.vimode;
@@ -469,6 +470,7 @@ define([
 				}
 				return true;
 			},"Toggle VI mode");
+			*/
 
 
 			// No keybinding by default
