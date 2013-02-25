@@ -46,6 +46,7 @@ var filesystem = scriptedFs.configure(corefs, {
 });
 
 var server=require('../server/scriptedServer.js').start(filesystem, {
-	port: 8123
+	port: 8123,
+	cloudfoundry: true //Enables some customization for the cf deployed scripted 'showroom' app.
 });
 

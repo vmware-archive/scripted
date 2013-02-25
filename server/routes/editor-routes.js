@@ -20,7 +20,12 @@ var pathResolve = require('../jsdepend/utils').pathResolve;
 var EDITOR_HTML = pathResolve(__dirname, '../../client/editor.html');
 
 exports.install = function (app, filesystem) {
+
 	var getUserHome = filesystem.getUserHome;
+
+	app.get('/', function (req, res) {
+		res.redirect('/editor'+getUserHome());
+	});
 
 	function sendEditor(req, res) {
 		res.header('Content-Type', 'text/html');
@@ -30,6 +35,7 @@ exports.install = function (app, filesystem) {
 
 	app.get('/editor', sendEditor);
 	app.get('/editor/:path(*)', sendEditor);
+
 	app.get('/', function (req, res) {
 		res.redirect('/editor'+getUserHome());
 	});

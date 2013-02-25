@@ -19,6 +19,7 @@
 function configure(filesystem, options) {
 
 	var port = (options && options.port) || 7261;
+	var isCloudfoundry = (options && options.cloudfoundry);
 
 	var express = require('express');
 	var pathResolve = require('path').resolve;
@@ -48,6 +49,7 @@ function configure(filesystem, options) {
 
 		app.configure(function() {
 			app.use(express.json());
+			app.use(express.cookieParser());
 			app.use(app.router);
 			app.use(onRequest); // bridge to 'servlets', we should remove over time
 			app.use(express['static'](pathResolve(__dirname, '../client'), { maxAge: 6e5 }));
@@ -59,6 +61,10 @@ function configure(filesystem, options) {
 
 		require('./servlets/status').install(app);
 
+
+		if (isCloudfoundry) {
+			require('./routes/cloudfoundry-routes.js').install(app, filesystem);
+		}
 		require('./routes/editor-routes').install(app, filesystem);
 		require('./routes/test-routes').install(app);
 		require('./routes/config-routes').install(app, filesystem);

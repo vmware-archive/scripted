@@ -35,9 +35,11 @@ var nodeNatives = require('../jsdepend/node-natives');
 		//  provider.
 
 var when = require('when');
+var each = require('../utils/promises');
 var utils = require('../jsdepend/utils');
 
 var pathNormalize = utils.pathNormalize;
+var pathJoin = utils.pathJoin;
 var pathResolve = utils.pathResolve;
 var startsWith = utils.startsWith;
 
@@ -272,7 +274,6 @@ function configure(fs, options) {
 		};
 	}
 
-
 	function listFiles(handle, callback, errback) {
 		var d;
 		if (!callback) {
@@ -401,6 +402,58 @@ function configure(fs, options) {
 		return fs_createReadStream(file, { encoding: encoding});
 	}
 
+	/**
+	 * Recursively copy the contents of a source directory to a target directory.
+	 * If the target directory does not yet exists then it will be created.
+	 *
+	 * @return {Promise.Void} Resolves when copy succesfully completed.
+	 */
+	function copyDir(source, target) {
+
+		//Actually, despite the name, internally this function also works for
+		// copying files. That actually makes it easier to recurse onto itself.
+
+		/**
+		 * Make sure target dir exists, create if needed.
+		 */
+		function createDir(target) {
+			return isDirectory(target).then(function (isDir) {
+				if (!isDir) {
+					return mkdir(target);
+				}
+				//else: already exists notthing to do.
+			});
+		}
+
+		return stat(source).then(function (sourceStat) {
+			if (sourceStat.isDirectory) {
+				return createDir(target).then(function () {
+					return listFiles(source).then(function (names) {
+						return when.map(names, function (name) {
+							var sourceChild = pathJoin(source, name);
+							var targetChild = pathJoin(target, name);
+							return copyDir(sourceChild, targetChild);
+						});
+					});
+				});
+			} else if (sourceStat.isFile) {
+				return getContents(source).then(function (contents) {
+					return putContents(target, contents);
+				});
+			} else {
+				//Not sure what that is, ignore!
+			}
+		});
+	}
+
+	function exists(handle) {
+		return stat(handle).then(function () {
+			return true;
+		}, function (err) {
+			return err && err.code ==- 'ENOENT';
+		});
+	}
+
 	return {
 		getUserHome:  getUserHome, //TODO: does this really belong in here?
 		getScriptedHome: getScriptedHome, //TODO: does this really belong in here?
@@ -414,8 +467,10 @@ function configure(fs, options) {
 		rename:       rename,
 		stat:         stat,
 		mkdir:        mkdir,
+		exists: exists,
 		deleteResource: deleteResource,
-		createReadStream: createReadStream
+		createReadStream: createReadStream,
+		copyDir: copyDir
 	};
 }
 
