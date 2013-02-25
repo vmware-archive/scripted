@@ -171,8 +171,10 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			for (var k=0;k<this._keyModes.length;k++) {
 				if (this._keyModes[k]===keyMode) {
 					this._keyModes.splice(k,1);
+					return true;
 				}
 			}
+			return false;
 		},
 
 		/**

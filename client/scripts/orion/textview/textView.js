@@ -2712,6 +2712,19 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_handleKeyDown: function (e) {
+			console.log("xx keydown");
+			if (this._keyPressHandlers) {
+				for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
+					if (this._keyPressHandlers[kph].passthrough()) {
+						return true;
+					}
+//					var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
+//					if (handled) {
+//						if (e.preventDefault) { e.preventDefault(); }
+//						return false;
+//					}
+				}
+			}
 			var modifier = false;
 			switch (e.keyCode) {
 				case 16: /* Shift */
@@ -2778,15 +2791,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_handleKeyPress: function (e) {
-			if (this._keyPressHandlers) {
-				for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
-					var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
-					if (handled) {
-						if (e.preventDefault) { e.preventDefault(); }
-						return false;
-					}
-				}
-			}
+			console.log("xx keypress");
+//			if (this._keyPressHandlers) {
+//				for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
+//					var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
+//					if (handled) {
+//						if (e.preventDefault) { e.preventDefault(); }
+//						return false;
+//					}
+//				}
+//			}
 			/*
 			* Feature in Embedded WebKit.  Embedded WekKit on Mac runs in compatibility mode and
 			* generates key press events for these Unicode values (Function keys).  This does not

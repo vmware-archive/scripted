@@ -135,6 +135,10 @@ define([
     // - auto unindent when closing } on a whitespace only line
     
     ExtendedEditorFeatures.prototype = {
+		passthrough: function() {
+	return false;
+},
+
 		_endsWith: function(string, suffix) {
 			if (string.length>suffix.length) {
 				if (string.substring(string.length-suffix.length)===suffix) {
@@ -212,14 +216,58 @@ define([
      * ...
      * Persist on/off setting in storage (like navigator F2 toggle)
      * Configurable via .scripted
+     *
+     * more gotcha's:
+     * - should apply to all editors, currently as a toggle it only toggles the one you are in
+     * - interplay with other dialog cancelling actions (infile search cancel)
+     * - two char line separators
      */
     function ViMode(editor) {
 		this.editor = editor;
+		this.tv = editor.getTextView();
+		this.m = editor.getModel();
+		this.buffer = [];
 		this.mode = 0; // 0=command 1=insert
     }
     
     ViMode.prototype = {
 		// http://hea-www.harvard.edu/~fine/Tech/vi.html
+
+		// keyMode related functions
+		isActive: function() {
+//			console.log("active check!");
+			return true;
+		},
+		enter: function() {
+			console.log("enter");
+			return (this.mode===0);
+		},
+		cancel: function() {
+			this.buffer = [];
+			console.log("cancel");
+			// revert to command mode
+			this.mode = 0;
+			$('#status_mode').empty();
+			$('#status_mode').append(document.createTextNode("vi mode: "+this.getMode()));
+			return true;
+		},
+		tab: function() {
+			console.log("tab");
+			return false;
+		},
+		lineUp: function() {
+			return false;
+		},
+		lineDown: function() {
+			return false;
+		},
+		
+
+
+		passthrough: function() {
+			return true;
+		},
+		
 
 		getMode: function() {
 			if (this.mode===0) { return "command"; } else { return "insert"; }
@@ -227,37 +275,88 @@ define([
 		actionMoveLeft: function() {
 //			this.editor.getTextView()
 		},
+		setMode: function(newMode) {
+			this.mode = newMode;
+			$('#status_mode').empty();
+			$('#status_mode').append(document.createTextNode("vi mode: "+this.getMode()));
+		},
+		
+		// Commands implemented, with notes:
+		// G - goto line.
 
 		handleKeyPress: function(e) {
 			var key = (e.charCode !== undefined ? e.charCode : e.keyCode);
+			// if in insert mode, don't intercept the key, let it do what it was going to do
+			if (this.mode === 1) {
+				return false;
+			}
 			console.log("keycode is "+key);
-//			if (mode === 1) {
-//				return false;
-//			}
 			if (key > 31) {
 				var ch = String.fromCharCode(key); // TODO use keycode directly?
-				
-//				switch (ch) {
-//					case 'h': // Move left one char
-//						this.actionMoveLeft();
-//						return true;
-//					case 'j': // Move down one line
-//						this.actionMoveDownLine();
-//						return true;
-//					case 'k': // Move up one line
-//						this.actionMoveUpLine();
-//						return true;
-//					case 'l': // Move right one char
-//						this.actionMoveRight();
-//						return true;
+				switch (ch) {
+					case 'i': // insert mode
+						// TODO allow for repeat numbers
+						this.setMode(1);
+						break;
+					case 'I': // insert at start of line
+						this.mode = 1;
+						var edline = this.m.getLineAtOffset(this.editor.getCaretOffset());
+						this.editor.onGotoLine(edline,0);
+						break;
+					case '^': // jump to start of line
+					case '0':
+						var caret = this.editor.getCaretOffset();
+						var edline = this.m.getLineAtOffset(caret);
+						this.editor.onGotoLine(edline,0);
+						break;
+					case '$': // jump to end of line
+						var caret = this.editor.getCaretOffset();
+						var edline = this.m.getLineAtOffset(caret);
+						this.tv.setCaretOffset(this.m.getLineEnd(edline,true)-1,true);
+						break;
+					case 'G': // goto line
+						var line;
+						if (this.buffer.length===0) {
+							line = this.m.getLineCount();
+						} else {
+							line = parseInt(this.buffer.join(""),10);
+						}
+						this.buffer=[];
+						this.editor.onGotoLine(line-1,0);
+						break;
+					case 'h': // Move left one char
+						var caret = this.editor.getCaretOffset();
+						var edline = this.m.getLineAtOffset(caret);
+						var lineStart = this.m.getLineStart(edline);
+						var column = caret-lineStart;
+						if (column>0) {
+							this.editor.getTextView().invokeAction("charPrevious");
+						}
+						break;
+					case 'j': // Move down one line
+						this.tv.invokeAction("lineDown");
+						break;
+					case 'k': // Move up one line
+						this.tv.invokeAction("lineUp");
+						break;
+					case 'l': // Move right one char
+						var caret = this.editor.getCaretOffset();
+						var edline = this.m.getLineAtOffset(caret);
+						var lineEnd = this.m.getLineEnd(edline,true);
+						var lineStart = this.m.getLineStart(edline);
+						var column = caret-lineStart;
+						if (column<(lineEnd-lineStart-1)) {
+							this.editor.getTextView().invokeAction("charNext");
+						}
+						break;
 //
-//					default:
-//					return false;
-//				}
+					default:
+						this.buffer.push(ch);
+				}
 				console.log("press for "+String.fromCharCode(key));
 //					this._doContent(String.fromCharCode (key));
 			}
-			return false;
+			return true;
 		}
     };
     
@@ -447,14 +546,16 @@ define([
 				if (vimode) {
 					console.log("vi mode OFF");
 					$('#status_mode').empty();
-					var b = editor.getTextView().removeKeyPressHandler(editor.vimode);
+					var b  = editor.getTextView().removeKeyPressHandler(editor.vimode);
+					var b2 = editor.removeKeyMode(editor.vimode);
 					editor.vimode = null;
-					console.log("removed it?"+b);
+					console.log("removed kphandler?"+b+" removed km?"+b2);
 				} else {
 					console.log("vi mode ON");
 					editor.vimode = new ViMode(editor);
 					$('#status_mode').append(document.createTextNode("vi mode: "+editor.vimode.getMode()));
 					editor.getTextView().addKeyPressHandler(editor.vimode);
+					editor.pushKeyMode(editor.vimode);
 				}
 				return true;
 			},"Toggle VI mode");
