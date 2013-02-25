@@ -22,6 +22,8 @@ var pathJoin = utils.pathJoin;
 var nodefs = require('fs');
 var noExistError = require('./fs-errors').noExistError;
 
+var bindProperties = require('../utils/bind').bindProperties;
+
 /**
  * Create a filesystem mapped to a subdirectory of another filesystem.
  */
@@ -206,17 +208,6 @@ function configure(options) {
 		};
 	}
 
-	function bind(exports, self) {
-		var bound = {};
-		for (var p in exports) {
-			if (exports.hasOwnProperty(p)) {
-				var f = exports[p];
-				bound[p] = (typeof(exports[p]) === 'function') ? f.bind(self) : f;
-			}
-		}
-		return bound;
-	}
-
 	var prebindExports = {
 		stat: convertArg(fs.stat, 0),
 		unlink: convertArg(fs.unlink, 0),
@@ -230,7 +221,7 @@ function configure(options) {
 		handle2file: compose(fs_handle2file, handle2file),
 		file2handle: compose(file2handle, fs_file2handle)
 	};
-	return bind(prebindExports, fs);
+	return bindProperties(prebindExports, fs);
 }
 
 exports.configure = configure;
