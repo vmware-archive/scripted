@@ -121,7 +121,7 @@ define([
         }
         return false;
     }
-    
+
     function ExtendedEditorFeatures(editor) {
 		this.editor = editor;
 		// TODO make initing these a one off?
@@ -129,11 +129,11 @@ define([
 			this.unindent_after_close_curly = scripted.config.editor.unindent_after_close_curly;
 		}
     }
-    
+
     // EditorExtras - this string marks the changes through the code for editor 'smarts'
     // - auto indent when pressing return after {
     // - auto unindent when closing } on a whitespace only line
-    
+
     ExtendedEditorFeatures.prototype = {
 		_endsWith: function(string, suffix) {
 			if (string.length>suffix.length) {
@@ -154,6 +154,15 @@ define([
 		},
 		_isWhitespace: function(char) {
 			return char===' ' || char==='\t';
+		},
+		_posOfFirstNonwhitespace: function(linetext) {
+			for (var i=0;i<linetext.length;i++) {
+				var ch = linetext.charAt(i);
+				if (ch!==' ' && ch!=='\t') {
+					return i;
+				}
+			}
+			return -1;
 		},
 		handleKeyPress: function(e) {
 			var key = (e.charCode !== undefined ? e.charCode : e.keyCode);
@@ -176,20 +185,22 @@ define([
 							if (this._endsWith(linetext,tabtext)) {
 								// check the previous line
 								var unindent = false;
-								
+
 								var previouslinetext=model.getLine(lineNum-1,false);
 								var previouslinelength = previouslinetext.length;
 								// If the line before starts with the same amount of whitespace, probably worth unindenting:
 								if (previouslinelength>linetext.length && previouslinetext.indexOf(linetext)===0 &&
-									!this._isWhitespace(previouslinetext.charAt(linetext.length))) {
+									!this._isWhitespace(previouslinetext.charAt(linetext.length)) &&
+									previouslinetext.charAt(previouslinetext.length-1)!=='{') {
 									unindent = true;
 								}
 								// if the line before ends with a '{' unindent
-								if (previouslinelength>0 && previouslinetext.charAt(previouslinetext.length-1)==='{') {
+								if (previouslinelength>0 && previouslinetext.charAt(previouslinetext.length-1)==='{' &&
+									linetext.length>this._posOfFirstNonwhitespace(previouslinetext)) {
 									unindent = true;
 									// TODO unindent to same level?
 								}
-								
+
 								if (unindent) {
 									// replace the 'tab' with the '}' and be done.
 									textview._modifyContent({text: '}', start: selection.start-tabtext.length, end: selection.end, _ignoreDOMSelection: true}, true);
@@ -203,7 +214,7 @@ define([
 			return false;
 		}
     };
-        
+
     /* Beginnings of vi mode, plan of attack
      * Function key to toggle it on/off
      * Intercept keys of interest, keypresses handled here, how to route ESC in here?
@@ -217,7 +228,7 @@ define([
 		this.editor = editor;
 		this.mode = 0; // 0=command 1=insert
     }
-    
+
     ViMode.prototype = {
 		// http://hea-www.harvard.edu/~fine/Tech/vi.html
 
@@ -236,7 +247,7 @@ define([
 //			}
 			if (key > 31) {
 				var ch = String.fromCharCode(key); // TODO use keycode directly?
-				
+
 //				switch (ch) {
 //					case 'h': // Move left one char
 //						this.actionMoveLeft();
@@ -260,7 +271,7 @@ define([
 			return false;
 		}
     };
-    
+
 
 
 	var makeEditor = function(domNode, filePath, editorType){
@@ -437,7 +448,7 @@ define([
 				editor.getTextView().invokeAction("Toggle Navigator",false);
 				return true;
 			});
-			
+
 			editor.getTextView().addKeyPressHandler(new ExtendedEditorFeatures(editor));
 
 			// added after ExtendedEditorFeatures so it has priority:
