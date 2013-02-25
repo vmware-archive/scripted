@@ -373,8 +373,14 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 		}
 	};
 
-	// Expand the tree if necessary and highlight the specific file
-	FileExplorer.prototype.highlight = function( /*String*/ fileintree) {
+	/**
+     * Expand the tree if necessary and highlight the specific file. By default it will expand an directory selection, unless explicitly set to false
+     */
+	FileExplorer.prototype.highlight = function( /*String*/ fileintree, expand) {
+       // if expand is not defined, expand by default
+	   if (expand === undefined) {
+	      expand = true;
+	   }
 
 		/*Remove any existing highlights*/
 		var element = $('.highlightrow')[0];
@@ -425,14 +431,21 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			// fileintree = /foo/bar/here/there/file.js
 			var topmostparent = fileintree.substr(root.length + 1); // topmostparent = here/there/file.js
 			var splits = topmostparent.split('/');
-			expandSection(root, splits, 0);
+
+			if (expand === true) {
+			    expandSection(root, splits, 0);
+			}
+
 		} else {
 			$(element).addClass("highlightrow");
 			$(element).removeClass("lightTreeTableRow");
 			$(element).removeClass("darkTreeTableRow");
 			$(element.childNodes[1]).removeClass("secondaryColumn");
 			$(element.childNodes[1]).addClass("secondaryColumnDark");
-			this.renderer.expand(id);
+
+			if (expand === true) {
+                 this.renderer.expand(id);
+			}
 		}
 	};
 
