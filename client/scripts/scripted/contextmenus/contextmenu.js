@@ -38,7 +38,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 		contextEvent) {
 
 			// This handles both the case where a user wants to invoke the context menu action
-			// using a hold right click mousedown and release, as well as left-clicking on the 
+			// using a hold right click mousedown and release, as well as left-clicking on the
 			// context menu action.
 			menuDiv.mouseup(function(event) {
 				clickHandler(menuItem, menuTable, contextEvent);
@@ -119,14 +119,14 @@ function(contextMenuProvider, scriptedLogger, $) {
 			// Handle ESCAPE keypresses on the dialog
 			$(window).on('keyup.' + contextMenuClass, function(e) {
 
-				if (e.keyCode === 27 /*ESCAPE*/) {
+				if (e.keyCode === 27 /*ESCAPE*/ ) {
 					hideContextMenu(contextMenu);
 				}
 			});
 
 			// click listener to the window so that the context menu disappear when clicking
 			// outside the context menu to close it. Note that to prevent the context menu to close when a user is
-			// clicking within the contextmenu, another mousedown event handler is needs to be attached to the 
+			// clicking within the contextmenu, another mousedown event handler is needs to be attached to the
 			// context menu dom node which prevents the mousedown event from propagating.
 			$(window).on('mousedown.' + contextMenuClass, function(e) {
 				hideContextMenu(contextMenu);
@@ -134,7 +134,11 @@ function(contextMenuProvider, scriptedLogger, $) {
 
 		};
 
-	var showContextMenu = function(context, contextMenu, eventContext) {
+	var showContextMenu = function(context, contextMenuProvider) {
+
+			var contextMenu = context.contextMenu;
+			var eventContext = context.eventContext;
+			var nodeToAttach = context.nodeToAttach;
 
 			// Hide existing context menu
 			if (currentContextMenu) {
@@ -149,7 +153,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 			}
 
 			if (contextMenu) {
-				$(context).append(contextMenu);
+				$(nodeToAttach).append(contextMenu);
 			}
 
 			var eventx = eventContext.pageX;
@@ -166,7 +170,9 @@ function(contextMenuProvider, scriptedLogger, $) {
 
 			attachContextMenuEvents(contextMenu);
 
-
+			if (contextMenuProvider && contextMenuProvider.onContextMenuOpen) {
+				contextMenuProvider.onContextMenuOpen(nodeToAttach);
+			}
 		};
 
 	hideContextMenu = function(contextMenu) {
@@ -175,7 +181,7 @@ function(contextMenuProvider, scriptedLogger, $) {
 		}
 		// Remove any event listeners on window
 		$(window).off('keyup.' + contextMenuClass);
-		
+
 		$(window).off('mousedown.' + contextMenuClass);
 	};
 
@@ -206,8 +212,12 @@ function(contextMenuProvider, scriptedLogger, $) {
 						var cmenu = createContextMenu(
 						menus, e);
 						if (cmenu) {
-							showContextMenu(nodeContext, cmenu,
-							e);
+
+							showContextMenu({
+								contextMenu: cmenu,
+								eventContext: e,
+								nodeToAttach: nodeContext
+							}, contextMenuProvider);
 
 							e.preventDefault();
 

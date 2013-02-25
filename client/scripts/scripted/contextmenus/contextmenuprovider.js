@@ -12,9 +12,9 @@
 /*global define window $*/
 
 define(
-['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'scriptedLogger', 'jquery'],
+['scripted/utils/navHistory', 'scripted/contextmenus/resourcesDialogue', 'servlets/filesystem-client', 'scripted/utils/pathUtils', 'scripted/pane/paneFactory', 'scripted/pane/sidePanelManager', 'scripted/utils/pageState', 'scriptedLogger', 'jquery'],
 
-function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager, scriptedLogger) {
+function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFactory, sidePanelManager, pageState, scriptedLogger) {
 
 
 	var loggingCategory = "CONTEXT_MENU";
@@ -83,6 +83,18 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 					};
 				}
 			}
+		}
+	};
+
+
+	/**
+	* This API is used by the context menu to perform some action when the context menu is about to be opened on a context selection
+	*/
+	ExplorerProvider.prototype.onContextMenuOpen = function(nodeContext) {
+		var resourceType = this.getResourceFromContextSelection(nodeContext);
+		if (this.explorer && resourceType && resourceType.location) {
+		       // Highlight but do not expand directory selections
+		       this.explorer.highlight(resourceType.location, false);
 		}
 	};
 
@@ -200,6 +212,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 								}
 
 								navigatorRefreshHandler(promise, mainEditorPathToNavigate, explorer);
+
+							    pageState.removeHistoryEntry(contextResource.location);
 							});
 
 							return promise;
@@ -247,7 +261,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 						}
 						navigatorRefreshHandler(promise, pathToNavigate, explorer);
 
-
+						// Remove the old name from local history
+						pageState.removeHistoryEntry(contextResource.location);
 					});
 					return promise;
 				});
