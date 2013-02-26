@@ -373,6 +373,7 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 		}
 	};
 
+
 	/**
      * Expand the tree if necessary and highlight the specific file. By default it will expand an directory selection, unless explicitly set to false
      */
@@ -401,7 +402,8 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 		var self = this;
 		var id = this.model.getIdFromString(fileintree);
 		this._highlightingId = id;
-		var element = document.getElementById(id);
+
+		element = document.getElementById(id);
 		if (element === null || element === undefined) {
 			var expandSection = function(root, splits, index) {
 				if (index < (splits.length - 1)) {
@@ -442,6 +444,15 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			$(element).removeClass("darkTreeTableRow");
 			$(element.childNodes[1]).removeClass("secondaryColumn");
 			$(element.childNodes[1]).addClass("secondaryColumnDark");
+
+			// Scroll if not visible
+            var currentPosition = $(element).offset();
+
+            var navigatorHeight = $("#navigator-container").height();
+
+            if (navigatorHeight < currentPosition.top) {
+                $("#navigator-container").scrollTop(currentPosition.top);
+            }
 
 			if (expand === true) {
                  this.renderer.expand(id);
