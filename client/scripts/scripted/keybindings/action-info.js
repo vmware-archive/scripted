@@ -280,7 +280,7 @@ define(function (require) {
 	function setEditorAction(editor, actionID, handler) {
 		var tv = editor.getTextView();
 		var action = function() {
-			handler(editor);
+			handler(editor.getScriptedProxy());
 			return true; //stop event propagation.
 		};
 		tv.setAction(actionID, action);
