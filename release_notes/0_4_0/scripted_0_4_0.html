@@ -78,35 +78,89 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
     <tr id="templates">
 		<td class="title">Code template improvements</td>
 		<td class="description">
-		Long winded description of it.
-		</td>
-	</tr>
-
-    <tr id="hover_parameter_types">
-		<td class="title">Tooltip hovers now show function parameter types</td>
-		<td class="description">
-		Long winded description of it.
+		We have improved code templates and snippets in Scripted.  From an end user's point of view, you can select a word in 
+		a JavaScript or HTML file and surround the word with some text.  For example, in a JavaScript file, you can make a selection and press CTRL+Space:
+		
+		<center>
+			<img src="template1.png" border="1" />
+		</center>
+		
+		When you make a selection, the text is surrounded by the text with appropriate indentation:
+		
+		<center>
+			<img src="template2.png" border="1" />
+		</center>
+		
+		This also works in HTML files, where there are many built-in templates:
+		
+		<center>
+			<img src="template3.png" border="1" />
+		</center>
+		
+		And choose the <tt>a</tt> template:
+		
+		<center>
+			<img src="template4.png" border="1" />
+		</center>
+		
+		For more information, including instructions on how to author your own templates, see our 
+		<a href="http://blog.springsource.org/2013/01/22/simple-templates-for-the-scripted-editor/">blog post on it</a>.
 		</td>
 	</tr>
 
     <tr id="hover_jsdoc">
 		<td class="title">Tooltip hovers now show JSdoc</td>
 		<td class="description">
-		Long winded description of it.
+		Hovers on function and variable references and declarations now include JSDoc. A declaration with simple JSDoc attached to it will look like this:
+		<center>
+			<img src="jsdoc2.png" border="1" />
+		</center>
+		
+		And if you have a function, then all of the JSDoc tags will be displayed appropriately.
+		<center>
+			<img src="jsdoc1.png" border="1" />
+		</center>
 		</td>
 	</tr>
+
+    <tr id="hover_parameter_types">
+		<td class="title">Tooltip hovers now show function parameter types</td>
+		<td class="description">
+		Hovers on function references and declarations now include the parameter types.  In the following example, you can see the full type signature for the
+		<tt>performOperation</tt> function:
+		<center>
+			<img src="jsdoc3.png" border="1" />
+		</center>
+		The signature says that the function takes 3 arguments and returns a number. The first two are numbers and the third is an object with a <tt>doit</tt> property that is
+		a function that itself takes two numbers as arguments and returns a number.
+		</td>
+	</tr>
+
 
     <tr id="zencoding">
 		<td class="title">Zencoding/Emmet support</td>
 		<td class="description">
-		Long winded description of it.
+		<a href="http://emmet.io">Emmet (also called Zen Coding)</a> is an editor plugin that supports a greatly improves HTML & CSS workflow.  Scripted now has Emmet support in the editor.
+		The key bindings for Emmet commands are Ctrl+Shift+n, where <em>n</em> is a number from 1-9.  See the complete bindings in the help panel (open by pressing <em>F1</em>)
+		<center>
+			<img src="zen_help_panel.png" border="1" />
+		</center>
+		The Emmet support provides many features.  One of them is expanding snippets into proper HTML.  So, pressing Ctrl+Shift+1 on the following selection:
+		<center>
+			<img src="zen_pre_expand.png" border="1" />
+		</center>
+		will expand the selection into this:
+		<center>
+			<img src="zen_post_expand.png" border="1" />
+		</center>
+		For more information on Emmet, its snippet syntax, and its operations, see <a href="http://docs.emmet.io/">the full documentation</a>.
 		</td>
 	</tr>
 
     <tr id="auto_content_assist">
 		<td class="title">Content assist auto-activation</td>
 		<td class="description">
-		Long winded description of it.
+		Content assist will now auto-activate in JavaScript files after pressing a '.'.
 		</td>
 	</tr>
 
