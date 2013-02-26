@@ -730,7 +730,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		/** @private */
 		getLineStart: function (lineIndex) {
-			if (!this.view._wrapMode || lineIndex === 0) {
+			//SCRIPTED: bugfix for https://github.com/scripted-editor/scripted/issues/234
+			//if (!this.view._wrapMode || lineIndex === 0) {
+			if (!this.view._wrapMode) {
+			//SCRIPTED end
 				return this.view._model.getLineStart(lineIndex);
 			}
 			var rects = this.getClientRects();
@@ -1066,7 +1069,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	}
 
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
-		
+
 		addKeyPressHandler: function (keyPressHandler) {
 			if (!this._keyPressHandlers) {
 				this._keyPressHandlers = [];
