@@ -22,6 +22,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 		$(this._editor).focus();
 //		$(this.activeElement).focus();
 		$(this._bar).off('widthchange.dialog');
+		$(document).off('editorpane.destroy');
 		this.removeCurrentAnnotation();
 	}
 
@@ -396,6 +397,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "text!script
 
 		$(bar).on('widthchange.dialog',function() {
 			that.resize(that.dialog);
+		});
+
+		$(document).on('editorpane.destroy',function(evt,editorPane) {
+			var ourEditor = that._editor === editorPane.editor;
+			// If an editor other than ours is closed, it does not mean this dialog needs to close
+			if (ourEditor) {
+				that.closeDialog();
+			}
 		});
 
 		$(document)
