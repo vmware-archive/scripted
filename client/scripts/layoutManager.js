@@ -185,7 +185,7 @@ function(require, jQuery, jqueryUi, mNavHistory, mPageState, editorUtils, storag
 				editorNode.css('margin-right', side_width);
 
 				if (editorUtils.getMainEditor()) {
-					editorUtils.getMainEditor().getTextView()._update();
+					editorUtils.getMainEditor().getTextView().resize();
 				}
 			});
 

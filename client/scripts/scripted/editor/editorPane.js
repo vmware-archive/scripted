@@ -438,6 +438,7 @@ function(mKeybinder, mEditor, mPaneFactory, mNavHistory, mKeyBinding, mPageState
 				$('.subeditor_switch').off('click.' + this.evtName, mNavHistory.switchEditors);
 				$('.subeditor_wrapper').remove();
 			}
+			$(document).trigger('editorpane.destroy',this);
 		},
 		/**
 		 * Pane API

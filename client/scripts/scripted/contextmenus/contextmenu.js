@@ -97,21 +97,43 @@ function(contextMenuProvider, scriptedLogger, $) {
 		};
 
 
+	/**
+	 * Part with context is the editor part where the context menu was invoked. It's not necessarily a node within the part, but the entire part (example: the navigator)
+	 */
+	var getPosition = function(absoluteMouseClickPosition, partWithContextMenu, contextMenu) {
+			var contextMenuX = absoluteMouseClickPosition.clickX;
+			var contextMenuY = absoluteMouseClickPosition.clickY;
 
-	var getPosition = function(clickX, clickY, relativeToContextID) {
-			var x = clickX;
-			var y = clickY;
+			if (partWithContextMenu && $(partWithContextMenu).size() > 0) {
 
-			if (relativeToContextID && $(relativeToContextID).size() > 0) {
-				var contextOffset = $(relativeToContextID).offset();
-				// Take into account the context and position to the right of the mouse click
-				x += contextOffset.left;
+				// This is the offset of the part relative to the document. Therefore if there are any offsets, it should be taken
+				// into account when positioning the context menu, as the mouse events are not relative to the part where the event occured, but
+				// relative to the document
+				var partOffset = $(partWithContextMenu).offset();
 
-				y -= contextOffset.top;
+                // Needed to determine if there is enough space to show the context menu to the immediate bottom of the click event.
+				var contextMenuHeight = $(contextMenu).height();
+				var partHeight = $(partWithContextMenu).height();
+
+
+				// Take into account the part offset and position to the right of the mouse click
+				contextMenuX += partOffset.left;
+
+				// as the mouse y click event is relative to the entire document, not the part, subtract any offset for the part, because the context menu is positioned relative to
+				// the part, yet it should be positioned at the mouse click event.
+				contextMenuY -= partOffset.top;
+
+				// Position context menu to the immediate bottom of the mouse y click, if there is enough space to show the context menu.
+				// Otherwise position to the immediate top of the y click.
+				var remainingSpace = partHeight - contextMenuY;
+				if (remainingSpace < contextMenuHeight) {
+					contextMenuY -= contextMenuHeight;
+				}
+
 			}
 			return {
-				'x': x,
-				'y': y
+				'x': contextMenuX,
+				'y': contextMenuY
 			};
 		};
 
@@ -160,7 +182,10 @@ function(contextMenuProvider, scriptedLogger, $) {
 			var eventy = eventContext.pageY;
 
 			// TODO: Hardcoded navigator wrapper as the context for now. Refactor when context menus should be more general
-			var position = getPosition(eventx, eventy, "#navigator-wrapper");
+			var position = getPosition({
+				clickX: eventx,
+				clickY: eventy
+			}, "#navigator-wrapper", contextMenu);
 
 			// reposition context menu based on mouse click
 			contextMenu.css({

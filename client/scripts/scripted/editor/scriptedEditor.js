@@ -177,6 +177,12 @@ define([
 				var editor = this.editor;
 				var textview = editor.getTextView();
 				var selection = editor.getSelection();
+
+				// TODO think about using the styler for bracket searching
+//				var styler = editor.getTextStyler();
+//				console.log("styler "+styler);
+
+
 				if (selection.start===selection.end) {
 					var model = editor.getModel();
 					var caretPos = editor.getCaretOffset();
@@ -629,6 +635,10 @@ define([
 				}
 			},
 
+			getTextStyler: function() {
+				return this.styler;
+			},
+
 			highlight: function(path, editor) {
 				if (this.styler) {
 					this.styler.destroy();
@@ -761,6 +771,10 @@ define([
 			// NEWEDITOR - doesn't have highlightAnnotations
 			// editor.highlightAnnotations();
 			postSave(text);
+		};
+
+		editor.getTextStyler = function () {
+			return syntaxHighlighter.getTextStyler();
 		};
 
 		editor.findDefinition = function(offset) {
