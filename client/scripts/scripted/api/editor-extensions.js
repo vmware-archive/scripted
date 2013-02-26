@@ -11,7 +11,7 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  ******************************************************************************/
 
-/*global define window require console */
+/*global define window require console document */
 
 //
 // This is meant to be or become a 'nice' and easy to use

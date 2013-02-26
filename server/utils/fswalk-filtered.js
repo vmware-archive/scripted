@@ -39,7 +39,7 @@ function configure(filesystem) {
 			var ignoreGlob = null;
 			if (ignorePatterns) {
 				ignoreGlob = glob.fromJson(ignorePatterns, conf.fsroot);
-				console.log('ignore glob for fswalk: \n'+ignoreGlob);
+				//console.log('ignore glob for fswalk: \n'+ignoreGlob);
 				walkerConf = extend(filesystem, {
 					ignorePath: function (path) {
 						return ignoreGlob.test(path);
