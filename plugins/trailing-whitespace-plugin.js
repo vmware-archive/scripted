@@ -28,10 +28,12 @@ define(function(require) {
 		return text.replace(/[ \t][ \t]*$/gm, "");
 
 	}
-	editorApi.addSaveTransform(function (text, filePath, config) {
-		var enabled = config('plugins', 'trailing-whitespace');
+	editorApi.addSaveTransform(function (editor) {
+		var text = editor.getText();
+		var enabled = editor.getConfig('plugins.trailing-whitespace');
+		var filePath = editor.getFilePath();
 		//console.log('whitespace-plugin: '+enabled);
-		if (enabled) {
+		if (enabled && filePath) {
 			//console.log('Trailing ws removal on: '+filePath);
 			if (/.*\.js$/.test(filePath)) { //Only .js files
 				return trimLines(text);

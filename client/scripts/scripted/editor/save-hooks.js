@@ -8,7 +8,7 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Kris De Volder
+ *   Kris De Volder
  ******************************************************************************/
 
 /*global define*/
@@ -27,6 +27,22 @@ define(function(require) {
 	//var sequence = require('when/sequence');
 
 	var preSaveHandlers = [];
+	var isSorted = false; //Tracks whether the preSaveHandlers have already been sorted
+						// based on priority.
+
+	/**
+	 * Ensures that handlers are sorted according to their numeric priority.
+	 */
+	function sort() {
+		if (!isSorted) {
+			preSaveHandlers.sort(function (a, b) {
+				var ap = a.priority || 0;
+				var bp = b.priority || 0;
+				return bp - ap;
+			});
+			isSorted = true;
+		}
+	}
 
 	/**
 	 * This function should be called by the editor just before it is going to save
@@ -35,7 +51,8 @@ define(function(require) {
 	 * If it returns a rejected promise or throws an exception then the editor should abort the save
 	 * and display some type of error message somewhere.
 	 */
-	function preSaveHook(editor, filePath) {
+	function preSaveHook(editor) {
+		sort();
 
 		//Call each of the handlers one by one in sequence until one of them
 		//rejects. The preSaveHook returns a promise that rejects if any
@@ -44,7 +61,7 @@ define(function(require) {
 			function (acc, handler, i) {
 				return when(acc, function () {
 					//console.log('handle index: '+i);
-					return handler(editor, filePath);
+					return handler(editor, editor.getFilePath());
 				});
 			},
 			true //IMPORTANT: may be anything except undefined...
@@ -53,6 +70,11 @@ define(function(require) {
 	}
 
 	function onPreSave(handler) {
+	    if (typeof(handler)!=='function') {
+	        console.trace('onPreSave handler is not a function: '+handler);
+	        return;
+	    }
+		isSorted = false; // handlers may no longer be sorted.
 		preSaveHandlers.push(handler);
 	}
 

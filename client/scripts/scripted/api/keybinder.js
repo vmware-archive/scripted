@@ -41,6 +41,7 @@ define(function(require){
 	 * @param {String} actionID
 	 */
 	function setKeyBinding(keystroke, actionID) {
+		//console.log('setKeybinding: '+keystroke + ' => ' +actionID );
 		keybinder.setPluginKeyBinding(keystroke, actionID);
 	}
 

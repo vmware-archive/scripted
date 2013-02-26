@@ -15,6 +15,7 @@ var when = require('when');
 var endsWith = require('../jsdepend/utils').endsWith;
 var each = require('../utils/promises').each;
 var pathResolve = require('../jsdepend/utils').pathResolve;
+var deref = require('../jsdepend/utils').deref;
 
 /**
  * Creates an instance of the plugin-discovery api. Requires a config object
@@ -61,27 +62,29 @@ function configure(filesystem) {
 						if (isDir) {
 							var pkgJsonFile = pathResolve(path, 'package.json');
 							return parseJsonFile(pkgJsonFile).then(function (pkgJson) {
-								var mainName = (pkgJson && pkgJson.main) || 'index';
-								//The main we wanna return is actually relative to
-								//the 'webroot' rather than the filesystem.
-								//So beware:
-								var mainPath = pathResolve(SCRIPTED_PLUGINS_WEB_PATH,
-									name + '/' + mainName
-								);
+								if (deref(pkgJson, ['scripted', 'plugin'])) {
+									var mainName = (pkgJson && pkgJson.main) || 'index';
+									//The main we wanna return is actually relative to
+									//the 'webroot' rather than the filesystem.
+									//So beware:
+									var mainPath = pathResolve(SCRIPTED_PLUGINS_WEB_PATH,
+										name + '/' + mainName
+									);
 
-								//TODO: This isn't quite correct. But it should work
-								// in most cases. The correct thing to do would be
-								// to tell the plugin loader how to map the paths
-								// via an additional 'packages' declaration for
-								// requirejs.config. I.e. instead of giving just
-								// the path to the 'main' file it should
-								// give a 'location' and a 'main' as separate entries
-								// and then its upto the client-side plugin loader
-								// to configure requirejs with that info.
-								allPlugins.push({
-									name: name,
-									path: mainPath
-								});
+									//TODO: This isn't quite correct. But it should work
+									// in most cases. The correct thing to do would be
+									// to tell the plugin loader how to map the paths
+									// via an additional 'packages' declaration for
+									// requirejs.config. I.e. instead of giving just
+									// the path to the 'main' file it should
+									// give a 'location' and a 'main' as separate entries
+									// and then its upto the client-side plugin loader
+									// to configure requirejs with that info.
+									allPlugins.push({
+										name: name,
+										path: mainPath
+									});
+								}
 							});
 						}
 					});

@@ -1,9 +1,9 @@
 {	
-	"name": "marker-adding-plugin",
+	"name": "annotation-adding-plugin",
 	"version": "0.1",
 	"description": "Scripted plugin to add markers in the editor",
-	"main": "marker-adding-plugin",
+	"main": "annotation-adding-plugin",
 	"scripted": {
-		"plugin": true
+		"plugin": false
 	}
 }

@@ -24,11 +24,11 @@ define(function (require) {
 	 * A wrapper for a scripted editor that exposes API suitable for plugin development
 	 * @param {{}} editor the editor to wrap
 	 */
-	var EditorAPI = function(editor) {
+	var EditorProxy = function(editor) {
 		this._editor = editor;
 	};
 
-	EditorAPI.prototype = {
+	EditorProxy.prototype = {
 		/**
 		 * Returns the line index at the given character offset.
 		 * <p>
@@ -124,14 +124,6 @@ define(function (require) {
 		},
 
 		/**
-		 * Gets the kind of editor (either 'sub' or 'main'
-		 * @return String 'sub' if a sub-editor or 'main' if a main editor
-		 */
-		getEditorKind : function() {
-			return this._editor.type;
-		},
-
-		/**
 		 * @param String key the dotted configuration key to retrieve
 		 * @return String the cofiguration value specified by the key
 		 */
@@ -152,8 +144,13 @@ define(function (require) {
 		 */
 		getLeadingWhitespace : function(offset) {
 			return textUtils.leadingWhitespace(this._editor.getText(), offset);
+		},
+
+		getScriptedProxy : function () {
+			//This doesn't need wrapping it's already a wrapper
+			return this;
 		}
 	};
 
-	return EditorAPI;
+	return EditorProxy;
 });

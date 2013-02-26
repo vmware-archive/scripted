@@ -17,7 +17,9 @@
 /*jslint browser:true devel:true */
 
 define([
-	"require", "scripted/utils/deref", "scripted/editor/save-hooks", "when", "scripted/fileapi",
+	"require",
+	"scripted/api/editor-wrapper",
+	"scripted/utils/deref", "scripted/editor/save-hooks", "when", "scripted/fileapi",
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
@@ -28,7 +30,9 @@ define([
 	"layoutManager", "scripted/inplacedialogs/infile-search", "scripted/utils/jshintloader", "scripted/utils/behaviourConfig", "scripted/utils/textUtils",
 	"scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
-	require, deref, mSaveHooks, when, fileapi,
+	require,
+	EditorProxy,
+	deref, mSaveHooks, when, fileapi,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mHtmlGrammar, mModuleVerifier,
@@ -975,6 +979,22 @@ define([
 			start: model.getLineStart(line),
 			end: model.getLineEnd(line)
 		};
+	};
+
+	/**
+	 * Get the 'scripted proxy' for this editor. The 'scripted proxy' is a wrapper
+	 * around an internal editor object that implements the api defined in
+	 * 'scripted-wrapper.js'. This is generally the api that we want to
+	 * expose to plugins.
+	 *
+	 * This method ensures that only at most one scriptedProxy is created per
+	 * editor instance.
+	 */
+	mEditor.Editor.prototype.getScriptedProxy = function() {
+		if (!this._scriptedProxy) {
+			this._scriptedProxy = new EditorProxy(this);
+		}
+		return this._scriptedProxy;
 	};
 
 	// End extra editor errors

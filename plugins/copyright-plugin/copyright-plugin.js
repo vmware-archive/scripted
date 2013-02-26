@@ -11,26 +11,28 @@ define(function (require) {
 	var defaultRegExp = '@license|\\* Copyright \\(c\\)';
 	var defaultPathRegExp = '.*\\.js$';
 
-	editorApi.addSaveTransform(function (text, path, config) {
-		var enabled = config('plugins', 'copyright');
+	editorApi.addSaveTransform(function (editor) {
+		var enabled = editor.getConfig('plugins.copyright');
 		//Only enable the copyright plugin functionality if at least some options
 		// are configured for it.
 		if (enabled) {
-			var copyrightHeader = config('plugins', 'copyright', 'header');
-
+			var copyrightHeader = editor.getConfig('plugins.copyright.header');
 			if (Array.isArray(copyrightHeader)) {
 				//We allow the copyright header to be a list of lines, because its hard
 				//typing/reading mutliline string literals in json.
 				copyrightHeader = copyrightHeader.join('\n');
 			}
 			copyrightHeader = copyrightHeader || defaultCopyright;
+
 //			console.log('>>>copyright header');
 //			console.log(copyrightHeader);
 //			console.log('<<<copyright header');
-			var copyrightExp = new RegExp(config('plugins', 'copyright', 'regexp') || defaultRegExp);
-			var pathExp = new RegExp(config('plugins', 'copyright', 'path') || defaultPathRegExp);
+			var copyrightExp = new RegExp(editor.getConfig('plugins.copyright.regexp') || defaultRegExp);
+			var pathExp = new RegExp(editor.getConfig('plugins.copyright.path') || defaultPathRegExp);
 
-			if (pathExp.test(path)) {
+			var path = editor.getFilePath();
+			if (path && pathExp.test(path)) {
+				var text = editor.getText();
 				if (!copyrightExp.test(text)) {
 					return copyrightHeader + text;
 				}
