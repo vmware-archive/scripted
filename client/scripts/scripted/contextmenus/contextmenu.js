@@ -131,6 +131,10 @@ function(contextMenuProvider, scriptedLogger, $) {
 				}
 
 			}
+            // https://github.com/scripted-editor/scripted/issues/162
+			// Add 1 pixel to the vertical and horizontal positions as to avoid the right click to also close the context menu at the same time
+			contextMenuX += 1;
+			contextMenuY += 1;
 			return {
 				'x': contextMenuX,
 				'y': contextMenuY
