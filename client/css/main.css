@@ -101,6 +101,8 @@ header{
 	/* do we need a border on the right of the navigator?
 	border-right: 1px solid #646464;
 	*/
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+	font-size: 12px;
 }
 
 
@@ -276,12 +278,15 @@ footer{
 	width:auto;
 	background-color: #323232;
 	overflow: hidden;
+	font-size:12px;
 }
 
 #breadcrumb > li{
 	height:36px;
 	float:left;
+	/*
 	font-size:12px;
+	*/
 	color: #ffffff;
 	line-height:36px;
 }

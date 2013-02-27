@@ -107,6 +107,9 @@ define(function (require) {
 	 */
 	 var globalActions = [
 		'scriptedKeyHelp',
+		'toggleDayNightMode',
+		'toggleConsole',
+		'startStopApplication',
 		'Save',
 		'Find File Named...',
 		'Look in files',

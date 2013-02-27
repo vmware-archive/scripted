@@ -15,21 +15,21 @@
 /**
  * This module interacts with the server to start and stop an 'application' (static file server).
  */
- 
-define(['rest/interceptor/mime', 'rest', 'scripted/utils/editorUtils','jquery'],
-function (mime, rest, editorUtils, $) {
- 
+
+define(['rest/interceptor/mime', 'rest', 'scripted/utils/editorUtils','jquery','scripted/exec/exec-console'],
+function (mime, rest, editorUtils, $, execConsole) {
+
 	var activeAppPath = null;
-	
+
 	var webroot = window.scripted.config && window.scripted.config.application && window.scripted.config.application.webroot;
-		
+
 	var startApplication = function() {
 		var app_path = window.fsroot;
 		if (webroot) {
 			app_path = app_path+"/"+webroot;
 		}
 		var start = rest({ path:"/application/status?path="+app_path+"&suppressOpen=true", method:"PUT" });
-		
+
 		start.then(function() {
 			// Register as interested in save events so a reload can be fired
 			$(document).bind('afterEditorSave',function(event,file) {
@@ -37,6 +37,7 @@ function (mime, rest, editorUtils, $) {
 			});
 			activeAppPath = app_path;
 			configureForStop(app_path);
+			execConsole.log("Now serving "+app_path+" on http://localhost:8000");
 		},function(err) {
 			activeAppPath = null;
 			console.log("Error on serv startup"+err);
@@ -53,7 +54,7 @@ function (mime, rest, editorUtils, $) {
 			activeAppPath = null;
 		});
 	};
-	
+
 	function configureForStart() {
 		var appcontrol = $('#application_control');
 		appcontrol.removeClass('stop');
@@ -62,7 +63,7 @@ function (mime, rest, editorUtils, $) {
 		appcontrol.off('click');
 		appcontrol.on('click',startApplication);
 	}
-	
+
 	function configureForStop(path) {
 		if (path && path.indexOf(window.fsroot)===0) {
 			path = path.substring(window.fsroot.length);
@@ -77,9 +78,9 @@ function (mime, rest, editorUtils, $) {
 		appcontrol.off('click');
 		appcontrol.on('click',stopApplication);
 	}
-	
+
 	var client = mime(); // mime will auto unpack json objects in the response
-	
+
 	// Ask the server for status so we know what initial state to
 	// set for the application manager UI piece
 	var application_status = client({ path:"/application/status", method:"GET" });
@@ -90,7 +91,7 @@ function (mime, rest, editorUtils, $) {
 			configureForStop(response.entity.path);
 		}
 	});
-		
+
 	return {
 		/**
 		 * If the server is active this will return the path it is serving.
@@ -100,4 +101,4 @@ function (mime, rest, editorUtils, $) {
 		}
 	};
 });
-		
+

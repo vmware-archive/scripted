@@ -458,6 +458,27 @@ define([
 				return true;
 			});
 
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F3'), "toggleDayNightMode");
+			editor.getTextView().setAction("toggleDayNightMode", function() {
+				$('#theme_toggle').click();
+				return true;
+			},{name:"Switch between dark/light themes"});
+
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F4'), "toggleConsole");
+			editor.getTextView().setAction("toggleConsole", function() {
+				$('#console_toggle').click();
+				return true;
+			},{name: "Toggle the console open"});
+
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F5'), "Toggle Subeditor");
+			// action is already defined for that
+
+			editor.getTextView().setKeyBinding(mKeystroke.toKeyBinding('F6'), "startStopApplication");
+			editor.getTextView().setAction("startStopApplication", function() {
+				$('#application_control').click();
+				return true;
+			},{name: "Start/stop application"});
+
 			editor.getTextView().addKeyPressHandler(new ExtendedEditorFeatures(editor));
 
 			// added after ExtendedEditorFeatures so it has priority:
@@ -905,6 +926,21 @@ define([
 			} else if (uiFontSizeSpecified) {
 				$('#contentassist').css('font-size', uiFontSizeSpecified);
 				editorUpdateRequired = true;
+			}
+			if (window.scripted.config.ui) {
+				// Other font overrides now working
+				var size = window.scripted.config.ui.font_size_nav;
+				if (size) {
+					$('#navigator-wrapper').css('font-size',size);
+				}
+				size = window.scripted.config.ui.font_size_breadcrumb;
+				if (size) {
+					$('#breadcrumb').css('font-size',size);
+				}
+				size = window.scripted.config.ui.font_size_help;
+				if (size) {
+					$('#help_panel').css('font-size',size);
+				}
 			}
 			if (editorUpdateRequired) {
 				editor.getTextView().update(true);
