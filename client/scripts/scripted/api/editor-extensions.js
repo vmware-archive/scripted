@@ -87,6 +87,8 @@ define(function (require) {
 		 * any marker created by the same computer on the current editor on a
 		 * previous run will be erased from the annotations model each time the
 		 * computer is executed.
+		 *
+		 * @param {function(editor:Editor):Array.Annotation?} transformFun
 		 */
 		addAnnotationComputer: function (computer) {
 
@@ -169,7 +171,7 @@ define(function (require) {
 		 * Note that it is also possible to call operations such as 'setText' on the
 		 * editor but such uses are discouraged.
 		 *
-		 * @param {function(editor:Editor):Object):String?} transformFun
+		 * @param {function(editor:Editor):String?} transformFun
 		 */
 		addSaveTransform: function (transformFun) {
 			function textTransformHook(editor) {
