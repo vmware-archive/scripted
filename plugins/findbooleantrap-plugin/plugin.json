@@ -1,0 +1,9 @@
+{	
+	"name": "findbooleantrap-plugin",
+	"version": "0.1",
+	"description": "Scripted plugin based on http://ariya.ofilabs.com/2012/06/detecting-boolean-traps-with-esprima.html",
+	"main": "findbooleantrap-plugin",
+	"scripted": {
+		"plugin": false
+	}
+}

@@ -45,6 +45,16 @@ define(function (require) {
 		},
 
 		/**
+		 * Convert from a line and column to an editor offset
+		 * @param {Number} line number
+		 * @param {Number} column number
+		 */
+		toOffset : function(line, col) {
+			var lineoffset = this._editor.getTextView().getModel().getLineStart(line);
+			return lineoffset+col;
+		},
+
+		/**
 		 * Gets the start and end offsets for the given offset into the editor's buffer
 		 * @param Number offset
 		 * @return {{start:Number,end:Number}}
