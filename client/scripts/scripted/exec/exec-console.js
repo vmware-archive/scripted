@@ -22,7 +22,11 @@
 
 //So 'exec-console' is not a good name for this module.
 
-define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUtils) {
+define(function (require) {
+
+	var editorUtils = require('scripted/utils/editorUtils');
+	require('jquery');
+	require('jquery_ui');
 
 	/**
 	 * Maximum number of log entries in the console. If more entries are
@@ -34,31 +38,71 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 	 * The id of the dom element to which we append console output.
 	 */
 	var CONSOLE_DISPLAY = "#console_display";
-	
+
 	/**
 	 * The id of the dom element that represents the entire console UI.
 	 */
 	var CONSOLE_WRAPPER = "#console_wrapper";
 
 	var initialized = false;
-	
+
+	//This regexp defines what text snippets should be turned into links.
+	//This regexp may need some more tweaking
+	var urlRegexp = "http(s)?://[a-zA-Z,0-9\\.@:%_\\+~#=]+";
+
 	/**
 	 * A helper method that creates a dom element to display a given msg.
-	 * For now all we know how to render is plain text messages.
+	 * Displays mostly plain text but create links for things that look
+	 * like urls like http://blah.foo.com.
 	 */
 	function render(msg, cssClass) {
-		var elem = $('<div>', {text: msg});
+
+		function addText(elem, text) {
+			if (text) {
+				var textContent = document.createTextNode(text);
+				elem.appendChild(textContent);
+			}
+		}
+
+		function addLink(elem, url) {
+			var link = document.createElement('a');
+			link.href = url;
+			link.setAttribute('target','_blank'); //In new tab/window
+			addText(link, url);
+			elem.appendChild(link);
+		}
+
+		var regexp = new RegExp(urlRegexp, 'g');
+		var elem = document.createElement('div');
 		if (cssClass) {
-			elem.addClass(cssClass);
+			elem.setAttribute('class', cssClass);
+		}
+		var index = 0; // start index of the 'unprocessed' part of the message
+		while (index < msg.length) {
+			var match = regexp.exec(msg);
+			if (!match) {
+				//no more urls in the msg. So plunk all remaining text into the node
+				addText(elem, msg.substring(index));
+				index = msg.length;
+			} else {
+				//First pick up any text before the url...
+				addText(elem, msg.substring(index, match.index));
+				index += match.index;
+
+				//Now add a link for the found url
+				var url = match[0];
+				addLink(elem, url);
+				index += url.length;
+			}
 		}
 		return elem;
 	}
-	
+
 	///// Managing the entries in the log (so we can limit their number) //////////////
-	
+
 	var entries = []; //Array with at most MAX_ENTRIES entries.
 	var newEntryPos = 0; // next place to put an element, cycles around if running past the end.
-	
+
 	function addEntry(e) {
 		var oldest = entries[newEntryPos];
 		if (oldest) {
@@ -67,7 +111,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 		entries[newEntryPos] = e;
 		newEntryPos = (newEntryPos+1) % MAX_ENTRIES;
 	}
-	
+
 	function clear() {
 		for (var i = 0; i < entries.length; i++) {
 			var e = entries[i];
@@ -120,11 +164,11 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			$("#side_panel").resize(updateWidth);
 		}
 	}
-	
+
 	function isVisible() {
 		return $(CONSOLE_WRAPPER).css('display')!=='none';
 	}
-	
+
 	function show() {
 		initialize();
 		var c = $(CONSOLE_WRAPPER);
@@ -135,9 +179,9 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			var editor_height = e.height();
 			var console_height = $(CONSOLE_WRAPPER).height() || (editor_height / 3);
 			editor_height = editor_height - console_height;
-			
+
 			var overhead = c.outerHeight() - c.height();
-			
+
 			c.css('display', 'block');
 			c.height(console_height-overhead);
 			e.height(editor_height);
@@ -149,7 +193,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			updateWidth();
 		}
 	}
-	
+
 	function hide() {
 		if (isVisible()) {
 			var c = $(CONSOLE_WRAPPER);
@@ -163,7 +207,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			editorUtils.getMainEditor().getTextView()._update();
 		}
 	}
-	
+
 	function toggle() {
 		if (isVisible()) {
 			hide();
@@ -171,7 +215,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			show();
 		}
 	}
-	
+
 	function scrollToBottom() {
 		var c = $(CONSOLE_DISPLAY);
 		var scrollH = c.prop("scrollHeight");
@@ -180,7 +224,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 			c.scrollTop(scrollH-H);
 		}
 	}
-	
+
 	/**
 	 * Append a message to the console.
 	 * An optional cssClass parameter allows tagging the
@@ -198,7 +242,7 @@ define(['scripted/utils/editorUtils', "jquery", "jquery_ui"], function (editorUt
 		addEntry(e);
 		scrollToBottom();
 	}
-	
+
 	$(document).ready(function () {
 		$('#console_toggle').on('click', toggle);
 		$('#side_panel').bind('open', updateWidth);
