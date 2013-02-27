@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global define console XMLHttpRequest*/
 define(['when'], function(when) {
 
@@ -68,16 +68,16 @@ define(['when'], function(when) {
 			} catch (err) {
 				errback(err);
 			}
-			return deferred;
+			return deferred.promise;
 		};
 	}
 
 	function makeServletStub(path, sig) {
 		sig = JSON.stringify(sig);
 		var stub = null;
-		
+
 		//TODO: all these stubs look alike, can we factor this code better?
-		
+
 		if (sig===oneArgSig) {
 			stub = function(handle, callback, errback) {
 				errback = errback || function (err) {
@@ -206,11 +206,11 @@ define(['when'], function(when) {
 		}
 		return stub;
 	}
-	
+
 	return {
 		makeServletStub: makeServletStub,
 		makePromisedServletStub: makePromisedServletStub
 	};
 });
-	
-	
+
+
