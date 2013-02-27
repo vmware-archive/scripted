@@ -152,6 +152,9 @@ define(function (require) {
 			managedAnnotationComputer.priority = MARKER_PRIORITY;
 
 			saveHooks.onPreSave(managedAnnotationComputer);
+			$(document).on('editorLoaded', function (event, editor) {
+				managedAnnotationComputer(editor);
+			});
 		},
 
 		/**
@@ -206,6 +209,7 @@ define(function (require) {
 			//Use lower-level preSave hook to grab editor text, apply transformFun
 			//and put contents back into the edito
 			saveHooks.onPreSave(textTransformHook);
+
 		},
 
 		/**

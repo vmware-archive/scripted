@@ -704,6 +704,9 @@ define([
 		 * Promise that gets resolved once the editor's contents are loaded
 		 */
 		editor.editorLoadedPromise = when.defer();
+		editor.editorLoadedPromise.then(function () {
+			$(document).trigger('editorLoaded', editor);
+		});
 
 		editor.getFilePath = function() {
 			return filePath;
