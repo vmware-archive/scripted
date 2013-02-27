@@ -140,7 +140,7 @@ define([
 
     ExtendedEditorFeatures.prototype = {
 		_endsWith: function(string, suffix) {
-			if (string.length>suffix.length) {
+			if (string.length>=suffix.length) {
 				if (string.substring(string.length-suffix.length)===suffix) {
 					return true;
 				}
@@ -195,7 +195,6 @@ define([
 							if (this._endsWith(linetext,tabtext)) {
 								// check the previous line
 								var unindent = false;
-
 								var previouslinetext=model.getLine(lineNum-1,false);
 								var previouslinelength = previouslinetext.length;
 								// If the line before starts with the same amount of whitespace, probably worth unindenting:
