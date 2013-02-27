@@ -16,23 +16,23 @@
 /**
  * The outline dialog.
  */
-define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/outline/esprimaOutliner",
+define(["scripted/dialogs/dialogUtils", "scripted/utils/navHistory", "scripted/utils/pageState", "plugins/outline/esprimaOutliner",
 	"text!scripted/dialogs/outlineDialog.html","jquery"],
-	function(dialogUtils, pagestate, outliner, dialogText,$) {
+	function(dialogUtils, navHistory, pagestate, outliner, dialogText,$) {
 
 	function closeDialog() {
 		$('#dialog_mask').hide();
 		$("#dialogs").empty();
 		$(this.activeElement).focus();
 	}
-	
+
 	/**
 	 * (re)size the mask - which should fill the screen whilst visible.
 	 */
 	var popupOrResizeMask = function(dialogId) {
 	    $('#dialog_mask').css({height:$(document).height(), width:$(document).width()}).show();
 	};
-	
+
 	/**
 	 * Position the dialog
 	 */
@@ -48,7 +48,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 		}
 	    $(dialogId).css({top:dialogTop, left:dialogLeft}).show();
 	};
-	
+
 	/**
 	 * Check if string 'label' contains all the characters (in the right order
 	 * but not necessarily adjacent) from charseq.
@@ -70,7 +70,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 		}
 		return false;
 	}
-	
+
 	/**
 	 * This helper function for rendering looks at the 'data' array and for elements whose
 	 * label match the 'queryString' it will add a row to the 'table'.  The indent gives
@@ -88,6 +88,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 			var range = evt.currentTarget.range;
 			if (range) {
 				that.editor.setSelection(range[0], range[1], true);
+				navHistory.scrollToSelection(that.editor);
 				that.closeDialog();
 			}
 		};
@@ -112,7 +113,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 			}
 		}
 	}
-	
+
 	/**
 	 * Render this.outline (a set of function references) into the dom.
 	 * The regex can be used to subset the entries from this.outline.
@@ -140,8 +141,8 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 			}
 		}
 	}
-	
-	
+
+
 	var openDialog = function(editor) {
 		this.editor = editor;
 		this.dialog="#dialog_outline";
@@ -152,7 +153,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 		this.selected = -1;
 
 		var that = this;
-		
+
 		$("#dialogs").append('<div id="dialog_mask"></div>');
 		$("#dialogs").append(dialogText);
 
@@ -162,7 +163,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 			that.closeDialog();
 			return false;
 		});
-		
+
 		// Handle ENTER and ESCAPE keypresses on the dialog
 		$(this.dialog).off('keydown.dialogs');
 		$(this.dialog).on('keydown.dialogs',function( e ) {
@@ -199,7 +200,7 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 						loopedRound=true;
 					}
 				}
-				
+
 				// This code adjust the scroll bars to try and ensure the selection
 				// stays on screen
 				var r = $("#dialog_outline_results"); // the on screen container for results
@@ -208,14 +209,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 				var linkHeight = $(links[0]).outerHeight();
 				var scrollAreaHeight = dialog_results.height();
 				var viewHeight = $(r).height();
-				
+
 				var viewWidth = dialog_results.width();
 				var scrollWidth = dialog_results.get(0).scrollWidth;
 				// if horizontal scrollbar is on, adjust our viewport
 				if (scrollWidth>viewWidth) {
 					viewHeight-=linkHeight;
 				}
-				
+
 				var pos = ((that.selected+1)*linkHeight);
 				var oldpos = ((currentSelection+1)*linkHeight);
 				var wasOffScreen = (oldpos-scrollPositionOfResults)>viewHeight || oldpos<=scrollPositionOfResults;
@@ -282,14 +283,14 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 				popupOrResizeMask(that.dialog);
 			}
 		});
-		
+
 		popupOrResizeMask(this.dialog);
-		
+
 		positionDialog(this.dialog);
-		
+
 		this.outline = outliner.getOutline(this.editor.getText());
 		this.renderOutline();
-		
+
 		$('#dialog_outline_filter_text').off('input.dialogs');
 		$('#dialog_outline_filter_text').on('input.dialogs',function (evt) {
 			var filter_text = $(evt.target).val();
@@ -298,11 +299,11 @@ define(["scripted/dialogs/dialogUtils", "scripted/utils/pageState", "plugins/out
 			}
 			that.renderOutline(filter_text);
 		});
-		
+
 		$('#dialog_outline_results').scroll(function(evt) {
 			$('#dialog_outline_filter_text').focus(); // refocus after scrolling
 		});
-		
+
 	    $('#dialog_outline_filter_text').focus();
     };
 

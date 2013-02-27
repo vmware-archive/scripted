@@ -399,6 +399,7 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		switchEditors: switchEditors,
 		toggleSidePanel: toggleSidePanel,
 		openOnRange: openOnRange,
+		scrollToSelection: scrollToSelection,
 		storeAllState : storeAllState
 	};
 });
