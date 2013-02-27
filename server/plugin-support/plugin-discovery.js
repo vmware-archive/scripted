@@ -28,6 +28,10 @@ function configure(filesystem) {
 	var isDirectory = filesystem.isDirectory;
 	var parseJsonFile = require('../utils/parse-json-file').configure(filesystem);
 
+	var PLUGIN_MANIFEST_NAME = 'plugin.json'; //A file similar to package.json that will be
+											  // consulted by the plugin loader to determine
+											  // if a directory is a scripted plugin.
+
 	var SCRIPTED_RC = getScriptedRcDirLocation();
 	var SCRIPTED_PLUGINS_WEB_PATH =  'scripted/plugins';
 	var SCRIPTED_HOME = filesystem.getScriptedHome();
@@ -60,7 +64,7 @@ function configure(filesystem) {
 					var path = pathResolve(pluginDir, name);
 					return isDirectory(path).then(function (isDir) {
 						if (isDir) {
-							var pkgJsonFile = pathResolve(path, 'package.json');
+							var pkgJsonFile = pathResolve(path, PLUGIN_MANIFEST_NAME);
 							return parseJsonFile(pkgJsonFile).then(function (pkgJson) {
 								if (deref(pkgJson, ['scripted', 'plugin'])) {
 									var mainName = (pkgJson && pkgJson.main) || 'index';
