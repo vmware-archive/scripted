@@ -65,18 +65,139 @@ For more information on Scripted, see the <a href="http://github.com/scripted-ed
 <br>
 Download Scripted 0.4 using the links above or from here <a href="http://dist.springsource.org/release/SCRIPTED/scripted_v0.4.0.zip">scripted_v0.4.0.zip</a>.  The simple installation instructions are in the readme on the <a href="http://github.com/scripted-editor/scripted">project homepage</a>.
 
-	<tr><td class="nansection" colspan="2">ASC</td></tr>
+	<tr><td class="nansection" colspan="2">Editing enhancements</td></tr>
 
 	<tr id="editor_update">
 		<td class="title">Editor update and new features</td>
 		<td class="description">
-		Scripted 0.4 has moved from an orion editor dated Feb 2012 to an editor dated Jan 2013 (version 20130123-1139). This gives Scripted
+		Scripted 0.4 has upgraded an Orion editor from Jan 2013 (version 20130123-1139). This gives Scripted
 		theming capabilities and also provides new facilities like a line wrapping mode and the ability to show whitespace.
 		These new actions are listed in the help: 
 		'<span class="code">Toggle Visible Whitespace</span>' and '<span class="code">Toggle Wrap Mode</span>'. Bind these actions to
 		a key if you want to try them out. (Any keys you bind will be persisted in your <span class="code">USER_HOME/.scriptedrc/keymap-*.json</span>)
 		</td>
 	</tr>
+
+
+    <tr id="templates">
+		<td class="title">Code template improvements</td>
+		<td class="description">
+		We have improved code templates and snippets in Scripted.  From an end user's point of view, you can select a word in 
+		a JavaScript or HTML file and surround the word with some text.  For example, in a JavaScript file, you can make a selection and press CTRL+Space:
+		
+		<center>
+			<img src="template1.png" border="1" />
+		</center>
+		
+		When you make a selection, the text is surrounded by the text with appropriate indentation:
+		
+		<center>
+			<img src="template2.png" border="1" />
+		</center>
+		
+		This also works in HTML files, where there are many built-in templates:
+		
+		<center>
+			<img src="template3.png" border="1" />
+		</center>
+		
+		And choose the '<span class="code">a</span>' template:
+		
+		<center>
+			<img src="template4.png" border="1" />
+		</center>
+		
+		For more information, including instructions on how to author your own templates, see our 
+		<a href="http://blog.springsource.org/2013/01/22/simple-templates-for-the-scripted-editor/">blog post on it</a>.
+		</td>
+	</tr>
+
+    <tr id="hover_jsdoc">
+		<td class="title">Tooltip hovers now show JSdoc</td>
+		<td class="description">
+		Hovers on function and variable references and declarations now include JSDoc. A declaration with simple JSDoc attached to it will look like this:
+		<center>
+			<img src="jsdoc2.png" border="1" />
+		</center>
+		
+		And if you have a function, then all of the JSDoc tags will be displayed appropriately.
+		<center>
+			<img src="jsdoc1.png" border="1" />
+		</center>
+		This works across files when references can correctly be resolved by the inferencing engine.
+		</td>
+	</tr>
+
+    <tr id="hover_parameter_types">
+		<td class="title">Tooltip hovers now show function parameter types</td>
+		<td class="description">
+		Hovers on function references and declarations now include the parameter types.  In the following example, you can see the full type signature for the
+		<span class="code">performOperation</span> function:
+		<center>
+			<img src="jsdoc3.png" border="1" />
+		</center>
+		The signature says that the function takes 3 arguments and returns a number. The first two are numbers and the third is an object with a <tt>doit</tt> property that is
+		a function that itself takes two numbers as arguments and returns a number.
+		</td>
+	</tr>
+
+    <tr id="auto_content_assist">
+		<td class="title">Content assist auto-activation</td>
+		<td class="description">
+		Content assist will now auto-activate in JavaScript files after pressing a '.'.
+		</td>
+	</tr>
+
+	<tr id="editor_theme">
+		<td class="title">Dark/light themes</td>
+		<td class="description">
+		Exploiting the theming support in the latest Orion editor, Scripted now has a dark theme with light text on a dark background.
+		The colors within the themes are not configurable at the moment but a toggle is provided in the toolbar at
+		the top to switch quickly between dark and light (or press <span class="kb">F3</span>).
+		<img src="darkmode.png"></img>
+		</td>
+	</tr>
+
+	<tr id="auto_indent_unindent">
+		<td class="title">Auto indent and unindent</td>
+		<td class="description">
+		After entering a <span class="code">{</span> and pressing <span class="kb">ENTER</span> the cursor will be
+		appropriately indented on the next line. When the block is closed
+		with a <span class="code">}</span> and <span class="kb">ENTER</span> pressed again, that will be
+		automatically unindented. This is not a sophisticated implementation at the
+        moment, so please raise issues for any problems you see. If whatever problems you hit with it become too irritating,
+		use the following config options in your <span class="code">.scripted</span> file to turn it off!
+<div class="codeblockcontainer"><span class="codeblock">{
+    editor: {
+        unindent_after_close_curly: false,
+        indent_after_open_curly: false
+    }
+}
+</span></div>
+		</td>
+	</tr>
+
+    <tr id="zencoding">
+		<td class="title">Zencoding/Emmet support</td>
+		<td class="description">
+		<a href="http://emmet.io">Emmet (also called Zen Coding)</a> is an editor plugin that supports a greatly improves HTML & CSS workflow.  Scripted now has Emmet support in the editor.
+		The key bindings for Emmet commands are <span class="kb">Ctrl+Shift+n</span>, where <em>n</em> is a number from 1-9.  See the complete bindings in the help panel (open by pressing <span class="kb">F1</span>)
+		<center>
+			<img src="zen_help_panel.png" border="1" />
+		</center>
+		The Emmet support provides many features.  One of them is expanding snippets into proper HTML.  So, pressing <span class="kb">Ctrl+Shift+1</span> on the following selection:
+		<center>
+			<img src="zen_pre_expand.png" border="1" />
+		</center>
+		will expand the selection into this:
+		<center>
+			<img src="zen_post_expand.png" border="1" />
+		</center>
+		For more information on Emmet, its snippet syntax, and its operations, see <a href="http://docs.emmet.io/">the full documentation</a>.
+		</td>
+	</tr>
+
+	<tr><td class="nansection" colspan="2">UI configuration</td></tr>
 
 	<tr id="font_configuration">
 		<td class="title">More font size configuration</td>
@@ -94,13 +215,8 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
         </td>
 	</tr>
 
-	<tr id="async">
-		<td class="title">More asynchronicity</td>
-		<td class="description">
-		Some more of the editor behaviour has been made asynchronous thanks to a contribution from <a href="https://github.com/tgeorgiev">Tony Georgiev</a>. This
-		means you get into a position where you can edit your code even faster.
-		</td>
-	</tr>
+
+	<tr><td class="nansection" colspan="2">Integrated server</td></tr>
 
 	<tr id="livereload">
 		<td class="title">Integrated server (with livereload)</td>
@@ -126,6 +242,47 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 		</td>
 	</tr>
 
+	<tr><td class="nansection" colspan="2">Extensibility</td></tr>
+
+    <tr id="plugins">
+		<td class="title">Plugins</td>
+		<td class="description">
+		Scripted's client-side app can now be extended via plugins written in JavaScript.
+		<p>
+		A Scripted plugin is a JavaScript AMD module that gets loaded dynamically by the Scripted client app if
+		it is found in 'the right place'. Scripted 0.4. will look for plugins in two different places. a) '<span class="code">~/.scriptedrc/plugins</span>' folder and b) the
+		'<span class="code">plugins</span>' folder inside the Scripted distribution itself.</p>
+		<p>
+		A Scripted plugin is a 'first-class' citizen in the Scripted client app. It is just an AMD module, like any other client-side module 
+		in the Scripted code base. As such, a plugin can essentially do anything that any other client-side Scripted code can do. However
+		as internal APIs are unstable and are not typically well-documented nor easy to use, a growing set of clean and stable public 
+		APIs are being developed. These APIs are designed specifically to make it easy to implement certain kinds functionality as plugins.</p>
+		<p>
+		Currently we already have APIs to support the following kinds of things:</p>
+		<ul>
+		   <li>Transform the text in the editor before a save (e.g. remove trailing whitespace). <br>
+			Example: <a href="https://github.com/scripted-editor/scripted/blob/master/plugins/trailing-whitespace-plugin.js">The remove trailing whitespace plugin</a></li>
+		   <li>Define actions and keybindings. The actions can interact with the editor and do things like change the editor contents, move the
+		       cursor, change the selection, etc. As an example Zencoding support is implemented as a plugin.<br>
+				Example: <a href="https://github.com/scripted-editor/scripted/blob/master/plugins/zen-coding-plugin/zen-coding-plugin.js">Zen coding plugin</a></li>
+		   <li>Create gutter annotations. The Scripted editor shows information such as JavaScript Syntax Errors or Jshint Warnings by annotating
+		       the text in the editor. An annotation is like a text snippet attached to a specific region of text in the editor. It is shown by styling 
+		       the region differently as well as adding corresponding visual cues in the right and left margins of the editor. Via this API it is 
+		       easy for a plugin to contribute their own annotations.<br>
+				Example: <a href="https://github.com/scripted-editor/scripted/blob/master/plugins/annotation-adding-plugin/annotation-adding-plugin.js">Fruit name locator plugin!</a></li>
+		</ul>
+		<p>
+		The plugin architecture and APIs are a work in progress. We envision that the APIs will grow  and may still evolve as we strive to support 
+		more use cases. Do you have something you'd like to add to Scripted as a plugin? If the current APIs don't work for you, 
+		or you find them too hard to use, we would like to <a href="https://github.com/scripted-editor/scripted/issues">hear from you</a>!</p>
+		<p>
+		More details about the plugin-architecture and APIs can be found on the <a href="https://github.com/scripted-editor/scripted/wiki/Plugins">Scripted Wiki</a>.
+		</td>
+		
+	</tr>
+
+	<tr><td class="nansection" colspan="2">This and that</td></tr>
+
 	<tr id="keybindings_for_toolbar_entries">
 		<td class="title">Fn keys for toolbar buttons</td>
 		<td class="description">
@@ -139,17 +296,6 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 		</td>
 	</tr>
 
-
-	<tr id="editor_theme">
-		<td class="title">Dark/light themes</td>
-		<td class="description">
-		Exploiting the theming support in the latest Orion editor, Scripted now has a dark theme with light text on a dark background.
-		The themes are not configurable at the moment but a toggle is provided in the toolbar at the top to switch quickly between dark
-		and light (or press <span class="kb">F3</span>).
-		<img src="darkmode.png"></img>
-		</td>
-	</tr>
-
 	<tr id="open_file_changes">
 		<td class="title">Open File changes</td>
 		<td class="description">
@@ -157,26 +303,6 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 		to filtering as you type, just like the other entries.
 		</td>
 	</tr>
-
-	<tr id="auto_indent_unindent">
-		<td class="title">Auto indent and unindent</td>
-		<td class="description">
-		After entering a <span class="code">{</span> and pressing <span class="code">ENTER</span> the cursor will be
-		appropriately indented on the next line. When the block is closed
-		with a <span class="code">}</span> and <span class="code">ENTER</span> pressed again, that will be
-		automatically unindented. This is not a sophisticated implementation at the
-        moment, please raise issues for any problems you see. If whatever problems you hit with it become too irritating,
-		use the following config options to turn it off!
-<div class="codeblockcontainer"><span class="codeblock">{
-    editor: {
-        unindent_after_close_curly: false,
-        indent_after_open_curly: false
-    }
-}
-</span></div>
-		</td>
-	</tr>
-
 
     <tr id="node_launch_scripts">
 		<td class="title">Node all the way</td>
@@ -186,132 +312,6 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 		</td>
 	</tr>
 
-	<tr><td class="nansection" colspan="2">ADE</td></tr>
-
-    <tr id="templates">
-		<td class="title">Code template improvements</td>
-		<td class="description">
-		We have improved code templates and snippets in Scripted.  From an end user's point of view, you can select a word in 
-		a JavaScript or HTML file and surround the word with some text.  For example, in a JavaScript file, you can make a selection and press CTRL+Space:
-		
-		<center>
-			<img src="template1.png" border="1" />
-		</center>
-		
-		When you make a selection, the text is surrounded by the text with appropriate indentation:
-		
-		<center>
-			<img src="template2.png" border="1" />
-		</center>
-		
-		This also works in HTML files, where there are many built-in templates:
-		
-		<center>
-			<img src="template3.png" border="1" />
-		</center>
-		
-		And choose the <tt>a</tt> template:
-		
-		<center>
-			<img src="template4.png" border="1" />
-		</center>
-		
-		For more information, including instructions on how to author your own templates, see our 
-		<a href="http://blog.springsource.org/2013/01/22/simple-templates-for-the-scripted-editor/">blog post on it</a>.
-		</td>
-	</tr>
-
-    <tr id="hover_jsdoc">
-		<td class="title">Tooltip hovers now show JSdoc</td>
-		<td class="description">
-		Hovers on function and variable references and declarations now include JSDoc. A declaration with simple JSDoc attached to it will look like this:
-		<center>
-			<img src="jsdoc2.png" border="1" />
-		</center>
-		
-		And if you have a function, then all of the JSDoc tags will be displayed appropriately.
-		<center>
-			<img src="jsdoc1.png" border="1" />
-		</center>
-		</td>
-	</tr>
-
-    <tr id="hover_parameter_types">
-		<td class="title">Tooltip hovers now show function parameter types</td>
-		<td class="description">
-		Hovers on function references and declarations now include the parameter types.  In the following example, you can see the full type signature for the
-		<tt>performOperation</tt> function:
-		<center>
-			<img src="jsdoc3.png" border="1" />
-		</center>
-		The signature says that the function takes 3 arguments and returns a number. The first two are numbers and the third is an object with a <tt>doit</tt> property that is
-		a function that itself takes two numbers as arguments and returns a number.
-		</td>
-	</tr>
-
-
-    <tr id="zencoding">
-		<td class="title">Zencoding/Emmet support</td>
-		<td class="description">
-		<a href="http://emmet.io">Emmet (also called Zen Coding)</a> is an editor plugin that supports a greatly improves HTML & CSS workflow.  Scripted now has Emmet support in the editor.
-		The key bindings for Emmet commands are Ctrl+Shift+n, where <em>n</em> is a number from 1-9.  See the complete bindings in the help panel (open by pressing <em>F1</em>)
-		<center>
-			<img src="zen_help_panel.png" border="1" />
-		</center>
-		The Emmet support provides many features.  One of them is expanding snippets into proper HTML.  So, pressing Ctrl+Shift+1 on the following selection:
-		<center>
-			<img src="zen_pre_expand.png" border="1" />
-		</center>
-		will expand the selection into this:
-		<center>
-			<img src="zen_post_expand.png" border="1" />
-		</center>
-		For more information on Emmet, its snippet syntax, and its operations, see <a href="http://docs.emmet.io/">the full documentation</a>.
-		</td>
-	</tr>
-
-    <tr id="auto_content_assist">
-		<td class="title">Content assist auto-activation</td>
-		<td class="description">
-		Content assist will now auto-activate in JavaScript files after pressing a '.'.
-		</td>
-	</tr>
-
-	<tr><td class="nansection" colspan="2">KDV</td></tr>
-
-    <tr id="plugins">
-		<td class="title">Plugins</td>
-		<td class="description">
-		Scripted's client-side app can now be extended via plugins written in JavaScript.
-		<p>
-		A Scripted plugin is a JavaScript AMD module that gets loaded dynamically by the Scripted client app if
-		it is found in 'the right place'. Scripted 0.4. will look for plugins in two different places. a) '~/.scriptedrc/plugins' folder and b) the
-		'plugins' folder inside the Scripted distribution itself.</p>
-		<p>
-		A Scripted plugin is a 'first-class' citizen in the Scripted client app. It is just an AMD module, like any other client-side module 
-		in the Scripted code base. As such, a plugin can essentially do anything that any other client-side Scripted code can do. However
-		as internal APIs are unstable and are not typically well-documented nor easy to use, a growing set of clean and stable public 
-		APIs are being developed. These APIs are designed specifically to make it easy to implement certain kinds functionality as plugins.</p>
-		<p>
-		Currently we already have APIs to support the following kinds of things:</p>
-		<ul>
-		   <li>Transform the text in the editor before a save (e.g. remove trailing whitespace)</li>
-		   <li>Define actions and keybindings. The actions can interact with the editor and do things like change the editor contents, move the
-		       cursor, change the selection, etc. As an example Zencoding support is implemented as a plugin.</lo>
-		   <li>Create gutter annotations. The Scripted editor shows information such as JavaScript Syntax Errors or Jshint Warnings by annotating
-		       the text in the editor. An annotation is like a text snippet attached to a specific region of text in the editor. It is shown by styling 
-		       the region differently as well as adding corresponding visual cues in the right and left margins of the editor. Via this API it is 
-		       easy for a plugin to contribute their own anotations.</li>
-		</ul>
-		<p>
-		The plugin architecture and APIs are a work in progress. We envision that the APIs will grow  and may still evolve as we strive to support 
-		more use cases. Do you have something you'd like to add to Scripted as a plugin? The current APIs don't work for you, 
-		or you find them too hard to use? We would like to <a href="https://github.com/scripted-editor/scripted/issues">hear from you</a>!</p>
-		<p>
-		More details about the plugin-architecture and APIs can be found on the <a href="https://github.com/scripted-editor/scripted/wiki/Plugins">Scripted Wiki</a>.</p>
-		</td>
-		
-	</tr>
 
     <tr id="execLinks">
 		<td class="title">Console Links</td>
@@ -328,22 +328,28 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 	</tr>
 
 
-	<tr><td class="nansection" colspan="2">NS</td></tr>
+	<tr id="async">
+		<td class="title">More asynchronicity</td>
+		<td class="description">
+		Some more of the editor behaviour has been made asynchronous thanks to a contribution from <a href="https://github.com/tgeorgiev">Tony Georgiev</a>. This
+		means you get into a position where you can edit your code even faster. It also enables Scripted to behave better when the server is deployed remotely,
+		more on this soon.
+		</td>
+	</tr>
 
     <tr id="contextmenu">
 		<td class="title">Navigator Context Menu</td>
 		<td class="description">
-		<p>
-		Various fixes have been included that improve the behaviour of the navigator context menu, and include:</p>
-		<ul>
-		   <li>Right-click on a navigator element now highlights the selection so that it is clear what the context is. Unlike left-click selection, right-clicking on a directory will not exapnd it, only select it.</li>
-		   <li>When invoking the context menu towards the bottom of the navigator, the context menu is now positioned to the immediate top of the mouse click location. If sufficient space exists below
-		   the mouse click location, the context menu will continue to be shown beneath it.</li>
-		   <li>Fixed issues with the navigator not properly refreshing after deleting or renaming a navigator element, where the containing parent used to be in a collapsed state. Now the parent directory retains its expanded state. 
-		   </li>
-		   <li>Navigating to hidden elements that would otherwise require manual scrolling to make them visible now automatically scrolls them to the centre of the visible area in the navigator.</li>
-		   <li>In certain cases, invoking the context menu used to automatically select the first context menu action. This has been fixed as well for 0.4 </li>
-		</ul>
+		The right-click context menu available in the navigator has received numerous changes to improve usability.
+		</td>
+	</tr>
+
+	<tr><td class="nansection" colspan="2">Credits for 0.4</td></tr>
+    <tr id="contextmenu">
+		<td class="title">Special thanks to:</td>
+		<td class="description">
+		We are grateful to these people for their contributions to 0.4:
+		Loc Nguyen, Tony Georgiev, Scott Andrews, John Hann, Brian Cavalier, Jeremy Grelle
 		</td>
 	</tr>
 
