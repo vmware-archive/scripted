@@ -11,18 +11,6 @@
  *   Andy Clement - Initial implementation
  *   Kris De Volder - Use specific 'annotationComputer' API.
  ******************************************************************************/
-/*
-Notes on plugin development:
-- really could do with content assist in require block "require('scri<Ctrl+Space>
-- need that jsdoc box next to content assist to tell me about the APIs
-- after type 'editorApi.addSaveTransform(<Ctrl+Space> I wanted help on the required parameters? Is this a parser recovery issue?
-- help hover for addSaveTransform is horrendous, really not obvious what it wants from me.
-- can't see a breadcrumb in sidepanel, annoying!
-- docs for addSaveTransform, what does it mean if function doesn't return anything? blank text or unchanged text?
-- is 'getCurrentEditor()' always going to reliably return the current editor in a save transform, the one that matches the text?
-- how would I load an image resource for my styling?
-- how do I also get called on load? (without unnecessary duplication)
-*/
 
 /**
  * Plugin sample: marker-adding-plugin
