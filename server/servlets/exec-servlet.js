@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global console require*/
 
 var servlets = require('../servlets');
@@ -25,6 +25,15 @@ function exec(cmd, callback, errback) {
 
 	var options = cmd;
 	cmd = cmd.cmd;
+
+	// TODO use mixin, if scipted had one...
+	// options.env = mixin({}, options.env, process.env);
+	options.env = options.env || {};
+	for (var env in process.env) {
+		if (!(env in options.env)) {
+			options.env[env] = process.env[env];
+		}
+	}
 
 	/*var process = */cpExec(cmd, options, callback);
 }
