@@ -8,6 +8,7 @@ p, table, td, th { font-size: 14pt; }
 .code { 
 	font-size: 12pt;
 	font-family: Monaco, monospace; 
+	color: #171717;
 }
 pre {  font-family: Monaco, monospace; font-size: 10pt}
 
@@ -65,19 +66,15 @@ For more information on Scripted, see the <a href="http://github.com/scripted-ed
 Download Scripted 0.4 using the links above or from here <a href="http://dist.springsource.org/release/SCRIPTED/scripted_v0.4.0.zip">scripted_v0.4.0.zip</a>.  The simple installation instructions are in the readme on the <a href="http://github.com/scripted-editor/scripted">project homepage</a>.
 
 	<tr><td class="nansection" colspan="2">ASC</td></tr>
-<!--
-  dojo removal (new dialogs)
-  async changes - Tony
-  livereload
-  plugins
--->
 
 	<tr id="editor_update">
 		<td class="title">Editor update and new features</td>
 		<td class="description">
-		Scripted 0.4 has moved from an orion editor dated Feb 2012 to an editor dated Jan 2013 (version 20130123-1139). This enables
-		the theming options in Scripted and also provides new facilities like 'line wrapping' and 'show whitespace'. The help panel
-		shows both of these actions and you can bind key bindings to them.
+		Scripted 0.4 has moved from an orion editor dated Feb 2012 to an editor dated Jan 2013 (version 20130123-1139). This gives Scripted
+		theming capabilities and also provides new facilities like a line wrapping mode and the ability to show whitespace.
+		These new actions are listed in the help: 
+		'<span class="code">Toggle Visible Whitespace</span>' and '<span class="code">Toggle Wrap Mode</span>'. Bind these actions to
+		a key if you want to try them out. (Any keys you bind will be persisted in your <span class="code">USER_HOME/.scriptedrc/keymap-*.json</span>)
 		</td>
 	</tr>
 
@@ -86,40 +83,59 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 		<td class="description">
 		Previously the font size could only be set for the editor. It can now be set for the breadcrumb, navigator and help panel.
 		The configuration options are:
-font_size_breadcrumb: 16,
-font_size_nav: 16,
-font_size_help: 14
-
+<div class="codeblockcontainer"><span class="codeblock">{
+    ui: {
+        font_size_breadcrumb: 16,
+        font_size_nav: 16,
+        font_size_help: 14
+    }
+}
+</span></div>
         </td>
 	</tr>
 
-	<td id="async">
+	<tr id="async">
 		<td class="title">More asynchronicity</td>
 		<td class="description">
-		Some more of the editor behaviour has been made asynchronous thanks to a contribution from Tony Georgiev. This
+		Some more of the editor behaviour has been made asynchronous thanks to a contribution from <a href="https://github.com/tgeorgiev">Tony Georgiev</a>. This
 		means you get into a position where you can edit your code even faster.
 		</td>
-	</td>
+	</tr>
 
-	<td id="livereload">
-		<td class="title">
+	<tr id="livereload">
+		<td class="title">Integrated server (with livereload)</td>
 		<td class="description">
 		On the toolbar is a new 'play' icon. When pressed this will launch a small server that 'serves' the content of the project
-		currently being edited. The project is served at http://localhost:8000.:q
+		currently being edited. The project is served at <span class="code">http://localhost:8000</span>. After pressing 'play' the button will change to a
+		'stop' icon which will stop the server when pressed.  If you wish to serve a directory other then the project root, you can set
+		the webroot in the config file:
+<div class="codeblockcontainer"><span class="codeblock">{
+    application: {
+        webroot: "client" // project subfolder
+    }
+}
+</span></div>
+		The server that is launched actually includes some basic livereload integration. To exploit this you (currently) need to include
+		the following script snippet in your html:
 
+<div class="codeblockcontainer"><span class="codeblock"> &lt;script src="http://localhost:35729/livereload.js"&gt;&lt;/script&gt;
+</span></div>
+
+		With that in place, the app available on localhost:8000 will be live reloading, this means it will notice css file changes and
+		dynamically update them on the page you are viewing. It will notice changes to js files but those will trigger a page reload.
 		</td>
-	</td>
+	</tr>
 
 	<tr id="keybindings_for_toolbar_entries">
 		<td class="title">Fn keys for toolbar buttons</td>
 		<td class="description">
-		Previously only F1 was bound to help, now all the actions on the toolbar have Fn keys:
-		F1=help
-		F2=toggle navigator open/closed
-		F3=toggle day/night theme
-		F4=toggle console open/closed
-		F5=toggle side panel open/closed
-		F6=start/stop application
+		Previously only <span class="kb">F1</span> was bound to help, now all the actions on the toolbar have Fn keys:
+		<span class="kb">F1</span>=help<br>
+		<span class="kb">F2</span>=toggle navigator open/closed<br>
+		<span class="kb">F3</span>=toggle day/night theme<br>
+		<span class="kb">F4</span>=toggle console open/closed<br>
+		<span class="kb">F5</span>=toggle side panel open/closed<br>
+		<span class="kb">F6</span>=start/stop application<br>
 		</td>
 	</tr>
 
@@ -129,7 +145,8 @@ font_size_help: 14
 		<td class="description">
 		Exploiting the theming support in the latest Orion editor, Scripted now has a dark theme with light text on a dark background.
 		The themes are not configurable at the moment but a toggle is provided in the toolbar at the top to switch quickly between dark
-		and light (or press F3).
+		and light (or press <span class="kb">F3</span>).
+		<img src="darkmode.png"></img>
 		</td>
 	</tr>
 
@@ -144,22 +161,27 @@ font_size_help: 14
 	<tr id="auto_indent_unindent">
 		<td class="title">Auto indent and unindent</td>
 		<td class="description">
-		After entering a { and pressing ENTER the cursor will be appropriately indented on the next line. When the block is closed
-		with a } and ENTER pressed again, that will be automatically unindented. This is not a sophisticated implementation at the
-        moment, please raise issues for any problems you see. If it becomes too painful the following config options can turn it
-		off:
-		"editor": {
-        	unindent_after_close_curly: false,
-        	indent_after_open_curly: false
-    	}
+		After entering a <span class="code">{</span> and pressing <span class="code">ENTER</span> the cursor will be
+		appropriately indented on the next line. When the block is closed
+		with a <span class="code">}</span> and <span class="code">ENTER</span> pressed again, that will be
+		automatically unindented. This is not a sophisticated implementation at the
+        moment, please raise issues for any problems you see. If whatever problems you hit with it become too irritating,
+		use the following config options to turn it off!
+<div class="codeblockcontainer"><span class="codeblock">{
+    editor: {
+        unindent_after_close_curly: false,
+        indent_after_open_curly: false
+    }
+}
+</span></div>
 		</td>
 	</tr>
 
 
     <tr id="node_launch_scripts">
-		<td class="title">Node node node</td>
+		<td class="title">Node all the way</td>
 		<td class="description">
-		In previous versions of Scripted the launch scripts were platform specific scripts, with
+		In previous versions of Scripted the launch scripts were platform specific batch files and shell scripts, with
 		0.4 they are now node.js scripts.
 		</td>
 	</tr>
