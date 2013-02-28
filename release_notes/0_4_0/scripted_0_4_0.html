@@ -67,23 +67,94 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 	<tr><td class="nansection" colspan="2">ASC</td></tr>
 <!--
   dojo removal (new dialogs)
-  open file improvements
   async changes - Tony
-  editor:
-  show/hide whitespace
-  auto indent/unindent
-  font configuration
-  dark theme
-  latest orion editor
-  open/close navigator
   livereload
-  node launch scripts
   plugins
 -->
 
-	<tr id="editor_theme">
-		<td class="title">
+	<tr id="editor_update">
+		<td class="title">Editor update and new features</td>
+		<td class="description">
+		Scripted 0.4 has moved from an orion editor dated Feb 2012 to an editor dated Jan 2013 (version 20130123-1139). This enables
+		the theming options in Scripted and also provides new facilities like 'line wrapping' and 'show whitespace'. The help panel
+		shows both of these actions and you can bind key bindings to them.
+		</td>
 	</tr>
+
+	<tr id="font_configuration">
+		<td class="title">More font size configuration</td>
+		<td class="description">
+		Previously the font size could only be set for the editor. It can now be set for the breadcrumb, navigator and help panel.
+		The configuration options are:
+font_size_breadcrumb: 16,
+font_size_nav: 16,
+font_size_help: 14
+
+        </td>
+	</tr>
+
+	<td id="async">
+		<td class="title">More asynchronicity</td>
+		<td class="description">
+		Some more of the editor behaviour has been made asynchronous thanks to a contribution from Tony Georgiev. This
+		means you get into a position where you can edit your code even faster.
+		</td>
+	</td>
+
+	<td id="livereload">
+		<td class="title">
+		<td class="description">
+		On the toolbar is a new 'play' icon. When pressed this will launch a small server that 'serves' the content of the project
+		currently being edited. The project is served at http://localhost:8000.:q
+
+		</td>
+	</td>
+
+	<tr id="keybindings_for_toolbar_entries">
+		<td class="title">Fn keys for toolbar buttons</td>
+		<td class="description">
+		Previously only F1 was bound to help, now all the actions on the toolbar have Fn keys:
+		F1=help
+		F2=toggle navigator open/closed
+		F3=toggle day/night theme
+		F4=toggle console open/closed
+		F5=toggle side panel open/closed
+		F6=start/stop application
+		</td>
+	</tr>
+
+
+	<tr id="editor_theme">
+		<td class="title">Dark/light themes</td>
+		<td class="description">
+		Exploiting the theming support in the latest Orion editor, Scripted now has a dark theme with light text on a dark background.
+		The themes are not configurable at the moment but a toggle is provided in the toolbar at the top to switch quickly between dark
+		and light (or press F3).
+		</td>
+	</tr>
+
+	<tr id="open_file_changes">
+		<td class="title">Open File changes</td>
+		<td class="description">
+		The open file dialog now shows the recent files that have been edited at the top of the list (in bold). These are subject
+		to filtering as you type, just like the other entries.
+		</td>
+	</tr>
+
+	<tr id="auto_indent_unindent">
+		<td class="title">Auto indent and unindent</td>
+		<td class="description">
+		After entering a { and pressing ENTER the cursor will be appropriately indented on the next line. When the block is closed
+		with a } and ENTER pressed again, that will be automatically unindented. This is not a sophisticated implementation at the
+        moment, please raise issues for any problems you see. If it becomes too painful the following config options can turn it
+		off:
+		"editor": {
+        	unindent_after_close_curly: false,
+        	indent_after_open_curly: false
+    	}
+		</td>
+	</tr>
+
 
     <tr id="node_launch_scripts">
 		<td class="title">Node node node</td>
