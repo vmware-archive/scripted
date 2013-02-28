@@ -217,14 +217,19 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 
 	<tr><td class="nansection" colspan="2">NS</td></tr>
 
-    <tr id="short_id_for_the_feature">
-		<td class="title">Feature title</td>
+    <tr id="contextmenu">
+		<td class="title">Navigator Context Menu</td>
 		<td class="description">
-		Long winded description of it.
-		Long winded description of it.
-		Long winded description of it.
-		Long winded description of it.
-		Long winded description of it.
+		<p>
+		Various fixes have been included that improve the behaviour of the navigator context menu, and include:</p>
+		<ul>
+		   <li>Right-click on a navigator element now highlights the selection so that it is clear what the context is. Unlike left-click selection, right-clicking on a directory will not exapnd it, only select it.</li>
+		   <li>When invoking the context menu towards the bottom of the navigator, the context menu is now positioned to the immediate top of the mouse click location. If sufficient space exists below
+		   the mouse click location, the context menu will continue to be shown beneath it.</li>
+		   <li>Fixed issues with the navigator not properly refreshing after deleting or renaming a navigator element, where the containing parent used to be in a collapsed state. Now the parent directory retains its expanded state. 
+		   </li>
+		   <li>In certain cases, invoking the context menu used to automatically select the first context menu action. This has been fixed as well for 0.4 </li>
+		</ul>
 		</td>
 	</tr>
 
