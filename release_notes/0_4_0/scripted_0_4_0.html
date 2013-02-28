@@ -166,12 +166,54 @@ Download Scripted 0.4 using the links above or from here <a href="http://dist.sp
 
 	<tr><td class="nansection" colspan="2">KDV</td></tr>
 
-    <tr id="short_id_for_the_feature">
-		<td class="title">Feature title</td>
+    <tr id="plugins">
+		<td class="title">Plugins</td>
 		<td class="description">
-		Long winded description of it.
+		Scripted's client-side app can now be extended via plugins written in JavaScript.
+		<p>
+		A Scripted plugin is a JavaScript AMD module that gets loaded dynamically by the Scripted client app if
+		it is found in 'the right place'. Scripted 0.4. will look for plugins in two different places. a) '~/.scriptedrc/plugins' folder and b) the
+		'plugins' folder inside the Scripted distribution itself.</p>
+		<p>
+		A Scripted plugin is a 'first-class' citizen in the Scripted client app. It is just an AMD module, like any other client-side module 
+		in the Scripted code base. As such, a plugin can essentially do anything that any other client-side Scripted code can do. However
+		as internal APIs are unstable and are not typically well-documented nor easy to use, a growing set of clean and stable public 
+		APIs are being developed. These APIs are designed specifically to make it easy to implement certain kinds functionality as plugins.</p>
+		<p>
+		Currently we already have APIs to support the following kinds of things:</p>
+		<ul>
+		   <li>Transform the text in the editor before a save (e.g. remove trailing whitespace)</li>
+		   <li>Define actions and keybindings. The actions can interact with the editor and do things like change the editor contents, move the
+		       cursor, change the selection, etc. As an example Zencoding support is implemented as a plugin.</lo>
+		   <li>Create gutter annotations. The Scripted editor shows information such as JavaScript Syntax Errors or Jshint Warnings by annotating
+		       the text in the editor. An annotation is like a text snippet attached to a specific region of text in the editor. It is shown by styling 
+		       the region differently as well as adding corresponding visual cues in the right and left margins of the editor. Via this API it is 
+		       easy for a plugin to contribute their own anotations.</li>
+		</ul>
+		<p>
+		The plugin architecture and APIs are a work in progress. We envision that the APIs will grow  and may still evolve as we strive to support 
+		more use cases. Do you have something you'd like to add to Scripted as a plugin? The current APIs don't work for you, 
+		or you find them too hard to use? We would like to <a href="https://github.com/scripted-editor/scripted/issues">hear from you</a>!</p>
+		<p>
+		More details about the plugin-architecture and APIs can be found on the <a href="https://github.com/scripted-editor/scripted/wiki/Plugins">Scripted Wiki</a>.</p>
 		</td>
+		
 	</tr>
+
+    <tr id="execLinks">
+		<td class="title">Console Links</td>
+		<td class="description">
+		Scripted's client-side app can now be extended via plugins written in JavaScript.
+		<p>
+		The exec-console now searches its contents for things that look like http or https urls and turns those into proper
+		links that open in a new browser tab when clicked on.
+		
+			<img src="console-links.png"/>
+		
+		</td>
+		
+	</tr>
+
 
 	<tr><td class="nansection" colspan="2">NS</td></tr>
 
