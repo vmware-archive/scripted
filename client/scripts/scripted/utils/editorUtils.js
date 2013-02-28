@@ -27,7 +27,7 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		//console.log('editorFocus: '+t);
 		lastEditor = editor;
 	});
-	
+
 	function isOk(editor) {
 		var tv = editor && editor.getTextView();
 		return tv && !tv.isDestroyed();
@@ -37,13 +37,54 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		var main = mPaneFactory.getMainPane();
 		return main ? main.editor : null;
 	}
-	
+
 	function getSubEditors() {
 		return mPaneFactory.getPanes("scripted.editor").map(function (pane) {
 			return pane.editor;
 		});
 	}
-	
+
+	function eachEditor(doFun) {
+		var editor = getMainEditor();
+		var abort;
+		if (editor) {
+			//Can be no main editor if we get called really early!
+			abort = doFun(editor);
+		}
+		if (abort) {
+			return abort;
+		}
+		var subeditors = getSubEditors();
+		if (subeditors) {
+			for (var i = 0; i < subeditors.length; i++) {
+				abort = doFun(subeditors[i]);
+				if (abort) {
+					return abort;
+				}
+			}
+		}
+		return abort;
+	}
+
+	/**
+	 * Do something with each current and future editor. The function gets invoked
+	 * immediately on any currently existing editors. It will also be invoked
+	 * when future editors are created.
+	 */
+	function eachCurrentAndFutureEditor(doFun) {
+		var abort = eachEditor(function (editor) {
+			if (editor.editorLoadedFired) {
+				doFun(editor);
+			}
+			//We must return a falsy value because we don't want the 'abort'
+			//behavior implemented in 'eachEditor'.
+			//return undefined;
+		});
+		$(document).on('editorLoaded', function (event, editor) {
+			doFun(editor);
+		});
+	}
+
 	return {
 		/**
 		 * Get a reference to the 'current' editor. This is the last editor that got focus.
@@ -69,28 +110,8 @@ define(['scripted/pane/paneFactory', 'jquery'], function (mPaneFactory) {
 		 * from the doFun. If so, then the true value will be returned as
 		 * a result of the iteration as well.
 		 */
-		eachEditor: function (doFun) {
-			var editor = getMainEditor();
-			var abort;
-			if (editor) {
-				//Can be no main editor if we get called really early!
-				abort = doFun(editor);
-			}
-			if (abort) {
-				return abort;
-			}
-			var subeditors = getSubEditors();
-			if (subeditors) {
-				for (var i = 0; i < subeditors.length; i++) {
-					abort = doFun(subeditors[i]);
-					if (abort) {
-						return abort;
-					}
-				}
-			}
-			return abort;
-		},
-		
+		eachEditor: eachEditor,
+		eachCurrentAndFutureEditor: eachCurrentAndFutureEditor,
 		/**
 		 * Sets the focus on an editor
 		 * @param Boolean isSub if truthy, set focus on sub editor if one exists.  If falsy, set focus to main editor

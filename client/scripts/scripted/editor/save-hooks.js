@@ -64,7 +64,7 @@ define(function(require) {
 					return handler(editor, editor.getFilePath());
 				});
 			},
-			true //IMPORTANT: may be anything except undefined...
+			null //IMPORTANT: may be anything except undefined...
 				// because reduce behaves differently if no inital value is suplied!
 		);
 	}

@@ -45,6 +45,8 @@ define(function (require) {
 	var actions = require('scripted/keybindings/action-info');
 
 	var saveHooks = require('scripted/editor/save-hooks');
+	var loadHooks = require('scripted/editor/load-hooks');
+
 
 	var editorUtils = require('scripted/utils/editorUtils');
 	var annotationModule = require('orion/textview/annotations');
@@ -152,9 +154,7 @@ define(function (require) {
 			managedAnnotationComputer.priority = MARKER_PRIORITY;
 
 			saveHooks.onPreSave(managedAnnotationComputer);
-			$(document).on('editorLoaded', function (event, editor) {
-				managedAnnotationComputer(editor);
-			});
+			loadHooks.afterEditorLoaded(managedAnnotationComputer);
 		},
 
 		/**
