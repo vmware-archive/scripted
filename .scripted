@@ -1,112 +1,37 @@
 /*
-
-    FORMATTER OPTIONS:
-
-    indent_size (default 4)          ? indentation size,
-    indent_char (default space)      ? character to indent with,
-    preserve_newlines (default true) ? whether existing line breaks should be preserved,
-    preserve_max_newlines (default unlimited) ? maximum number of line breaks to be preserved in one chunk,
-
-    jslint_happy (default false) ? if true, then jslint-stricter mode is enforced.
-
-            jslint_happy   !jslint_happy
-            ---------------------------------
-             function ()      function()
-
-    brace_style (default "collapse") ? "collapse" | "expand" | "end-expand" | "expand-strict"
-            put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or just put end braces on own line.
-
-            expand-strict: put brace on own line even in such cases:
-
-                var a =
-                {
-                    a: 5,
-                    b: 6
-                }
-            This mode may break your scripts - e.g "return { a: 1 }" will be broken into two lines, so beware.
-
-    space_before_conditional (default true) ? should the space before conditional statement be added, "if(true)" vs "if (true)",
-
-    unescape_strings (default false) ? should printable characters in strings encoded in \xNN notation be unescaped, "example" vs "\x65\x78\x61\x6d\x70\x6c\x65"
-
-
-
-    CONFIGURATION OPTION EXAMPLES:
-    
-	"formatter": {
-		"js": {
-			"indent_size": 1,
-			"indent_char": "\t"
-		}
-	},
-    "ui": {
-		"font":"Ubuntu Mono",
-		"font_size":18,
-		"content_assist_font_size":14,
-		"navigator": false,
-		// time in ms before content assist auto activates and history menu drops down (default 500ms)
-		"auto_activation": 500
-    }
-    
-    EXEC configuration examples:
-    
-    "exec": {
-        "onKeys" : {
-	        "ctrl+alt+b": {
-				"cmd": "ls -la", 
-				"cwd": "${dir}",
-				"name": "ls current dir"
-	        },
-	        "ctrl+alt+shift+b": "ls -la",
-	        "ctrl+alt+shift+x": "this command is very long and should be too long for a name",
-	        "ctrl+alt+shift+y": "this command is very long and should be too long for a name like this",
-	        "ctrl+alt+shift+c": "javac ${file}"
-	    },
-	    "afterSave" : {
-			"** / *.js": "cat ${file}", //!!!Spaces arround the / should be removed!!!
-			".rigel": "echo Thank you for saving me!",
-			"** / .rigel": "echo ${file}"  //!!!Spaces arround the / should be removed!!!
-	    },
-	    "onLoad" : [
-			"echo Loading ${projectDir}",
-			{	"cmd": "ls -la",
-				"cwd": "${projectDir}/client"
-			}
-	    ]
-     }
-    
-    "exec": {
-        "onKeys" : {
-	        "ctrl+alt+c": "node releng/copycheck.js"
-	    }
-	},
+	This is a sample scripted configuration file. 
+	For more information see the wiki: https://github.com/scripted-editor/scripted/wiki/Configuration
+	
     "lint" : {
 	    //The directories to exclude while running jslint/jshint
 	    exclude_dirs : 'node_modules',
-    },
-	"formatter": {
-		"js": {
-			"indent_size": 1,
-			"indent_char": "\t"
-		}
-	}
-{
-    "ui": { 
-		"font": "Monaco"
-	},
-	"editor": {
-		"expandtab": true,
-		"tabsize": 4
-	}
-  } 
+    }
 */
 {
-/*
-	"jshint" : {
-		"global" : ["console", "define", "exports", "module", "process", "__dirname",
-					"require", "$", "window"]
-	},
-*/
+	
+	// Various aspects of the UI can be configured:
+//	"ui" : {
+//		"font": "Monaco", // the font to be used in the editor
+//		"font_size": 12, // the editor font size
+//		"navigator": false, // Start with the navigator open or closed?
+//		"font_size_breadcrumb": 12, // font size for the breadcrumb
+//		"font_size_nav": 12, // font size for the navigator
+//		"font_size_help": 12, // font size for the help panel
+//		"content_assist_font_size":14, // size of content assist, defaults to editor text font size
+//		"auto_activation": 500 // time in ms before content assist auto activates (and history menu drop down time) (default 500ms)
+//	},
+
+	// JSHint can be configured within this file or via an external .jshintrc file
+//	"jshint" : {
+//		"global" : ["console", "define", "exports", "module", "process", "__dirname",
+//					"require", "$", "window"]
+//	},
+
+	// Control tabs in the editor
+//	"editor": {
+//		"expandtab": true,
+//		"tabsize": 4
+//	},
 
 	search: {
 		exclude: [
@@ -118,17 +43,69 @@
 	},
 
 
-	/* Configuring the mark occurrences behavior */
+	// Configures the mark occurrences behavior
 	mark_occurrences : {
 		interval :500,  // interval between requests. set to 0 for instantaneous, or higher numbers for more of a delay
 		disable : false,  // set to true to disable mark occurrences
 		retain : false  // set to true to retain marks if current caret location is not over a word
 	},
+	
+	// The plugins config block can be used to control plugins. 
+	// Within the block the format is up to the specific plugins:
 	plugins: {
 		'trailing-whitespace' : true
 	}
-/*	application : {
-		webroot:"client" // the folder to 'serve' in the server instance that scripted can launch, relative to inferred project root
-	}
-*/
+	
+//  The application section controls which directories are made available 
+//  via the built in server (i.e. the one controlled with play/stop)
+//	application : {
+//		webroot:"client" // the folder to 'serve' in the project, relative to project root
+//	},
+
+//  The exec keys block allows user commands to be installed into the editor, either
+//  driven by a specific keypress or on an event (e.g. file saved).
+//	"exec": {
+//        "onKeys" : {
+//	        "ctrl+alt+b": {
+//				"cmd": "ls -la", 
+//				"cwd": "${dir}",
+//				"name": "ls current dir"
+//	        },
+//	        "ctrl+alt+shift+b": "ls -la",
+//	        "ctrl+alt+shift+x": "this command is very long and should be too long for a name",
+//	        "ctrl+alt+shift+y": "this command is very long and should be too long for a name like this",
+//	        "ctrl+alt+shift+c": "javac ${file}"
+//	    },
+//	    "afterSave" : {
+//			"** / *.js": "cat ${file}", //!!!Spaces arround the / should be removed!!!
+//			".rigel": "echo Thank you for saving me!",
+//			"** / .rigel": "echo ${file}"  //!!!Spaces arround the / should be removed!!!
+//	    },
+//	    "onLoad" : [
+//			"echo Loading ${projectDir}",
+//			{	"cmd": "ls -la",
+//				"cwd": "${projectDir}/client"
+//			}
+//	    ]
+//     },
+
+	// Formatter config options
+//	"formatter" : {
+//		"js" : {
+//			"indent_size" : 4, // indent size (default 4)
+//			"indent_char" : "\t", // indent char (default space)
+//			"preserve_newlines" : true, // whether existing line breaks should be preserved (default true)
+//			"preserve_max_newlines": 5, // max number of line breaks to be preserved in one chunk (default unlimited)
+//			"jslint_happy": false, // if true a jslint-stricter mode is turned on (producing 'function ()' rather than 'function()'
+//			"brace_style": collapse, // where to put braces: 
+//									 // collapse - same line as control statements
+//									 // expand - put braces on own line
+//									 // end-expand - put end braces on own line
+//									 // expand-strict - put brace on own line even in cases like: var a = { a:5, b:6 }
+//			"space_before_conditional": true, // should a space be added before conditional 'if(true)' vs 'if (true)'
+//			"unescape_strings": false
+//		}
+//	},
+									
+
 }
