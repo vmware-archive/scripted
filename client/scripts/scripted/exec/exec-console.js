@@ -116,7 +116,8 @@ define(function (require) {
 		for (var i = 0; i < entries.length; i++) {
 			var e = entries[i];
 			if (e) {
-				e.remove();
+				//This doesn't work on FireFox: e.remove();
+				e.parentNode.removeChild(e);
 				entries[i] = null;
 			}
 		}
