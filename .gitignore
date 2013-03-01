@@ -3,4 +3,5 @@
 .DS_Store
 scripted.log
 node_modules
+serv.log
 /client/components
