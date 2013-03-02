@@ -48,7 +48,7 @@ define(function (require) {
 
 	//This regexp defines what text snippets should be turned into links.
 	//This regexp may need some more tweaking
-	var urlRegexp = "http(s)?://[a-zA-Z,0-9\\.@:%_\\+~#=]+";
+	var urlRegexp = "http(s)?://[a-zA-Z,0-9\\.@:%_\\+~#=/\\-]+";
 
 	/**
 	 * A helper method that creates a dom element to display a given msg.
@@ -87,7 +87,7 @@ define(function (require) {
 			} else {
 				//First pick up any text before the url...
 				addText(elem, msg.substring(index, match.index));
-				index += match.index;
+				index = match.index;
 
 				//Now add a link for the found url
 				var url = match[0];
@@ -116,7 +116,8 @@ define(function (require) {
 		for (var i = 0; i < entries.length; i++) {
 			var e = entries[i];
 			if (e) {
-				e.remove();
+				//This doesn't work on FireFox: e.remove();
+				e.parentNode.removeChild(e);
 				entries[i] = null;
 			}
 		}
