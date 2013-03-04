@@ -35,9 +35,10 @@ var github = withPrefix('/github', githubFs.configure(
 	JSON.parse(nodefs.readFileSync(__dirname+'/../secret.json'))
 ));
 
-var scriptedHome = withPrefix('/scripted.home',
-	withBaseDir(scriptedHomeLocation)
-);
+var scriptedHome = withPrefix('/scripted.home', compose(
+	withPrefix('/plugins', withBaseDir(scriptedHomeLocation + '/plugins')),
+	withPrefix('/completions', withBaseDir(scriptedHomeLocation + '/completions'))
+));
 
 //All of our files, with the 'slim' node-like fs API:
 var corefs = compose(
