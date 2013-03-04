@@ -310,7 +310,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		/** @private */
 		getPrefixStart: function(end) {
 			var index = end;
-			while (index > 0 && /[A-Za-z0-9_]/.test(this.textView.getText(index - 1, index))) {
+			while (index > 0 && /[A-Za-z0-9_$]/.test(this.textView.getText(index - 1, index))) {
 				index--;
 			}
 			return index;
