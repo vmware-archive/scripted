@@ -18,8 +18,10 @@
 
 var path = require('path');
 
+var nodefs = require('fs');
 var mappedFs = require('../server/plugable-fs/mapped-fs');
 var scriptedFs = require('../server/plugable-fs/scripted-fs');
+var githubFs = require('../server/plugable-fs/github-fs');
 var compose = require('../server/plugable-fs/composite-fs').compose;
 
 var withBaseDir = mappedFs.withBaseDir;
@@ -29,6 +31,10 @@ var scriptedHomeLocation = path.resolve(__dirname, '..');
 
 var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
 
+var github = withPrefix('/github', githubFs.configure(
+	JSON.parse(nodefs.readFileSync(__dirname+'/../secret.json'))
+));
+
 var scriptedHome = withPrefix('/scripted.home',
 	withBaseDir(scriptedHomeLocation)
 );
@@ -36,6 +42,7 @@ var scriptedHome = withPrefix('/scripted.home',
 //All of our files, with the 'slim' node-like fs API:
 var corefs = compose(
 	sandbox,
+	github,
 	scriptedHome
 );
 

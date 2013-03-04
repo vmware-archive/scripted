@@ -5,3 +5,4 @@ scripted.log
 node_modules
 serv.log
 /client/components
+secret.json
