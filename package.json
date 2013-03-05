@@ -44,7 +44,8 @@
         "rest": "0.8.4",
         "express": "3.0.6",
 		"bower": "0.6.8",
-		"mime": "1.2.9"
+		"mime": "1.2.9",
+		"priorityqueuejs": "0.1.0"
 	},
 	"devDependencies": {
 		"fake-fs": "https://github.com/eldargab/node-fake-fs/archive/50f54e9551d9ece5578213564268021d4976db26.tar.gz",
