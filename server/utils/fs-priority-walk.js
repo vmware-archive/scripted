@@ -30,8 +30,9 @@
 // If a 'burried' directory / file needs to be searched early on then priorities
 // on the parent directory should be set high as well.
 
-var PRIORITY_INVISIBLE = -1000; // Anything <= this will be completely skipped in
-                                // searches.
+var PRIORITY_INVISIBLE = "invisible"; // A Special symbolic priority that completely
+                                      // hides/skips any items with this priority
+                                      // in the walk.
 
 var PRIORITY_DEFAULT = 0; // Anything not assigned a priority by the priorityFun will
 						  // be given this default priority.
@@ -42,47 +43,80 @@ var PRIORITY_DEFAULT = 0; // Anything not assigned a priority by the priorityFun
 
 var PriorityQueue = require('priorityqueuejs');
 var when = require('when');
+var timeout = require('when/timeout');
 var pathJoin = require('../jsdepend/utils').pathJoin;
 
 function compare(item1, item2) {
 	return item1.priority - item2.priority;
 }
 
+/**
+ * Try to detect 'bad' promisified function calls that have somehow dropped the ball
+ * and not resolved their promise. We do this by allowing a generous timeout for the
+ * promise to resolve and if it resolves on the timeout. Then we log something.
+ */
+function badPromiseFunctionFinder(f) {
+	function wrap() {
+		//We may not need all of this info but hey!
+		var args = Array.prototype.slice.call(arguments);
+		var stack = new Error().stack;
+		var promise = timeout(
+			f.apply(this, arguments),
+			60000 //a minute is long, but trust me it'll be worht the wait to find
+			      // out who's the culprit
+		);
+		promise.otherwise(function (err) {
+			if (err && err.message==='timed out') {
+				console.log('TIMED-OUT: '+f.name);// + JSON.stringify(args));
+				console.log(stack);
+			}
+		});
+		return promise;
+	}
+	wrap.name = f.name;
+	return wrap;
+}
+
 function configure(conf) {
 
-	var priorityFun = conf.priorityFun;
-
-	var listFiles = conf.listFiles;
-	var isDirectory = conf.isDirectory;
+	var listFiles = badPromiseFunctionFinder(conf.listFiles);
+	var isDirectory = badPromiseFunctionFinder(conf.isDirectory);
 
 	/**
-	 * Create a work item for the priority queue, consists of a path and a priority.
-	 */
-	function workItem(path) {
-		return {
-			path: path,
-			priority: priorityFun(path) || PRIORITY_DEFAULT
-		};
-	}
-
-	/**
-	 * Walk a subtree the configured filesystem starting at a given rootpath and using
-	 * configured priority function to influence the walking order.
+	 * Walk a subtree on the filesystem starting at a given rootpath and using
+	 * a given priority function to influence the walking order.
+	 *
+	 * The priority function may return the following values:
+	 *   - numeric priority. Higher numbered priorities will be processed earlier.
+	 *   - 'invisible': a special priority causing the item to be completely ignored.
+	 *   - undefined: automatically replaced with default numeric priority of 0.
 	 *
 	 * @param {String} rootPath where to start the walk
+	 * @param {function(String):(String|Number)?
 	 * @param {function(String):Promise} fileFun function that does some work on a file.
 	 */
-	function fswalk(rootPath, fileFun) {
+	function fswalk(rootPath, priorityFun, fileFun) {
 		var worklist = new PriorityQueue(compare);
+
+		fileFun = badPromiseFunctionFinder(fileFun);
+
+		/**
+		 * Create a work item for the priority queue, consists of a path and a priority.
+		 */
+		function workItem(path) {
+			return {
+				path: path,
+				priority: priorityFun(path) || PRIORITY_DEFAULT
+			};
+		}
 
 		/**
 		 * Enqueue an item, but only if it doesn't have so low a priority
 		 * that it is rendered 'INVISIBLE'.
 		 */
 		function enq(item) {
-			console.log(item.priority + ' : '+item.path);
-			if (item.priority <= PRIORITY_INVISIBLE) {
-				console.log('SKIP : '+item.path);
+			if (item.priority === PRIORITY_INVISIBLE) {
+				//console.log('SKIP : '+item.path);
 				//Skip invisible items
 			} else {
 				worklist.enq(item);
@@ -96,10 +130,12 @@ function configure(conf) {
 		 * that resolves when the walk terminates.
 		 */
 		function walk() {
+			console.log('worklist.size = '+worklist.size());
 			if (worklist.isEmpty()) {
-				return when.resolve();
+				return when.resolve('Is finished');
 			} else {
 				var item = worklist.deq();
+				//console.log(item.priority + ' : '+item.path);
 				var path = item.path;
 				return isDirectory(path).then(function (isDir) {
 					if (isDir) {
@@ -115,11 +151,14 @@ function configure(conf) {
 			}
 		}
 
+		walk = badPromiseFunctionFinder(walk);
+
 		return walk();
 	}
+
+	fswalk = badPromiseFunctionFinder(fswalk);
 
 	return fswalk;
 }
 
 exports.configure = configure;
-exports.PRIORITY_INVISIBLE = PRIORITY_INVISIBLE;
