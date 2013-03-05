@@ -168,6 +168,37 @@
 			});
 		}
 
+		/**
+		 * Pass a promise result or err to a nodejs style callback function.
+		 */
+		function nodeCallback(promise, callback) {
+			if (!callback) {
+				console.trace('undefined callback??');
+			}
+			promise.then(
+				function (result) {
+	//				console.log('nodeCallback ' +callback);
+	//				console.log('nodeCallback result = ' +result);
+					callback(/*noerror*/null, result);
+				},
+				function (error) {
+	//				console.log('nodeCallback error = ' +error);
+					callback(error);
+				}
+			).otherwise(function (err) {
+				//Add an otherwise here to make it easier to diagnose broken code.
+				//Without this errors thrown by the calls to the callback above are likely to
+				//be swallowed without a trace by the when library.
+				//Since when library will swallow (convert to a reject) anything thrown in here as well
+				//the only way to make sure there's a trace of this error is to log it here.
+				console.log(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+				return when.reject(err); //Stay rejected although this is probably swallowed anyway.
+			});
+		}
+
 		return {
 			not: not,
 			until: until,
@@ -176,7 +207,8 @@
 			each: each,
 			filter: filter,
 			findFirst: findFirst,
-			findFirstIndex: findFirstIndex
+			findFirstIndex: findFirstIndex,
+			nodeCallback: nodeCallback
 		};
 	});
 

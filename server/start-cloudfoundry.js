@@ -18,9 +18,12 @@
 
 var path = require('path');
 
+var nodefs = require('fs');
 var mappedFs = require('../server/plugable-fs/mapped-fs');
 var scriptedFs = require('../server/plugable-fs/scripted-fs');
+var githubFs = require('../server/plugable-fs/github-fs');
 var compose = require('../server/plugable-fs/composite-fs').compose;
+var readOnly = require('../server/plugable-fs/read-only-fs');
 
 var withBaseDir = mappedFs.withBaseDir;
 var withPrefix = mappedFs.withPrefix;
@@ -29,14 +32,24 @@ var scriptedHomeLocation = path.resolve(__dirname, '..');
 
 var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
 
-var scriptedHome = withPrefix('/scripted.home',
-	withBaseDir(scriptedHomeLocation)
-);
+var github = withPrefix('/github', githubFs.configure(
+	JSON.parse(nodefs.readFileSync(__dirname+'/../secret.json'))
+));
+
+var scriptedHome = withPrefix('/scripted.home', readOnly(compose(
+	//Needed to load built-in plugins
+	withPrefix('/plugins', withBaseDir(scriptedHomeLocation + '/plugins')),
+	//Needed to load built-in completions:
+	withPrefix('/completions', withBaseDir(scriptedHomeLocation + '/completions')),
+	//Needed to provide content assist for plugin APIs:
+	withPrefix('/client', withBaseDir(scriptedHomeLocation + '/client'))
+)));
 
 //All of our files, with the 'slim' node-like fs API:
 var corefs = compose(
 	sandbox,
-	scriptedHome
+	scriptedHome,
+	github
 );
 
 //Now wrap that to create our 'fat' API that scripted uses throughout its codebase.
