@@ -1,6 +1,6 @@
 {
 	"name": "scripted",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "A fast and lightweight browser based code editor",
 	"keywords": [ "javascript", "browser", "code", "editor" ],
 	"repository": {
@@ -17,7 +17,11 @@
 		"Alain Kalker <a.c.kalker@gmail.com>",
 		"Nieraj Singh <nierajsingh@vmware.com>",
 		"Scott Andrews <andrewss@vmware.com>",
-		"Jeremy Grelle <jgrelle@vmware.com>"
+		"Jeremy Grelle <jgrelle@vmware.com>",
+		"Brian Cavalier <bcavalier@vmware.com>",
+		"John Hann <jhann@vmware.com>",
+		"Tony Georgiev <tgeorgiev@vmware.com>",
+		"Loc Nguyen <nal_io@yahoo.com>"
 	],
 	"bin": {
 		"scr": "./bin/scr",
