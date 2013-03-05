@@ -15,6 +15,17 @@
 // A start script to run scripted server on cloudfoundry
 //
 
+// TODO: Before this can go 'public'
+//
+//   - disable 'exec' related features. Don't really want people to run exec commands
+//     on cf hosts.
+//   - github-fs
+//        - needs some cache management cleanup so it can avoid running out of memory
+//        - login mechanis to obtain oauth token for individual user
+//   - remove or fix the 'Play' button.
+//   - Customized readme shown when opening on a folder.
+//   - A reasonable piece of sample code to pre-populate first-time visitor space.
+//   - Ask Scott to vacate domain name 'scripted.cloudfoundry.com' so we can use that.
 
 var path = require('path');
 
