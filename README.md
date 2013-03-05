@@ -60,6 +60,9 @@ This will install directly from master.
 
 ### Download a packaged zip
 
+[Version 0.4.0 zip](http://dist.springsource.org/release/SCRIPTED/scripted_v0.4.0.zip)<br>
+[Version 0.4.0 Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_4_0/scripted_0_4_0.html)
+
 [Version 0.3.0 zip](http://dist.springsource.org/release/SCRIPTED/scripted_v0.3.0.zip)<br>
 [Version 0.3.0 Release Notes](http://scripted-editor.github.com/scripted/release_notes/0_3_0/scripted_0_3_0.html)
 
