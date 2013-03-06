@@ -33,7 +33,7 @@ function configure(filesystem) {
 	var createReadStream = filesystem.createReadStream;
 
 	var NEWLINE = '\n';  // TODO  doesn't care about \r - maybe it should
-	var MAX_LINE_LEN = 1000; //if lines are longer than this, we bail out of trying to read the file
+	var MAX_LINE_LEN = 10000; //if lines are longer than this, we bail out of trying to read the file
 							// we'll assume its something funky like a minified file rather than
 							// something people would actually like to read and/or search in.
 

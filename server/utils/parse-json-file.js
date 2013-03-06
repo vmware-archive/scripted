@@ -59,7 +59,7 @@ define(function(require) {
 			if (callback) {
 				d.then(callback);
 			}
-			return d;
+			return d.promise;
 		}
 
 		return parseJsonFile;

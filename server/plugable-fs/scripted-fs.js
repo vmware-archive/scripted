@@ -312,7 +312,7 @@ function configure(fs, options) {
 				d.resolve();
 			}
 		});
-		return d;
+		return d.promise;
 	}
 
 	/**
@@ -327,7 +327,7 @@ function configure(fs, options) {
 				d.resolve();
 			}
 		});
-		return d;
+		return d.promise;
 	}
 
 	/**

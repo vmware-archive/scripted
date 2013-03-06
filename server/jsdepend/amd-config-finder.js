@@ -488,7 +488,7 @@ function configure(conf) {
 					return d.resolve(r);
 				});
 			}
-			return d.then(callback);
+			return d.promise.then(callback);
 		}
 		if (timeout) {
 			setInterval(function() {

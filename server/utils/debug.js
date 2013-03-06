@@ -11,72 +11,98 @@
  *   Kris De Volder
  ******************************************************************************/
 
-var nodefs = require('fs');
-var pathGlob = require('./path-glob').fromJson;
-var filesystem = require('../plugable-fs/scripted-fs').configure(
-	nodefs
-);
-var pathResolve = require('../jsdepend/utils').pathResolve;
-var extend = require('../jsdepend/utils').extend;
+var whileLoop = require('./promises').whileLoop;
 var delay = require('when/delay');
 
-//var root = pathResolve(__dirname, '../..');
-var root = '/home/kdvolder/commandline-dev/new-tools/scripted/node_modules';
-var thirdParty = pathGlob([
-	'/**/node_modules',
-	'/**/components'
-]);
-var projectLower = pathGlob('/**/test*');
-var invisible = pathGlob('/**/.git');
-
-function priority(path) {
-	if (projectLower.test(path)) {
-		return -1; //lower priority that normal project files.
-	} else if (thirdParty.test(path)) {
-		return -2; //lower priority than project files
-	} else if (invisible.test(path)) {
-		return "invisible"; //hidden files, should match stuff like hash/cache directories, source control dirs
-		                    // etc... anything you don't really ever want to see or search.
-	}
-	//return 0;
+function testLoop(count) {
+	return whileLoop(
+		function () {
+//			if (count===3) {
+//				throw new Error('Condition has a bug on 3');
+//			}
+			return count>0;
+		},
+		function () {
+//			if (count===3) {
+//				throw new Error('Body has a bug on 3');
+//			}
+			console.log(count--);
+			return delay(null, 1);
+		}
+	);
 }
 
-var fswalk = require('./fs-priority-walk').configure(filesystem);
-
-fswalk(root, priority, function (path) {
-	console.log('Visit: '+path);
-	return delay(undefined, 1);
-}).then(function (val) {
+testLoop(10000).then(function () {
 	console.log('Done');
 }).otherwise(function (err) {
-	console.error(err);
+	console.log(err);
 });
 
-//var when = require('when');
+
+//var each = require('./promises').each;
+//var nodefs = require('fs');
+//var pathGlob = require('./path-glob').fromJson;
+//var filesystem = require('../plugable-fs/scripted-fs').configure(
+//	nodefs
+//);
+//var pathResolve = require('../jsdepend/utils').pathResolve;
+//var extend = require('../jsdepend/utils').extend;
+//var delay = require('when/delay');
+//var timeout = require('when/timeout');
 //
-//function fswalk(i, work) {
-//	var q = i;
-//	function walk() {
-//		if (q === 0) {
-//			return when.resolve();
-//		} else {
-//			return when(work(q--)).then(walk);
-//		}
+////var root = pathResolve(__dirname, '../..');
+////var root = '/home/kdvolder/commandline-dev/new-tools/scripted/node_modules';
+//
+//var thirdParty = pathGlob([
+//	'/**/node_modules',
+//	'/**/components'
+//]);
+//var projectLower = pathGlob('/**/test*');
+//var invisible = pathGlob('/**/.git');
+//
+//function priority(path) {
+//	if (projectLower.test(path)) {
+//		return -1; //lower priority that normal project files.
+//	} else if (thirdParty.test(path)) {
+//		return -2; //lower priority than project files
+//	} else if (invisible.test(path)) {
+//		return "invisible"; //hidden files, should match stuff like hash/cache directories, source control dirs
+//		                    // etc... anything you don't really ever want to see or search.
 //	}
-//	return walk();
+//	//return 0;
 //}
 //
-//function work(i) {
-//	var d = when.defer();
-//	process.nextTick(function() {
-//		console.log(i);
-//		d.resolve();
+//var fswalk = require('./fs-priority-walk').configure(filesystem);
+//
+//var dirs = ['/home/kdvolder/commandline-dev/new-tools/scripted/node_modules'];
+//
+//each(dirs, function (root) {
+//	var result = fswalk(root, priority, function (path) {
+////		if (path.indexOf('websocket.io')>=0) {
+////			throw new Error('Bad path rejected: '+path);
+////		}
+//		//console.log('Visit: '+path);
+//		return delay(undefined, 1);
 //	});
-//	return d.promise;
-//}
-//
-//fswalk(100000, work).then(function () {
+//	return timeout(result, 60000).then(function () {
+//		console.log('DONE:  '+root);
+//	}).otherwise(function (err) {
+//		console.log('BAD: '+root);
+//		console.log(err);
+//	});
+//}).then(function() {
+//	console.log('===================================================');
+//}).otherwise(function (err) {
+//	console.error(err);
+//});
+
+
+//fswalk(root, priority, function (path) {
+//	console.log('Visit: '+path);
+//	return delay(undefined, 1);
+//}).then(function (val) {
 //	console.log('Done');
 //}).otherwise(function (err) {
 //	console.error(err);
 //});
+

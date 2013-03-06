@@ -15,6 +15,24 @@
 // for settings configured via the '.scripted' or '.scripterc' file.
 module.exports = {
 	lint: {
-		exclude_dirs : 'node_modules'
+		//TODO: actually should use path glob exps to configure lint exclusion to be
+		// consistent with search exclusion
+		exclude_dirs : [
+			'node_modules',
+			'components' //Bower components.
+		]
+	},
+	search: {
+		//exclude: []
+		deemphasize: [
+			//Not deemphasized: any files not mathcin
+			'**/test*', //Test files in the user's own code.
+			'.*', //Toplevel . files
+			'*/**/.*', //Nested . files
+			[	//All at the bottom: third party library code
+				'**/node_modules',
+				'**/components' //bower installed components
+			]
+		]
 	}
 };

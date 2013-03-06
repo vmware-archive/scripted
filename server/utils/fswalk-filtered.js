@@ -12,47 +12,38 @@
  ******************************************************************************/
 
 //
-// This module provides a convenient wrapper around the fswalk module to
+// This module provides a convenient wrapper around the priority-fswalk module to
 // create 'configured' versions of fswalk that filters the tree based on
-// exclude patterns in the '.scripted' config file.
+// exclude and priority patterns in the '.scripted' config file.
+
+var extend = require('../jsdepend/utils').extend;
+var glob = require('../utils/path-glob');
+var deref = require('../jsdepend/utils').deref;
+var pathResolve = require('../jsdepend/utils').pathResolve;
 
 function configure(filesystem) {
 
-	/**
-	 * Create a configured version of fswalk module based on the .scripted configuration
-	 * info discovered in the context of a given path.
-	 *
-	 * @return {Promise}
-	 */
-	function forPath(searchroot) {
-		var extend = require('../jsdepend/utils').extend;
-		var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
-		var glob = require('../utils/path-glob');
-		var deref = require('../jsdepend/utils').deref;
-		var pathResolve = require('../jsdepend/utils').pathResolve;
-		var mFswalk = require('../jsdepend/fswalk'); //fswalk module not yet configured.
+	var _fswalk = require('./fs-priority-walk').configure(filesystem);
+	var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
 
-		var walkerConf = filesystem;
+	function makePriorityFun(conf) {
+		var ignorePatterns = deref(conf, ['search', 'exclude']);
+		var ignoreGlob = glob.fromJson(ignorePatterns, conf.fsroot);
+		var deemphasizePatterns = deref(conf, ['search', 'deemphasize']);
+		function priority(path) {
+		}
+		return priority;
+	}
 
-		return getDotScripted(searchroot).then(function (conf) {
-			var ignorePatterns = deref(conf, ['search', 'exclude']);
-			var ignoreGlob = null;
-			if (ignorePatterns) {
-				ignoreGlob = glob.fromJson(ignorePatterns, conf.fsroot);
-				//console.log('ignore glob for fswalk: \n'+ignoreGlob);
-				walkerConf = extend(filesystem, {
-					ignorePath: function (path) {
-						return ignoreGlob.test(path);
-					}
-				});
-			}
-			return mFswalk.configure(walkerConf);
+	function fswalk(searchRoot, workFun) {
+		return getDotScripted(searchRoot).then(
+			makePriorityFun
+		).then(function (priorityFun) {
+			return _fswalk(searchRoot, priorityFun, workFun);
 		});
 	}
 
-	return {
-		forPath: forPath
-	};
+	return fswalk;
 
 }
 exports.configure = configure;
