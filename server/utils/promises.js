@@ -199,7 +199,51 @@
 			});
 		}
 
+		/**
+		 * A while loop that avoids the exceeding stack limits on propagating the
+		 * final resolve result of the body back to the caller.
+		 */
+		function whileLoop(condition, body) {
+			var d = when.defer();
+			//It seems that when library does ok passing control down into the recursive loop...
+			// but it has bit of trouble crawling back out of the resolve chain if gets too
+			// long.
+			//See : https://gist.github.com/kdvolder/5095739
+			//I'd fix the when library if I knew how.... But I don't so...
+			//So instead we shall work around this by transmitting any resolves or
+			// rejects that occur inside the loop back directly to our loop's entry-point's
+			//returned promise.
+
+			//Helper function to transmit an error directly out of the loop
+			function reject(err) {
+				d.reject(err);
+			}
+
+			//Helper function to transmist a result directly out of the loop.
+			function resolve(value) {
+				d.resolve(value);
+			}
+
+			function loop() {
+				when(undefined, condition).then(
+					function (c) {
+						if (c) {
+							when(undefined, body).then(loop, reject);
+						} else {
+							resolve();
+						}
+					},
+					reject
+				);
+				//Yes, it's on purpose we don't return anything anywhere since it doesn't
+				//work anyway if the chain gets too deep.
+			}
+			loop();
+			return d.promise;
+		}
+
 		return {
+			whileLoop: whileLoop,
 			not: not,
 			until: until,
 			orMap: until, // just another name I like to use.
