@@ -23,9 +23,11 @@ var SERVICE_NAME = 'ifsearch';
 //The reason this servlet is 'special' is it doesn't
 //have a simple http request handler but uses 'sockjs' (WebSockets).
 
+var when = require('when');
 var websockets = require('./websockets-servlet');
 var extend = require('../jsdepend/utils').extend;
 var getFileName = require('../jsdepend/utils').getFileName;
+var deref = require('../jsdepend/utils').deref;
 
 var LOG_SOCKET_COUNT = false;
 var MAX_RESULTS_DEFAULT = 30; // When this number is reached, then the walker will be paused.
@@ -40,7 +42,10 @@ function debug_log(msg, obj) {
 exports.install = function (server, filesystem) {
 
 	var searchFile = require('../textsearch/searcher').configure(filesystem);
-	var mFswalk = require('../utils/fswalk-filtered').configure(filesystem);
+	var getDotScripted = require('../jsdepend/dot-scripted').configure(filesystem).getConfiguration;
+	var fsPriorityWalk = require('../utils/fs-priority-walk').configure(filesystem);
+	var makePriorityFun = fsPriorityWalk.makePriorityFun;
+	var fswalk = fsPriorityWalk.fswalk;
 
 	websockets.install(server);
 
@@ -68,7 +73,8 @@ exports.install = function (server, filesystem) {
 		var results = {}; // The 'keys' of this map are the results we have already sent to the client.
 		var searchRoot = null; //The file system path in which to start the search
 							   //Set when we have determined/received the search context.
-		var fswalk = null; // fswalk function configured based on search root. Set once when configured.
+		var priorityFun = null; // priorityFun for walker, based on search root.
+								// Set once when configured.
 		var options = {};
 
 		/**
@@ -144,8 +150,8 @@ exports.install = function (server, filesystem) {
 			if (!searchRoot) {
 				console.error('Can not start search: the search context is not defined');
 			}
-			if (!fswalk) {
-				console.error('Can not start search: the fswalk function is not configured');
+			if (!priorityFun) {
+				console.error('Can not start search: the priority function is not configured');
 			}
 			var canceled = false;
 			var paused = false; // Intially, set to true when pause is requested. Then when
@@ -157,67 +163,73 @@ exports.install = function (server, filesystem) {
 			//console.log("starting search in: "+searchRoot);
 
 			/**
-			 * Given a function that represents 'remaining work'. Either continue the work,
-			 * by calling this function. Or store the function for later resuming the work.
+			 * Returns a promise we can call 'then' on to do some work.
+			 * The promise may be resolved immediately or it may be a real promise
+			 * when a 'pause' was requested. In that case the promise will be resolved
+			 * when the work needs to be resumed.
 			 */
-			function pauseOrRun(work) {
+			function pauseOrRun() {
 				//process.nextTick(work);
 				if (paused===true) { // a 'pause' was requested.
 					//console.log("suspend walking");
-					paused = work;
+					paused = when.defer();
 					send({pause:[]});
+					return paused.promise;
 				} else {
 					if (!paused) {
-						//console.log("continue walking");
-						process.nextTick(work);
+						return when.resolve();
 					} else {
 						//Seems like somehow a walker is both running and suspended at the same time. That should not
 						//be possible!
-						throw "Illegal state: It looks like we still have a function in 'paused' although walker is still running!";
+						return when.reject("Illegal state: It looks like we still have a 'paused' promise although walker is still running!");
 					}
 				}
 			}
 
 			send({start:[]});
-			fswalk(searchRoot,
-				/*called for each file*/
-				function (filepath, k) {
-					pauseOrRun(function(){
-						if (!canceled) {
-							searchFile(query, filepath,
-								//called on each match in the file (may be called 0 or more times)
-								function (match) {
-									if (!canceled) {
-										addResult(match);
-									}
-								},
-								//called when file is fully processed
-								function () {
-									k(canceled);
-								}
-							);
-						} else {
-							k(canceled);
-						}
-					});
-				},
-
-				/*called when walk stops*/
-				function () {
+			fswalk(searchRoot, priorityFun, function (filepath) {
+				return pauseOrRun().then(function() {
 					if (!canceled) {
-						//console.log("sending done");
-						done = true;
-						send({done: []});
+						var d = when.defer();
+						searchFile(query, filepath,
+							//called on each match in the file (may be called 0 or more times)
+							function (match) {
+								if (!canceled) {
+									addResult(match);
+								}
+							},
+							//called when file is fully processed
+							function () {
+								if (canceled) {
+									d.reject('canceled');
+								} else {
+									d.resolve();
+								}
+							}
+						);
+						return d.promise;
+					} else {
+						throw 'canceled';
+					}
+				});
+			}).then(function () {
+				done = true;
+				send({done: []});
+			}).otherwise(function (err) {
+				if (err!=='canceled') {
+					console.error(err);
+					if (err.stack) {
+						console.log(err.stack);
 					}
 				}
-			);
+			});
 			//Return a bunch of functions that allow manipulating the active search (pause, resume, cancel it).
 			return {
 				cancel: function () {
 					canceled = true;
 				},
 				pause: function () {
-					//If double pausing, take care not to accidentally wipe out a work function that may
+					//If double pausing, take care not to accidentally wipe out a deferred that may
 					//already be stored in the 'paused' variable.
 					paused = paused || true;
 				},
@@ -228,11 +240,11 @@ exports.install = function (server, filesystem) {
 						// get what it expects and can update 'noresults found' info if needed.
 						send({start:[]});
 						send({done:[]});
-					} else if (typeof(paused)==='function') {
+					} else if (paused && paused.resolve) {
 						//we have some work to resume
-						var work = paused;
+						var deferred = paused;
 						paused = false;
-						work();
+						deferred.resolve();
 					} else if (paused) {
 						//paused, but we have no work to resume.
 						paused = false;
@@ -271,9 +283,19 @@ exports.install = function (server, filesystem) {
 					options = opts || {};
 					maxResults = options.maxResults || MAX_RESULTS_DEFAULT;
 					//console.log('maxResults = '+maxResults);
-					mFswalk.forPath(sr).then(function (configured) {
-						fswalk = configured.asynchWalk;
+					getDotScripted(sr).then(function (dotScripted) {
+						var priorityConf = {
+							fsroot: deref(dotScripted, ['fsroot']),
+							exclude: deref(dotScripted, ['search', 'exclude']),
+							deemphasize: deref(dotScripted, ['search', 'deemphasize'])
+						};
+						priorityFun = makePriorityFun(priorityConf);
 						activeWalker = startSearch();
+					}).otherwise(function(err) {
+						console.error(err);
+						if (err.stack) {
+							console.log(err.stack);
+						}
 					});
 				} else {
 					console.error("multiple queries received on the same /ifsearch connection");

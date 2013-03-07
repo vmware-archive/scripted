@@ -21,7 +21,8 @@
 //     on cf hosts.
 //   - github-fs
 //        - needs some cache management cleanup so it can avoid running out of memory
-//        - login mechanis to obtain oauth token for individual user
+//        - cache contents of files as well
+//        - login mechanis to obtain oauth token for individual user (optional for 'demo')
 //   - remove or fix the 'Play' button.
 //   - Customized readme shown when opening on a folder.
 //   - A reasonable piece of sample code to pre-populate first-time visitor space.
@@ -55,6 +56,10 @@ var scriptedHome = withPrefix('/scripted.home', readOnly(compose(
 	//Needed to provide content assist for plugin APIs:
 	withPrefix('/client', withBaseDir(scriptedHomeLocation + '/client'))
 )));
+
+//var scriptedHome = withPrefix('/scripted.home',
+//	withBaseDir(scriptedHomeLocation)
+//);
 
 //All of our files, with the 'slim' node-like fs API:
 var corefs = compose(

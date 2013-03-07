@@ -187,7 +187,7 @@ function configure(conf) {
 
 	var priorityConf = {
 		fsroot: root,
-		exclude: '.git',
+		exclude: ['** /require.js'],
 		deemphasize: [
 			//Deemphasize a little (priority = default -100 ):
 			'/** /test*',

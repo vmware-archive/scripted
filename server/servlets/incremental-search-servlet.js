@@ -220,7 +220,6 @@ exports.install = function (server, filesystem) {
 							exclude: deref(dotScripted, ['search', 'exclude']),
 							deemphasize: deref(dotScripted, ['search', 'deemphasize'])
 						};
-						console.log('priorityConf = '+JSON.stringify(priorityConf, null, '   '));
 						priorityFun = makePriorityFun(priorityConf);
 						activeWalker = startSearch();
 					}).otherwise(function(err) {
@@ -302,7 +301,7 @@ exports.install = function (server, filesystem) {
 			}
 		}
 		conn.on('data', function (message) {
-			//console.log("isearch ["+id+"] << "+message);
+			console.log("isearch ["+id+"] << "+message);
 			receive(JSON.parse(message));
 		});
 

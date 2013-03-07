@@ -37,7 +37,7 @@ define(function(require) {
 		 * by adding an explanation to the object in a property called 'error'.
 		 */
 		function parseJsonFile(handle, callback) {
-			var d = getContents(handle).then(function (contents) {
+			var promise = getContents(handle).then(function (contents) {
 				var data = null;
 				if (!ALL_WHITE_SPACE.test(contents)) {
 					try {
@@ -57,9 +57,9 @@ define(function(require) {
 			//Also support callback form so we don't have to convert all clients
 			//of this function to deferred style
 			if (callback) {
-				d.then(callback);
+				promise.then(callback);
 			}
-			return d.promise;
+			return promise;
 		}
 
 		return parseJsonFile;

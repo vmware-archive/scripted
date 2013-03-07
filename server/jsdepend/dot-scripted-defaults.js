@@ -23,12 +23,11 @@ module.exports = {
 		]
 	},
 	search: {
-		//exclude: []
+		exclude: '**/require.js', //Why would you wanna search in there really?
 		deemphasize: [
 			//Not deemphasized: any files not mathcin
 			'**/test*', //Test files in the user's own code.
-			'.*', //Toplevel . files
-			'*/**/.*', //Nested . files
+			'**/.*', //. files
 			[	//All at the bottom: third party library code
 				'**/node_modules',
 				'**/components' //bower installed components
