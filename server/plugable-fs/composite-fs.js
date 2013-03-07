@@ -396,7 +396,6 @@ function compose() {
 					return entries;
 				});
 			}
-
 			nodeCallback(
 				filter(subsystems, function (fs) {
 					//The only subystems that matter are those where the handle exists.

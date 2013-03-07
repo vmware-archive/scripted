@@ -45,7 +45,7 @@ var scriptedHomeLocation = path.resolve(__dirname, '..');
 var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
 
 var github = withPrefix('/github', githubFs.configure(
-	JSON.parse(nodefs.readFileSync(__dirname+'/../secret.json'))
+	JSON.parse(nodefs.readFileSync(__dirname+'/../../secret.json'))
 ));
 
 var scriptedHome = withPrefix('/scripted.home', readOnly(compose(
