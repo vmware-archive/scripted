@@ -17,6 +17,8 @@ var filter = promiseUtils.filter;
 var findFirst = promiseUtils.findFirst;
 var when = require('when');
 var toCompareString = require('../../server/jsdepend/utils').toCompareString;
+var whileLoop = promiseUtils.whileLoop;
+var delay = require('when/delay');
 
 exports.emptyArray = function (test) {
 	when(
@@ -66,7 +68,7 @@ exports.allElementsFail = function (test) {
 			}
 		}),
 		function (r) {
-			test.ok(false, "The promise should reject but it resolved");
+			test.ok(false, 'The promise should reject but it resolved');
 		},
 		function (err) {
 			test.done();
@@ -88,7 +90,7 @@ exports.lastElementSucceeds = function (test) {
 			test.done();
 		},
 		function (err) {
-			test.ok(false, "Should resolve but it rejects");
+			test.ok(false, 'Should resolve but it rejects '+err);
 		}
 	);
 };
@@ -272,3 +274,113 @@ exports.filter = function (test) {
 	);
 
 };
+
+//Basic while loop
+exports.whileLoop = function (test) {
+	var output = '';
+
+	var i = 9;
+	whileLoop(function () { //condition
+		return i>0;
+	},
+	function () {
+		output += i--;
+	}).then(function () {
+		test.equals(output, '987654321');
+		test.done();
+	});
+};
+
+//Now with real promises
+exports.whileLoopPromises = function (test) {
+	var output = '';
+
+	var i = 9;
+	whileLoop(function () { //condition
+		return delay(i>0, 1);
+	},
+	function () {
+		output += i--;
+		return delay(i*100); //Try our best to destablize the order by making longer delays for the
+		                // our earliest elements.
+	}).then(function () {
+		test.equals(output, '987654321');
+		test.done();
+	});
+};
+
+//If the condition throws loop should reject
+exports.whileLoopConditionThrows = function (test) {
+	var output = '';
+
+	var i = 9;
+	whileLoop(function () { //condition
+		if (i==3) {
+			throw 'Condition';
+		}
+		return delay(i>0, 1);
+	},
+	function () {
+		output += i--;
+		return delay(i*100); //Try our best to destablize the order by making longer delays for the
+		                // our earliest elements.
+	}).then(function () {
+		test.fail('Should have rejected');
+		test.done();
+	}).otherwise(function (err) {
+		test.equals('Condition', err);
+		test.done();
+	});
+};
+
+//If the body throws loop should reject
+exports.whileLoopBodyThrows = function (test) {
+	var output = '';
+
+	var i = 9;
+	whileLoop(function () { //condition
+		return delay(i>0, 1);
+	},
+	function () {
+		if (i==3) {
+			throw 'Body';
+		}
+		output += i--;
+		return delay(i*100); //Try our best to destablize the order by making longer delays for the
+		                // our earliest elements.
+	}).then(function () {
+		test.fail('Should have rejected');
+		test.done();
+	}).otherwise(function (err) {
+		test.equals('Body', err);
+		test.done();
+	});
+};
+
+//The whileLoop should be able to handle lots of iterations
+// that is afterall its sole purpose.
+exports.whileLoopManyItearations = function (test) {
+	var output = '';
+
+	//3000 already breaks the normal recursive way to write a whileLoop
+	// See https://gist.github.com/kdvolder/5095739
+	var i = 10000;
+
+	whileLoop(function () { //condition
+		return i>0;
+	},
+	function () {
+		if (i<10) {
+			output += i;
+		}
+		i--;
+		return delay(1);
+	}).then(function () {
+		test.equals(output, '987654321');
+		test.done();
+	});
+};
+
+//Note we don't have an expectation that whileLoop works also with deep iteration
+// when both condition/body are non-async. In that case, just use a real while loop!
+

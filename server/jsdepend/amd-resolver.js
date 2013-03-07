@@ -58,7 +58,7 @@ function configure(conf) {
 		getAmdConfig(context, function (resolverConf) {
 			deferred.resolve(mPathMapper.configure(resolverConf));
 		});
-		return deferred;
+		return deferred.promise;
 	}
 
 	function isRelative(path) {
@@ -145,6 +145,12 @@ function configure(conf) {
 				//console.log(resolverConf);
 				dep.path = mapper(resource) + ext;
 				callback(dep);
+			}).otherwise(function (err) {
+				console.error(err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
+				callback(err);
 			});
 		}
 	}

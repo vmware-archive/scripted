@@ -17,8 +17,8 @@
 
 //THIS CODE IS NOT PART OF scripted (its not loaded by any other module)
 
-var testCase = require('./plugable-fs/composite-fs-test.js')
-	.statNeitherLeftOrRightHas;
+//var testCase = require('./plugable-fs/composite-fs-test.js')
+//	.statNeitherLeftOrRightHas;
 //	.statLeftFsWins;
 
 //var testCase = require('./completions-test')
@@ -41,7 +41,9 @@ var testCase = require('./plugable-fs/composite-fs-test.js')
 //	.globalDependenciesSimple1;
 
 //var testCase = require('./dot-scripted-test')
+//	.readDotScripted;
 //	.getScriptedRcFile;
+//	.readScriptedRc;
 
 //var testCase = require('./module-types-test.js')
 //	.bigFile;
@@ -78,12 +80,15 @@ var testCase = require('./plugable-fs/composite-fs-test.js')
 //var testCase = require('./reference-finder-test')
 //	.commonjsRefs;
 
+var testCase = require('./template-provider-test')
+	.providerTest;
+
 testCase({
 	equals: function (a, b) {
 		console.log('equals? '+ a + ' === '+ b);
 	},
 	ok: function (bool, msg) {
-		console.log('ok? '+bool);
+		console.trace('ok? '+bool);
 		if (!bool) {
 			console.error(msg);
 		}

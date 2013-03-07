@@ -60,16 +60,22 @@ exports.readDotScripted = function (test) {
 	api.getConfiguration('client/scripts/editor.js', function (conf) {
 		test.equals(
 			toCompareString({
-				"lint" : { exclude_dirs : 'node_modules' },
-			    "exec": {
-			        "onKeys" : {
-				        "ctrl+alt+c": "node releng/copycheck.js"
-				    }
+				"lint": {
+					"exclude_dirs": ["node_modules", "components"]
 				},
-			    "ui": {
-					"font_size":11
+				"search": {
+					"exclude": "**/require.js",
+					"deemphasize": ["**/test*", "**/.*", ["**/node_modules", "**/components"]]
 				},
-				"fsroot" : "."
+				"exec": {
+					"onKeys": {
+						"ctrl+alt+c": "node releng/copycheck.js"
+					}
+				},
+				"ui": {
+					"font_size": 11
+				},
+				"fsroot": "."
 			}),
 			toCompareString(conf)
 		);
@@ -82,11 +88,17 @@ exports.readScriptedRc = function (test) {
 	api.getConfiguration('bork/foo.js', function (conf) {
 		test.equals(
 			toCompareString({
-				"lint" : { exclude_dirs : 'node_modules' },
-			    "ui": {
+				"lint": {
+					"exclude_dirs": ["node_modules", "components"]
+				},
+				"search": {
+					"exclude": "**/require.js",
+					"deemphasize": ["**/test*", "**/.*", ["**/node_modules", "**/components"]]
+				},
+				"ui": {
 					"font_size": 99
 				},
-				"fsroot" : "bork"
+				"fsroot": "bork"
 			}),
 			toCompareString(conf)
 		);
@@ -99,7 +111,13 @@ exports.combineScriptedRcAndDotScripted = function (test) {
 	api.getConfiguration('bork/foo.js', function (conf) {
 		test.equals(
 			toCompareString({
-				"lint" : { exclude_dirs : 'node_modules' },
+				"lint": {
+					"exclude_dirs": ["node_modules", "components"]
+				},
+				"search": {
+					"exclude": "**/require.js",
+					"deemphasize": ["**/test*", "**/.*", ["**/node_modules", "**/components"]]
+				},
 				"readScriptedRc" : true,
 			    "ui": {
 					"font_size": 5
@@ -118,7 +136,13 @@ exports.scriptedRcDir = function (test) {
 	api.getConfiguration('bork/foo.js', function (conf) {
 		test.equals(
 			toCompareString({
-				"lint" : { exclude_dirs : 'node_modules' },
+				"lint": {
+					"exclude_dirs": ["node_modules", "components"]
+				},
+				"search": {
+					"exclude": "**/require.js",
+					"deemphasize": ["**/test*", "**/.*", ["**/node_modules", "**/components"]]
+				},
 			    "ui": {
 					"font_size": 99
 				},

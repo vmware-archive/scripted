@@ -18,7 +18,16 @@ var mappedFs = require('../plugable-fs/mapped-fs');
 var scriptedfs = require('../plugable-fs/scripted-fs');
 var pathResolve = require('../jsdepend/utils').pathResolve;
 
+/**
+ * This function filters out file/dir names we probably *never* want to show to users.
+ * As such they can't be overriden via scripted config. So be carful adding stuff in here
+ * users can not override the behavior.
+ */
 function ignore(name) {
+	//Deprecated: we should not be using this anymore to hardwire
+	// certain things to ignore. The ignores are now all configured (or should be)
+	// via '.scripted' configs. And defaults should be provided via
+	// 'dot-scripted-defaults.js'
 	var result = false;
 	if (typeof(name)!=='string') {
 		result = true;
@@ -26,7 +35,7 @@ function ignore(name) {
 		result = true;
 	} else if (name===".svn") {
 		result = true;
-	} else if (name==="node_modules") {
+	} else if (name===".cvs") {
 		result = true;
 	}
 	// console.log('ignore? '+name+' => '+result);

@@ -11,6 +11,8 @@
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
 
+console.log('Loading');
+
 /*global require exports __dirname console */
 
 //To run this test do this on the commandline:

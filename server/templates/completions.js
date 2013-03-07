@@ -25,10 +25,12 @@ function configure(filesystem) {
 var JSON5 = require('json5');
 var when = require('when');
 var dotscripted = require('../jsdepend/dot-scripted').configure(filesystem);
-var pathResolve = require('../jsdepend/utils').pathResolve;
+var pathJoin = require('../jsdepend/utils').pathJoin;
+var endsWith = require('../jsdepend/utils').endsWith;
+var listFiles = filesystem.listFiles;
+var each = require('../utils/promises').each;
 
 var EXTENSION = ".scripted-completions";
-var EXTENSION_LEN = EXTENSION.length;
 
 var exports = {};
 
@@ -53,53 +55,27 @@ exports.CompletionsProcessor.prototype = {
 
 	// these are the default folders.
 	completionsFolders : [
-		pathResolve(filesystem.getScriptedHome(), 'completions'),
+		pathJoin(filesystem.getScriptedHome(), 'completions'),
 		dotscripted.getScriptedRcDirLocation()
 	],
 
 	// determine the file locations where completions are stored
 	findCompletionsFiles : function(cb) {
-		var realFiles = [];
-
-		var processDir = function(deferred, folder) {
-			// first go stat the directory to make sure it exists and is a dir
-			// were getting problems on windows when trying to list files
-			// of a non-existant dir
-			filesystem.stat(folder).then(function (stats) {
-				if (stats.isDirectory) {
-					console.log("listing files for " + folder);
-					filesystem.listFiles(folder).then(function(files) {
-						for (var i = 0; i < files.length; i++) {
-							if (files[i].substr(- EXTENSION_LEN, EXTENSION_LEN) === EXTENSION) {
-								console.log("Found " + files[i]);
-								realFiles.push(pathResolve(folder, files[i]));
-							}
-						}
-						deferred.resolve(realFiles);
-					}, function(err) {
-						console.log ("Directory " + err.path + " not found");
-						deferred.resolve(realFiles);
-					});
-				} else {
-					console.log (folder + " is not a directory");
-					deferred.resolve(realFiles);
+		var result = [];
+		each(this.completionsFolders, function (folder) {
+			return each(listFiles(folder), function (name) {
+				if (endsWith(name, EXTENSION)) {
+					result.push(pathJoin(folder,name));
 				}
-			}, function(err) {
-				console.log(err);
-				deferred.resolve(realFiles);
 			});
-		};
-
-		var deferreds = [];
-		for (var i = 0; i < this.completionsFolders.length; i++) {
-			console.log("About to process " + this.completionsFolders[i]);
-			var deferred = when.defer();
-			deferreds.push(deferred);
-			processDir(deferred, this.completionsFolders[i]);
-		}
-		when.all(deferreds).then(function() { cb(realFiles); });
+		}).then(function () {
+			cb(result);
+		}).otherwise(function (err) {
+			//Protection against bugs
+			console.error(err);
+			cb([]);
+		});
 	},
-
 
 	// finds the associated closing bracket
 	findClosingBracket : function(contents, start) {

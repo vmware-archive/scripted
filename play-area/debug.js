@@ -10,30 +10,41 @@
  * Contributors:
  *   Kris De Volder
  ******************************************************************************/
+var when = require('when');
 
-function QueueMap(limit) {
-	this._size = 0;
-	this._contents = {};
-}
-QueueMap.prototype.put = function (key, value) {
-	var isNew = !this._contents.hasOwnProperty(key);
-	if (isNew) {
-		this.size++;
-	} else {
-		delete this._contents[key];
+function fswalk(i, work) {
+	var q = i;
+	function walk() {
+		if (q === 0) {
+			return when.resolve();
+		} else {
+			return when(work(q--)).then(walk);
+		}
 	}
-	this._contents[key]=value;
-};
-QueueMap.prototype.toString = function () {
-	return JSON.stringify(this._contents, null, '  ');
-};
+	return walk();
+}
 
-var qm = new QueueMap();
-qm.put('a', 'Hello');
-qm.put('b', 'World');
+function work(i) {
+	var d = when.defer();
+	process.nextTick(function() {
+		if (i<10) { //Don't print too much junk.
+			console.log(i);
+		}
+		d.resolve();
+	});
+	return d.promise;
+}
 
-console.log(""+qm);
+//This code breaks in the sense that it will not call the then function
+//and print done if we make problem size 'big enough'.
+//For me it breaks somewhere between 2000 and 3000.
 
-qm.put('a', 'Goobye');
-
-console.log(""+qm);
+fswalk(100000, work).then(function () {
+	console.trace('Done');
+	console.log('Done');
+}).otherwise(function (err) {
+	console.error(err);
+	if (err.stack) {
+		console.log(err.stack);
+	}
+});
