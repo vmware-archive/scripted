@@ -26,7 +26,6 @@ function configure(options) {
 	var errorCode = require('rest/interceptor/errorCode');
 	var entity = require('rest/interceptor/entity');
 	var mime = require('rest/interceptor/mime');
-	var fs = require('fs');
 	var when = require('when');
 
 	var oauth = interceptor({

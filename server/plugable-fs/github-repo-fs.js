@@ -44,12 +44,13 @@ function configure(options) {
 		throw new Error('github-repo-fs needs to be configured with a "repo"');
 	}
 
+	//The URL that should be used to fetch the 'root node' data.
 	var API_ROOT = 'https://api.github.com/repos/'+options.owner+'/'+options.repo+'/contents';
 
 	//var cache = {}; //Map from paths to Promised github API call results.
 
 	/**
-	 * Fetch the contents of a path via github rest api. This can fecth both directory and
+	 * Fetch the contents of a path via github rest api. This can fetch both directory and
 	 * file contents.
 	 */
 	function fetch(path) {
