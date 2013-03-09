@@ -11,22 +11,37 @@
  *   Kris De Volder
  ******************************************************************************/
 
-var fs = require('./github-fs').configure({
-	token: '4c67f6a0107750cb830bc7bf3dd6438f0a7d7da9'
+var fs = require('./github-repo-fs').configure({
+	token: require('./secret.js').token,
+	owner: 'kdvolder',
+	repo: 'playground'
 });
 
-var scriptedFs = require('./scripted-fs');
-var sfs = scriptedFs.configure(fs);
-
-var path = '/kdvolder/playground/README.md';
-
-fs.readdir('/kdvolder/playground/subdir', function (err, names) {
-	console.dir(names);
-	fs.stat('/kdvolder/playground', function (err, stats) {
-		console.log('2');
-		console.dir(stats);
-	});
+var fetch = fs.forTesting.fetch;
+var rest = fs.forTesting.rest;
+//rest({
+//	path: 'http://api.github.com/repos/kdvolder/playground/git/trees/76a125ab17535dd744b8c138cf2f2e3f8fa55392'
+fetch('/').then(function (data) {
+	console.log(JSON.stringify(data, null, '   '));
+}).otherwise(function (err) {
+	console.error(err);
+	if (err.stack) {
+		console.log(err.stack);
+	}
 });
+
+//var scriptedFs = require('./scripted-fs');
+//var sfs = scriptedFs.configure(fs);
+//
+//var path = '/kdvolder/playground/README.md';
+//
+//fs.readdir('/kdvolder/playground/subdir', function (err, names) {
+//	console.dir(names);
+//	fs.stat('/kdvolder/playground', function (err, stats) {
+//		console.log('2');
+//		console.dir(stats);
+//	});
+//});
 
 //sfs.getContents(path).then(function (x) {
 //	console.log(x);

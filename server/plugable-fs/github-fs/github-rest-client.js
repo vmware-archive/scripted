@@ -11,7 +11,8 @@
  *   Kris De Volder
  ******************************************************************************/
 
-var fsErrors = require('./fs-errors');
+var fsErrors = require('../fs-errors');
+var deref = require('../../jsdepend/utils').deref;
 
 function configure(options) {
 
@@ -19,6 +20,8 @@ function configure(options) {
 	if (!token) {
 		throw new Error('github-rest-client needs to be configured with an OAuth token');
 	}
+
+	var nodeFactory = options.nodeFactory;
 
 	var rest = require('rest');
 //	var basicAuth = require('rest/interceptor/basicAuth');
@@ -36,14 +39,25 @@ function configure(options) {
 		}
 	});
 
+//	var redirect = interceptor({
+//		//See http://developer.github.com/v3/#http-redirects
+//		response: function (resp) {
+//			if (resp.status && resp.status.code === 301) {
+//				console.log('Request for : '+resp.request.path);
+//				console.log('Should redirect to : '+resp.headers.Location);
+//			}
+//			return resp;
+//		}
+//	});
+
 	var lastModified = interceptor({
-		request: function (req) {
-			if (req['Last-Modified']) {
-				var headers = req.headers || (req.headers = {});
-				headers['If-Modified-Since'] = req['Last-Modified'];
-			}
-			return req;
-		},
+//		request: function (req) {
+//			if (req['Last-Modified']) {
+//				var headers = req.headers || (req.headers = {});
+//				headers['If-Modified-Since'] = req['Last-Modified'];
+//			}
+//			return req;
+//		},
 		response: function (resp) {
 			//console.dir(resp);
 			var lastModified = resp.headers['Last-Modified'];
@@ -55,9 +69,26 @@ function configure(options) {
 		}
 	});
 
+	function RestNode(url) {
+		this.url = url;
+	}
+
 	var logResp = interceptor({
 		response: function (resp) {
 			console.dir(resp);
+			return resp;
+		}
+	});
+
+	var logRateLimit = interceptor({
+		response: function (resp) {
+			var limit = deref(resp, ['headers', 'X-Ratelimit-Limit']);
+			if (limit) {
+				var remaining = deref(resp, ['headers', 'X-Ratelimit-Remaining']);
+				console.log('github rate limit: '+remaining+ '/'+ limit + ' url: '+resp.request.path);
+			}
+			var mem = process.memoryUsage();
+			console.log('mem = '+JSON.stringify(mem));
 			return resp;
 		}
 	});
@@ -74,7 +105,7 @@ function configure(options) {
 		};
 	}
 
-	var oauthClient = fixNoExistError(entity(lastModified(errorCode(mime(oauth())))));
+	var oauthClient = fixNoExistError(errorCode(entity(lastModified(mime(logRateLimit(oauth()))))));
 
 	return oauthClient;
 

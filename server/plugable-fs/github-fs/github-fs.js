@@ -12,13 +12,13 @@
  ******************************************************************************/
 
 function configure(options) {
-	var utils = require('../jsdepend/utils');
+	var utils = require('../../jsdepend/utils');
 	var extend = utils.extend;
 	var pathJoin = utils.pathJoin;
 
 	var mRepoFs = require('./github-repo-fs');
-	var readonlyFs = require('./read-only-fs');
-	var fsErrors = require('./fs-errors');
+	var readonlyFs = require('../read-only-fs');
+	var fsErrors = require('../fs-errors');
 
 	var repoFss = {};
 
@@ -88,6 +88,7 @@ function configure(options) {
 						names.push(pieces[1]);
 					}
 				});
+				console.log('readdir '+path+ ' => '+JSON.stringify(names));
 				callback(null, names);
 			} else {
 				//Other stuff just pretend they have no visible children.

@@ -107,6 +107,11 @@ function configure(conf) {
 	 */
 	function fswalk(rootPath, priorityFun, fileFun) {
 
+		if (!fileFun) {
+			fileFun = priorityFun;
+			priorityFun = function () {};
+		}
+
 		//console.log('>> fswalk '+rootPath);
 
 		var worklist = new PriorityQueue(compare);
@@ -117,6 +122,7 @@ function configure(conf) {
 		 * Create a work item for the priority queue, consists of a path and a priority.
 		 */
 		function workItem(path) {
+			//console.log('work: ' + path);
 			return {
 				path: path,
 				priority: priorityFun(path) || PRIORITY_DEFAULT

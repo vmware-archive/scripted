@@ -301,7 +301,7 @@ exports.install = function (server, filesystem) {
 			}
 		}
 		conn.on('data', function (message) {
-			console.log("isearch ["+id+"] << "+message);
+			//console.log("isearch ["+id+"] << "+message);
 			receive(JSON.parse(message));
 		});
 
