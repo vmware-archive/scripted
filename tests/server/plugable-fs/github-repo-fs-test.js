@@ -13,10 +13,14 @@
 
 var ghRepoFs = require('../../../server/plugable-fs/github-fs/github-repo-fs');
 
+var nodeCache = require(
+	'../../../server/plugable-fs/github-fs/rest-node-manager'
+).configure({ limit: 1});
 var fs = ghRepoFs.configure({
 	token: require('../../../server/plugable-fs/github-fs/secret').token,
 	owner: 'kdvolder',
-	repo: 'playground'
+	repo: 'playground',
+	cache: nodeCache
 });
 
 var scriptedFs = require('../../../server/plugable-fs/scripted-fs').configure(fs);
@@ -43,51 +47,51 @@ exports.readRoot = function (test) {
 	});
 };
 
-//exports.readSubdir = function (test) {
-//	fs.readdir('/subdir', function (err, names) {
-//		test.equals(toCompareString(names), toCompareString([
-//			'a-file.js'
-//		]));
-//		test.done();
-//	});
-//};
-//
-////Walk the tree and collect all the paths. See if we get them all.
-//exports.walk = function (test) {
-//	var collect = []; // Collect all the file paths in here
-//	fswalk('/', function (path) {
-//		collect.push(path);
-//	}).then(function () {
-//		collect.sort();
-//		test.equals(toCompareString(collect), toCompareString([
-//			"/.scripted",
-//			"/README.md",
-//			"/subdir/a-file.js"
-//		]));
-//		test.done();
-//	});
-//};
+exports.readSubdir = function (test) {
+	fs.readdir('/subdir', function (err, names) {
+		test.equals(toCompareString(names), toCompareString([
+			'a-file.js'
+		]));
+		test.done();
+	});
+};
 
-//var README_TEXT = "playground\n"+
-//			"==========\n"+
-//			"\n"+
-//			"This is just a testing repo to play with";
-//
-//exports.readFileUTF8 = function (test) {
-//	fs.readFile('/README.md', 'utf8', function (err, text) {
-//		test.equals(text,
-//			README_TEXT
-//		);
-//		test.done();
-//	});
-//};
-//
-//exports.readFileBuffer = function (test) {
-//	fs.readFile('/README.md', function (err, buffer) {
-//		test.ok(buffer instanceof Buffer);
-//		test.equals(buffer.toString('utf8'),
-//			README_TEXT
-//		);
-//		test.done();
-//	});
-//};
+//Walk the tree and collect all the paths. See if we get them all.
+exports.walk = function (test) {
+	var collect = []; // Collect all the file paths in here
+	fswalk('/', function (path) {
+		collect.push(path);
+	}).then(function () {
+		collect.sort();
+		test.equals(toCompareString(collect), toCompareString([
+			"/.scripted",
+			"/README.md",
+			"/subdir/a-file.js"
+		]));
+		test.done();
+	});
+};
+
+var README_TEXT = "playground\n"+
+			"==========\n"+
+			"\n"+
+			"This is just a testing repo to play with";
+
+exports.readFileUTF8 = function (test) {
+	fs.readFile('/README.md', 'utf8', function (err, text) {
+		test.equals(text,
+			README_TEXT
+		);
+		test.done();
+	});
+};
+
+exports.readFileBuffer = function (test) {
+	fs.readFile('/README.md', function (err, buffer) {
+		test.ok(buffer instanceof Buffer);
+		test.equals(buffer.toString('utf8'),
+			README_TEXT
+		);
+		test.done();
+	});
+};

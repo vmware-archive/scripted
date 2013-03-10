@@ -21,15 +21,15 @@ function configure(options) {
 		throw new Error('github-rest-client needs to be configured with an OAuth token');
 	}
 
-	var nodeFactory = options.nodeFactory;
-
 	var rest = require('rest');
 //	var basicAuth = require('rest/interceptor/basicAuth');
 	var interceptor = require('rest/interceptor');
 	var errorCode = require('rest/interceptor/errorCode');
 	var entity = require('rest/interceptor/entity');
 	var mime = require('rest/interceptor/mime');
+	var retry = require('rest/interceptor/retry');
 	var when = require('when');
+
 
 	var oauth = interceptor({
 		request: function (request, config) {
@@ -50,29 +50,6 @@ function configure(options) {
 //		}
 //	});
 
-	var lastModified = interceptor({
-//		request: function (req) {
-//			if (req['Last-Modified']) {
-//				var headers = req.headers || (req.headers = {});
-//				headers['If-Modified-Since'] = req['Last-Modified'];
-//			}
-//			return req;
-//		},
-		response: function (resp) {
-			//console.dir(resp);
-			var lastModified = resp.headers['Last-Modified'];
-			if (lastModified) {
-				resp.entity.status = resp.status;
-				resp.entity['Last-Modified'] = lastModified;
-			}
-			return resp;
-		}
-	});
-
-	function RestNode(url) {
-		this.url = url;
-	}
-
 	var logResp = interceptor({
 		response: function (resp) {
 			console.dir(resp);
@@ -85,10 +62,12 @@ function configure(options) {
 			var limit = deref(resp, ['headers', 'X-Ratelimit-Limit']);
 			if (limit) {
 				var remaining = deref(resp, ['headers', 'X-Ratelimit-Remaining']);
-				console.log('github rate limit: '+remaining+ '/'+ limit + ' url: '+resp.request.path);
+				if (remaining%100===0 || remaining < 100) {
+					console.log('github rate limit: '+remaining+ '/'+ limit + ' url: '+resp.request.path);
+				}
 			}
-			var mem = process.memoryUsage();
-			console.log('mem = '+JSON.stringify(mem));
+//			var mem = process.memoryUsage();
+//			console.log('mem = '+JSON.stringify(mem));
 			return resp;
 		}
 	});
@@ -105,7 +84,7 @@ function configure(options) {
 		};
 	}
 
-	var oauthClient = fixNoExistError(errorCode(entity(lastModified(mime(logRateLimit(oauth()))))));
+	var oauthClient = fixNoExistError(errorCode(mime(logRateLimit(oauth()))));
 
 	return oauthClient;
 

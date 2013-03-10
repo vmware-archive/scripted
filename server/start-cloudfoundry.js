@@ -44,9 +44,13 @@ var scriptedHomeLocation = path.resolve(__dirname, '..');
 
 var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
 
-var github = withPrefix('/github', githubFs.configure(
-	require('../server/plugable-fs/github-fs/secret'))
-);
+var cache = require('./plugable-fs/github-fs/rest-node-manager').configure({
+	limit: 2500 // Limits number of in-memory cached nodes.
+});
+var github = withPrefix('/github', githubFs.configure({
+	token: require('./plugable-fs/github-fs/secret').token,
+	cache: cache
+}));
 
 var scriptedHome = withPrefix('/scripted.home', readOnly(compose(
 	//Needed to load built-in plugins
@@ -64,7 +68,7 @@ var scriptedHome = withPrefix('/scripted.home', readOnly(compose(
 //All of our files, with the 'slim' node-like fs API:
 var corefs = compose(
 	github,
-//	sandbox,
+	sandbox,
 	scriptedHome
 );
 

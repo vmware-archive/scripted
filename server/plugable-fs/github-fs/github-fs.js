@@ -20,6 +20,8 @@ function configure(options) {
 	var readonlyFs = require('../read-only-fs');
 	var fsErrors = require('../fs-errors');
 
+	var cache = options.cache; //TODO: try to also use this cache
+							   // for repo nodes, not just repo-fs nodes.
 	var repoFss = {};
 
 	var DIR_STAT = {
@@ -44,7 +46,8 @@ function configure(options) {
 					var repoFs = repoFss[repoId] || (
 						repoFss[repoId] = mRepoFs.configure(extend(options, {
 							owner: owner,
-							repo: repo
+							repo: repo,
+							cache: cache
 						}))
 					);
 					args[0] = path;

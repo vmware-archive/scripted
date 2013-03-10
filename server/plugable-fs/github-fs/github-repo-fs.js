@@ -33,6 +33,11 @@ var LOGGING = false;
 
 function configure(options) {
 
+	var cache = options.cache;
+	if (!cache) {
+		throw new Error('Please inject a rest-node cache');
+	}
+
 	//console.log('repoFs options = '+ JSON.stringify(options, null, '   '));
 
 	if (!options.token) {
@@ -48,21 +53,11 @@ function configure(options) {
 	//The URL that should be used to fetch the 'root node' data.
 	var API_ROOT = 'https://api.github.com/repos/'+options.owner+'/'+options.repo+'/contents';
 
-	var store = {};
-	var cache = {
-		get: function (url) {
-			var entry = store[url];
-			if (entry) {
-				return entry;
-			}
-		},
-		put: function (url, entry) {
-//			console.log('put '+url + " : "+entry);
-			store[url] = entry;
-		}
-	};
-
 	function getNode(url) {
+		if (typeof(url)!=='string') {
+			console.trace('Need url to create a node: '+url);
+			throw new Error('Must have a url to create a node');
+		}
 //		console.log('>> getNode '+url);
 		var cached = cache.get(url);
 //		console.log('>> getNode from cache = '+cached);
@@ -85,92 +80,157 @@ function configure(options) {
 		//File nodes:
 		'content', 'encoding'
 	];
-	function copyInterestingData(source, dest) {
-		INTERESTING.forEach(function (name) {
+
+	//Helper to save memory by only retaining interesting data from rest response entities.
+	function compress(source, interesting) {
+		var dest = {}; //TODO: maybe faster (less garbage) if we delete props from source
+		                // object directly?
+		interesting.forEach(function (name) {
 			if (source.hasOwnProperty(name)) {
 				dest[name] = source[name];
 			} else {
 				delete dest[name];
 			}
 		});
+		return dest;
 	}
 
+	/**
+	 * A node represents a resource in a rest-api. It should always be possible
+	 * to be fully reconsituted by getting the url.
+	 *
+	 * Before a node is retrieved it only contains a url.
+	 */
 	function Node(url) {
 		this.url = url;
 	}
+
 	/**
-	 * Inserts data just fetched from rest api into a node
+	 * THe LRU cache calls this method to tell an element its been decommisioned.
+	 * We remove most of the data... except for 'type' and 'url'.
+	 * This is so we don't need to go hunt down references in other nodes.
+	 * Before using stored nodes referring nodes should take responsibility
+	 * to discover destroyed nodes and get rid of them.
 	 */
-	Node.prototype.setData = function (data) {
-		if (Array.isArray(data)) { //Directory node
-			//Directories are kind-a funny. When we fetch their contents we
-			//actually get summary info about their children as an array.
-			//So this is the time to create the child nodes with that data
-			//already in it.
-			var children = this.children = {}; //Will point to the urls of our children.
+	Node.prototype.destroy = function() {
+		this.destroyed = true;
+		delete this.data;
+	};
+	/**
+	 * This function is called when the response has been received from
+	 * the rest client.
+	 */
+	Node.prototype.setData = function (response, depth) {
+		var data = response.entity;
+		if (Array.isArray(data)) {
+			//Directory node: we get a list of pointers to children.
+			this.type = 'dir';
+			var children = {};
+			this.data = children;
 			data.forEach(function (childData) {
-				if (childData.name && childData.url) {
-					var url = childData.url;
-					children[childData.name] = childData.url;
+				var name = childData.name, url = childData.url;
+				if (name && url) {
+					children[name] = url;
 					var child = getNode(url);
-					child.setData(childData);
+					child.type = childData.type;
+					if (depth && depth>1) {
+//						console.log('BEG prefetc ['+depth+']: '+child.url);
+						child.fetch(depth-1);
+//						.then(function() {
+//							console.log('END prefetch ['+depth+']: '+child.url);
+//						});
+					}
 				} else {
 					console.log('Ignoring unexpected child data:'+JSON.stringify(childData, null, '  '));
 				}
 			});
-			if (!this.isDirectory()) {
-				//Provide minimal 'dirEntry' data that makes us look like a dir
-				// because it seems we are a dir now, regardless of what we were before.
-				this.dirEntry = {
-					type: 'dir'
-				};
-			}
+		} else if (data.type==='file') {
+			this.type = data.type;
+			this.data = compress(data, INTERESTING);
+		} else if (data.type) {
+			this.type = 'error';
+			this.data = 'Unknown github data type: '+data.type;
 		} else {
-			this.dirEntry = {};
-			copyInterestingData(data, this.dirEntry);
-			if (!this.isDirectory()) {
-				//In that case shouldn't have any children!
-				delete this.children;
-			}
+			this.type = 'error';
+			this.data = data || 'no entity data';
 		}
 	};
 	/**
-	 * Fetch this node's contents from its url and store it in the node
+	 * Fetch this node's contents from its url and store it in the node.
+	 * Returns a promise that resolves when the data is fetched.
+	 *
+	 * Optional 'depth' parameter is used to also kick of an asynchronous
+	 * prefetch of additional levels of the tree.
+	 *
+	 * The promise returned always resolves after the current node has been
+	 * fetched. But it children will be fetched asynchrnously. This is in
+	 * anticipation they may soon be needed.
 	 */
-	Node.prototype.fetch = function () {
-		if (!this.fetched) {
-			return rest({ path: this.url }).then(function (data) {
-//				console.log('data received for '+this.url);
-//				console.dir(data);
-				this.setData(data);
-				this.fetched = true;
-			}.bind(this));
+	Node.prototype.fetch = function (depth) {
+		if (depth===undefined) {
+			depth = 1; // By default just fetch current node data.
 		}
-		return when.resolve();
+		if (!depth) {
+			return when.resolve(this);
+		}
+		if (this.data) {
+			//TODO: Currently we never fetch the data again if we already have it.
+			// Should use last modified time to verify whether rest resource
+			// needs a refresh. And if the data is really new we shouldn't even
+			// ask github if it has changed.
+			return when.resolve(this);
+		}
+		//The this.fetching field is used to avoid multiple simultaneuos fetches of
+		//the same data. It will be set only while fetching is in progress.
+		if (!this.fetching) {
+			this.fetching = rest({ path: this.url });
+		}
+		var self = this;
+		var url = this.url;
+		return this.fetching.then(function (response) {
+			delete self.fetching;
+			if (self.destroyed) {
+				//Under stress, nodes may already be destroyed before we actually got their data
+				console.log('WARNING: using a already destroyed node for '+this.url);
+				self = getNode(url);
+			}
+			self.setData(response, depth);
+			return when.resolve(self);
+		}, function (err) {
+			delete self.fetching;
+			if (err && err.status) {
+				console.error(err.status.code + ' : ' +  url);
+			} else {
+				console.error('fetch failed for: '+self.url);
+				console.log(err);
+			}
+			return when.reject(err);
+		});
 	};
 	Node.prototype.getChildren = function () {
-		return this.fetch().then(function () {
-			if (!this.isDirectory()) {
-				return when.reject(fsErrors.isNotDirError('getChildren', this.url));
+		return this.fetch().then(function (self) {
+			if (!self.isDirectory()) {
+				return when.reject(fsErrors.isNotDirError('getChildren', self.url));
 			}
-			if (!this.children) {
-				return when.reject('Internal Error: type is dir but no children');
-			}
-			return when.resolve(this.children);
-		}.bind(this));
+			return when.resolve(self.data);
+		});
 	};
 	Node.prototype.getChild = function (name) {
-		var that = this;
 		return this.getChildren().then(function (children) {
-			var child = children[name];
-			if (typeof(child)==='string') {
-				child = getNode(child);
-				children[name] = child; //faster next time?
-			}
+			var childUrl = children[name];
+			var child = childUrl && getNode(childUrl);
+//			if (child.destroyed) {
+//				var oldType = child.type;
+//				//Destroyed nodes should retain at least their url and
+//				//type so we can create a suitable replacement for them.
+//				child = getNode(child.url);
+//				children[name] = child;
+//				child.type = child.type || oldType;
+//			}
 			return child || when.reject(
-				fsErrors.noExistError('getChild', pathJoin(that.url, name))
+				fsErrors.noExistError('getChild', pathJoin(this.url, name))
 			);
-		});
+		}.bind(this));
 	};
 	Node.prototype.navigate = function (segments) {
 		if (typeof(segments)==='string') {
@@ -192,40 +252,40 @@ function configure(options) {
 		}
 	};
 	Node.prototype.isDirectory = function () {
-		//Only the root node is created without a dirEntry read from the parent node.
-		//The root node is assumed to always be a directory.
-		return !this.dirEntry || this.dirEntry.type === 'dir';
+		return this.type === 'dir';
 	};
 	Node.prototype.isFile = function () {
-		return this.dirEntry && this.dirEntry.type === 'file';
+		return this.type === 'file';
+	};
+	Node.prototype.toString = function () {
+		return this.url + ' type: '+ (this.type);
+	};
+	Node.prototype.readdir = function () {
+		//First set in motion the work we *really* need to do
+		var result = this.getChildren().then(function (children) {
+			return Object.keys(children);
+		});
+		var prefetch = cache.isStressed() ? 1 : 5;
+		//TODO: Also make prefetch dependent on remaining github api rate limit.
+		// back off from prefetching if are in danger of exceeding our hourly rate.
+		this.fetch(prefetch);
+		return result;
 	};
 	Node.prototype.stat = function () {
 		return this;
 	};
-	Node.prototype.toString = function () {
-		return this.url + ' type: '+ (this.dirEntry && this.dirEntry.type);
-	};
-	Node.prototype.readdir = function () {
-		return this.getChildren().then(function (children) {
-			return Object.keys(children);
-		});
-	};
 	Node.prototype.readFile = function (encoding) {
-		if (!this.isFile()) {
-			//Avoid expensive fetch if this looks like its not even a file
-			return when.reject(fsErrors.isDirError('readFile', this.url));
-		}
-		return this.fetch().then(function () {
-			if (!this.isFile()) {
-				return when.reject(fsErrors.isDirError('readFile', this.url));
+		return this.fetch().then(function (self) {
+			if (!self.isFile()) {
+				return when.reject(fsErrors.isDirError('readFile', self.url));
 			}
-			var apiData = this.dirEntry;
+			var apiData = self.data;
 			var contents = apiData.content;
 			if (encoding===apiData.encoding) {
 				return contents;
 			}
 			//Encodings mismatch... must convert
-			console.log('transcode: '+this.url+' to '+encoding);
+			//console.log('transcode: '+this.url+' to '+encoding);
 
 			contents = new Buffer(contents, apiData.encoding);
 			if (encoding) {
@@ -236,10 +296,11 @@ function configure(options) {
 			apiData.encoding = encoding;
 			apiData.content = contents;
 			return contents;
-		}.bind(this));
+		});
 	};
 
 	var rootNode = new Node(API_ROOT);
+	rootNode.type = 'dir'; //Rootnode always assumed to be a directory.
 
 	function readdir(path, callback) {
 		nodeCallback(
