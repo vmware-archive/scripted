@@ -103,9 +103,9 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		if (!editorUtils.getSubEditor()) {
 			return false;
 		}
-		if (!mSidePanelManager.confirmAll()) {
-			return false;
-		}
+//		if (!mSidePanelManager.confirmAll()) {
+//			return false;
+//		}
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
 
@@ -137,6 +137,13 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 					EDITOR_TARGET.main, true, true).then(function() {
 				mainEditor = editorUtils.getMainEditor();
 				subEditor = editorUtils.getSubEditor();
+				mainEditor.setText(subText);
+				subEditor.setText(mainText);
+
+				// re-apply the selection since it may have changed
+				mainEditor.setSelection(subSel.start, subSel.end);
+				subEditor.setSelection(mainSel.start, mainSel.end);
+
 				if (mainActive) {
 					subEditor.getTextView().focus();
 				} else {
