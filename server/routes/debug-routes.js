@@ -12,7 +12,6 @@
  ******************************************************************************/
 
 //See: memwatch: https://hacks.mozilla.org/2012/11/tracking-down-memory-leaks-in-node-js-a-node-js-holiday-season/
-
 //TODO: why does this have issues when deployed on CF, could because I run 32 bit and cf has 64 bit.
 //     is it deploying my locally compiled stuff onto CF?
 //var memwatch = require('memwatch');
