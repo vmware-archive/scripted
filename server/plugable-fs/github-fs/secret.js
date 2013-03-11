@@ -16,7 +16,13 @@ var pathResolve = require('../../jsdepend/utils').pathResolve;
 
 var secretFile = pathResolve(__dirname, '../../../secret.json');
 
-var secret = JSON.parse(nodefs.readFileSync(secretFile));
+var secret = {}; //No secret info by default.
+
+try {
+	secret = JSON.parse(nodefs.readFileSync(secretFile));
+} catch (err) {
+	console.log("WARNING: No github secret token available, github-fs won't work and its tests will be skipped");
+}
 
 console.log('secret = '+JSON.stringify(secret));
 

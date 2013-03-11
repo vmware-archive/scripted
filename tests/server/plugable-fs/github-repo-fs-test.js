@@ -13,11 +13,17 @@
 
 var ghRepoFs = require('../../../server/plugable-fs/github-fs/github-repo-fs');
 
+var token = require('../../../server/plugable-fs/github-fs/secret').token;
+
+if (!token) {
+	return; // skip these tests if we don't have a github token to use.
+}
+
 var nodeCache = require(
 	'../../../server/plugable-fs/github-fs/rest-node-manager'
 ).configure({ limit: 20});
 var fs = ghRepoFs.configure({
-	token: require('../../../server/plugable-fs/github-fs/secret').token,
+	token: token,
 	owner: 'kdvolder',
 	repo: 'playground',
 	cache: nodeCache

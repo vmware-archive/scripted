@@ -17,7 +17,7 @@ var cache = require('./rest-node-manager').configure({
 
 
 var fs = require('./github-repo-fs').configure({
-	token: require('./secret.js').token,
+	token: require('./secret').token,
 	owner: 'kdvolder',
 	repo: 'playground',
 	cache: cache
