@@ -1940,7 +1940,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							// prioritize methods over fields
 							relevance: relevance + 5,
 							style: 'emphasis',
-							replace: true
+							overwrite: true
 						};
 					} else {
 						proposals["$"+propName] = {
@@ -1948,7 +1948,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							relevance: relevance,
 							description: createProposalDescription(propName, propType, env),
 							style: 'emphasis',
-							replace: true
+							overwrite: true
 						};
 					}
 				}
