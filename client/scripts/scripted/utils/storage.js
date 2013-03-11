@@ -47,7 +47,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 					scriptedLogger.warn("Tried too many times. Ignoring request.", "STORAGE");
 				}
 			} catch (e) {
-				if (e.name.indexOf('QUOTA')>=0) { // Chrome: "QUOTA_EXCEEDED_ERR", FireFox: "NS_ERROR_DOM_QUOTA_REACHED", other browsers
+				if (e.name.indexOf('QUOTA')>=0 || e.name === "QuotaExceededError") { // Chrome: "QUOTA_EXCEEDED_ERR" or "QuotaExceededError", FireFox: "NS_ERROR_DOM_QUOTA_REACHED", other browsers
 					scriptedLogger.warn("Tried to add to local storage: " + key + " : " + value, "STORAGE");
 					scriptedLogger.warn("Local storage quota exceeded. Purging parts of local storage and trying again", "STORAGE");
 					if (thresholds[depth]) {

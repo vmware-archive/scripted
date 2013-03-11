@@ -3520,6 +3520,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 									} else {
 										return false;
 									}
+								} else {
+//									Firefox feature...without this empty block, this function will return false when action.handler() returns true
 								}
 							} else if (action.defaultHandler) {
 								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
