@@ -41,6 +41,9 @@ exports.install = function (app, filesystem) {
 			},
 			function (err) {
 				console.error("Error in request for '%s': %s", req.url, err);
+				if (err.stack) {
+					console.log(err.stack);
+				}
 				res.writeHead(500, {"Content-Type": "text/plain"});
 				res.write(err + "\n");
 				res.end();

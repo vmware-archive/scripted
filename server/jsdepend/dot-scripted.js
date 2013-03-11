@@ -175,7 +175,7 @@ function configure(filesystem) {
 		} else {
 			d.resolve({});
 		}
-		return d;
+		return d.promise;
 	}
 
 	function convertRcFileToDir(loc) {

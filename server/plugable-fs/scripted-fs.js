@@ -35,13 +35,13 @@ var nodeNatives = require('../jsdepend/node-natives');
 		//  provider.
 
 var when = require('when');
-var each = require('../utils/promises');
+//var each = require('../utils/promises');
 var utils = require('../jsdepend/utils');
 
-var pathNormalize = utils.pathNormalize;
+//var pathNormalize = utils.pathNormalize;
 var pathJoin = utils.pathJoin;
 var pathResolve = utils.pathResolve;
-var startsWith = utils.startsWith;
+//var startsWith = utils.startsWith;
 
 var isNativeNodeModulePath = nodeNatives.isNativeNodeModulePath;
 var nativeNodeModuleName = nodeNatives.nativeNodeModuleName;
@@ -65,7 +65,7 @@ function configure(fs, options) {
 	function idFun(x) { return x; }
 
 	var handle2file = idFun; //TODO: might remove?
-	var file2handle = idFun; //TODO: might remove?
+//	var file2handle = idFun; //TODO: might remove?
 	var encoding = options.encoding || 'UTF-8';
 
 	function getUserHome() {
@@ -204,7 +204,7 @@ function configure(fs, options) {
 			console.log('delete: ' + file);
 		});
 
-		return deferred;
+		return deferred.promise;
 	}
 
 	function rmDir(_handle) {
@@ -221,7 +221,7 @@ function configure(fs, options) {
 		deferred.promise.then(function() {
 			console.log('rmdir: ' + file);
 		});
-		return deferred;
+		return deferred.promise;
 	}
 
 	function getContents(handle, callback, errback) {
@@ -312,7 +312,7 @@ function configure(fs, options) {
 				d.resolve();
 			}
 		});
-		return d;
+		return d.promise;
 	}
 
 	/**
@@ -327,7 +327,7 @@ function configure(fs, options) {
 				d.resolve();
 			}
 		});
-		return d;
+		return d.promise;
 	}
 
 	/**

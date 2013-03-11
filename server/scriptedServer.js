@@ -21,6 +21,8 @@
 
 function start(filesystem, options) {
 
+var isCloudfoundry = (options && options.cloudfoundry);
+
 var server = require("./server").configure(filesystem, options);
 var router = require("./router");
 var servlets = require("./servlets");
@@ -28,11 +30,13 @@ var servlets = require("./servlets");
 var requestHandlers = require("./requestHandlers").configure(filesystem);
 
 //require("./servlets/hello");
-require("./servlets/listFiles");
+//require("./servlets/listFiles"); //Dead?
 require("./servlets/jsdepend-servlet").install(filesystem);
-require("./servlets/exec-servlet");
+if (!isCloudfoundry) {
+	require("./servlets/exec-servlet");
+}
 //require("./servlets/config-servlet");
-//these two wired up in server.js
+//these two wired up in server.
 //require("./servlets/kill");
 //require("./servlets/status");
 require("./servlets/filesystem-servlet").install(filesystem);

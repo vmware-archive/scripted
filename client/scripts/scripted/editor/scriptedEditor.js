@@ -726,6 +726,11 @@ define([
 		editor.editorLoadedPromise = when.defer();
 		editor.editorLoadedPromise.then(function () {
 			$(document).trigger('editorLoaded', editor);
+			editor.editorLoadedFired = true; //So we can check if the editorLoadedEvent
+											// already fired on a given editor
+											//Need this when we try to execute some
+											//code on all current and future editors
+											//whether or not the event already fired.
 		});
 
 		editor.getFilePath = function() {

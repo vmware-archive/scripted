@@ -106,8 +106,8 @@ function(navHistory, resourcesDialogue, fileOperationsClient, pathUtils, paneFac
 	ExplorerProvider.prototype.onContextMenuOpen = function(nodeContext) {
 		var resourceType = this.getResourceFromContextSelection(nodeContext);
 		if (this.explorer && resourceType && resourceType.location) {
-			// Highlight but do not expand directory selections
-			this.explorer.highlight(resourceType.location, false);
+			// Highlight but do not expand directory selections, and do not scroll elements that are partially hidden
+			this.explorer.highlight(resourceType.location, false, true);
 		}
 	};
 

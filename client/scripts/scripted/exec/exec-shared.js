@@ -14,22 +14,22 @@
 /*global require define window console */
 
 /////////////////////////////
-// exec-shared: 
+// exec-shared:
 //
-//   Common functionality shared between exec-keys and exec-after-save 
+//   Common functionality shared between exec-keys and exec-after-save
 //
 //   TODO: actually, exec-keys isn't using this yet. The code was merely copied
 //     from it.
 /////////////////////////////
-define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'], 
+define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'],
 function (require) {
 
 	var exec = require('servlets/exec-client').exec;
 	var execConsole = require('scripted/exec/exec-console');
 
-	/** 
-	 * Follow a 'trail' of properties starting at given object. 
-	 * If one of the values on the trail is 'falsy' then 
+	/**
+	 * Follow a 'trail' of properties starting at given object.
+	 * If one of the values on the trail is 'falsy' then
 	 * this value is returned instead of trying to keep following the
 	 * trail down.
 	 */
@@ -48,9 +48,9 @@ function (require) {
 	function getConfig(eventType) {
 		return deref(window, ["scripted", "config", "exec", eventType]);
 	}
-	
+
 	/////////////////////////////////////////////
-	
+
 	function render(msg) {
 		if (typeof(msg)==='string') {
 			return msg;
@@ -58,7 +58,7 @@ function (require) {
 			return ""+msg;
 		}
 	}
-	
+
 //	var execConsole = {
 //		log : function (msg) {
 //			console.log(render(msg));
@@ -67,7 +67,7 @@ function (require) {
 //			console.error(render(msg));
 //		}
 //	};
-	
+
 	function makeExecFunction(cmdSpec) {
 		//Start by normalizing the cmdSpec so it always has 'object form' and provides
 		//suitable defaults for required options.
@@ -78,8 +78,9 @@ function (require) {
 		}
 		cmdSpec.cwd = cmdSpec.cwd || "${projectDir}";
 		cmdSpec.timeout = cmdSpec.timeout || 5000;
-		
+
 		return function(replaceParams) {
+			console.log('exec : '+JSON.stringify(cmdSpec, null, '  '));
 			var cmd = replaceParams(cmdSpec);
 			execConsole.clear();
 			execConsole.log(cmd.cmd, "command");
@@ -98,10 +99,10 @@ function (require) {
 			);
 		};
 	}
-	
+
 	return {
 		getConfig: getConfig,
 		makeExecFunction: makeExecFunction
 	};
 
-});	
+});

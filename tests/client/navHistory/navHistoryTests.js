@@ -78,7 +78,7 @@ function(assert, mNavHistory, mPageState, mTestutils, mSidePanelManager, mPaneFa
 				deferred.resolve();
 			}
 		});
-		return deferred;
+		return deferred.promise;
 	}
 
 	function changeLocation(url) {

@@ -1,9 +1,9 @@
 --- 
 applications: 
-- name: scr
-  path: .
+- instances: 1
+  memory: 1G
+  name: scr
   runtime: node08
-  memory: 512M
-  framework: node
-  instances: 1
+  path: .
   url: scrptd.${target-base}
+  framework: node

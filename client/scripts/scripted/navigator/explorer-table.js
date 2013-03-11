@@ -375,12 +375,17 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 
 
 	/**
-     * Expand the tree if necessary and highlight the specific file. By default it will expand an directory selection, unless explicitly set to false
+     * Expand the tree if necessary and highlight the specific file. By default it will expand an directory selection, unless explicitly set to false. By default, it will also scroll
+     * any elements that are highlighted but not visible in the navigator, unless skipping scrolling is explicitly set to true.
      */
-	FileExplorer.prototype.highlight = function( /*String*/ fileintree, expand) {
+	FileExplorer.prototype.highlight = function( /*String*/ fileintree, expand, skipScrolling) {
        // if expand is not defined, expand by default
 	   if (expand === undefined) {
 	      expand = true;
+	   }
+
+	   if (skipScrolling === undefined) {
+			skipScrolling = false;
 	   }
 
 		/*Remove any existing highlights*/
@@ -446,13 +451,16 @@ define(['require', 'scripted/navigator/explorer', "jquery", "scripted/utils/page
 			$(element.childNodes[1]).addClass("secondaryColumnDark");
 
 			// Scroll if not visible
-            var currentPosition = $(element).offset();
+			if (skipScrolling === false) {
+				var currentPosition = $(element).offset();
 
-            var navigatorHeight = $("#navigator-container").height();
+				var navigatorHeight = $("#navigator-container").height();
 
-            if (navigatorHeight < currentPosition.top) {
-                $("#navigator-container").scrollTop(currentPosition.top);
-            }
+				if (navigatorHeight < currentPosition.top) {
+					$("#navigator-container").scrollTop(currentPosition.top);
+				}
+			}
+
 
 			if (expand === true) {
                  this.renderer.expand(id);

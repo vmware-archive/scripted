@@ -163,7 +163,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var sel = this.textView.getSelection();
 			var start = Math.min(sel.start, sel.end);
 			var end = Math.max(sel.start, sel.end);
-			if( proposal.replace ) {
+			if (proposal.overwrite) {
 				start = this.getPrefixStart(start);
 			}
 			// old
@@ -644,10 +644,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.isShowing = false;
 		},
 		position: function() {
+			// SCRIPTED start
 			// Allow for a prefix in positioning the content assist, avoids it moving along as chars are typed
 			var caretLocation = this.textView.getLocationAtOffset(this.contentAssist.getPrefixStart(this.textView.getCaretOffset()));
 			// previous computation for left hand side of contentassist window
 			//this.textView.getLocationAtOffset(this.textView.getCaretOffset());
+			// SCRIPTED end
 			caretLocation.y += this.textView.getLineHeight();
 			caretLocation.x-=6; // two lots of 3 padding around the element
 			this.textView.convert(caretLocation, "document", "page");

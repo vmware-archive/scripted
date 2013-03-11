@@ -31,7 +31,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 	 * @type {{completions:Array}}
 	 */
 	var allTemplates = {};
-	
+
 	function updatePosition(initialOffset, replaceStart, replacements) {
 		var newOffset = initialOffset;
 		for (var i = 0; i < replacements.length; i++) {
@@ -43,7 +43,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 		}
 		return newOffset;
 	}
-	
+
 	/**
 	 * @param Number offset offset into unreplaced text
 	 */
@@ -68,7 +68,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 	}
 
 
-		
+
 	function findPreviousChar(buffer, offset) {
 		var c = "";
 		while (offset >= 0) {
@@ -88,7 +88,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 
 
 	function TemplateContentAssist() { }
-	
+
 	TemplateContentAssist.prototype = {
 		install : function(editor, scope, root) {
 			if (editor) {
@@ -129,12 +129,12 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 			if (!myTemplates) {
 				return [];
 			}
-			
+
 			// assume we don't want templates if previous char is '.'
 			if (findPreviousChar(buffer, invocationOffset) === '.') {
 				return [];
 			}
-			
+
 			// we're in business
 			var newTemplates = [];
 			var prefix = context.prefix;
@@ -148,7 +148,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 			myTemplates.forEach(function(template) {
 				if ((templatesOnly && template.isTemplate) ||
 					(!templatesOnly && proposalUtils.looselyMatches(prefix, template.trigger))) {
-					
+
 					// defer the actual calculation of the proposal until it is accepted
 					var proposalFunc = function() {
 						var implicitPrefixMatch = template.proposal.charAt(0) === implicitPrefix;
@@ -165,8 +165,8 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 							escape = actualText.length + replaceStart;
 						}
 						replaceStart = implicitPrefixMatch ? replaceStart-1 : replaceStart;
-						
-						
+
+
 						return {
 							proposal : actualText,
 							description : template.description,
@@ -174,7 +174,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 							positions : extractPositions(template.positions, replaceStart, replacements),
 							// relevance not used...should it be?
 	//						relevance : 20000,
-							replace : true
+							overwrite : true
 						};
 					};
 					proposalFunc.description = template.description;
@@ -184,7 +184,7 @@ define(['servlets/get-templates', 'when', 'scripted/exec/param-resolver', "plugi
 			return newTemplates;
 		}
 	};
-	
+
 	return {
 		TemplateContentAssist : TemplateContentAssist,
 		_getAllTemplates : function() { return allTemplates; },
