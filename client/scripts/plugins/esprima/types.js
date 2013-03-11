@@ -1793,7 +1793,8 @@ SVGFEFuncAElement
 					var expr = this.convertJsDocType(jsdocType.expression, env);
 					if (expr === "Array" && jsdocType.applications && jsdocType.applications.length > 0) {
 						// only parameterize arrays not handling objects yet
-						return "Array.<" + this.convertJsDocType(jsdocType.applications[0], env) + ">";
+						var typeParam = this.convertJsDocType(jsdocType.applications[0], env) || "Object";
+						return "Array.<" + typeParam + ">";
 					}
 					return expr;
 				case 'ParameterType':
