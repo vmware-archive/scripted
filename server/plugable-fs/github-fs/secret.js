@@ -14,7 +14,7 @@
 var nodefs = require('fs');
 var pathResolve = require('../../jsdepend/utils').pathResolve;
 
-var secretFile = pathResolve(__dirname, '../../../../secret.json');
+var secretFile = pathResolve(__dirname, '../../../secret.json');
 
 var secret = JSON.parse(nodefs.readFileSync(secretFile));
 

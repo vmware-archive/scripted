@@ -15,7 +15,7 @@ var ghRepoFs = require('../../../server/plugable-fs/github-fs/github-repo-fs');
 
 var nodeCache = require(
 	'../../../server/plugable-fs/github-fs/rest-node-manager'
-).configure({ limit: 1});
+).configure({ limit: 20});
 var fs = ghRepoFs.configure({
 	token: require('../../../server/plugable-fs/github-fs/secret').token,
 	owner: 'kdvolder',
@@ -72,10 +72,10 @@ exports.walk = function (test) {
 	});
 };
 
-var README_TEXT = "playground\n"+
-			"==========\n"+
-			"\n"+
-			"This is just a testing repo to play with";
+var README_TEXT =
+	'playground\n==========\n\n' +
+	'This is just a testing repo to play with.\n\n' +
+	'Put some stuff in here to test github-fs.\n';
 
 exports.readFileUTF8 = function (test) {
 	fs.readFile('/README.md', 'utf8', function (err, text) {
@@ -86,12 +86,12 @@ exports.readFileUTF8 = function (test) {
 	});
 };
 
-exports.readFileBuffer = function (test) {
-	fs.readFile('/README.md', function (err, buffer) {
-		test.ok(buffer instanceof Buffer);
-		test.equals(buffer.toString('utf8'),
-			README_TEXT
-		);
-		test.done();
-	});
-};
+//exports.readFileBuffer = function (test) {
+//	fs.readFile('/README.md', function (err, buffer) {
+//		test.ok(buffer instanceof Buffer);
+//		test.equals(buffer.toString('utf8'),
+//			README_TEXT
+//		);
+//		test.done();
+//	});
+//};

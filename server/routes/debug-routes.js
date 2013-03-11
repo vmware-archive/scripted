@@ -12,26 +12,33 @@
  ******************************************************************************/
 
 //See: memwatch: https://hacks.mozilla.org/2012/11/tracking-down-memory-leaks-in-node-js-a-node-js-holiday-season/
-var memwatch = require('memwatch');
+
+//TODO: why does this have issues when deployed on CF, could because I run 32 bit and cf has 64 bit.
+//     is it deploying my locally compiled stuff onto CF?
+//var memwatch = require('memwatch');
+var memwatch = null;
 
 exports.install = function install(app) {
 
 	var lastGc = null;
-	memwatch.on('stats', function (stats) {
-		lastGc = stats;
-//		console.log('GC : ',JSON.stringify(stats, null, '  '));
-	});
+	if (memwatch) {
+		memwatch.on('stats', function(stats) {
+			lastGc = stats;
+			//		console.log('GC : ',JSON.stringify(stats, null, '  '));
+		});
 
-	//Returns stats about the last gc event.
-	app.get('/debug/gc', function (req, res) {
-		if (!lastGc) {
-			res.status(404);
-		} else {
-			res.header('Content-Type', 'application/json');
-			res.write(JSON.stringify(lastGc, null, '  '));
-		}
-		res.end();
-	});
+		//Returns stats about the last gc event.
+		app.get('/debug/gc', function(req, res) {
+			if (!lastGc) {
+				res.status(404);
+			} else {
+				res.header('Content-Type', 'application/json');
+				res.write(JSON.stringify(lastGc, null, '  '));
+			}
+			res.end();
+		});
+	}
+
 	app.get('/debug/mem', function (req, res) {
 		res.header('Content-Type', 'application/json');
 		res.write(JSON.stringify(process.memoryUsage(), null, '  '));

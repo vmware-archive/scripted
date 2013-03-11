@@ -11,30 +11,29 @@
  *   Kris De Volder
  ******************************************************************************/
 
+var cache = require('./rest-node-manager').configure({
+	limit: 2500 // Limits number of in-memory cached nodes.
+});
+
+
 var fs = require('./github-repo-fs').configure({
 	token: require('./secret.js').token,
 	owner: 'kdvolder',
-	repo: 'playground'
+	repo: 'playground',
+	cache: cache
 });
+
+
 
 var fetch = fs.forTesting.fetch;
 var rest = fs.forTesting.rest;
 //rest({
 //	path: 'http://api.github.com/repos/kdvolder/playground/git/trees/76a125ab17535dd744b8c138cf2f2e3f8fa55392'
-fetch('/').then(function (data) {
-	console.log(JSON.stringify(data, null, '   '));
-}).otherwise(function (err) {
-	console.error(err);
-	if (err.stack) {
-		console.log(err.stack);
-	}
-});
+var scriptedFs = require('../scripted-fs');
+var sfs = scriptedFs.configure(fs);
 
-//var scriptedFs = require('./scripted-fs');
-//var sfs = scriptedFs.configure(fs);
-//
-//var path = '/kdvolder/playground/README.md';
-//
+var path = '/README.md';
+
 //fs.readdir('/kdvolder/playground/subdir', function (err, names) {
 //	console.dir(names);
 //	fs.stat('/kdvolder/playground', function (err, stats) {
@@ -43,15 +42,18 @@ fetch('/').then(function (data) {
 //	});
 //});
 
-//sfs.getContents(path).then(function (x) {
-//	console.log(x);
-//}).otherwise(function (err) {
-//	console.log(err);
-//	if (err.stack) {
-//		console.log(err.stack);
-//	}
-//});
-//
+sfs.getContents(path).then(function (x) {
+	console.log(x);
+}).then(function (x) {
+	return sfs.getContents(path);
+}).then(function (x) {
+	console.log(x);
+}).otherwise(function (err) {
+	console.log(err);
+	if (err.stack) {
+		console.log(err.stack);
+	}
+});
 
 
 //fs.readdir(path, function (err, names) {
