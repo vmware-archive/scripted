@@ -4139,5 +4139,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
+
+
+
+
+
+	// See https://github.com/scripted-editor/scripted/issues/258
+	tests['test invalid array type param in jsdoc']  = function() {
+		var results = computeContentAssist(
+			"/** @type Array.<nuthin> */\n" +
+			"var graph = {};\n" +
+			"graph[''].k.proto", "proto");
+		testProposals(results, [
+			["prototype", "prototype : Object"]
+		]);
+	};
+
 	return tests;
 });
