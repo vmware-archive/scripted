@@ -67,13 +67,17 @@ var scriptedFs = require('../server/plugable-fs/scripted-fs');
 var githubFs = require('../server/plugable-fs/github-fs/github-fs');
 var compose = require('../server/plugable-fs/composite-fs').compose;
 var readOnly = require('../server/plugable-fs/read-only-fs');
+var unlistable = require('../server/plugable-fs/unlistable-fs');
 
 var withBaseDir = mappedFs.withBaseDir;
 var withPrefix = mappedFs.withPrefix;
 
 var scriptedHomeLocation = path.resolve(__dirname, '..');
 
-var sandbox = mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox'));
+var sandbox = unlistable(
+	mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox')),
+	'/home'
+);
 
 var cache = require('./plugable-fs/github-fs/rest-node-manager').configure({
 	limit: 2500 // Limits number of in-memory cached nodes.
@@ -105,7 +109,7 @@ var corefs = compose(
 
 //Now wrap that to create our 'fat' API that scripted uses throughout its codebase.
 var filesystem = scriptedFs.configure(corefs, {
-	userHome: '/user.home',
+	userHome: '/home',
 	scriptedHome: '/scripted.home'
 });
 
