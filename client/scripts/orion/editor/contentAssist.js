@@ -201,7 +201,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		 * provides auto-activation for content assist on '.'
 		 */
 		autoActivate : function(e) {
-			if (e.text === '.' && !this.activationRequest) {
+			if (e.text === '.' && !this.activationRequest && !this.textView.isIncrementalFindActive()) {
 				// simple check to see if we are in a valid location
 				// for content assist.
 				// if not, prevent auto-activation

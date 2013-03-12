@@ -961,6 +961,18 @@ define([
 
 		themeManager.applyCurrentTheme(editor);
 
+		// must add this function to textView and not editor
+		// since it must be available in the content assistant
+		editor.getTextView().isIncrementalFindActive = function() {
+			var keyModes = editor._keyModes;
+			for (var i = 0; i < keyModes.length; i++) {
+				if (keyModes[i].toggleIncrementalFind) {
+					return keyModes[i].isActive();
+				}
+			}
+			return false;
+		};
+
 		return editor;
 	};
 
