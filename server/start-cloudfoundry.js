@@ -56,8 +56,6 @@
 // optional
 
 //   - github-fs
-//        - needs some cache management cleanup so it can avoid running out of memory
-//        - cache contents of files as well
 //        - login mechanis to obtain oauth token for individual user (optional for 'demo')
 //   - upload zip?
 
