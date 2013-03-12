@@ -96,6 +96,12 @@
 //			"unescape_strings": false
 //		}
 //	},
-									
+				
+//	search: {
+//		exclude: [
+//			'**/node_modules',
+//			'**/client/components'
+//		]
+//	}
 
 }
