@@ -23,9 +23,11 @@
 var pathJoin = require('../jsdepend/utils').pathJoin;
 var when = require('when');
 
-exports.install = function (app, filesystem) {
+//TODO: this cooky stuff should really be done as a connect
+// middleware on every access not just on access to the 'root' path
+// of the webserver.
 
-	var welcomeText = 'Welcome to Scripted!';
+exports.install = function (app, filesystem) {
 
 	var getUserHome = filesystem.getUserHome;
 	var isDirectory = filesystem.isDirectory;
@@ -50,7 +52,7 @@ exports.install = function (app, filesystem) {
 	}
 
 	function randomString(len) {
-		var chars = "abcdefghijklmnopqrstuvwxyz01234567890";
+		var chars = "abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		var str = "";
 		for (var i = 0; i < len; i++) {
 			var code = Math.floor(Math.random()*chars.length);
@@ -61,7 +63,7 @@ exports.install = function (app, filesystem) {
 
 	function generateUserID(tries) {
 		tries = tries || 0;
-		var id = randomString(8);
+		var id = randomString(10);
 		return exists(getUserPath(id)).then(function (exists) {
 			if (exists) {
 				//already exists... try to find another one

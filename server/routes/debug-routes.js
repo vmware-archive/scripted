@@ -17,7 +17,7 @@
 //var memwatch = require('memwatch');
 var memwatch = null;
 
-var mongodb = require('../mongodb-config');
+var mongodb = require('../mongo');
 
 function errorFun(res) {
 	function error(err) {
@@ -67,18 +67,10 @@ exports.install = function install(app) {
 		var name = req.params.collection;
 		console.log('mongo fetch collection : '+name );
 		mongodb.collection(name).then(function (coll) {
-			console.log('collection = '+coll);
-			coll.find(function (err, entries) {
-				console.log('find coll err = '+err);
+			return mongodb.find(coll).then(function (entries) {
 				console.log('find coll entries = '+entries);
-				if (err) {
-					return errorFun(res)(err);
-				}
 				res.header('Content-Type', 'application/json');
-				entries.toArray(function (err, array) {
-					if (err) {
-						errorFun(res)(err);
-					}
+				return mongodb.toArray(entries).then(function (array) {
 					res.write(JSON.stringify(array, null, '  '));
 					res.end();
 				});
@@ -92,23 +84,13 @@ exports.install = function install(app) {
 			date: new Date(),
 			ip: req.connection.remoteAddress
 		};
-		mongodb.connect().then(function (connection) {
-			connection.collection('testlog', function (err, collection) {
-				if (err) {
-					return errorFun(res)(err);
-				} else {
-					collection.insert(entry, {safe: true}, function (err) {
-						if (err) {
-							return errorFun(res)(err);
-						}
-						//Woohoo! no errors so far!
-				        res.writeHead(200, {'Content-Type': 'text/plain'});
-				        res.write(JSON.stringify(entry));
-				        res.end('\n');
-					});
-				}
+		mongodb.collection('testlog').then(function (collection) {
+			return mongodb.insert(collection, entry).then(function () {
+				//Woohoo! no errors so far!
+		        res.writeHead(200, {'Content-Type': 'text/plain'});
+		        res.write(JSON.stringify(entry));
+		        res.end('\n');
 			});
 		}).otherwise(errorFun(res));
-
 	});
 };

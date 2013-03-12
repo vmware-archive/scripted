@@ -11,8 +11,18 @@
  *   Kris De Volder
  ******************************************************************************/
 
+//
+// Provides some convenience api to access a mongodb database.
+//
+// The database is automatically configure to work on a local
+// testing mongodb server or on a database provided by
+// cloudfoundry as a service.
+
 var mongodb = require('mongodb');
 var when = require('when');
+var whenFunction = require('when/node/function');
+var methodCaller = require('./utils/promises').methodCaller;
+//var createCallback = whenFunction.createCallback;
 
 if(process.env.VCAP_SERVICES){
   var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -46,23 +56,46 @@ var mongourl = generate_mongo_url(mongo);
 
 console.log(mongourl);
 
+var _connect = methodCaller('connect');
 function connect() {
-	var d = when.defer();
-	mongodb.connect(mongourl, function (err, conn) {
-		if (err) {
-			d.reject(err);
-		} else {
-			d.resolve(conn);
-		}
-	});
-	return d.promise;
+	return _connect(mongodb, mongourl);
 }
 
+//function apply(f, self/*optional*/, args) {
+//	if (!args) {
+//		//Actually, self are the args in that case!
+//		return _apply(f, self);
+//	} else {
+//		return when(self, function (self) {
+//			return _apply(f.bind(self), args);
+//		});
+//	}
+//}
+
+var _insert = methodCaller('insert');
+
 /**
- * Connect to mongodb with either local or cloudfoundry url depending on
- * where we are running.
+ * Insert an object into a mongodb collection.
+ *
+ * @return {Promise} that resolves when object was inserted or rejects if there was
+ *             an error.
  */
-exports.connect = connect;
+exports.insert = function (collection, data, options) {
+	return _insert(collection, data, options || { safe: true });
+};
+
+
+/**
+ * Call 'find' on a collection. This just passes through arguments to
+ * mongo as is, but returns a promise instead of accepting a callback.
+ */
+exports.find = methodCaller('find');
+
+/**
+ * Call 'toArray' on a Cursor... .
+ */
+exports.toArray = methodCaller('toArray');
+
 /**
  * Get a mongodb collection
  */
