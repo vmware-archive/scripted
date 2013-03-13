@@ -26,6 +26,8 @@
 //   - Disable shutdown hook
 //   - auto restart after crash
 //   - prefetch sensitive to rate limit remaining
+//   - keybindings: now that filesystem is all read-only, they can't be saved.
+//
 
 //- (must do) accessible usage stats? We may need the numbers as
 //ammunition going forward, we need to know how many users try this out.
