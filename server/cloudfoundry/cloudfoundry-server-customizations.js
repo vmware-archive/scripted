@@ -123,7 +123,7 @@ exports.install = function (app, filesystem) {
 				//Options:
 				{ upsert: true, 'new': true }
 			).then(function (user) {
-				console.log('Visit recorded: '+JSON.stringify(user, null, '  '));
+				console.log('Visit recorded: '+JSON.stringify(user[0]));
 				return user;
 			});
 		});
@@ -148,7 +148,7 @@ exports.install = function (app, filesystem) {
 
 	function trackUsers(req, res, next) {
 		var shouldTrack = trackedPaths.test(req.path);
-		console.log('trackUsers ['+shouldTrack+'] '+req.path);
+//		console.log('trackUsers ['+shouldTrack+'] '+req.path);
 		if (shouldTrack) {
 			var userID = req.cookies.userID;
 			console.log('cookie userID = '+userID);
