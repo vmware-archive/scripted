@@ -24,7 +24,7 @@
 		"scripted": "./bin/scripted"
 	},
 	"scripts": {
-		"start" : "node server/start-cloudfoundry.js",
+		"start" : "node server/cloudfoundry/start-cloudfoundry.js",
 		"test": "node tests/server/run-all.js",
 		"postinstall": "cd client && bower install"
 	},

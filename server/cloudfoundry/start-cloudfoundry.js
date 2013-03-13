@@ -62,28 +62,26 @@
 var path = require('path');
 
 var nodefs = require('fs');
-var mappedFs = require('../server/plugable-fs/mapped-fs');
-var scriptedFs = require('../server/plugable-fs/scripted-fs');
-var githubFs = require('../server/plugable-fs/github-fs/github-fs');
-var compose = require('../server/plugable-fs/composite-fs').compose;
-var readOnly = require('../server/plugable-fs/read-only-fs');
-var unlistable = require('../server/plugable-fs/unlistable-fs');
+var mappedFs = require('../plugable-fs/mapped-fs');
+var scriptedFs = require('../plugable-fs/scripted-fs');
+var githubFs = require('../plugable-fs/github-fs/github-fs');
+var compose = require('../plugable-fs/composite-fs').compose;
+var readOnly = require('../plugable-fs/read-only-fs');
+//var unlistable = require('../plugable-fs/unlistable-fs');
 
 var withBaseDir = mappedFs.withBaseDir;
 var withPrefix = mappedFs.withPrefix;
 
-var scriptedHomeLocation = path.resolve(__dirname, '..');
+var scriptedHomeLocation = path.resolve(__dirname, '../..');
+console.log('scripted.home = '+scriptedHomeLocation);
 
-var sandbox = unlistable(
-	mappedFs.withBaseDir(path.resolve(__dirname, '../sandbox')),
-	'/home'
-);
+var sandbox = readOnly(mappedFs.withBaseDir(path.resolve(scriptedHomeLocation, 'sandbox')));
 
-var cache = require('./plugable-fs/github-fs/rest-node-manager').configure({
+var cache = require('../plugable-fs/github-fs/rest-node-manager').configure({
 	limit: 2500 // Limits number of in-memory cached nodes.
 });
 var github = withPrefix('/github', githubFs.configure({
-	token: require('./plugable-fs/github-fs/secret').token,
+	token: require('../plugable-fs/github-fs/secret').token,
 	cache: cache
 }));
 
@@ -113,7 +111,7 @@ var filesystem = scriptedFs.configure(corefs, {
 	scriptedHome: '/scripted.home'
 });
 
-var server=require('../server/scriptedServer.js').start(filesystem, {
+var server=require('../scriptedServer.js').start(filesystem, {
 	port: 8123,
 	cloudfoundry: true //Enables some customization for the cf deployed scripted 'showroom' app.
 });

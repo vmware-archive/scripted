@@ -12,36 +12,41 @@
  ******************************************************************************/
 
 //
-// On cloudfoundry this module replaces the handling of the '/' url.
+// On cloudfoundry this module
+//  1) replaces the handling of the '/' url.
+//  2) adds some 'user tracking' middleware
 //
-// It provides some logic to use a cooky to assign a unique identifier
-// to a user.
-//
-// Instead of redirecting to user.home we then setup a sample project
-// area for this user and redirect them to that area.
 
 var pathJoin = require('../jsdepend/utils').pathJoin;
 var when = require('when');
-var mongo = require('../mongo');
+var mongo = require('../mongo'); //TODO: inject rather than import database instance
+var glob = require('../utils/path-glob');
 
+var users = mongo.collection('users');
+
+/**
+ * Creates an error function in the context of a given http response object.
+ * The error fun may attache error info to the response.
+ */
 function errorFun(res) {
 	function error(err) {
 		console.error(err);
 		if (err.stack) {
 			console.error(err.stack);
 		}
-		res.status(500);
-		res.header('Content-Type', 'text/plain');
-		res.write(""+err);
-		if (err.stack) {
-			res.write(""+err.stack);
-		}
-		res.end();
+		//Only logging errors now, don't reject requests just because
+		//there's probably a bug or resource limit problem with user tracking.
+
+//		res.status(500);
+//		res.header('Content-Type', 'text/plain');
+//		res.write(""+err);
+//		if (err.stack) {
+//			res.write(""+err.stack);
+//		}
+//		res.end();
 	}
 	return error;
 }
-
-var users = mongo.collection('users');
 
 //TODO: this cooky stuff should really be done as a connect
 // middleware on every access not just on access to the 'root' path
@@ -59,7 +64,7 @@ exports.install = function (app, filesystem) {
 		return pathJoin(getUserHome(), userID);
 	}
 
-// Discontinued: will only show a read-only sample now.
+// Discontinued for now. We will only show a read-only sample now.
 //
 //	function createUserArea(userID) {
 //		var path = getUserPath(userID);
@@ -134,29 +139,43 @@ exports.install = function (app, filesystem) {
 		});
 	}
 
-	app.get('/', function (req, res) {
-		var userID = req.cookies.userID;
-		console.log('cookie userID = '+userID);
-		if (!userID) {
-			userID = generateUserID();
-		}
-		//Yes... doing next sep asyncly (i.e. we aren't waiting for success to proceed).
-		when(userID, recordVisitor).otherwise(function (err) {
-			console.error('Problems recording a visit?');
-			console.error(err);
-			if (err.stack) {
-				console.error(err.stack);
+	/**
+	 * When one of these paths gets hit we create user tracking cookies.
+	 */
+	var trackedPaths = glob.fromJson([
+		'/', '/editor/**'
+	]);
+
+	function trackUsers(req, res, next) {
+		var shouldTrack = trackedPaths.test(req.path);
+		console.log('trackUsers ['+shouldTrack+'] '+req.path);
+		if (shouldTrack) {
+			var userID = req.cookies.userID;
+			console.log('cookie userID = '+userID);
+			if (!userID) {
+				userID = generateUserID();
 			}
-		});
-		when(userID, function (userID) {
-			res.cookie('userID', userID, {
-				maxAge: 365 * 24 * 3600 * 1000 /*expires in one year*/
-			});
-			res.redirect('/editor/sample');
-//			createUserArea(userID).then(function () {
-//				res.redirect('/editor'+getUserHome()+'/'+userID);
-//			});
-		}).otherwise(errorFun(res));
+			//Yes... its deliberate we are doing next sep asyncly
+			// (i.e. we aren't waiting for success to proceed).
+			when(userID, recordVisitor).otherwise(errorFun(res));
+			when(userID, function (userID) {
+				res.cookie('userID', userID, {
+					maxAge: 365 * 24 * 3600 * 1000 /*expires in one year*/
+				});
+	//			createUserArea(userID).then(function () {
+	//				res.redirect('/editor'+getUserHome()+'/'+userID);
+	//			});
+			}).otherwise(errorFun(res));
+		}
+		next();
+	}
+
+	app.use(trackUsers);
+
+	// Change the redirect target for the '/' path to point to the
+	// sample project.
+	app.get('/', function (req, res) {
+		res.redirect('/editor/home/sample');
 	});
 
 };

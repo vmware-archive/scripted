@@ -18,7 +18,7 @@
 // against ant-like path patterns using '**' and '*'.
 //
 
-// IMPORTANT: 
+// IMPORTANT:
 // It is assumed that patterns are always being matched against absolute
 // path strings. Any 'relative' patterns will be interpreted as matching
 // from the file system root.
@@ -26,7 +26,9 @@
 // TODO: It could make sense to make the 'root dir' to which relative paths
 // should be made relative a configuration option or parameter.
 
-var pathResolve = require('../jsdepend/utils').pathResolve;
+var utils = require('../jsdepend/utils');
+var pathResolve = utils.pathResolve;
+var endsWith = utils.endsWith;
 
 function configure(isWindows) {
 
@@ -42,12 +44,12 @@ function configure(isWindows) {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Regexp snippet to match a '/' depending on the platform.
 	 */
 	var SLASH = isWindows ? '[\\\\/]' : '/';
-	
+
 	/**
 	 * Regexp snippet to match a 'non slash' depending on the platform.
 	 */
@@ -63,7 +65,7 @@ function configure(isWindows) {
 	function pat2regexp(pat) {
 		//TODO: something like this also exists in client-side code to
 		// support 'afterSave' exec action triggering.
-		
+
 		//TODO: is all this string concatenation slow?
 		var re = "^";
 		if (isWindows) {
@@ -82,22 +84,26 @@ function configure(isWindows) {
 				re = re + '[a-zA-Z]:';
 			}
 		}
-		
+
 		//At this point there should be no more differences between win or nowin since
 		//we already dealt with the device portion of the pattern.
-		
+
 		//Ensure patterns always start with a '/'
 		if (pat[0]!=='/') {
 			pat = '/' + pat;
 		}
-		
+
 		var i = 0;
 		while (i<pat.length) {
 			if ("/**/"===pat.substring(i,i+4)) {
 				re += SLASH+"(.*"+SLASH+")?";
 				i+=4;
+			} else if (pat.substring(i,i+3)==='/**' && pat.length===i+3) {
+				re += "("+SLASH+".*)?";
+				i+=3;
 			} else if ("**"===pat.substring(i,i+2)) {
-				throw "Bad glob pattern: "+pat+"\n '**' only allowed as follows '.../**/...' or '**/...";
+				throw "Bad glob pattern: "+pat+"\n '**' only allowed as follows:"+
+				" '.../**/...' or '**/... or '../**'";
 			} else if ("/"===pat[i]) {
 				re += SLASH;
 				i++;
