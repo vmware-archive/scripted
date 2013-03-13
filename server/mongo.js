@@ -57,8 +57,12 @@ var mongourl = generate_mongo_url(mongo);
 console.log(mongourl);
 
 var _connect = methodCaller('connect');
+var connection = null;
 function connect() {
-	return _connect(mongodb, mongourl);
+	if (!connection) {
+		connection = _connect(mongodb, mongourl);
+	}
+	return connection;
 }
 
 //function apply(f, self/*optional*/, args) {
@@ -100,13 +104,14 @@ exports.toArray = methodCaller('toArray');
  * Get a mongodb collection
  */
 exports.collection = function (name) {
+	//TODO: use methodCaller to implement this in much less code.
 	var d = when.defer();
 	connect().then(function (conn) {
-		console.log('fetch collection connection = '+conn);
+		//console.log('fetch collection connection = '+conn);
 		conn.collection(name, function (err, coll) {
-			console.log('fetch collection err = '+err);
-			console.log('fetch collection coll = '+coll);
-			console.log('Connection = '+conn);
+//			console.log('fetch collection err = '+err);
+//			console.log('fetch collection coll = '+coll);
+//			console.log('Connection = '+conn);
 			if (err) {
 				return d.reject(err);
 			} else {
@@ -116,3 +121,5 @@ exports.collection = function (name) {
 	});
 	return d.promise;
 };
+
+exports.findAndModify = methodCaller('findAndModify');

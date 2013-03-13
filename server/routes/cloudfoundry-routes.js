@@ -22,6 +22,26 @@
 
 var pathJoin = require('../jsdepend/utils').pathJoin;
 var when = require('when');
+var mongo = require('../mongo');
+
+function errorFun(res) {
+	function error(err) {
+		console.error(err);
+		if (err.stack) {
+			console.error(err.stack);
+		}
+		res.status(500);
+		res.header('Content-Type', 'text/plain');
+		res.write(""+err);
+		if (err.stack) {
+			res.write(""+err.stack);
+		}
+		res.end();
+	}
+	return error;
+}
+
+var users = mongo.collection('users');
 
 //TODO: this cooky stuff should really be done as a connect
 // middleware on every access not just on access to the 'root' path
@@ -39,17 +59,19 @@ exports.install = function (app, filesystem) {
 		return pathJoin(getUserHome(), userID);
 	}
 
-	function createUserArea(userID) {
-		var path = getUserPath(userID);
-		return isDirectory(path).then(function (isDir) {
-			if (isDir) {
-				//already got a user-area
-				return;
-			}
-			//must create user area
-			return copyDir('/sample', path);
-		});
-	}
+// Discontinued: will only show a read-only sample now.
+//
+//	function createUserArea(userID) {
+//		var path = getUserPath(userID);
+//		return isDirectory(path).then(function (isDir) {
+//			if (isDir) {
+//				//already got a user-area
+//				return;
+//			}
+//			//must create user area
+//			return copyDir('/sample', path);
+//		});
+//	}
 
 	function randomString(len) {
 		var chars = "abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -64,36 +86,77 @@ exports.install = function (app, filesystem) {
 	function generateUserID(tries) {
 		tries = tries || 0;
 		var id = randomString(10);
-		return exists(getUserPath(id)).then(function (exists) {
-			if (exists) {
-				//already exists... try to find another one
-				if (++tries < 10) {
-					return generateUserID(tries);
-				} else {
-					//Can't find a free 'private' user id. Use the 'shared' ID.
-					return 'shared';
-				}
-			}
+		return createUser(id).then(function () {
+			console.log('User created: '+id);
 			return id; //Yeah! Found one that's still available.
+		}, function (err) {
+			console.log('Faile to create User: '+id);
+			console.err(err);
+			if (++tries < 10) {
+				return generateUserID(tries);
+			} else {
+				//Can't find a free 'private' user id. Use the 'shared' ID.
+				return 'shared';
+			}
+		});
+	}
+
+	function recordVisitor(id) {
+		console.log('Recording visit: '+id);
+		//Ignoring any errors about creating duplicate ids
+		return users.then(function (users) {
+			return mongo.findAndModify(users,
+				//Criteria:
+				{_id: id},
+				//Sort:
+				[['_id','asc']],
+				//Update:
+				{
+					'$inc' : { visits: 1 },
+					'$set' : { lastVisit: new Date()}
+				},
+				//Options:
+				{ upsert: true, 'new': true }
+			).then(function (user) {
+				console.log('Visit recorded: '+JSON.stringify(user, null, '  '));
+				return user;
+			});
+		});
+	}
+
+	function createUser(id) {
+		return users.then(function (users) {
+			//The insert call below will reject when the user id already exists.
+			return mongo.insert(users, {
+				_id: id,
+				created: new Date()
+			}).then(function () {return id;});
 		});
 	}
 
 	app.get('/', function (req, res) {
-		console.log("Should be redirecting to user-specific area");
-
 		var userID = req.cookies.userID;
 		console.log('cookie userID = '+userID);
 		if (!userID) {
 			userID = generateUserID();
 		}
+		//Yes... doing next sep asyncly (i.e. we aren't waiting for success to proceed).
+		when(userID, recordVisitor).otherwise(function (err) {
+			console.error('Problems recording a visit?');
+			console.error(err);
+			if (err.stack) {
+				console.error(err.stack);
+			}
+		});
 		when(userID, function (userID) {
 			res.cookie('userID', userID, {
 				maxAge: 365 * 24 * 3600 * 1000 /*expires in one year*/
 			});
-			createUserArea(userID).then(function () {
-				res.redirect('/editor'+getUserHome()+'/'+userID);
-			});
-		});
+			res.redirect('/editor/sample');
+//			createUserArea(userID).then(function () {
+//				res.redirect('/editor'+getUserHome()+'/'+userID);
+//			});
+		}).otherwise(errorFun(res));
 	});
 
 };
