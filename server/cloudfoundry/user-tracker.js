@@ -30,20 +30,22 @@ var users = mongo.collection('users');
  */
 function errorFun(res) {
 	function error(err) {
+		//Always log errors to console.
 		console.error(err);
 		if (err.stack) {
 			console.error(err.stack);
 		}
-		//Only logging errors now, don't reject requests just because
-		//there's probably a bug or resource limit problem with user tracking.
 
-//		res.status(500);
-//		res.header('Content-Type', 'text/plain');
-//		res.write(""+err);
-//		if (err.stack) {
-//			res.write(""+err.stack);
-//		}
-//		res.end();
+		//If res object is available also show error to the client.
+		if (res) {
+			res.status(500);
+			res.header('Content-Type', 'text/plain');
+			res.write(""+err);
+			if (err.stack) {
+				res.write(""+err.stack);
+			}
+			res.end();
+		}
 	}
 	return error;
 }
@@ -149,25 +151,22 @@ exports.install = function (app, filesystem) {
 	function trackUsers(req, res, next) {
 		var shouldTrack = trackedPaths.test(req.path);
 //		console.log('trackUsers ['+shouldTrack+'] '+req.path);
-		if (shouldTrack) {
+		if (!shouldTrack) {
+			return next();
+		} else {
 			var userID = req.cookies.userID;
 			console.log('cookie userID = '+userID);
 			if (!userID) {
 				userID = generateUserID();
 			}
-			//Yes... its deliberate we are doing next sep asyncly
-			// (i.e. we aren't waiting for success to proceed).
-			when(userID, recordVisitor).otherwise(errorFun(res));
+			when(userID, recordVisitor).otherwise(errorFun(null));
 			when(userID, function (userID) {
 				res.cookie('userID', userID, {
 					maxAge: 365 * 24 * 3600 * 1000 /*expires in one year*/
 				});
-	//			createUserArea(userID).then(function () {
-	//				res.redirect('/editor'+getUserHome()+'/'+userID);
-	//			});
+				next();
 			}).otherwise(errorFun(res));
 		}
-		next();
 	}
 
 	app.use(trackUsers);

@@ -52,7 +52,9 @@ function configure(filesystem, options) {
 			app.use(express.cookieParser());
 
 			if (isCloudfoundry) {
-				require('./cloudfoundry/cloudfoundry-server-customizations').install(app, filesystem);
+				//Add cf specific middleware
+				console.log('Add cf middleware');
+				require('./cloudfoundry/user-tracker').install(app, filesystem);
 			}
 
 			app.use(app.router);
@@ -64,6 +66,12 @@ function configure(filesystem, options) {
 			}));
 		});
 
+		if (isCloudfoundry) {
+			console.log('Add cf routes');
+
+			//Add cf specific 'routes'
+			require('./cloudfoundry/cloudfoundry-routes').install(app, filesystem);
+		}
 		require('./servlets/status').install(app);
 
 		require('./routes/editor-routes').install(app, filesystem);
