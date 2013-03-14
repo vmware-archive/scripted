@@ -18,6 +18,7 @@
 
 define([
 	"require",
+	"scripted/editor/InlineRenameRefactoring",
 	"scripted/api/editor-wrapper",
 	"scripted/utils/deref", "scripted/editor/save-hooks", "when", "scripted/fileapi",
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
@@ -31,6 +32,7 @@ define([
 	"scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require,
+	inlineRenameRefactoring,
 	EditorProxy,
 	deref, mSaveHooks, when, fileapi,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
@@ -572,6 +574,8 @@ define([
 				infileSearchDialog.openDialog(editor,undoStack,searchString,editor._titleNode);
 				return true;
 			});
+
+			new inlineRenameRefactoring.InlineRenameRefactoring(editor,undoStack,linkedMode);
 
 			// save binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
