@@ -79,7 +79,7 @@ function configure(filesystem, options) {
 			//Add cf specific 'routes'
 			require('./cloudfoundry/cloudfoundry-routes').install(app, filesystem);
 		}
-		require('./servlets/status').install(app);
+		require('./routes/status-routes').install(app, options);
 
 		require('./routes/editor-routes').install(app, filesystem);
 		require('./routes/test-routes').install(app);

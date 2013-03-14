@@ -23,8 +23,12 @@ var jsonMerge = require('./jsdepend/json-merge');
 
 function start(filesystem, options) {
 
+//Default options for the 'localhost', commandline version of scripted.
+// Note: any options that need to be false by default don't need to be
+// added here since not setting them will already make them 'falsy'.
 var defaultOptions = {
-	applicationManager: true
+	applicationManager: true,
+	shutdownHook: true
 };
 options = jsonMerge(defaultOptions, options);
 
