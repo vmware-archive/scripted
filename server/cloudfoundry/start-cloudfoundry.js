@@ -25,12 +25,6 @@
 //            and then use localstorage.
 //
 
-//- (must do) accessible usage stats? We may need the numbers as
-//ammunition going forward, we need to know how many users try this out.
-// At least number of visitors who try it out - if this is captured in the
-// server log, can we access that file?  I don't think we want to track IP
-// addresses of visitors (do we?) - but just a count of users creating
-//projects would be useful.
 //
 //
 //- (must do) improve the landing page getting started text or even offer alternative text when deployed in this way.
@@ -61,6 +55,12 @@
 //(b) how do we check
 // the space isn't filled up? Handle rogue users filling it up? Can we
 //easily see all the material that is up there?
+//- (must do) accessible usage stats? We may need the numbers as
+//ammunition going forward, we need to know how many users try this out.
+// At least number of visitors who try it out - if this is captured in the
+// server log, can we access that file?  I don't think we want to track IP
+// addresses of visitors (do we?) - but just a count of users creating
+//projects would be useful.
 
 
 var path = require('path');
