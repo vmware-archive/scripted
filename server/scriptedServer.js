@@ -15,11 +15,18 @@
  ******************************************************************************/
 /*jslint node:true */
 
+var jsonMerge = require('./jsdepend/json-merge');
+
 // Entry point for the node app
 // Basic construction.  Some requestHandlers are used for
 // specific actions. Other URLs are assumed to be static content.
 
 function start(filesystem, options) {
+
+var defaultOptions = {
+	applicationManager: true
+};
+options = jsonMerge(defaultOptions, options);
 
 var isCloudfoundry = (options && options.cloudfoundry);
 

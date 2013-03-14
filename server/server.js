@@ -51,7 +51,7 @@ function configure(filesystem, options) {
 			app.use(express.json());
 			app.use(express.cookieParser());
 
-			if (isCloudfoundry) {
+			if (options.cloudfoundry) {
 				//Add cf specific middleware
 				console.log('Add cf middleware');
 				require('./cloudfoundry/user-tracker').install(app, filesystem);
@@ -65,8 +65,15 @@ function configure(filesystem, options) {
 				showStack: true
 			}));
 		});
+		//Make the options available to client code.
+		app.get('/options', function (req, res) {
+			res.status(200);
+			res.header('Content-Type', 'application/json');
+			res.write(JSON.stringify(options));
+			res.end();
+		});
 
-		if (isCloudfoundry) {
+		if (options.cloudfoundry) {
 			console.log('Add cf routes');
 
 			//Add cf specific 'routes'
@@ -83,7 +90,9 @@ function configure(filesystem, options) {
 		require('./servlets/incremental-search-servlet').install(app, filesystem);
 		require('./servlets/incremental-file-search-servlet').install(app, filesystem);
 
-		require('./servlets/application-servlet').install(app);
+		if (options.applicationManager) {
+			require('./servlets/application-servlet').install(app);
+		}
 
 		console.log('Server port = ' + port);
 		app.server.listen(port, "127.0.0.1" /* only accepting connections from localhost */);

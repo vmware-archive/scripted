@@ -115,6 +115,7 @@ var filesystem = scriptedFs.configure(corefs, {
 
 var server=require('../scriptedServer.js').start(filesystem, {
 	port: 8123,
-	cloudfoundry: true //Enables some customization for the cf deployed scripted 'showroom' app.
+	cloudfoundry: true, //Enables some customization for the cf deployed scripted 'showroom' app.
+	applicationManager: false //Disable the application manager.
 });
 

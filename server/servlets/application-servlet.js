@@ -38,11 +38,11 @@ exports.install = function (app) {
 	 */
 	app.get("/application/status", function(request, response) {
 		// Return status of the server.
-		
+
 		// There is no path through 'serv' right now so we communicate
 		// direct with the server it starts (see URL)
 		var mimeclient = mime();
-		
+
 		mimeclient({ path:url+"/serv/status", method:"GET" }).then(function(status_response) {
 				response.send({"status": "running", "path": status_response.entity.path},200);
 			},function(error) {
@@ -52,6 +52,7 @@ exports.install = function (app) {
 
 	/** Start the server */
 	app.put("/application/status", function(request, response) {
+		console.log('Starting app');
 		servStart.exec({cwd:request.param("path"),suppressOpen:request.param("suppressOpen"),logdir:request.param("path")});
 		response.end();
 	});
@@ -61,7 +62,7 @@ exports.install = function (app) {
 		servStop.exec({});
 		response.end();
 	});
-	
+
 	/** Reload a file */
 	app.post("/application/reload", function(request, response) {
 		console.log("Reloading "+request.param("path"));
