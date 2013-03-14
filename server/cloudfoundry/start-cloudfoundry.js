@@ -120,6 +120,55 @@ var server=require('../scriptedServer.js').start(filesystem, {
 	cloudfoundry: true, //Enables some customization for the cf deployed scripted 'showroom' app.
 	applicationManager: false, //Disable the application manager.
 	shutdownHook: false, //Disable the 'shutdown hook' used by 'scr -k' and 'scr -r' commands.
-	exec: false //Disable 'exec' related features.
+	exec: false, //Disable 'exec' related features.
+	help_text: [
+"                 _  _  _       _                                      ",
+"                | || || |     | |                            _        ",
+"                | || || |_____| | ____ ___  ____  _____    _| |_ ___  ",
+"                | || || | ___ | |/ ___) _ \\|    \\| ___ |  (_   _) _ \\ ",
+"                | || || | ____| ( (__| |_| | | | | ____|    | || |_| |",
+"                 \\_____/|_____)\\_)____)___/|_|_|_|_____)     \\__)___/ ",
+"",
+"                      ______             _                      _ ",
+"                     / _____)           (_)       _            | |",
+"                    ( (____   ____  ____ _ ____ _| |_ _____  __| |",
+"                     \\____ \\ / ___)/ ___) |  _ (_   _) ___ |/ _  |",
+"                     _____) | (___| |   | | |_| || |_| ____( (_| |",
+"                    (______/ \\____)_|   |_|  __/  \\__)_____)\\____|",
+"                                          |_|                     ",
+"",
+"		  This is a DEMO of the Scripted Editor running on 'cloudfoundry.com'.",
+"		  Here you can quickly try out Scripted without any hassles such as",
+"		  installing, signing-up, etc.",
+"",
+"		  Unfortunately, due to practical and legal limitations we",
+"		  could only make this 'hassle free' publically hosted DEMO with a",
+"		  read-only file system.",
+"",
+"		  We hope this demo will help you decide if you want to give Scripted",
+"		  a 'real' try and install it for a more thorough try-out.",
+"",
+"		  To find out more visit our GitHub homepage:",
+"",
+"				'http://github.com/scripted-editor/scripted",
+"",
+"		  Some basic instructions for getting started with Scripted:",
+"",
+"		  Use the navigator on the left to select a file for editing.",
+"",
+"		  Help on all supported key bindings is available by clicking the",
+"		  '?' icon in the top right, or simply pressing 'F1'",
+"",
+"		  To search your project for a file to open by name, press 'Cmd/Ctrl+Shift+F'",
+"		  to show the 'Open File' dialog.",
+"",
+"		  To search for a file based simply on a string within it, press ",
+"		  'Cmd/Ctrl+Shift+L' to open the 'Look in files' dialog.",
+"",
+"		  The 'bars' icon next to the help icon opens the side panel which can",
+"		  host a second editor, pressing 'Shift' when opening any link or navigable",
+"		  JavaScript reference in Scripted will open the target in the side panel.",
+"		  The side panel can also be opened/closed with 'Cmd/Ctrl+Shift+E'."
+	]
 });
 

@@ -65,6 +65,7 @@ function configure(filesystem, options) {
 				showStack: true
 			}));
 		});
+
 		//Make the options available to client code.
 		app.get('/options', function (req, res) {
 			res.status(200);
@@ -72,6 +73,17 @@ function configure(filesystem, options) {
 			res.write(JSON.stringify(options));
 			res.end();
 		});
+
+		//Serve alternate help.txt
+		if (options.help_text) {
+			app.get('/scripts/scripted/help.txt', function (req, res) {
+				console.log('Request for help.txt intercepted');
+				res.status(200);
+				res.header('Content-Type', 'text/plain');
+				res.write(options.help_text);
+				res.end();
+			});
+		}
 
 		if (options.cloudfoundry) {
 			console.log('Add cf routes');

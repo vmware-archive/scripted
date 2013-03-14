@@ -32,6 +32,11 @@ var defaultOptions = {
 	exec: true
 };
 options = jsonMerge(defaultOptions, options);
+if (options.help_text) {
+	if (Array.isArray(options.help_text)) {
+		options.help_text = options.help_text.join('\n');
+	}
+}
 
 var isCloudfoundry = (options && options.cloudfoundry);
 
