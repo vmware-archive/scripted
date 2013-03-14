@@ -146,8 +146,8 @@ define(['when'], function(when) {
 				        if(xhrobj.readyState === 4) { // 4 means content has finished loading
 							if (xhrobj.status===200) {
 								callback.apply(null, JSON.parse(xhrobj.responseText));
-							} else if (xhrobj.status===500) {
-								callback("Error: xhr request status = "+xhrobj.responseText);
+							} else {
+								callback("Error: status ["+xhrobj.status+"] "+xhrobj.responseText);
 							}
 						}
 					};
@@ -169,8 +169,8 @@ define(['when'], function(when) {
 				        if(xhrobj.readyState === 4) { // 4 means content has finished loading
 							if (xhrobj.status===200) {
 								callback.apply(null, JSON.parse(xhrobj.responseText));
-							} else if (xhrobj.status===500) {
-								callback("Error: xhr request status = "+xhrobj.responseText);
+							} else {
+								callback("Error: status ["+xhrobj.status+"] "+xhrobj.responseText);
 							}
 						}
 					};

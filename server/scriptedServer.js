@@ -28,7 +28,8 @@ function start(filesystem, options) {
 // added here since not setting them will already make them 'falsy'.
 var defaultOptions = {
 	applicationManager: true,
-	shutdownHook: true
+	shutdownHook: true,
+	exec: true
 };
 options = jsonMerge(defaultOptions, options);
 
@@ -43,9 +44,8 @@ var requestHandlers = require("./requestHandlers").configure(filesystem);
 //require("./servlets/hello");
 //require("./servlets/listFiles"); //Dead?
 require("./servlets/jsdepend-servlet").install(filesystem);
-if (!isCloudfoundry) {
-	require("./servlets/exec-servlet");
-}
+require("./servlets/exec-servlet").install(options);
+
 //require("./servlets/config-servlet");
 //these two wired up in server.
 //require("./servlets/kill");

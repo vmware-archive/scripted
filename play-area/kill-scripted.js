@@ -1,6 +1,6 @@
 
-var killUrl = 'http://localhost:8123/status';
-//var killUrl = 'http://scrptd.cloudfoundry.com/status
+//var killUrl = 'http://localhost:8123/status';
+var killUrl = 'http://scrptd.cloudfoundry.com/status';
 
 var rest = require('rest');
 

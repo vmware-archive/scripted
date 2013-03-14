@@ -17,16 +17,12 @@
 
 // TODO: Before this can go 'public'
 //
-//   - disable 'exec' related features. Don't really want people to run exec commands
-//     on cf hosts.
-//   - remove or fix the 'Play' button.
 //   - Customized readme shown when opening on a folder.
 //   - A reasonable piece of sample code to pre-populate first-time visitor space.
 //   - Ask Scott to vacate domain name 'scripted.cloudfoundry.com' so we can use that.
-//   - Disable shutdown hook
-//   - auto restart after crash
-//   - prefetch sensitive to rate limit remaining
 //   - keybindings: now that filesystem is all read-only, they can't be saved.
+//       fix: should make 'keybindings store' injectable on client-side
+//            and then use localstorage.
 //
 
 //- (must do) accessible usage stats? We may need the numbers as
@@ -36,18 +32,9 @@
 // addresses of visitors (do we?) - but just a count of users creating
 //projects would be useful.
 //
-//- (must do) decide how to handle these things:
-//(a) how do we stop
-//people putting up stuff they shouldn't? Either copyrighted or offensive
-//material. Do we have to care about that? Feels like we might. Do we need
-// some kind of disclaimer - like the jsfiddle one.
-//(b) how do we check
-// the space isn't filled up? Handle rogue users filling it up? Can we
-//easily see all the material that is up there?
 //
 //- (must do) improve the landing page getting started text or even offer alternative text when deployed in this way.
 //
-//- (must do) decide on exec keys, do we need to shut it off? We can't expose a server to running arbitrary commands.
 //
 //-
 // (must do) links to download pages for scripted, maybe to
@@ -59,7 +46,22 @@
 
 //   - github-fs
 //        - login mechanis to obtain oauth token for individual user (optional for 'demo')
+//        - prefetch sensitive to rate limit remaining
 //   - upload zip?
+
+// DONE
+//- disable shutdown hook
+//- disable play / stop button
+//- (must do) decide on exec keys, do we need to shut it off? We can't expose a server to running arbitrary commands.
+//- (must do) decide how to handle these things:
+//(a) how do we stop
+//people putting up stuff they shouldn't? Either copyrighted or offensive
+//material. Do we have to care about that? Feels like we might. Do we need
+// some kind of disclaimer - like the jsfiddle one.
+//(b) how do we check
+// the space isn't filled up? Handle rogue users filling it up? Can we
+//easily see all the material that is up there?
+
 
 var path = require('path');
 
@@ -117,6 +119,7 @@ var server=require('../scriptedServer.js').start(filesystem, {
 	port: 8123,
 	cloudfoundry: true, //Enables some customization for the cf deployed scripted 'showroom' app.
 	applicationManager: false, //Disable the application manager.
-	shutdownHook: false //Disable the 'shutdown hook' used by 'scr -k' and 'scr -r' commands.
+	shutdownHook: false, //Disable the 'shutdown hook' used by 'scr -k' and 'scr -r' commands.
+	exec: false //Disable 'exec' related features.
 });
 
