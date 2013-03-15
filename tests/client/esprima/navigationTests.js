@@ -12,7 +12,7 @@
  ******************************************************************************/
 
 // tests for javascript navigation, both in-file and out
-/*global define esprima console setTimeout esprimaContentAssistant*/
+/*global define esprima console setTimeout esprimaContentAssistant doctrine*/
 define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsprimaPlugin, assert) {
 
 	//////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		if (!actual) {
 			assert.fail("No definition found for:\n" + expected.hoverText );
 		}
-		assert.equal(actual.typeName, expected.typeName, "Invalid type name in definition");
+		assert.equal(doctrine.stringify(actual.typeObj), expected.typeSig, "Invalid type name in definition");
 		assert.equal(actual.path, expected.path, "Invalid path in definition");
 		if (!expected.range) {
 			assert.ok(!actual.range, "Should not have found a range object: " + actual.range);
@@ -81,7 +81,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		} else {
 			expected.range = null;
 		}
-		expected.typeName = typeName;
+		expected.typeSig = typeName;
 		expected.hoverText = hover;
 		expected.path = path;
 		expected.buffer = buffer;
@@ -130,22 +130,25 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		doSameFileTest("var aaa = 9\naaa", 'aaa', 'Number');
 	};
 	tests.testVar2 = function() {
-		doSameFileTest("var aaa = function(a,b,c) { return 9; }\naaa", 'aaa', "?Number:a/gen~local~0,b/gen~local~1,c/gen~local~2", 'aaa : (a, b, c) ⇒ Number');
+		doSameFileTest("var aaa = function(a,b,c) { return 9; }\naaa", 'aaa',
+		"function(a:gen~local~0,b:gen~local~1,c:gen~local~2):Number", 'aaa : function(a:{},b:{},c:{}):Number');
+
 	};
 	tests.testVar3 = function() {
 		doSameFileTest("var aaa = function(a,b,c) { return function(a) { return 9; }; }\naaa",
-			'aaa', "??Number:a/gen~local~5:a/gen~local~0,b/gen~local~1,c/gen~local~2", 'aaa : (a, b, c) ⇒ (a:{...}) ⇒ Number');
+			'aaa', "function(a:gen~local~0,b:gen~local~1,c:gen~local~2):function(a:gen~local~5):Number",
+			'aaa : function(a:{},b:{},c:{}):function(a:{}):Number');
 	};
 	tests.testParam1 = function() {
 		doSameFileTest("var bbb = function(a,b,d) { d }",
-			'd', "gen~local~2", 'd : {  }');
+			'd', "gen~local~2", 'd : {}');
 	};
 	tests.testParam2 = function() {
 		doSameFileTest("var d = 9;var bbb = function(a,b,d) { d }",
-			'd', "gen~local~2", 'd : {  }', 2);
+			'd', "gen~local~2", 'd : {}', 2);
 	};
 	tests.testParam3 = function() {
-		doSameFileTest("var d = 9;var bbb = function(a,b,d) {  }\nd",
+		doSameFileTest("var d = 9;var bbb = function(a,b,d) {}\nd",
 			'd', "Number", 'd : Number', 1);
 	};
 	tests.testObjLiteral1 = function() {
@@ -188,7 +191,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 
 	tests.testThis4 = function() {
 		doSameFileTest("var Foo = function() {};\nFoo.prototype = { a : this }",
-			'this', "gen~local~4", 'this : { a:{ a:{...} } }', '{ a : this }');
+			'this', "gen~local~4", 'this : {a:{a:{...}}}', '{ a : this }');
 	};
 
 	//////////////////////////////////////////////////////////
@@ -236,7 +239,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testAMD2 = function() {
 		doMultiFileTest( "file1", "define({ val1 : function() { return 9; } });",
 			"define(['file1'], function(f1) { f1.val1; });",
-			'val1', "?Number:", 'val1 : () ⇒ Number');
+			'val1', "function():Number", 'val1 : function():Number');
 	};
 
 	//////////////////////////////////////////////////////////
@@ -344,7 +347,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testFullFile2 = function() {
 		doSameFileTest("var x = y;\n" +
 			"x;\n" +
-			"var y = { fff : 0 };", "x", "gen~local~0", "x : {  }", 1);
+			"var y = { fff : 0 };", "x", "gen~local~0", "x : {}", 1);
 	};
 
 	// arrrrgh need to fix this one so that the test chooses the first fff, not the last
@@ -443,7 +446,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			" */\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {  }", 1,
+			contents, "x", "gen~local~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	tests.testJSDoc0a = function() {
@@ -451,7 +454,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"/***/\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {  }", 1,
+			contents, "x", "gen~local~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	tests.testJSDoc0b = function() {
@@ -460,7 +463,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"// TODO this is strannnnnnnnge.\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {  }", 1,
+			contents, "x", "gen~local~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
