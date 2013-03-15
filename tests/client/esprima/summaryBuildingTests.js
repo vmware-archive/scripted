@@ -17,10 +17,10 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	// helpers
 	//////////////////////////////////////////////////////////
 	var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider();
-	
+
 	function filterSummary(summary) {
-		if (summary && summary.typeName) {
-			summary = summary.typeName;
+		if (summary && summary.typeSig) {
+			summary = summary.typeSig;
 		} else if (typeof summary === "object") {
 			for (var prop in summary) {
 				if (summary.hasOwnProperty(prop)) {
@@ -30,7 +30,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		}
 		return summary;
 	}
-	
+
 	function computeSummary(fileName, buffer) {
 		return esprimaContentAssistant.computeSummary(buffer, fileName);
 	}
@@ -39,12 +39,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		var filteredSummary =filterSummary(actualSummary);
 		assert.equal(JSON.stringify(filteredSummary), expectedSummaryText);
 	}
-	
+
 	function assertCreateSummary(expectedSummaryText, buffer, fileName) {
 		assertSameSummary(expectedSummaryText, computeSummary(fileName, buffer));
 	}
-	
-	
+
+
 	//////////////////////////////////////////////////////////
 	// tests
 	//////////////////////////////////////////////////////////
@@ -56,52 +56,52 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testEmptyGlobalStructure = function() {
 		assertCreateSummary('{"provided":{},"types":{},"kind":"global"}', "", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure1 = function() {
 		assertCreateSummary('{"provided":{"x":"gen~a~0"},"types":{"gen~a~0":{"$$proto":"Object"}},"kind":"global"}',
 			"var x;", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure2 = function() {
 		assertCreateSummary('{"provided":{"x":"Number"},"types":{},"kind":"global"}',
 			"var x=0;", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure3 = function() {
 		assertCreateSummary('{"provided":{"x":"String"},"types":{},"kind":"global"}',
 			"var x='';", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure4 = function() {
 		assertCreateSummary('{"provided":{"x":"gen~a~1"},"types":{"gen~a~1":{"$$proto":"Object"}},"kind":"global"}',
 			"var x={};", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure5 = function() {
 		assertCreateSummary('{"provided":{"x":"gen~a~1"},"types":{"gen~a~1":{"$$proto":"Object","f":"Number","g":"String"}},"kind":"global"}',
 			"var x={f:9, g:''};", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure6 = function() {
-		assertCreateSummary('{"provided":{"x":"?undefined:"},"types":{},"kind":"global"}',
+		assertCreateSummary('{"provided":{"x":"function():undefined"},"types":{},"kind":"global"}',
 			"var x=function() {};", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure7 = function() {
-		assertCreateSummary('{"provided":{"x":"?undefined:a/gen~a~0,b/gen~a~1"},"types":{},"kind":"global"}',
+		assertCreateSummary('{"provided":{"x":"function(a:gen~a~0,b:gen~a~1):undefined"},"types":{"gen~a~0":{"$$proto":"Object"},"gen~a~1":{"$$proto":"Object"}},"kind":"global"}',
 			"var x=function(a,b) {};", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure8 = function() {
-		assertCreateSummary('{"provided":{"x":"?Number:a/gen~a~0,b/gen~a~1"},"types":{},"kind":"global"}',
+		assertCreateSummary('{"provided":{"x":"function(a:gen~a~0,b:gen~a~1):Number"},"types":{"gen~a~0":{"$$proto":"Object"},"gen~a~1":{"$$proto":"Object"}},"kind":"global"}',
 			"var x=function(a,b) {return 7; };", "a");
 	};
-	
+
 	tests.testOneVarGlobalStructure9 = function() {
-		assertCreateSummary('{"provided":{"x":"?Number:a/gen~a~0,b/gen~a~1"},"types":{},"kind":"global"}',
+		assertCreateSummary('{"provided":{"x":"function(a:gen~a~0,b:gen~a~1):Number"},"types":{"gen~a~0":{"$$proto":"Object"},"gen~a~1":{"$$proto":"Object"}},"kind":"global"}',
 			"function x(a,b) {return 7; }", "a");
 	};
-	
+
 	//////////////////////////////////////////////////////////
 	// AMD dependencies name value pairs (NVP)
 	// See http://requirejs.org/docs/api.html#defsimple
@@ -112,17 +112,17 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	};
 
 	tests.testNVP2 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?Number:"},"types":{},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"function():Number"},"types":{},"kind":"AMD"}',
 			"define({a : 1, b: function() { return 8; }});", "a");
 	};
 
 	tests.testNVP3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"??Fun::"},"types":{"Fun":{"$$proto":"*Fun:","ff":"Number"},"*Fun:":{"$$proto":"*Fun:~proto"},"*Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"function():function():Fun"},"types":{"Fun":{"$$proto":"Fun~proto","ff":"Number"}},"kind":"AMD"}',
 			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return function() { return new Fun(); }}});", "a");
 	};
 
 	tests.testNVP4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?*Fun:a/gen~a~6:"},"types":{"Fun":{"$$proto":"*Fun:","ff":"Number"},"*Fun:":{"$$proto":"*Fun:~proto"},"*Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"function():function(a:gen~a~6,new:Fun):Fun"},"types":{"Fun":{"$$proto":"Fun~proto","ff":"Number"},"gen~a~6":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return Fun; }});", "a");
 	};
 	tests.testNVP5 = function() {
@@ -181,8 +181,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n return new Exported(); });", "a");
 	};
-	
-	
+
+
 	//////////////////////////////////////////////////////////
 	// AMD futzing with prototypes of exported constructors
 	//////////////////////////////////////////////////////////
@@ -195,18 +195,18 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n Exported.prototype = { foo : 9, bar : '' };\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.open = function() { return 9; };\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto5 = function() {
-		assertCreateSummary('{"provided":"*Exported:a/gen~a~4,b/gen~a~5","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":"*Exported:a/gen~a~4,b/gen~a~5","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nreturn Exported; });", "a");
 	};
-	
+
 	// https://github.com/scripted-editor/scripted/issues/96
 	tests["test constructor export with changed prototype"] = function() {
 		assertCreateSummary('{"provided":"*Car:model/gen~a~4","types":{"Car":{"$$proto":"*Car:","model":"gen~a~4"},"*Car:":{"$$proto":"gen~a~9"},"*Car:~proto":{"$$proto":"Object"},"gen~a~9":{"$$proto":"Object","show":"?undefined:","model":"gen~a~14"},"gen~a~14":{"$$proto":"Object"}},"kind":"AMD"}',
@@ -223,7 +223,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"});", "a");
 	};
 
-	
+
 	//////////////////////////////////////////////////////////
 	// common js modules are modules that have an exports variable in the global scope
 	//////////////////////////////////////////////////////////
@@ -231,12 +231,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		assertCreateSummary('{"provided":{"$$proto":"Object","foo":"Number"},"types":{},"kind":"commonjs"}',
 			"/*global exports*/\nexports.foo = 9", "a");
 	};
-	
+
 	tests.testCommonJS2 = function() {
 		assertCreateSummary('{"provided":{"$$proto":"Object","foo":"Number"},"types":{},"kind":"commonjs"}',
 			"exports.foo = 9", "a");
 	};
-	
+
 	tests.testCommonJS3 = function() {
 		assertCreateSummary('{"provided":"Number","types":{},"kind":"commonjs"}',
 			"exports = 9", "a");
@@ -253,7 +253,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		assertCreateSummary('{"provided":{"$$proto":"Object","a":"gen~a~3"},"types":{"gen~a~3":{"$$proto":"Object","a":"gen~a~5"},"gen~a~5":{"$$proto":"Object","a":"gen~a~7"},"gen~a~7":{"$$proto":"Object"}},"kind":"commonjs"}',
 			"var a = { a : { a : { a : { } } } }\n exports = a;", "a");
 	};
-	
+
 	// not sure if this is right...an explicitly declared exports variable is the
 	// same as an implicit one
 	tests.testCommonJS7 = function() {
@@ -279,7 +279,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"  exports.a = { flart: function(a,b) { return ''; } }\n" +
 			"});", "a");
 	};
-	
+
 	//////////////////////////////////////////////////////////
 	// Common JS futzing with prototypes of exported constructors
 	//////////////////////////////////////////////////////////
@@ -292,22 +292,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"var Exported = function(a,b) { this.a = 9; };\n Exported.prototype = { foo : 9, bar : '' };\nexports.Exported = new Exported();", "a");
 	};
 	tests.testCommonjsProto3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.open = function() { return 9; };\nexports.Exported = new Exported();", "a");
 	};
 	tests.testCommonjsProto4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports = new Exported(); });", "a");
 	};
 	tests.testCommonjsProto5 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"*Exported:a/gen~a~1,b/gen~a~2"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"*Exported:a/gen~a~1,b/gen~a~2"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports.Exported = Exported; });", "a");
 	};
 	tests.testCommonjsProto6 = function() {
-		assertCreateSummary('{"provided":"*Exported:a/gen~a~1,b/gen~a~2","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":"*Exported:a/gen~a~1,b/gen~a~2","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports = Exported; });", "a");
 	};
-	
+
 	//////////////////////////////////////////////////////////
 	// Browser awareness
 	//////////////////////////////////////////////////////////
@@ -328,7 +328,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"/*jslint browser:true*/\n" +
 			"define([], function () { return { foo : { loc : location, scr : screen } }; });", "a");
 	};
-	
+
 	//////////////////////////////////////////////////////////
 	// Dotted constructors
 	//////////////////////////////////////////////////////////
@@ -379,8 +379,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function foo() {}\n" +
 			"exports = foo;", "a");
 	};
-	
-	
+
+
 	tests["test array export1"] = function() {
 		assertCreateSummary('{"provided":"Array.<Number>","types":{},"kind":"commonjs"}',
 			"exports = [1];", "a");
