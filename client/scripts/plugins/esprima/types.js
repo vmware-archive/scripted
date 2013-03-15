@@ -14,27 +14,39 @@
 /*
 This module defines the built in types for the scripted JS inferencer.
 It also contains functions for manipulating internal type signatures.
-
-Here is the BNF for internal type signature:
-
-<type> ::= <simple_type> | <array_type> | <function_type> | <constructor_type> | <proto_type>
-
-<simple_type> ::= js_identifier  // simple types are just js identifiers
-
-<array_type> ::= "Array.[" <type> "]"  // a bit verbose for array types, but following syntax of closure compiler
-
-<proto_type> ::= <type> "~proto"  // specifies that this type is a prototype of the base type
-
-<function_type> ::= "?" <type> ":" (<parameter_type> ",")*  // function types have one or more paramteters
-
-<constructor_type> ::= "*" <type> ":" (<parameter_type> ",")*  // same as function type, but with different start
-
-<parameter_type> ::= js_identifier ("/" <type>)?  // a parameter type consists of a name and an optional type, separated by a /
 */
 
+/*jslint es5:true browser:true*/
+/*global define doctrine console */
+define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
+function(proposalUtils, scriptedLogger/*, doctrine*/) {
 
-/*global define doctrine */
-define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"], function(proposalUtils, scriptedLogger) {
+	/**
+	 * Doctrine closure compiler style type objects
+	 */
+	function ensureTypeObject(signature) {
+		if (signature.type) {
+			return signature;
+		}
+		try {
+			return doctrine.parseParamType(signature);
+		} catch(e) {
+			console.error("doctrine failure to parse: " + signature);
+			return {};
+		}
+	}
+
+
+	function createNameType(name) {
+	    if (typeof name !== 'string') {
+	        throw new Error('Expected string, but found: ' + JSON.parse(name));
+	    }
+		return { type: 'NameExpression', name: name };
+	}
+
+	var THE_UNKNOWN_TYPE = createNameType("Object");
+	
+	var JUST_DOTS = '$$__JUST_DOTS__$$';
 
 	/**
 	 * The Definition class refers to the declaration of an identifier.
@@ -46,13 +58,27 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 	 * If the document is undefined, then the definition is in the current document.
 	 *
 	 * @param String typeName
-	 * @param {Array.<Number>} range
+	 * @param {[Number]} range
 	 * @param String path
 	 */
-	var Definition = function(typeName, range, path) {
-		this.typeName = typeName;
+	var Definition = function(typeObj, range, path) {
+		this._typeObj = ensureTypeObject(typeObj);
 		this.range = range;
 		this.path = path;
+	};
+
+	Definition.prototype = {
+		set typeObj(val) {
+			var maybeObj = val;
+			if (typeof maybeObj === 'string') {
+				maybeObj = ensureTypeObject(maybeObj);
+			}
+			this._typeObj = maybeObj;
+		},
+
+		get typeObj() {
+			return this._typeObj;
+		}
 	};
 
 	// From ecma script manual 262 section 15
@@ -61,30 +87,30 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 	Global.prototype = {
 		$$proto : new Definition("Object"),
 
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Global"),
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString")
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
+		"this": new Definition("Global")
 		// not included since not meant to be referenced directly
 		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError
 	};
@@ -93,43 +119,42 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 	var Module = function() {};
 	Module.prototype = {
 
-		// From Window
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Module"),
+		// From Global
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString"),
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
-
+		"this": new Definition("Module"),
 		Buffer: new Definition("Object"),
 		console: new Definition("Object"),
 		module: new Definition("Module"),
 		process: new Definition("Process"),
 
-		require: new Definition("?Object:module"),
+		require: new Definition("function(module:String):Object"),
 //		exports: new Definition("Object"),
-		clearInterval: new Definition("?undefined:t"),
-		clearTimeout: new Definition("?undefined:t"),
-		setInterval: new Definition("?Number:callback,ms"),
-		setTimeout : new Definition("?Number:callback,ms"),
+		clearInterval: new Definition("function(t:Number)"),
+		clearTimeout: new Definition("function(t:Number)"),
+		setInterval: new Definition("function(callback:Function,ms:Number):Number"),
+		setTimeout : new Definition("function(callback:Function,ms:Number):Number"),
 		global: new Definition("Module"),
 		querystring: new Definition("String"),
 		__filename: new Definition("String"),
@@ -141,30 +166,30 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		// copied from Global
 		$$proto : new Definition("Object"),
 
-		decodeURI : new Definition("?String:uri"),
-		encodeURI : new Definition("?String:uri"),
-		'eval' : new Definition("?Object:toEval"),
-		parseInt : new Definition("?Number:str,[radix]"),
-		parseFloat : new Definition("?Number:str,[radix]"),
-		"this": new Definition("Window"),
+		decodeURI : new Definition("function(uri:String):String"),
+		encodeURI : new Definition("function(uri:String):String"),
+		'eval' : new Definition("function(toEval:String):Object"),
+		parseInt : new Definition("function(str:String,radix:Number=):Number"),
+		parseFloat : new Definition("function(str:String,radix:Number=):Number"),
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("*Object:[val]"),
-		Function: new Definition("*Function:"),
-		Array: new Definition("*Array:[val]"),
-		Boolean: new Definition("*Boolean:[val]"),
-		Number: new Definition("*Number:[val]"),
-		Date: new Definition("*Date:[val]"),
-		RegExp: new Definition("*RegExp:[val]"),
-		Error: new Definition("*Error:[err]"),
+		Object: new Definition("function(new:Object,val:Object=):Object"),
+		Function: new Definition("function(new:Function):Function"),
+		Array: new Definition("function(new:Array,val:Array=):Array"),
+		Boolean: new Definition("function(new:Boolean,val:Boolean=):Boolean"),
+		Number: new Definition("function(new:Number,val:Number=):Number"),
+		Date: new Definition("function(new:Date,val:Date=):Date"),
+		RegExp: new Definition("function(new:RegExp,val:RegExp=):RegExp"),
+		Error: new Definition("function(new:Error,err:Error=):Error"),
 		'undefined' : new Definition("undefined"),
-		isNaN : new Definition("?Boolean:num"),
-		isFinite : new Definition("?Boolean:num"),
+		isNaN : new Definition("function(num:Number):Boolean"),
+		isFinite : new Definition("function(num:Number):Boolean"),
 		"NaN" : new Definition("Number"),
 		"Infinity" : new Definition("Number"),
-		decodeURIComponent : new Definition("?String:encodedURIString"),
-		encodeURIComponent : new Definition("?String:decodedURIString"),
+		decodeURIComponent : new Definition("function(encodedURIString:String):String"),
+		encodeURIComponent : new Definition("function(decodedURIString:String):String"),
 
+		"this": new Definition("Window"),
 		// see https://developer.mozilla.org/en/DOM/window
 			// Properties
 		applicationCache : new Definition("DOMApplicationCache"),
@@ -211,97 +236,92 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 
 			// Methods
 			// commented methods are mozilla-specific
-		addEventListener : new Definition("?undefined:"),
-		alert : new Definition("?undefined:String"),
-		atob : new Definition("?String:val"),
-		back : new Definition("?undefined:"),
-		blur : new Definition("?undefined:"),
-		btoa : new Definition("?String:val"),
-		clearInterval : new Definition("?undefined:interval"),
-		clearTimeout : new Definition("?undefined:timeout"),
-		close : new Definition("?undefined:"),
-		confirm : new Definition("?Boolean:msg"),
-		//disableExternalCapture : new Definition("???"),
-		dispatchEvent : new Definition("?undefined:domnode"),
-		dump : new Definition("?undefined:message"),
-		//enableExternalCapture : new Definition("???"),
-		escape : new Definition("?String:str"),
-		find : new Definition("?Boolean:text"),
-		focus : new Definition("?undefined:"),
-		forward : new Definition("?undefined:"),
-		getAttention : new Definition("?undefined:"),
-		getComputedStyle : new Definition("?CSSStyleDeclaration:dombode"),
-		getSelection : new Definition("?Selection:"),
-		home : new Definition("?undefined:"),
-		matchMedia : new Definition("?MediaQueryList:query"),
-		//maximize : new Definition("???"),
-		//minimize : new Definition("???"),
-		moveBy : new Definition("?undefined:deltaX,deltaY"),
-		moveTo : new Definition("?undefined:x,y"),
-		open : new Definition("?Window:strUrl,strWindowName,[strWindowFeatures]"),
-		openDialog : new Definition("?Window:strUrl,strWindowName,strWindowFeatures,[args]"),
-		postMessage : new Definition("?undefined:message,targetOrigin"),
-		print : new Definition("?undefined:"),
-		prompt : new Definition("?String:message"),
-		removeEventListener : new Definition("?undefined:type,listener,[useCapture]"),
-		resizeBy : new Definition("?undefined:deltaX,deltaY"),
-		resizeTo : new Definition("?undefined:x,y"),
-		scroll : new Definition("?undefined:x,y"),
-		scrollBy : new Definition("?undefined:deltaX,deltaY"),
-		scrollByLines : new Definition("?undefined:lines"),
-		scrollByPages : new Definition("?undefined:pages"),
-		scrollTo : new Definition("?undefined:x,y"),
-		setCursor : new Definition("?undefined:cursor"),
-		setInterval : new Definition("?Number:func,interval"),
-		//setResizable : new Definition("???"),
-		setTimeout : new Definition("?Number:func,timeout"),
-		sizeToContent : new Definition("?undefined:"),
-		stop : new Definition("?undefined:"),
-		unescape : new Definition("?String:str"),
-		updateCommands : new Definition("?undefined:cmdName"),
+		addEventListener : new Definition("function()"),
+		alert : new Definition("function(msg:String)"),
+		atob : new Definition("function(val:Object):String"),
+		back : new Definition("function()"),
+		blur : new Definition("function()"),
+		btoa : new Definition("function(val:Object):String"),
+		clearInterval: new Definition("function(t:Number)"),
+		clearTimeout: new Definition("function(t:Number)"),
+		close : new Definition("function()"),
+		confirm : new Definition("function(msg:String):Boolean"),
+		dispatchEvent : new Definition("function(domnode:Node)"),
+		dump : new Definition("function(msg:String)"),
+		escape : new Definition("function(str:String):String"),
+		find : new Definition("function(str:String):Boolean"),
+		focus : new Definition("function()"),
+		forward : new Definition("function()"),
+		getAttention : new Definition("function()"),
+		getComputedStyle : new Definition("function(domnode:Node):CSSStyleDeclaration"),
+		getSelection : new Definition("function():Selection"),
+		home : new Definition("function()"),
+		matchMedia : new Definition("function(query:Object):MediaQueryList"),
+		moveBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		moveTo : new Definition("function(x:Number,y:Number)"),
+		open : new Definition("function(strUrl:String,strWindowName:String,strWindowFeatures:String=):Window"),
+		openDialog : new Definition("function(strUrl:String,strWindowName:String,strWindowFeatures:String,args:String=):Window"),
+		postMessage : new Definition("function(message:String,targetOrigin:String)"),
+		print : new Definition("function()"),
+		prompt : new Definition("function(message:String):String"),
+		removeEventListener : new Definition("function(type:String,listener:Object,useCapture:Boolean=)"),
+		resizeBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		resizeTo : new Definition("function(x:Number,y:Number)"),
+		scroll : new Definition("function(x:Number,y:Number)"),
+		scrollBy : new Definition("function(deltaX:Number,deltaY:Number)"),
+		scrollByLines : new Definition("function(lines:Number)"),
+		scrollByPages : new Definition("function(pages:Number)"),
+		scrollTo : new Definition("function(x:Number,y:Number)"),
+		setCursor : new Definition("function(cursor)"),
+		setInterval: new Definition("function(callback:Function,ms:Number):Number"),
+		setTimeout : new Definition("function(callback:Function,ms:Number):Number"),
+		sizeToContent : new Definition("function()"),
+		stop : new Definition("function()"),
+		unescape : new Definition("function(str:String):String"),
+		updateCommands : new Definition("function(cmdName:String)"),
 
 			// Events
-		onabort : new Definition("?undefined:event"),
-		onbeforeunload : new Definition("?undefined:event"),
-		onblur : new Definition("?undefined:event"),
-		onchange : new Definition("?undefined:event"),
-		onclick : new Definition("?undefined:event"),
-		onclose : new Definition("?undefined:event"),
-		oncontextmenu : new Definition("?undefined:event"),
-		ondevicemotion : new Definition("?undefined:event"),
-		ondeviceorientation : new Definition("?undefined:event"),
-		ondragdrop : new Definition("?undefined:event"),
-		onerror : new Definition("?undefined:event"),
-		onfocus : new Definition("?undefined:event"),
-		onhashchange : new Definition("?undefined:event"),
-		onkeydown : new Definition("?undefined:event"),
-		onkeypress : new Definition("?undefined:event"),
-		onkeyup : new Definition("?undefined:event"),
-		onload : new Definition("?undefined:event"),
-		onmousedown : new Definition("?undefined:event"),
-		onmousemove : new Definition("?undefined:event"),
-		onmouseout : new Definition("?undefined:event"),
-		onmouseover : new Definition("?undefined:event"),
-		onmouseup : new Definition("?undefined:event"),
-		onpaint : new Definition("?undefined:event"),
-		onpopstate : new Definition("?undefined:event"),
-		onreset : new Definition("?undefined:event"),
-		onresize : new Definition("?undefined:event"),
-		onscroll : new Definition("?undefined:event"),
-		onselect : new Definition("?undefined:event"),
-		onsubmit : new Definition("?undefined:event"),
-		onunload : new Definition("?undefined:event"),
-		onpageshow : new Definition("?undefined:event"),
-		onpagehide : new Definition("?undefined:event"),
+		onabort : new Definition("function(event:Event)"),
+		onbeforeunload : new Definition("function(event:Event)"),
+		onblur : new Definition("function(event:Event)"),
+		onchange : new Definition("function(event:Event)"),
+		onclick : new Definition("function(event:Event)"),
+		onclose : new Definition("function(event:Event)"),
+		oncontextmenu : new Definition("function(event:Event)"),
+		ondevicemotion : new Definition("function(event:Event)"),
+		ondeviceorientation : new Definition("function(event:Event)"),
+		ondragdrop : new Definition("function(event:Event)"),
+		onerror : new Definition("function(event:Event)"),
+		onfocus : new Definition("function(event:Event)"),
+		onhashchange : new Definition("function(event:Event)"),
+		onkeydown : new Definition("function(event:Event)"),
+		onkeypress : new Definition("function(event:Event)"),
+		onkeyup : new Definition("function(event:Event)"),
+		onload : new Definition("function(event:Event)"),
+		onmousedown : new Definition("function(event:Event)"),
+		onmousemove : new Definition("function(event:Event)"),
+		onmouseout : new Definition("function(event:Event)"),
+		onmouseover : new Definition("function(event:Event)"),
+		onmouseup : new Definition("function(event:Event)"),
+		onpaint : new Definition("function(event:Event)"),
+		onpopstate : new Definition("function(event:Event)"),
+		onreset : new Definition("function(event:Event)"),
+		onresize : new Definition("function(event:Event)"),
+		onscroll : new Definition("function(event:Event)"),
+		onselect : new Definition("function(event:Event)"),
+		onsubmit : new Definition("function(event:Event)"),
+		onunload : new Definition("function(event:Event)"),
+		onpageshow : new Definition("function(event:Event)"),
+		onpagehide : new Definition("function(event:Event)"),
 
 			// Constructors
-		Image : new Definition("*HTMLImageElement:[width],[height]"),
-		Option : new Definition("*HTMLOptionElement:[text].[value],[defaultSelected],[selected]"),
-		Worker : new Definition("*Worker:url"),
-		XMLHttpRequest : new Definition("*XMLHttpRequest:"),
-		WebSocket : new Definition("*WebSocket:url,protocols"),
-		Event : new Definition("*Event:type"),
-		Node : new Definition("*Node:")
+		Image : new Definition("function(new:HTMLImageElement,width:Number=,height:Number=):HTMLImageElement"),
+		Option : new Definition("function(new:HTMLOptionElement,text:String=,value:Object=,defaultSelected:Boolean=,selected:Boolean=):HTMLOptionElement"),
+		Worker : new Definition("function(new:Worker,url:String):Worker"),
+		XMLHttpRequest : new Definition("function(new:XMLHttpRequest):XMLHttpRequest"),
+		WebSocket : new Definition("function(new:WebSocket,url,protocols):WebSocket"),
+		Event : new Definition("function(new:Event,type:String):Event"),
+		Node : new Definition("function(new:Node):Node")
 	};
 
 	var initialGlobalProperties = [];
@@ -359,12 +379,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			// Can't use the real propoerty name here because would override the real methods of that name
 			$_$prototype : new Definition("Object"),
-			$_$toString: new Definition("?String:"),
-			$_$toLocaleString : new Definition("?String:"),
-			$_$valueOf: new Definition("?Object:"),
-			$_$hasOwnProperty: new Definition("?Boolean:property"),
-			$_$isPrototypeOf: new Definition("?Boolean:object"),
-			$_$propertyIsEnumerable: new Definition("?Boolean:property")
+			$_$toString: new Definition("function():String"),
+			$_$toLocaleString : new Definition("function():String"),
+			$_$valueOf: new Definition("function():Object"),
+			$_$hasOwnProperty: new Definition("function(property:String):Boolean"),
+			$_$isPrototypeOf: new Definition("function(object:Object):Boolean"),
+			$_$propertyIsEnumerable: new Definition("function(property:String):Boolean")
 		},
 
 		/**
@@ -372,10 +392,10 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		 */
 		Function : {
 			$$isBuiltin: true,
-			apply : new Definition("?Object:func,[argArray]"),
+			apply : new Definition("function(func:function(),argArray:Array=):Object"),
 			"arguments" : new Definition("Arguments"),
-			bind : new Definition("?Object:func,[args...]"),
-			call : new Definition("?Object:func,[args...]"),
+			bind : new Definition("function(func:function(),args:Object...):Object"),
+			call : new Definition("function(func:function(),args:Object...):Object"),
 			caller : new Definition("Function"),
 			length : new Definition("Number"),
 			name : new Definition("String"),
@@ -388,26 +408,26 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		Array : {
 			$$isBuiltin: true,
 
-			concat : new Definition("?Array:first,[rest...]"),
-			join : new Definition("?String:separator"),
+			concat : new Definition("function(first:Array,rest:Array...):Array"),
+			join : new Definition("function(separator:Object):String"),
 			length : new Definition("Number"),
-			pop : new Definition("?Object:"),
-			push : new Definition("?Object:[vals...]"),
-			reverse : new Definition("?Array:"),
-			shift : new Definition("?Object:"),
-			slice : new Definition("?Array:start,deleteCount,[items...]"),
-			splice : new Definition("?Array:start,end"),
-			sort : new Definition("?Array:[sorter]"),
-			unshift : new Definition("?Number:[items...]"),
-			indexOf : new Definition("?Number:searchElement,[fromIndex]"),
-			lastIndexOf : new Definition("?Number:searchElement,[fromIndex]"),
-			every : new Definition("?Boolean:callbackFn,[thisArg]"),
-			some : new Definition("?Boolean:callbackFn,[thisArg]"),
-			forEach : new Definition("?Object:callbackFn,[thisArg]"),  // should return
-			map : new Definition("?Array:callbackFn,[thisArg]"),
-			filter : new Definition("?Array:callbackFn,[thisArg]"),
-			reduce : new Definition("?Array:callbackFn,[initialValue]"),
-			reduceRight : new Definition("?Array:callbackFn,[initialValue]"),
+			pop : new Definition("function():Object"),
+			push : new Definition("function(vals:Object...):Object"),
+			reverse : new Definition("function():Array"),
+			shift : new Definition("function():Object"),
+			slice : new Definition("function(start:Number,deleteCount:Number,items:Object...):Array"),
+			splice : new Definition("function(start:Number,end:Number):Array"),
+			sort : new Definition("function(sorter:Object=):Array"),
+			unshift : new Definition("function(items:Object...):Number"),
+			indexOf : new Definition("function(searchElement,fromIndex=):Number"),
+			lastIndexOf : new Definition("function(searchElement,fromIndex=):Number"),
+			every : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Boolean"),
+			some : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Boolean"),
+			forEach : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Object"),
+			map : new Definition("function(callbackFn:function(elt:Object):Object,thisArg:Object=):Array"),
+			filter : new Definition("function(callbackFn:function(elt:Object):Boolean,thisArg:Object=):Array"),
+			reduce : new Definition("function(callbackFn:function(elt:Object):Object,initialValue:Object=):Array"),
+			reduceRight : new Definition("function(callbackFn:function(elt:Object):Object,initialValue:Object=):Array"),
 			$$proto : new Definition("Object")
 		},
 
@@ -416,24 +436,24 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		 */
 		String : {
 			$$isBuiltin: true,
-			charAt : new Definition("?String:index"),
-			charCodeAt : new Definition("?Number:index"),
-			concat : new Definition("?String:array"),
-			indexOf : new Definition("?Number:searchString,[start]"),
-			lastIndexOf : new Definition("?Number:searchString,[start]"),
+			charAt : new Definition("function(index:Number):String"),
+			charCodeAt : new Definition("function(index:Number):Number"),
+			concat : new Definition("function(str:String):String"),
+			indexOf : new Definition("function(searchString:String,start:Number=):Number"),
+			lastIndexOf : new Definition("function(searchString:String,start:Number=):Number"),
 			length : new Definition("Number"),
-			localeCompare : new Definition("?Number:Object"),
-			match : new Definition("?Boolean:regexp"),
-			replace : new Definition("?String:searchValue,replaceValue"),
-			search : new Definition("?String:regexp"),
-			slice : new Definition("?String:start,end"),
-			split : new Definition("?Array:separator,[limit]"),  // Array of string
-			substring : new Definition("?String:start,end"),
-			toLocaleUpperCase : new Definition("?String:"),
-			toLowerCase : new Definition("?String:"),
-			toLocaleLowerCase : new Definition("?String:"),
-			toUpperCase : new Definition("?String:"),
-			trim : new Definition("?String:"),
+			localeCompare : new Definition("function(str:String):Number"),
+			match : new Definition("function(regexp:(String|RegExp)):Boolean"),
+			replace : new Definition("function(searchValue:(String|RegExp),replaceValue:String):String"),
+			search : new Definition("function(regexp:(String|RegExp)):String"),
+			slice : new Definition("function(start:Number,end:Number):String"),
+			split : new Definition("function(separator:String,limit:Number=):[String]"),  // Array of string
+			substring : new Definition("function(start:Number,end:Number=):String"),
+			toLocaleUpperCase : new Definition("function():String"),
+			toLowerCase : new Definition("function():String"),
+			toLocaleLowerCase : new Definition("function():String"),
+			toUpperCase : new Definition("function():String"),
+			trim : new Definition("function():String"),
 
 			$$proto : new Definition("Object")
 		},
@@ -451,9 +471,9 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		 */
 		Number : {
 			$$isBuiltin: true,
-			toExponential : new Definition("?Number:digits"),
-			toFixed : new Definition("?Number:digits"),
-			toPrecision : new Definition("?Number:digits"),
+			toExponential : new Definition("function(digits:Number):String"),
+			toFixed : new Definition("function(digits:Number):String"),
+			toPrecision : new Definition("function(digits:Number):String"),
 			// do we want to include NaN, MAX_VALUE, etc?
 
 			$$proto : new Definition("Object")
@@ -477,24 +497,24 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			SQRT2 : new Definition("Number"),
 
 			// Methods
-			abs : new Definition("?Number:val"),
-			acos : new Definition("?Number:val"),
-			asin : new Definition("?Number:val"),
-			atan : new Definition("?Number:val"),
-			atan2 : new Definition("?Number:val1,val2"),
-			ceil : new Definition("?Number:val"),
-			cos : new Definition("?Number:val"),
-			exp : new Definition("?Number:val"),
-			floor : new Definition("?Number:val"),
-			log : new Definition("?Number:val"),
-			max : new Definition("?Number:val1,val2"),
-			min : new Definition("?Number:val1,val2"),
-			pow : new Definition("?Number:x,y"),
-			random : new Definition("?Number:"),
-			round : new Definition("?Number:val"),
-			sin : new Definition("?Number:val"),
-			sqrt : new Definition("?Number:val"),
-			tan : new Definition("?Number:val"),
+			abs : new Definition("function(val:Number):Number"),
+			acos : new Definition("function(val:Number):Number"),
+			asin : new Definition("function(val:Number):Number"),
+			atan : new Definition("function(val:Number):Number"),
+			atan2 : new Definition("function(val1:Number,val2:Number):Number1"),
+			ceil : new Definition("function(val:Number):Number"),
+			cos : new Definition("function(val:Number):Number"),
+			exp : new Definition("function(val:Number):Number"),
+			floor : new Definition("function(val:Number):Number"),
+			log : new Definition("function(val:Number):Number"),
+			max : new Definition("function(val1:Number,val2:Number):Number"),
+			min : new Definition("function(val1:Number,val2:Number):Number"),
+			pow : new Definition("function(x:Number,y:Number):Number"),
+			random : new Definition("function():Number"),
+			round : new Definition("function(val:Number):Number"),
+			sin : new Definition("function(val:Number):Number"),
+			sqrt : new Definition("function(val:Number):Number"),
+			tan : new Definition("function(val:Number):Number"),
 			$$proto : new Definition("Object")
 		},
 
@@ -504,53 +524,53 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		 */
 		Date : {
 			$$isBuiltin: true,
-			toDateString : new Definition("?String:"),
-			toTimeString : new Definition("?String:"),
-			toUTCString : new Definition("?String:"),
-			toISOString : new Definition("?String:"),
-			toJSON : new Definition("?Object:key"),
-			toLocaleDateString : new Definition("?String:"),
-			toLocaleTimeString : new Definition("?String:"),
+			toDateString : new Definition("function():String"),
+			toTimeString : new Definition("function():String"),
+			toUTCString : new Definition("function():String"),
+			toISOString : new Definition("function():String"),
+			toJSON : new Definition("function(key:String):Object"),
+			toLocaleDateString : new Definition("function():String"),
+			toLocaleTimeString : new Definition("function():String"),
 
-			getTime : new Definition("?Number:"),
-			getTimezoneOffset : new Definition("?Number:"),
+			getTime : new Definition("function():Number"),
+			getTimezoneOffset : new Definition("function():Number"),
 
-			getDay : new Definition("?Number:"),
-			getUTCDay : new Definition("?Number:"),
-			getFullYear : new Definition("?Number:"),
-			getUTCFullYear : new Definition("?Number:"),
-			getHours : new Definition("?Number:"),
-			getUTCHours : new Definition("?Number:"),
-			getMinutes : new Definition("?Number:"),
-			getUTCMinutes : new Definition("?Number:"),
-			getSeconds : new Definition("?Number:"),
-			getUTCSeconds : new Definition("?Number:"),
-			getMilliseconds : new Definition("?Number:"),
-			getUTCMilliseconds : new Definition("?Number:"),
-			getMonth : new Definition("?Number:"),
-			getUTCMonth : new Definition("?Number:"),
-			getDate : new Definition("?Number:"),
-			getUTCDate : new Definition("?Number:"),
+			getDay : new Definition("function():Number"),
+			getUTCDay : new Definition("function():Number"),
+			getFullYear : new Definition("function():Number"),
+			getUTCFullYear : new Definition("function():Number"),
+			getHours : new Definition("function():Number"),
+			getUTCHours : new Definition("function():Number"),
+			getMinutes : new Definition("function():Number"),
+			getUTCMinutes : new Definition("function():Number"),
+			getSeconds : new Definition("function():Number"),
+			getUTCSeconds : new Definition("function():Number"),
+			getMilliseconds : new Definition("function():Number"),
+			getUTCMilliseconds : new Definition("function():Number"),
+			getMonth : new Definition("function():Number"),
+			getUTCMonth : new Definition("function():Number"),
+			getDate : new Definition("function():Number"),
+			getUTCDate : new Definition("function():Number"),
 
-			setTime : new Definition("?Number:"),
-			setTimezoneOffset : new Definition("?Number:"),
+			setTime : new Definition("function():Number"),
+			setTimezoneOffset : new Definition("function():Number"),
 
-			setDay : new Definition("?Number:dayOfWeek"),
-			setUTCDay : new Definition("?Number:dayOfWeek"),
-			setFullYear : new Definition("?Number:year,[month],[date]"),
-			setUTCFullYear : new Definition("?Number:year,[month],[date]"),
-			setHours : new Definition("?Number:hour,[min],[sec],[ms]"),
-			setUTCHours : new Definition("?Number:hour,[min],[sec],[ms]"),
-			setMinutes : new Definition("?Number:min,[sec],[ms]"),
-			setUTCMinutes : new Definition("?Number:min,[sec],[ms]"),
-			setSeconds : new Definition("?Number:sec,[ms]"),
-			setUTCSeconds : new Definition("?Number:sec,[ms]"),
-			setMilliseconds : new Definition("?Number:ms"),
-			setUTCMilliseconds : new Definition("?Number:ms"),
-			setMonth : new Definition("?Number:month,[date]"),
-			setUTCMonth : new Definition("?Number:month,[date]"),
-			setDate : new Definition("?Number:date"),
-			setUTCDate : new Definition("?Number:gate"),
+			setDay : new Definition("function(dayOfWeek:Number):Number"),
+			setUTCDay : new Definition("function(dayOfWeek:Number):Number"),
+			setFullYear : new Definition("function(year:Number,month:Number=,date:Number=):Number"),
+			setUTCFullYear : new Definition("function(year:Number,month:Number=,date:Number=):Number"),
+			setHours : new Definition("function(hour:Number,min:Number=,sec:Number=,ms:Number=):Number"),
+			setUTCHours : new Definition("function(hour:Number,min:Number=,sec:Number=,ms:Number=):Number"),
+			setMinutes : new Definition("function(min:Number,sec:Number=,ms:Number=):Number"),
+			setUTCMinutes : new Definition("function(min:Number,sec:Number=,ms:Number=):Number"),
+			setSeconds : new Definition("function(sec:Number,ms:Number=):Number"),
+			setUTCSeconds : new Definition("function(sec:Number,ms:Number=):Number"),
+			setMilliseconds : new Definition("function(ms:Number):Number"),
+			setUTCMilliseconds : new Definition("function(ms:Number):Number"),
+			setMonth : new Definition("function(month:Number,date:Number=):Number"),
+			setUTCMonth : new Definition("function(month:Number,date:Number=):Number"),
+			setDate : new Definition("function(date:Number):Number"),
+			setUTCDate : new Definition("function(date:Number):Number"),
 
 			$$proto : new Definition("Object")
 		},
@@ -570,13 +590,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			multiline : new Definition("Boolean"),
 			lastIndex : new Definition("Boolean"),
 
-			exec : new Definition("?Array:str"),
-			test : new Definition("?Boolean:str"),
+			exec : new Definition("function(str:String):[String]"),
+			test : new Definition("function(str:String):Boolean"),
 
 			$$proto : new Definition("Object")
 		},
 
-		"?RegExp:" : {
+		"function(new:RegExp):RegExp" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
 
@@ -625,8 +645,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 		JSON : {
 			$$isBuiltin: true,
 
-			parse : new Definition("?Object:str"),
-			stringify : new Definition("?String:obj"),
+			parse : new Definition("function(str:String):Object"),
+			stringify : new Definition("function(json:Object):String"),
 			$$proto : new Definition("Object")
 		},
 
@@ -643,34 +663,34 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
-			on: new Definition("?undefined:kind,callback"),
+			on: new Definition("function(kind:String,callback:function())"),
 
-			abort: new Definition("?undefined:"),
+			abort: new Definition("function()"),
 			stdout: new Definition("Stream"),
 			stderr: new Definition("Stream"),
 			stdin: new Definition("Stream"),
 			argv: new Definition("Array"), // Array.<String>
 			execPath: new Definition("String"),
-			chdir: new Definition("?undefined:directory"),
-			cwd: new Definition("?String:"),
+			chdir: new Definition("function(directory:String)"),
+			cwd: new Definition("function():String"),
 			env: new Definition("Object"),
-			getgid: new Definition("?Number:"),
-			setgid: new Definition("?undefined:id"),
-			getuid: new Definition("?Number:"),
-			setuid: new Definition("?undefined:id"),
+			getgid: new Definition("function():Number"),
+			setgid: new Definition("function(id:Number)"),
+			getuid: new Definition("function():Number"),
+			setuid: new Definition("function(id:Number)"),
 			version: new Definition("String"),
 			versions: new Definition("Object"), // TODO create a versions object?
 			config: new Definition("Object"),
-			kill: new Definition("?undefined:pid,[signal]"),
+			kill: new Definition("function(pid:Number,signal:Number=)"),
 			pid: new Definition("Number"),
 			title: new Definition("String"),
 			arch: new Definition("String"),
 			platform: new Definition("String"),
-			memoryUsage: new Definition("?Object:"),
-			nextTick: new Definition("?undefined:callback"),
-			umask: new Definition("?undefined:[mask]"),
-			uptime: new Definition("?Number:"),
-			hrtime: new Definition("?Array:") // Array.<Number>
+			memoryUsage: new Definition("function():Object"),
+			nextTick: new Definition("function(callback:function())"),
+			umask: new Definition("function(mask:Number=)"),
+			uptime: new Definition("function():Number"),
+			hrtime: new Definition("function():Array") // Array.<Number>
 		},
 
 		// See http://nodejs.org/api/stream.html
@@ -684,26 +704,26 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			// readable
 
 			// events
-			data: new Definition("?undefined:data"),
-			error: new Definition("?undefined:exception"),
-			close: new Definition("?undefined:"),
+			data: new Definition("function(data:Object)"),
+			error: new Definition("function(exception:Object)"),
+			close: new Definition("function()"),
 
 			readable: new Definition("Boolean"),
 
-			setEncoding: new Definition("?undefined:[encoding]"),
-			pause: new Definition("?undefined:"),
-			resume: new Definition("?undefined:"),
-			pipe: new Definition("?undefined:destingation,[options]"),
+			setEncoding: new Definition("function(encoding:String=)"),
+			pause: new Definition("function()"),
+			resume: new Definition("function()"),
+			pipe: new Definition("function(destination:Object,options:Object=)"),
 
 			// writable
-			drain: new Definition("?undefined:"),
+			drain: new Definition("function()"),
 
 			writable: new Definition("Boolean"),
 
-			write: new Definition("?undefined:[nuffer]"),
-			end: new Definition("?undefined:[string],[encoding]"),
-			destroy: new Definition("?undefined:"),
-			destroySoon: new Definition("?undefined:")
+			write: new Definition("function(buffer:Object=)"),
+			end: new Definition("function(string:String=,encoding:String=)"),
+			destroy: new Definition("function()"),
+			destroySoon: new Definition("function()")
 		},
 
 		///////////////////////////////////////////////////
@@ -762,17 +782,17 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			userAgent : new Definition("String"),
 
 			// methods
-			javaEnabled : new Definition("?Boolean:"),
-			registerContentHandler : new Definition("?undefined:mimType,url,title"),
-			registerProtocolHandler : new Definition("?undefined:protocol,url,title")
+			javaEnabled : new Definition("function():Boolean"),
+			registerContentHandler : new Definition("function(mimType:String,url:String,title:String)"),
+			registerProtocolHandler : new Definition("function(protocol:String,url:String,title:String)")
 		},
 
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeTypeArray.html
 		MimeTypeArray : {
 			$$isBuiltin: true,
 			length : new Definition("Number"),
-			item : new Definition("?MimeType:index"),
-			namedItem : new Definition("?MimeType:name")
+			item : new Definition("function(index:Number):MimeType"),
+			namedItem : new Definition("function(name:String):MimeType")
 		},
 
 		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeType.html
@@ -791,8 +811,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			fileName : new Definition("String"),
 			length : new Definition("Number"),
 			name : new Definition("String"),
-			item : new Definition("?MimeType:index"),
-			namedItem : new Definition("?MimeType:name")
+			item : new Definition("function(index:Number):MimeType"),
+			namedItem : new Definition("function(name:String):MimeType")
 		},
 
 		// http://dvcs.w3.org/hg/dap/raw-file/tip/network-api/Overview.html#the-connection-interface
@@ -811,11 +831,11 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 
 			length : new Definition("Number"),
 
-			key : new Definition("?String:idx"),
-			getItem : new Definition("?String:key"),
-			setItem : new Definition("?undefined:key,value"),
-			removeItem : new Definition("?undefined:key"),
-			clear : new Definition("?undefined:")
+			key : new Definition("function(idx:Number):String"),
+			getItem : new Definition("function(key:String):String"),
+			setItem : new Definition("function(key:String,value:String)"),
+			removeItem : new Definition("function(key:String)"),
+			clear : new Definition("function()")
 		},
 
 		// http://dvcs.w3.org/hg/xhr/raw-file/tip/Overview.html#interface-xmlhttprequest
@@ -826,17 +846,17 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			onreadystatechange : new Definition("EventHandler"),
 
 			// request
-			open : new Definition("?undefined:method,url,[async],[user],[password]"),
-			setRequestHeader : new Definition("?undefined:header,value"),
+			open : new Definition("function(method:String,url:String,async:Boolean=,user:String=,password:String=)"),
+			setRequestHeader : new Definition("function(header,value)"),
 			timeout : new Definition("Number"),
 			withCredentials : new Definition("Boolean"),
 			upload : new Definition("Object"), // not right
-			send : new Definition("?undefined:[data]"),
-			abort : new Definition("?undefined:"),
+			send : new Definition("function(data:String=)"),
+			abort : new Definition("function()"),
 
 			// response
-			getResponseHeader : new Definition("?String:header"),
-			getAllResponseHeaders : new Definition("?String:"),
+			getResponseHeader : new Definition("function(header:String):String"),
+			getAllResponseHeaders : new Definition("function():String"),
 			overrideMimType : new Definition("Object"),
 			responseType : new Definition("Object"),  // not right
 			readyState : new Definition("Number"),
@@ -852,9 +872,9 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
-			terminate : new Definition("?undefined:"),
-			postMessage : new Definition("?undefined:message,[transfer]"),
-			onmessage : new Definition("?undefined:")
+			terminate : new Definition("function()"),
+			postMessage : new Definition("function(message:String,transfer:Object=)"),
+			onmessage : new Definition("function()")
 		},
 
 		// http://www.w3.org/TR/workers/#messageport
@@ -877,25 +897,25 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			extensions : new Definition("String"),
 			protocol : new Definition("String"),
 
-			close : new Definition("?undefined:[reason]"),
-			send :  new Definition("?undefined:data")
+			close : new Definition("function(reason:Object=)"),
+			send :  new Definition("function(data)")
 		},
 
 		// https://developer.mozilla.org/en/DOM/Console
 		Console : {
 			$$isBuiltin: true,
-			debug : new Definition("?undefined:msg"),
-			dir : new Definition("?undefined:obj"),
-			error : new Definition("?undefined:msg"),
-			group : new Definition("?undefined:"),
-			groupCollapsed : new Definition("?undefined:"),
-			groupEnd : new Definition("?undefined:"),
-			info : new Definition("?undefined:msg"),
-			log : new Definition("?undefined:msg"),
-			time : new Definition("?undefined:timerName"),
-			timeEnd : new Definition("?undefined:timerName"),
-			trace : new Definition("?undefined:"),
-			warn : new Definition("?undefined:msg")
+			debug : new Definition("function(msg:String)"),
+			dir : new Definition("function(obj)"),
+			error : new Definition("function(msg:String)"),
+			group : new Definition("function()"),
+			groupCollapsed : new Definition("function()"),
+			groupEnd : new Definition("function()"),
+			info : new Definition("function(msg:String)"),
+			log : new Definition("function(msg:String)"),
+			time : new Definition("function(timerName:String)"),
+			timeEnd : new Definition("function(timerName:String)"),
+			trace : new Definition("function()"),
+			warn : new Definition("function(msg:String)")
 		},
 
 		// TODO FIXADE remove ???
@@ -923,13 +943,13 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			isTrusted : new Definition("Boolean"),
 
 			// methods
-			initEvent : new Definition("?undefined:type,bubbles,cancelable"),
-			preventDefault : new Definition("?undefined:"),
-			stopImmediatePropagation : new Definition("?undefined:"),
-			stopPropagation : new Definition("?undefined:")
+			initEvent : new Definition("function(type:String,bubbles:Boolean,cancelable:Boolean)"),
+			preventDefault : new Definition("function()"),
+			stopImmediatePropagation : new Definition("function()"),
+			stopPropagation : new Definition("function()")
 		},
 
-		"?Event:" : {
+		"function(new:Event):Event" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
 
@@ -947,10 +967,10 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			publicId : new Definition("String"),
 			systemId : new Definition("String"),
 
-			before : new Definition("?undefined:nodeOrString"),
-			after : new Definition("?undefined:nodeOrString"),
-			replace : new Definition("?undefined:nodeOrString"),
-			remove : new Definition("?undefined:")
+			before : new Definition("function(nodeOrString:(Node|String))"),
+			after : new Definition("function(nodeOrString:(Node|String))"),
+			replace : new Definition("function(nodeOrString:(Node|String))"),
+			remove : new Definition("function()")
 		},
 
 		// see http://www.whatwg.org/specs/web-apps/current-work/multipage/history.html#the-history-interface
@@ -961,11 +981,11 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			length : new Definition("Number"),
 			state : new Definition("Object"),
 
-			go : new Definition("?undefined:delta"),
-			back : new Definition("?undefined:"),
-			forward : new Definition("?undefined:"),
-			pushState : new Definition("?undefined:data,title,url"),
-			replaceState : new Definition("?undefined:data,title,url")
+			go : new Definition("function(delta:Number)"),
+			back : new Definition("function()"),
+			forward : new Definition("function()"),
+			pushState : new Definition("function(data:Object,title:String,url:String)"),
+			replaceState : new Definition("function(data:Object,title:String,url:String)")
 		},
 
 		// see http://www.w3.org/TR/dom/#document (complete)
@@ -984,26 +1004,23 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			doctype : new Definition("DocumentType"),
 			documentElement : new Definition("Element"),
 
-			getElementsByTagName : new Definition("?HTMLCollection:localName"),
-			getElementsByTagNameNS : new Definition("?HTMLCollection:namespace,localName"),
-			getElementsByClassName : new Definition("?HTMLCollection:classNames"),
-			getElementById : new Definition("?Element:elementId"),
-			createElement : new Definition("?Element:elementId"),
-			createElementNS : new Definition("?Element:namespace,qualifiedName"),
-			createDocumentFragment : new Definition("?DocumentFragment:"),
-			createTextNode : new Definition("?Text:data"),
-			createComment : new Definition("?Comment:data"),
-			createProcessingInstruction : new Definition("?ProcessingInstruction:target,data"),
-			importNode : new Definition("?Node:node,[deep]"),
-			adoptNode : new Definition("?Node:node"),
-			createEvent : new Definition("?Event:eventInterfaceName"),
-			createRange : new Definition("?Range:"),
+			getElementsByTagName : new Definition("function(localName:String):HTMLCollection"),
+			getElementsByTagNameNS : new Definition("function(namespace,localName:String):HTMLCollection"),
+			getElementsByClassName : new Definition("function(classNames:String):HTMLCollection"),
+			getElementById : new Definition("function(elementId:String):Element"),
+			createElement : new Definition("function(elementId:String):Element"),
+			createElementNS : new Definition("function(namespace,qualifiedName:String):Element"),
+			createDocumentFragment : new Definition("function():DocumentFragment"),
+			createTextNode : new Definition("function(data):Text"),
+			createComment : new Definition("function(data):Comment"),
+			createProcessingInstruction : new Definition("function(target,data):ProcessingInstruction"),
+			importNode : new Definition("function(node:Node,deep:Boolean=):Node"),
+			adoptNode : new Definition("function(node:Node):Node"),
+			createEvent : new Definition("function(eventInterfaceName:String):Event"),
+			createRange : new Definition("function():Range"),
 
-			createNodeIterator : new Definition("?NodeIterator:root,[whatToShow],[filter]"),
-			createTreeWalker : new Definition("?TreeWalker:root,[whatToShow],[filter]"),
-
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]")
+			createNodeIterator : new Definition("function(root:Node,whatToShow:Object=,filter:Object=):NodeIterator"),
+			createTreeWalker : new Definition("function(root:Node,whatToShow:Object=,filter:Object=):TreeWalker")
 		},
 
 		// see http://www.w3.org/TR/dom/#domimplementation
@@ -1011,10 +1028,10 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
-			createDocumentType : new Definition("?DocumentType:qualifiedName,publicId,systemId"),
-			createDocument : new Definition("?Document:namespace,qualifiedName,doctype"),
-			createHTMLDocument : new Definition("?Document:title"),
-			hasFeature : new Definition("?Boolean:feature")
+			createDocumentType : new Definition("function(qualifiedName:String,publicId:String,systemId:String):DocumentType"),
+			createDocument : new Definition("function(namespace:String,qualifiedName:String,doctype:String):Document"),
+			createHTMLDocument : new Definition("function(title:String):Document"),
+			hasFeature : new Definition("function(feature:String):Boolean")
 		},
 
 		// see http://www.w3.org/TR/dom/#node
@@ -1036,23 +1053,23 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			nodeValue : new Definition("String"),
 			textContent : new Definition("String"),
 
-			hasChildNodes : new Definition("?Boolean:"),
-			compareDocumentPosition : new Definition("?Number:other"),
-			contains : new Definition("?Boolean:other"),
-			insertBefore : new Definition("?Node:node,child"),
-			appendChild : new Definition("?Node:node"),
-			replaceChild : new Definition("?Node:node,child"),
-			removeChild : new Definition("?Node:node,child"),
-			normalize : new Definition("?undefined:"),
-			cloneNode : new Definition("?Node:[deep]"),
-			isEqualNode : new Definition("?Boolean:node"),
-			lookupPrefix : new Definition("?String:namespace"),
-			lookupNamespaceURI : new Definition("?String:prefix"),
-			isDefaultNamespace : new Definition("?Boolean:namespace")
+			hasChildNodes : new Definition("function():Boolean"),
+			compareDocumentPosition : new Definition("function(other:Node):Number"),
+			contains : new Definition("function(other:Node):Boolean"),
+			insertBefore : new Definition("function(child:Node):Node"),
+			appendChild : new Definition("function(node:Node):Node"),
+			replaceChild : new Definition("function(child:Node):Node"),
+			removeChild : new Definition("function(child:Node):Node"),
+			normalize : new Definition("function()"),
+			cloneNode : new Definition("function(deep:Boolean=):Node"),
+			isEqualNode : new Definition("function(node:Node):Boolean"),
+			lookupPrefix : new Definition("function(namespace:String):String"),
+			lookupNamespaceURI : new Definition("function(prefix:String):String"),
+			isDefaultNamespace : new Definition("function(namespace:String):Boolean")
 		},
 
 		// Constants declared on Node
-		"?Node:" : {
+		"function(new:Node):Node" : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Function"),
 			ELEMENT_NODE : new Definition("Number"),
@@ -1101,25 +1118,25 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			previousElementSibling : new Definition("Element"),
 			nextElementSibling : new Definition("Element"),
 
-			getAttribute : new Definition("?String:name"),
-			getAttributeNS : new Definition("?String:namespace,localname"),
-			setAttribute : new Definition("?undefined:name,value"),
-			setAttributeNS : new Definition("?undefined:namespace,name,value"),
-			removeAttribute : new Definition("?undefined:name"),
-			removeAttributeNS : new Definition("?undefined:namespace,localname"),
-			hasAttribute : new Definition("?Boolean:name"),
-			hasAttributeNS : new Definition("?Boolean:namespace,localname"),
+			getAttribute : new Definition("function(name:String):String"),
+			getAttributeNS : new Definition("function(namespace:String,localname:String):String"),
+			setAttribute : new Definition("function(name:String,value:Object)"),
+			setAttributeNS : new Definition("function(namespace:String,name:String,value:Object)"),
+			removeAttribute : new Definition("function(name:String)"),
+			removeAttributeNS : new Definition("function(namespace:String,localname:String)"),
+			hasAttribute : new Definition("function(name:String):Boolean"),
+			hasAttributeNS : new Definition("function(namespace:String,localname:String):Boolean"),
 
-			getElementsByTagName : new Definition("?HTMLCollection:localName"),
-			getElementsByTagNameNS : new Definition("?HTMLCollection:namespace,localName"),
-			getElementsByClassName : new Definition("?HTMLCollection:classname"),
+			getElementsByTagName : new Definition("function(localName:String):HTMLCollection"),
+			getElementsByTagNameNS : new Definition("function(namespace:String,localName:String):HTMLCollection"),
+			getElementsByClassName : new Definition("function(classname:String):HTMLCollection"),
 
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]"),
-			before : new Definition("?undefined:[nodes]"),
-			after : new Definition("?undefined:[nodes]"),
-			replace : new Definition("?undefined:[nodes]"),
-			remove : new Definition("?undefined:")
+			prepend : new Definition("function(nodes:Node...)"),
+			append : new Definition("function(nodes:Node...)"),
+			before : new Definition("function(nodes:Node...)"),
+			after : new Definition("function(nodes:Node...)"),
+			replace : new Definition("function(nodes:Node...)"),
+			remove : new Definition("function()")
 		},
 
 		// see http://www.w3.org/TR/dom/#attr
@@ -1165,9 +1182,9 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 
-			assign : new Definition("?undefined:url"),
-			replace : new Definition("?undefined:url"),
-			reload : new Definition("?undefined:"),
+			assign : new Definition("function(url:String)"),
+			replace : new Definition("function(url:String)"),
+			reload : new Definition("function()"),
 
 			href : new Definition("String"),
 			protocol : new Definition("String"),
@@ -1193,18 +1210,18 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			isCollapsed : new Definition("Boolean"),
 
 
-			collapse : new Definition("?undefined:node,offset"),
-			collapseToStart : new Definition("?undefined:"),
-			collapseToEnd : new Definition("?undefined:"),
+			collapse : new Definition("function(node:Node,offset:Number)"),
+			collapseToStart : new Definition("function()"),
+			collapseToEnd : new Definition("function()"),
 
-			extend : new Definition("?undefined:node,offset"),
+			extend : new Definition("function(node:Node,offset:Number)"),
 
-			selectAllChildren : new Definition("?undefined:node"),
-			deleteFromDocument : new Definition("?undefined:"),
-			getRangeAt : new Definition("?Range:index"),
-			addRange : new Definition("?undefined:range"),
-			removeRange : new Definition("?undefined:range"),
-			removeAllRanges : new Definition("?undefined:")
+			selectAllChildren : new Definition("function(node:Node)"),
+			deleteFromDocument : new Definition("function()"),
+			getRangeAt : new Definition("function(index:Number):Range"),
+			addRange : new Definition("function(range:Range)"),
+			removeRange : new Definition("function(range:Range)"),
+			removeAllRanges : new Definition("function()")
 		},
 
 		// see http://www.w3.org/TR/html5/the-html-element.html#the-html-element
@@ -1238,8 +1255,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Object"),
 			length : new Definition("Number"),
-			item : new Definition("?Element:index"),
-			namedItem : new Definition("?Element:name")
+			item : new Definition("function(index:Number):Element"),
+			namedItem : new Definition("function(name:String):Element")
 		},
 
 		// incomplete
@@ -1259,8 +1276,8 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
 
-			prepend : new Definition("?undefined:[nodes]"),
-			append : new Definition("?undefined:[nodes]")
+			prepend : new Definition("function(nodes:Node...)"),
+			append : new Definition("function(nodes:Node...)")
 		},
 
 		// incomplete
@@ -1293,35 +1310,35 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 			collapsed : new Definition("Boolean"),
 			commonAncestorContainer : new Definition("Node"),
 
-			setStart : new Definition("?undefined:refNode,offset"),
-			setEnd : new Definition("?undefined:refNode,offset"),
-			setStartBefore : new Definition("?undefined:refNode"),
-			setStartAfter : new Definition("?undefined:refNode"),
-			setEndBefore : new Definition("?undefined:refNode"),
-			setEndAfter : new Definition("?undefined:refNode"),
-			collapse : new Definition("?undefined:toStart"),
-			selectNode : new Definition("?undefined:refNode"),
-			selectNodeContents : new Definition("?undefined:refNode"),
+			setStart : new Definition("function(refNode:Node,offset:Number)"),
+			setEnd : new Definition("function(refNode:Node,offset:Number)"),
+			setStartBefore : new Definition("function(refNode:Node)"),
+			setStartAfter : new Definition("function(refNode:Node)"),
+			setEndBefore : new Definition("function(refNode:Node)"),
+			setEndAfter : new Definition("function(refNode:Node)"),
+			collapse : new Definition("function(toStart:Node)"),
+			selectNode : new Definition("function(refNode:Node)"),
+			selectNodeContents : new Definition("function(refNode:Node)"),
 
-			compareBoundaryPoints : new Definition("?Number:how,sourceRange"),
+			compareBoundaryPoints : new Definition("function(how:Object,sourceRange:Object):Number"),
 
-			deleteContents : new Definition("?undefined:"),
-			extractContents : new Definition("?DocumentFragment:"),
-			cloneContents : new Definition("?DocumentFragment:"),
-			insertNode : new Definition("?undefined:node"),
-			surroundContents : new Definition("?undefined:nodeParent"),
+			deleteContents : new Definition("function()"),
+			extractContents : new Definition("function():DocumentFragment"),
+			cloneContents : new Definition("function():DocumentFragment"),
+			insertNode : new Definition("function(node:Node)"),
+			surroundContents : new Definition("function(nodeParent:Node)"),
 
-			cloneRange : new Definition("?Range:"),
-			detach : new Definition("?undefined:"),
+			cloneRange : new Definition("function():Range"),
+			detach : new Definition("function()"),
 
 
-			isPointInRange : new Definition("?Boolean:node,offset"),
-			comparePoint : new Definition("?Number:node,offset"),
+			isPointInRange : new Definition("function(node:Node,offset:Number):Boolean"),
+			comparePoint : new Definition("function(node:Node,offset:Number):Number"),
 
-			intersectsNode : new Definition("?Boolean:node")
+			intersectsNode : new Definition("function(node:Node):Boolean")
 		},
 
-		"?Range:" : {
+		"funciton():Range" : {
 			$$isBuiltin: true,
 			START_TO_START : new Definition("Number"),
 			START_TO_END : new Definition("Number"),
@@ -1337,232 +1354,12 @@ define(["plugins/esprima/proposalUtils", "scriptedLogger", "doctrine/doctrine"],
 
 			length : new Definition("Number"),
 
-			item : new Definition("?String:index"),
-			contains : new Definition("?Boolean:token"),
-			add : new Definition("?undefined:token"),
-			remove : new Definition("?undefined:token"),
-			toggle : new Definition("?Boolean:token")
+			item : new Definition("function(index:Number):String"),
+			contains : new Definition("function(token:String):Boolean"),
+			add : new Definition("function(token:String)"),
+			remove : new Definition("function(token:String)"),
+			toggle : new Definition("function(token:String):Boolean")
 		}
-
-// HTML constructors
-// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-33759296
-/*
-HTMLVideoElement
-HTMLAppletElement
-HTMLCollection
-HTMLOutputElement
-HTMLQuoteElement
-HTMLFrameElement
-HTMLTableSectionElement
-HTMLModElement
-HTMLTableCaptionElement
-HTMLCanvasElement
-HTMLOptGroupElement
-HTMLLinkElement
-HTMLImageElement
-HTMLBRElement
-HTMLProgressElement
-HTMLParagraphElement
-HTMLScriptElement
-HTMLOListElement
-HTMLTableCellElement
-HTMLTextAreaElement
-HTMLUListElement
-HTMLMarqueeElement
-HTMLFieldSetElement
-HTMLLIElement
-HTMLTableElement
-HTMLButtonElement
-HTMLAnchorElement
-HTMLAllCollection
-HTMLMetaElement
-HTMLLabelElement
-HTMLMenuElement
-HTMLMapElement
-HTMLParamElement
-HTMLTableColElement
-HTMLTableRowElement
-HTMLDocument
-HTMLSpanElement
-HTMLBaseFontElement
-HTMLEmbedElement
-HTMLDivElement
-HTMLBaseElement
-HTMLHeadElement
-HTMLTitleElement
-HTMLDirectoryElement
-HTMLUnknownElement
-HTMLHtmlElement
-HTMLHRElement
-HTMLInputElement
-HTMLDataListElement
-HTMLStyleElement
-HTMLSourceElement
-HTMLOptionElement
-HTMLFontElement
-HTMLElement
-HTMLBodyElement
-HTMLFormElement
-HTMLHeadingElement
-HTMLSelectElement
-HTMLPreElement
-HTMLIFrameElement
-HTMLMediaElement
-HTMLLegendElement
-HTMLObjectElement
-HTMLDListElement
-HTMLAudioElement
-HTMLAreaElement
-HTMLFrameSetElement
-HTMLMeterElement
-HTMLKeygenElement
-*/
-// SVG constructors
-// http://www.w3.org/TR/SVG11/struct.html#NewDocument
-/*
-SVGScriptElement
-SVGCircleElement
-SVGTitleElement
-SVGFEDistantLightElement
-SVGGElement
-SVGAnimatedString
-SVGFEConvolveMatrixElement
-SVGTransform
-SVGAltGlyphDefElement
-SVGAnimatedLengthList
-SVGCursorElement
-SVGAnimateColorElement
-SVGPathSegCurvetoQuadraticSmoothAbs
-SVGDefsElement
-SVGAnimateElement
-SVGPathSegLinetoVerticalAbs
-SVGAnimatedBoolean
-SVGVKernElement
-SVGElement
-SVGEllipseElement
-SVGForeignObjectElement
-SVGColor
-SVGFEPointLightElement
-SVGMissingGlyphElement
-SVGPathSegCurvetoCubicRel
-SVGPathSegMovetoRel
-SVGFEDisplacementMapElement
-SVGPathSegArcRel
-SVGAElement
-SVGFETurbulenceElement
-SVGMetadataElement
-SVGTextElement
-SVGElementInstanceList
-SVGFEBlendElement
-SVGTSpanElement
-SVGFESpecularLightingElement
-SVGPathSegArcAbs
-SVGZoomEvent
-SVGSVGElement
-SVGPathSegLinetoHorizontalRel
-SVGFEOffsetElement
-SVGAltGlyphItemElement
-SVGPaint
-SVGException
-SVGLengthList
-SVGFontFaceUriElement
-SVGPathSegLinetoAbs
-SVGMarkerElement
-SVGStyleElement
-SVGAnimatedRect
-SVGFilterElement
-SVGFEFuncGElement
-SVGAnimatedNumberList
-SVGPathSegLinetoHorizontalAbs
-SVGZoomAndPan
-SVGFEImageElement
-SVGAnimatedPreserveAspectRatio
-SVGPathSegLinetoVerticalRel
-SVGAltGlyphElement
-SVGSetElement
-SVGPathSegCurvetoCubicAbs
-SVGRect
-SVGPathSegClosePath
-SVGFEGaussianBlurElement
-SVGAngle
-SVGViewElement
-SVGMatrix
-SVGPreserveAspectRatio
-SVGTextPathElement
-SVGRenderingIntent
-SVGFEFloodElement
-SVGAnimateTransformElement
-SVGFEMergeNodeElement
-SVGPoint
-SVGTRefElement
-SVGFESpotLightElement
-SVGLinearGradientElement
-SVGPathSegList
-SVGTextContentElement
-SVGPointList
-SVGSwitchElement
-SVGPathSegCurvetoQuadraticSmoothRel
-SVGFontFaceElement
-SVGLineElement
-SVGLength
-SVGFECompositeElement
-SVGDocument
-SVGGlyphElement
-SVGFontFaceNameElement
-SVGFEMergeElement
-SVGPathSegCurvetoCubicSmoothRel
-SVGAnimatedInteger
-SVGAnimatedNumber
-SVGAnimateMotionElement
-SVGStopElement
-SVGUseElement
-SVGFontElement
-SVGGradientElement
-SVGPathSegLinetoRel
-SVGPathSegCurvetoQuadraticAbs
-SVGAnimatedEnumeration
-SVGNumber
-SVGTextPositioningElement
-SVGComponentTransferFunctionElement
-SVGFEDiffuseLightingElement
-SVGStringList
-SVGRadialGradientElement
-SVGPathElement
-SVGMaskElement
-SVGFEFuncBElement
-SVGPolygonElement
-SVGGlyphRefElement
-SVGFEColorMatrixElement
-SVGElementInstance
-SVGFontFaceSrcElement
-SVGAnimatedAngle
-SVGFontFaceFormatElement
-SVGHKernElement
-SVGPolylineElement
-SVGAnimatedTransformList
-SVGFEFuncRElement
-SVGDescElement
-SVGAnimatedLength
-SVGSymbolElement
-SVGNumberList
-SVGViewSpec
-SVGPathSegCurvetoCubicSmoothAbs
-SVGMPathElement
-SVGPatternElement
-SVGPathSegCurvetoQuadraticRel
-SVGFEComponentTransferElement
-SVGRectElement
-SVGTransformList
-SVGFETileElement
-SVGFEDropShadowElement
-SVGUnitTypes
-SVGPathSegMovetoAbs
-SVGClipPathElement
-SVGFEMorphologyElement
-SVGImageElement
-SVGPathSeg
-SVGFEFuncAElement
-*/
 	};
 
 	var protoLength = "~proto".length;
@@ -1577,92 +1374,73 @@ SVGFEFuncAElement
 
 
 		// type parsing
-		isArrayType : function(typeName) {
-			return typeName.substr(0, "Array.<".length) === "Array.<";
+		isArrayType : function(typeObj) {
+			return typeObj.type === 'ArrayType' || typeObj.type === 'TypeApplication';
 		},
 
-		isFunctionOrConstructor : function(typeName) {
-			return typeName.charAt(0) === "?" || typeName.charAt(0) === "*";
+		isFunctionOrConstructor : function(typeObj) {
+			return typeObj.type === 'FunctionType';
 		},
 
-		isPrototype : function(typeName) {
-			return typeName.charAt(0) === "*" && typeName.substr( - protoLength, protoLength) === "~proto";
-		},
-
-		findReturnTypeEnd : function(fnType) {
-			if (this.isFunctionOrConstructor(fnType)) {
-				// walk the string and for every ? or *, find the corresponding :, until we reach the
-				// : for the first ? or *
-				var depth = 1;
-				var index = 1;
-				var len = fnType.length;
-
-				while (index < len) {
-					if (this.isFunctionOrConstructor(fnType.charAt(index))) {
-						depth++;
-					} else if (fnType.charAt(index) === ":") {
-						depth--;
-					}
-
-					if (depth === 0) {
-						// found it
-						return index;
-					}
-
-					index++;
-				}
-			}
-			return -1;
-		},
-
-		removeParameters : function(fnType) {
-			var index = this.findReturnTypeEnd(fnType);
-			if (index >= 0) {
-				return fnType.substring(0,index+1);
-			}
-			// didn't find a matching ":" (ie- invalid type)
-			// or just not a function type
-			return fnType;
-		},
-
-		/**
-		 * if the type passed in is a function type, extracts the return type
-		 * otherwise returns as is
-		 */
-		extractReturnType : function(fnType) {
-			var index = this.findReturnTypeEnd(fnType);
-			if (index >= 0) {
-				return fnType.substring(1,index);
-			}
-			// didn't find a matching ":" (ie- invalid type)
-			// or just not a function type
-			return fnType;
+		isPrototypeName : function(typeName) {
+			return typeName.substr( - protoLength, protoLength) === "~proto";
 		},
 
 		/**
 		 * returns a parameterized array type with the given type parameter
 		 */
-		parameterizeArray : function(parameterType) {
-			return "Array.<" + parameterType + ">";
+		parameterizeArray : function(parameterTypeObj) {
+			return {
+				type: 'ArrayType',
+				elements: [parameterTypeObj]
+			};
+		},
+
+		createFunctionType : function(params, result, isConstructor) {
+			var functionTypeObj = {
+				type: 'FunctionType',
+				params: params,
+				result: result
+			};
+			if (isConstructor) {
+			    // TODO should we also do 'this'?
+				functionTypeObj['new'] = result;
+			}
+
+			return functionTypeObj;
 		},
 
 		/**
 		 * If this is a parameterized array type, then extracts the type,
 		 * Otherwise object
 		 */
-		extractArrayParameterType : function (arrayType) {
-			if (arrayType.substr(0, "Array.<".length) === "Array.<" && arrayType.substr(-1, 1) === ">") {
-				return arrayType.substring("Array.<".length, arrayType.length -1);
+		extractArrayParameterType : function(arrayObj) {
+			if ((arrayObj.type === 'ArrayType' || arrayObj.type === 'TypeApplication')) {
+				if (arrayObj.elements.length > 0) {
+					return arrayObj.elements[0];
+				} else {
+					return THE_UNKNOWN_TYPE;
+				}
 			} else {
-				return "Object";
+				// not an array type
+				return arrayObj;
 			}
+
 		},
 
+		extractReturnType : function(fnType) {
+			return fnType.result || fnType;
+		},
+
+		// TODO should we just return a typeObj here???
 		parseJSDocComment : function(docComment) {
 			var result = { };
 			result.params = {};
 			if (docComment) {
 				var commentText = docComment.value;
+				if (!commentText) {
+					return result;
+				}
 				try {
 					var rawresult = doctrine.parse("/*" + commentText + "*/", {unwrap : true, tags : ['param', 'type', 'return']});
 					// transform result into something more manageable
@@ -1692,43 +1470,202 @@ SVGFEFuncAElement
 				} catch (e) {
 					scriptedLogger.error(e.message, "CONTENT_ASSIST");
 					scriptedLogger.error(e.stack, "CONTENT_ASSIST");
+					scriptedLogger.error("Error parsing doc comment:\n" + (docComment && docComment.value),
+							"CONTENT_ASSIST");
 				}
 			}
 			return result;
 		},
 
+
 		/**
-		 * Best effort to recursively convert from a jsdoc type specification to a scripted type name.
-		 *
-		 * See here: https://developers.google.com/closure/compiler/docs/js-for-compiler
-		 * should handle:
-				NullableLiteral
-				AllLiteral
-				NullLiteral
-				UndefinedLiteral
-				VoidLiteral
-				UnionType
-				ArrayType
-				RecordType
-				FieldType
-				FunctionType
-				ParameterType
-				RestType
-				NonNullableType
-				OptionalType
-				NullableType
-				NameExpression
-				TypeApplication
-		 * @return {String} if the type is found, then return string, otherwise null
+		 * takes this jsdoc type and recursively splits out all record types into their own type
+		 * also converts unknown name types into Objects
+		 * @see https://developers.google.com/closure/compiler/docs/js-for-compiler
 		 */
-		convertJsDocType : function(jsdocType, env) {
-			var allTypes = env.getAllTypes();
+		convertJsDocType : function(jsdocType, env, doCombine, depth) {
+		    if (typeof depth !== 'number') {
+		        depth = 0;
+		    }
 			if (!jsdocType) {
-				return null;
+				return THE_UNKNOWN_TYPE;
 			}
 
-			var i;
+			var self = this;
+			var name = jsdocType.name;
+			var allTypes = env.getAllTypes();
 			switch (jsdocType.type) {
+				case 'NullableLiteral':
+				case 'AllLiteral':
+				case 'NullLiteral':
+				case 'UndefinedLiteral':
+				case 'VoidLiteral':
+					return {
+						type: jsdocType.type
+					};
+
+				case 'UnionType':
+					return {
+						type: jsdocType.type,
+						elements: jsdocType.elements.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth+1);
+						})
+					};
+
+				case 'RestType':
+					return {
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1)
+					};
+
+				case 'ArrayType':
+					return {
+						type: jsdocType.type,
+						elements: jsdocType.elements.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth+1);
+						})
+					};
+
+				case 'FunctionType':
+					var fnType = {
+						type: jsdocType.type,
+						result: self.convertJsDocType(jsdocType.result, env, doCombine, depth+1),
+						params: jsdocType.params.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth+1);
+						})
+					};
+
+					if (jsdocType['new']) {
+						fnType['new'] = self.convertJsDocType(jsdocType['new'], env, doCombine, depth+1);
+					}
+
+					if (jsdocType['this']) {
+						fnType['this'] = self.convertJsDocType(jsdocType['this'], env, doCombine, depth+1);
+					}
+
+					return fnType;
+
+				case 'TypeApplication':
+					var typeApp = {
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1),
+						
+					};
+					if (jsdocType.applications) {
+                        typeApp.applications = jsdocType.applications.map(function(elt) {
+							return self.convertJsDocType(elt, env, doCombine, depth+1);
+						});		    
+					}
+					return typeApp;
+
+				case 'ParameterType':
+					return {
+						type: jsdocType.type,
+						name: name,
+						expression: jsdocType.expression ?
+							self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1) :
+							null
+					};
+
+				case 'NonNullableType':
+				case 'OptionalType':
+				case 'NullableType':
+					return {
+						type: jsdocType.type,
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1)
+					};
+
+				case 'NameExpression':
+					if (doCombine && env.isSyntheticName(name)) {
+						// Must mush together all properties for this synthetic type
+						var origFields = allTypes[name];
+						// must combine a record type
+						var newFields = [];
+						Object.keys(origFields).forEach(function(key) {
+							if (key === '$$proto') {
+								// maybe should traverse the prototype
+								return;
+							}
+							var prop = origFields[key];
+							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name)) ? 
+							     { type : 'NameExpression', name : JUST_DOTS } :
+							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);
+							newFields.push({
+								type: 'FieldType',
+								key: key,
+								value: fieldType
+							});
+						});
+
+
+						return {
+							type: 'RecordType',
+							fields: newFields
+						};
+					} else {
+						if (allTypes[name]) {
+							return { type: 'NameExpression', name: name };
+						} else {
+							var capType = name[0].toUpperCase() + name.substring(1);
+							if (allTypes[capType]) {
+								return { type: 'NameExpression', name: capType };
+							}
+						}
+					}
+					return THE_UNKNOWN_TYPE;
+
+				case 'FieldType':
+					return {
+						type: jsdocType.type,
+						key: jsdocType.key,
+						value: self.convertJsDocType(jsdocType.value, env, doCombine, depth+1)
+					};
+
+				case 'RecordType':
+					if (doCombine) {
+						// when we are combining, do not do anything special for record types
+						return {
+							type: jsdocType.type,
+							params: jsdocType.fields.map(function(elt) {
+								return self.convertJsDocType(elt, env, doCombine, depth+1);
+							})
+						};
+					} else {
+						// here's where it gets interesting
+						// create a synthetic type in the env and then
+						// create a property in the env type for each record property
+						var fields = { };
+						for (var i = 0; i < jsdocType.fields.length; i++) {
+							var field = jsdocType.fields[i];
+							var convertedField = self.convertJsDocType(field, env, doCombine, depth+1);
+							fields[convertedField.key] = convertedField.value;
+						}
+						// create a new type to store the record
+						var obj = env.newFleetingObject();
+						for (var prop in fields) {
+							if (fields.hasOwnProperty(prop)) {
+								// add the variable to the new object, which happens to be the top-level scope
+								env.addVariable(prop, obj.name, fields[prop]);
+							}
+						}
+						return obj;
+					}
+			}
+			return THE_UNKNOWN_TYPE;
+		},
+
+		createNameType : createNameType,
+
+		createParamType : function(name, typeObj) {
+			return {
+				type: 'ParameterType',
+				name: name,
+				expression: typeObj
+			};
+		},
+
+		convertToSimpleTypeName : function(typeObj) {
+			switch (typeObj.type) {
 				case 'NullableLiteral':
 				case 'AllLiteral':
 				case 'NullLiteral':
@@ -1738,103 +1675,31 @@ SVGFEFuncAElement
 				case 'VoidLiteral':
 					return "undefined";
 
-				case 'UnionType':
-					// TODO no direct handling of union types
-					// for now, just return the first of the union
-					if (jsdocType.elements && jsdocType.elements.length > 0) {
-						return this.convertJsDocType(jsdocType.elements[0], env);
-					}
-					return "Object";
+				case 'NameExpression':
+					return typeObj.name;
 
-				case 'RestType':
-					return "Array.<" + this.convertJsDocType(jsdocType.expression, env) + ">";
-				case 'ArrayType':
-					if (jsdocType.elements && jsdocType.elements.length > 0) {
-						// assume array type is type of first element, not correct, but close enough
-						return "Array.<" + this.convertJsDocType(jsdocType.elements[0], env) + ">";
-					}
+				case 'TypeApplication':
+				case 'ArrayExpressopm':
 					return "Array";
 
 				case 'FunctionType':
-					var ret = this.convertJsDocType(jsdocType.result, env);
-					if (!ret) {
-						ret = "Object";
-					}
-					var params = [];
-					if (jsdocType.params) {
-						for (i = 0; i < jsdocType.params.length; i++) {
-							// this means that if no name is used, then the type name is used (if a simple type)
-							var param = jsdocType.params[i].name;
-							if (!param) {
-								param = 'arg'+i;
-							}
-							var paramType = "";
-							if (jsdocType.params[i].expression) {
-								paramType = "/" + this.convertJsDocType(jsdocType.params[i].expression, env);
-							}
-							params.push(param + paramType);
-						}
-					}
-					// TODO FIXADE must also handle @constructor
-					var funcConstr;
-					if (jsdocType['new'] && jsdocType['this']) {
-						// this is actually a constructor
-						var maybeRet = this.convertJsDocType(jsdocType['this'], env);
-						if (maybeRet) {
-							ret = maybeRet;
-						}
-						funcConstr = "*";
-					} else {
-						funcConstr = "?";
-					}
-					return funcConstr + ret + ":" + params.join(',');
+					return "Function";
 
-				case 'TypeApplication':
-					var expr = this.convertJsDocType(jsdocType.expression, env);
-					if (expr === "Array" && jsdocType.applications && jsdocType.applications.length > 0) {
-						// only parameterize arrays not handling objects yet
-						var typeParam = this.convertJsDocType(jsdocType.applications[0], env) || "Object";
-						return "Array.<" + typeParam + ">";
-					}
-					return expr;
-				case 'ParameterType':
+				case 'UnionType':
+					return typeObj.expressions[0];
+
+				case 'RecordType':
+					return "Object";
+
+				case 'FieldType':
+					return this.convertToSimpleTypeName(typeObj.value);
+
 				case 'NonNullableType':
 				case 'OptionalType':
 				case 'NullableType':
-					return this.convertJsDocType(jsdocType.expression, env);
-
-				case 'NameExpression':
-					var name = jsdocType.name;
-					name = name.trim();
-					if (allTypes[name]) {
-						return name;
-					} else {
-						var capType = name[0].toUpperCase() + name.substring(1);
-						if (allTypes[capType]) {
-							return capType;
-						}
-					}
-					return null;
-				case 'RecordType':
-					var fields = { };
-					for (i = 0; i < jsdocType.fields.length; i++) {
-						var field = jsdocType.fields[i];
-						var fieldType = this.convertJsDocType(field, env);
-						fields[field.key] = fieldType ? fieldType : "Object";
-					}
-					// create a new type to store the record
-					var obj = env.newFleetingObject();
-					for (var prop in fields) {
-						if (fields.hasOwnProperty(prop)) {
-							// add the variable to the new object, which happens to be the top-level scope
-							env.addVariable(prop, obj, fields[prop]);
-						}
-					}
-					return obj;
-				case 'FieldType':
-					return this.convertJsDocType(jsdocType.value, env);
+				case 'ParameterType':
+					return this.convertToSimpleTypeName(typeObj.expression);
 			}
-			return null;
 		},
 
 		// type styling
@@ -1848,10 +1713,25 @@ SVGFEFuncAElement
 			return useHtml ? "<span style=\"font-style:italic;\">" + text + "</span>": text;
 		},
 
+
 		/**
 		 * creates a human readable type name from the name given
 		 */
-		createReadableType : function(typeName, env, useFunctionSig, depth, useHtml) {
+		createReadableType : function(typeObj, env, useFunctionSig, depth, useHtml) {
+			if (useFunctionSig) {
+				typeObj = this.convertJsDocType(typeObj, env, true);
+				var res = doctrine.stringify(typeObj);
+				res = res.replace(JUST_DOTS, "{...}", 'g');
+				return res;
+			} else {
+				typeObj = this.extractReturnType(typeObj);
+				return this.createReadableType(typeObj, env, true, depth, useHtml);
+			}
+		},
+		/**
+		 * creates a human readable type name from the name given
+		 */
+		createReadableTypeOLD : function(typeName, env, useFunctionSig, depth, useHtml) {
 			depth = depth || 0;
 			var first = typeName.charAt(0);
 			if (first === "?" || first === "*") {
@@ -1908,7 +1788,7 @@ SVGFEFuncAElement
 					if (type.hasOwnProperty(val) && val !== "$$proto") {
 						var name;
 						// don't show inner objects
-						name = this.createReadableType(type[val].typeName, env, true, depth + 1, useHtml);
+						name = this.createReadableType(type[val].typeObj, env, true, depth + 1, useHtml);
 						props.push((useHtml ? "<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;&nbsp;&nbsp;", depth+1) : "" ) +
 							this.styleAsProperty(val, useHtml) + ":" + name);
 					}
@@ -1926,6 +1806,14 @@ SVGFEFuncAElement
 			} else {
 				return this.styleAsType(typeName, useHtml);
 			}
-		}
+		},
+
+		OBJECT_TYPE: THE_UNKNOWN_TYPE,
+		UNDEFINED_TYPE: createNameType("undefined"),
+		NUMBER_TYPE: createNameType("Number"),
+		BOOLEAN_TYPE: createNameType("Boolean"),
+		STRING_TYPE: createNameType("String"),
+		ARRAY_TYPE: createNameType("Array"),
+		FUNCTION_TYPE: createNameType("Function")
 	};
 });

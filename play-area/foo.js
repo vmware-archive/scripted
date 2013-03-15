@@ -1,8 +1,6 @@
 /**
- * @param {String} path 
+ * @param {String} path
  * @return String
  */
-function parseFile(path) { }
+function parseFile(path) {  }
 var x =  parseFile('');
-
-1
