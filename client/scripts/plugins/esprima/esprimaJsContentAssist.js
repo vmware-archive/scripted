@@ -687,11 +687,16 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					docComment = findAssociatedCommentBlock(property.key, env.comments);
 					jsdocResult = mTypes.parseJSDocComment(docComment);
 					jsdocType = jsdocResult.type && mTypes.convertJsDocType(jsdocResult.type, env);
-					var keyType = jsdocType ? jsdocType : mTypes.OBJECT_TYPE;
-					env.addVariable(property.key.name, node, keyType, property.key.range, docComment.range);
 					if (!property.key.extras) {
 						property.key.extras = {};
 					}
+					var keyType;
+					if (jsdocType) {
+						property.key.extras.inferredType = property.key.extras.jsdocType = keyType = jsdocType;
+					} else {
+						keyType = mTypes.OBJECT_TYPE;
+					}
+					env.addVariable(property.key.name, node, keyType, property.key.range, docComment.range);
 					property.key.extras.associatedComment = docComment;
 					// remember that this is the LHS so that we don't add the identifier to global scope
 					property.key.extras.isLHS = property.key.extras.isDecl = true;
@@ -1056,7 +1061,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							range = kvps[i].key.range;
 						}
 
-						inferredTypeObj = kvps[i].value.extras.inferredTypeObj;
+						inferredTypeObj =  kvps[i].key.extras.jsdocType || kvps[i].value.extras.inferredTypeObj;
 						var docComment = kvps[i].key.extras.associatedComment;
 						env.addVariable(name, node, inferredTypeObj, range, docComment.range);
 						if (inRange(env.offset-1, kvps[i].key.range)) {
@@ -1197,7 +1202,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			break;
 
 		case "Property":
-			node.extras.inferredTypeObj = node.key.extras.inferredTypeObj = node.value.extras.inferredTypeObj;
+			if (node.key.extras.jsdocType) {
+				// use jsdoc instead of whatever we have inferred
+				node.extras.inferredTypeObj = node.key.extras.jsdocType;
+			} else {
+				node.extras.inferredTypeObj = node.key.extras.inferredTypeObj = node.value.extras.inferredTypeObj;
+			}
 			break;
 
 		case "AssignmentExpression":
@@ -1402,15 +1412,20 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 * added to it.  Additionally, the type specified in the $$proto property is
 	 * either empty or is Object
 	 *
-	 * @param String leftTypeObj
-	 * @param String leftTypeObj
+	 * @param {{}} leftTypeObj
+	 * @param {{}} rightTypeObj
 	 * @param {{getAllTypes:function():Object}} env
 	 *
 	 * @return Boolean
 	 */
 	function leftTypeIsMoreGeneral(leftTypeObj, rightTypeObj, env) {
-		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj;
+		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj.name;
 
+		if (!leftTypeName) {
+			if (leftTypeObj.type === 'NullLiteral' || leftTypeObj.type === 'UndefinedLiteral' || leftTypeObj.type === 'VoidLiteral') {
+				leftTypeName = 'undefined';
+			}
+		}
 		function isEmpty(generatedTypeName) {
 			if (typeof generatedTypeName !== 'string') {
 				// original type was not a name expression
@@ -1418,10 +1433,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			} else if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
 				return true;
 			} else if (generatedTypeName.substring(0, mTypes.GEN_NAME.length) !== mTypes.GEN_NAME) {
+				// not a synthetic type, so not empty
 				return false;
 			}
 
 
+			// now check to see if there are any non-default fields in this type
 			var type = env.getAllTypes()[generatedTypeName];
 			var popCount = 0;
 			// type should have a $$proto only and nothing else if it is empty
@@ -1436,7 +1453,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (popCount === 1) {
 				// we have an empty object literal, must check parent
 				// must traverse prototype hierarchy to make sure empty
-				return isEmpty(type.$$proto.typeObj);
+				return isEmpty(type.$$proto.typeObj.name);
 			}
 			return false;
 		}
