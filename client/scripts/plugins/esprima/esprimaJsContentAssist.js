@@ -8,11 +8,11 @@
  * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Contributors:
- *     Andy Clement (VMware) - initial API and implementation
- *     Andrew Eisenberg (VMware) - implemented visitor pattern
+ *	 Andy Clement (VMware) - initial API and implementation
+ *	 Andrew Eisenberg (VMware) - implemented visitor pattern
  ******************************************************************************/
 
-/*global define require eclipse esprima window */
+/*global define esprima doctrine */
 define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/esprima/proposalUtils", "scriptedLogger", "esprima/esprima"],
 		function(mVisitor, mTypes, proposalUtils, scriptedLogger) {
 
@@ -22,9 +22,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 */
 	var isArray = Array.isArray;
 	if (!isArray) {
-	    isArray = function isArray(ary) {
-	        return Object.prototype.toString.call(ary) === '[object Array]';
-	    };
+		isArray = function isArray(ary) {
+			return Object.prototype.toString.call(ary) === '[object Array]';
+		};
 	}
 
 	var RESERVED_WORDS = {
@@ -156,8 +156,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 * the first char and exclusive of the last char, must
 	 * use a +1 at the end.
 	 * eg- (^ is the line start)
-	 *       ^x    ---> range[0,0]
-	 *       ^  xx ---> range[2,3]
+	 *	   ^x	---> range[0,0]
+	 *	   ^  xx ---> range[2,3]
 	 */
 	function inRange(offset, range, includeEdge) {
 		return range[0] <= offset && (includeEdge ? range[1] >= offset : range[1] > offset);
@@ -1670,9 +1670,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					if (inferredTypeObj.type === 'NameExpression') {
 						return inferredTypeObj.name;
 					} else if (inferredTypeObj.type === 'FunctionType') {
-					    if (inferredTypeObj['new'] && inferredTypeObj['new'].name) {
-					        return inferredTypeObj['new'].name;
-					    }
+						if (inferredTypeObj['new'] && inferredTypeObj['new'].name) {
+							return inferredTypeObj['new'].name;
+						}
 						return "Function";
 					}
 				} else {
@@ -1772,7 +1772,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						found = true;
 						break;
 					} else if (current.$$proto) {
-					    var tname = current.$$proto.typeObj.name;
+						var tname = current.$$proto.typeObj.name;
 						current = this._allTypes[tname || "Function"];
 					} else {
 						current = null;
@@ -2053,32 +2053,80 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		}
 	}
 
-	// TODO this is incorrect!!!!!
 	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
-		if (currentTypeName.charAt(0) === '*') {
-			// constructors are not stored with their arguments so need to remove them in order to find them
-			currentTypeName = mTypes.removeParameters(currentTypeName);
+
+		function visitTypeStructure(typeObj) {
+			if (typeof typeObj !== 'object') {
+				return;
+			}
+			switch (typeObj.type) {
+				case 'NullableLiteral':
+				case 'AllLiteral':
+				case 'NullLiteral':
+				case 'UndefinedLiteral':
+				case 'VoidLiteral':
+					// leaf nodes
+					return;
+
+				case 'NameExpression':
+					alreadySeen[typeObj.name] = true;
+					return;
+
+				case 'ArrayType':
+					visitTypeStructure(typeObj.expression);
+					// fall-through
+				case 'UnionType':
+					if (typeObj.elements) {
+						typeObj.elements.forEach(visitTypeStructure);
+					}
+					return;
+
+				case 'RecordType':
+					if (typeObj.fields) {
+						typeObj.fields.forEach(visitTypeStructure);
+					}
+					return;
+
+				case 'FieldType':
+					visitTypeStructure(typeObj.expression);
+					return;
+
+				case 'FunctionType':
+					// do we need to check for serialized functions???
+					visitTypeStructure(typeObj.result);
+					if (typeObj.params) {
+						typeObj.params.forEach(visitTypeStructure);
+					}
+					return;
+
+				case 'ParameterType':
+					visitTypeStructure(typeObj.expression);
+					return;
+
+				case 'TypeApplication':
+					if (typeObj.applications) {
+						typeObj.applications.forEach(visitTypeStructure);
+					}
+
+					// fall-throudh
+				case 'RestType':
+				case 'NonNullableType':
+				case 'OptionalType':
+				case 'NullableType':
+					visitTypeStructure(typeObj.expression);
+					return;
+
+
+			}
 		}
+
 		var currentType = allTypes[currentTypeName];
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
 					var propType = currentType[prop].typeObj;
-					while (mTypes.isFunctionOrConstructor(propType) || mTypes.isArrayType(propType)) {
-						if (!alreadySeen[propType]) {
-							alreadySeen[propType] = true;
-							findUnreachable(propType, allTypes, alreadySeen);
-						}
-						if (mTypes.isFunctionOrConstructor(propType)) {
-							propType = mTypes.extractReturnType(propType);
-						} else if (mTypes.isArrayType(propType)) {
-							propType = mTypes.extractArrayParameterType(propType);
-						}
-					}
-					if (!alreadySeen[propType]) {
-						alreadySeen[propType] = true;
-						findUnreachable(propType, allTypes, alreadySeen);
-					}
+					// must visit the type strucutre
+					visitTypeStructure(propType);
 				}
 			}
 		}
@@ -2087,13 +2135,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	/**
 	 * filters types from the environment that should not be exported
 	 */
-	function filterTypes(environment, kind, moduleTypeName) {
+	function filterTypes(environment, kind, moduleTypeName, provided) {
 		var allTypes = environment.getAllTypes();
 		if (kind === "global") {
 			// for global dependencies must keep the global scope, but remove all builtin global variables
 			allTypes.clearDefaultGlobal();
 		} else {
-			delete allTypes.Global;
+			delete allTypes[environment.globalTypeName()];
 		}
 
 		// recursively walk the type tree to find unreachable types and delete them, too
@@ -2131,12 +2179,37 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			reachable[retType] = true;
 		}
 
-//		findUnreachable(moduleTypeName, allTypes, reachable);
+		findUnreachable(moduleTypeName, allTypes, reachable);
 		for (var prop in allTypes) {
 			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
 				delete allTypes[prop];
 			}
 		}
+		
+		// now reformat the types so that they are combined and serialized
+		Object.keys(allTypes).forEach(function(typeName) {
+		    var type = allTypes[typeName];
+			for (var defName in type) {
+				if (type.hasOwnProperty(defName)) {
+					var def = type[defName];
+					def.typeSig = doctrine.stringify(def.typeObj);
+					delete def._typeObj;
+				}
+			}
+		});
+		
+		if (typeof provided === 'object') {
+			for (var defName in provided) {
+				if (provided.hasOwnProperty(defName)) {
+					var def = provided[defName];
+					if (def.typeObj) {
+						def.typeSig = doctrine.stringify(def.typeObj);
+						delete def._typeObj;
+					}
+				}
+			}
+		}
+
 	}
 
 	var browserRegExp = /browser\s*:\s*true/;
@@ -2334,7 +2407,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// This is fixed in trunk of esprima.
 				// after next upgrade of esprima if the following has correct slocs, then
 				// can remove the second part of the &&
-				//    mUsers.getUser().name
+				// mUsers.getUser().name
 				if (node.range[0] > offset &&
 						(node.type === "ExpressionStatement" ||
 						 node.type === "ReturnStatement" ||
@@ -2431,57 +2504,62 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 				throw (e);
 			}
-			var provided;
+			var providedType;
 			var kind;
-			var modType;
+			var modTypeName;
+			var modTypeObj;
 			if (environment.amdModule) {
 				// provide the exports of the AMD module
 				// the exports is the return value of the final argument
 				var args = environment.amdModule["arguments"];
 				if (args && args.length > 0) {
-					modType = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
+					modTypeObj = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
+					modTypeName = doctrine.stringify(modTypeObj);
 				} else {
-					modType = "Object";
+					modTypeObj = mTypes.OBJECT_TYPE;
+					modTypeName = modTypeObj.name;
 				}
 				kind = "AMD";
 			} else if (environment.commonjsModule) {
 				// a wrapped commonjs module
 				// we have already checked the correctness of this function
 				var exportsParam = environment.commonjsModule["arguments"][0].params[1];
-				modType = exportsParam.extras.inferredTypeObj;
-				provided = provided = environment.findType(modType);
+				modTypeObj = exportsParam.extras.inferredTypeObj;
+				modTypeName = doctrine.stringify(modTypeObj);
+				providedType = environment.findType(modTypeObj);
 
 			} else {
 				// assume a non-module
-				provided = environment.globalScope();
+				providedType = environment.globalScope();
 
-				if (provided.exports) {
+				if (providedType.exports) {
 					// actually, commonjs
 					kind = "commonjs";
-					modType = provided.exports.typeObj;
+					modTypeObj = providedType.exports.typeObj;
+	       			modTypeName = doctrine.stringify(modTypeObj);
 				} else {
 					kind = "global";
-					modType = environment.globalTypeName();
+    				modTypeName = environment.globalTypeName();
+					modTypeObj = providedType['this'].typeObj;
 				}
 			}
 
 			// simplify the exported type
-			if (mTypes.isFunctionOrConstructor(modType) || environment.findType(modType).$$isBuiltin) {
+			if (mTypes.isFunctionOrConstructor(modTypeObj) || environment.findType(modTypeObj).$$isBuiltin) {
 				// this module provides a built in type or a function
-				provided = modType;
+				providedType = modTypeName;
 			} else {
 				// this module provides a composite type
-				provided = environment.findType(modType);
+				providedType = environment.findType(modTypeObj);
 			}
-
-
-			// now filter the builtins since they are always available
-			filterTypes(environment, kind, modType);
 
 			var allTypes = environment.getAllTypes();
 
+			// now filter the builtins since they are always available
+			filterTypes(environment, kind, modTypeName, providedType);
+
 			return {
-				provided : provided,
+				provided : providedType,
 				types : allTypes,
 				kind : kind
 			};
