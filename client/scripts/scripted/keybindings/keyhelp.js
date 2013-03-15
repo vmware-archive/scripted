@@ -21,10 +21,12 @@
 // from the main app.
 
 define(['jsrender', 'jquery', './keybinder', './keystroke', './keyedit',
-	"scripted/utils/editorUtils",'text!./_keybinding.tmpl.html', './action-info'],
-function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, commandTemplate, mActionInfo) {
+	"scripted/utils/editorUtils",'text!./_keybinding.tmpl.html', './action-info',
+	"scripted/utils/server-options"],
+function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, commandTemplate, mActionInfo,
+options) {
 
-	var attachKeyEditor = mKeyedit.attachKeyEditor;
+	var attachKeyEditor = options.keyedit ? mKeyedit.attachKeyEditor : function () {};
 	var getActionDescription = mActionInfo.getActionDescription;
 	var getCategory = mActionInfo.getCategory;
 
@@ -32,7 +34,7 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		// use a copy so we can sort
 		var editor = editorUtil.getMainEditor();
 		var keyBindings = editor.getTextView()._keyBindings.filter(function (kb) { return kb.actionID; });
-		
+
 		// not perfect since not all names are correct here, but pretty close
 		keyBindings.sort(function(l,r) {
 			var lname = getActionDescription(l.actionID);
@@ -54,23 +56,23 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 
 		return keyBindings;
 	}
-	
+
 	/**
 	 * Render or re-render the current keybindings to the help side panel.
 	 */
 	function renderKeyHelp() {
 		var editor = editorUtil.getMainEditor();
-	
+
 		$.views.converters({
 			toKeystroke: mKeystroke.fromKeyBinding,
 			toShortcutName: getActionDescription
 		});
 
 		var keyBindings = getSortedKeybindings();
-		
+
 		var importantKeyBindings = [];
 		var otherKeyBindings = [];
-		
+
 		keyBindings.forEach(function (kb) {
 			switch(getCategory(kb.actionID)) {
 				case 'hidden':
@@ -82,9 +84,9 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 					importantKeyBindings.push(kb);
 			}
 		});
-		
+
 		var tmpl = $.templates(commandTemplate);
-		
+
 		function render(it, into) {
 			if (Array.isArray(it)) {
 				for (var i = 0; i < it.length; i++) {
@@ -96,9 +98,9 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 				into.append(element);
 			}
 		}
-	
+
 		var cl = $('#command_list');
-		
+
 		cl.empty();
 		cl.append("<b>Click any key binding value to configure it. Scroll down to see unbound actions.</b>");
 		cl.append('<li><hr /></li>');
@@ -119,10 +121,10 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 
 		editor.getTextView()._update();
 	}
-	
+
 	/*Command help panel*/
 	var help_close, help_open;
-	
+
 	var isOpen = false;
 
 	help_open = function (){
@@ -140,13 +142,13 @@ function (mJsRender, mJquery, mKeybinder, mKeystroke, mKeyedit, editorUtil, comm
 		$('#help_open').off('click');
 		$('#help_open').on('click', help_open);
 	};
-	
+
 	$('#help_open').on('click', help_open);
 	$('#help_panel').on('refresh', function () {
 		if (isOpen) { //Don't bother to render if the panel is not visible.
 			renderKeyHelp();
 		}
 	});
-	
+
 });
-		
+

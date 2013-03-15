@@ -17,17 +17,11 @@
 
 // TODO: Before this can go 'public'
 //
-//   - Customized readme shown when opening on a folder.
+//   - Customized readme shown when opening on a folder (done), but contents
+//     is still a bit iffy.
+
 //   - A reasonable piece of sample code to pre-populate first-time visitor space.
 //   - Ask Scott to vacate domain name 'scripted.cloudfoundry.com' so we can use that.
-//   - keybindings: now that filesystem is all read-only, they can't be saved.
-//       fix: should make 'keybindings store' injectable on client-side
-//            and then use localstorage.
-//
-
-//
-//
-//- (must do) improve the landing page getting started text or even offer alternative text when deployed in this way.
 //
 //
 //-
@@ -61,11 +55,12 @@
 // server log, can we access that file?  I don't think we want to track IP
 // addresses of visitors (do we?) - but just a count of users creating
 //projects would be useful.
+//   - keybindings: now that filesystem is all read-only, they can't be saved.
+//      'fix' disable the keyeditor in CF version
 
 
 var path = require('path');
 
-var nodefs = require('fs');
 var mappedFs = require('../plugable-fs/mapped-fs');
 var scriptedFs = require('../plugable-fs/scripted-fs');
 var githubFs = require('../plugable-fs/github-fs/github-fs');
@@ -121,6 +116,8 @@ var server=require('../scriptedServer.js').start(filesystem, {
 	applicationManager: false, //Disable the application manager.
 	shutdownHook: false, //Disable the 'shutdown hook' used by 'scr -k' and 'scr -r' commands.
 	exec: false, //Disable 'exec' related features.
+	keyedit: false, //Disable help side-panel's keybdingins editor as it doesn't work well with
+					// a shared fs, and won't work at all with a read-only fs.
 	help_text: [
 "                 _  _  _       _                                      ",
 "                | || || |     | |                            _        ",
