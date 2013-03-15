@@ -2846,7 +2846,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"flar");
 			// hmmmm... functions returning functions not really showing up
 			testProposals(results, [
-				["flart(xx1, xx2)", "flart(xx1, xx2) : (a:String, arg1:Number) ⇒ Number"]
+				["flart(xx1, xx2)", "flart(xx1, xx2) : function(a:String,?Number):Number"]
 			]);
 		};
 
@@ -2968,6 +2968,14 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			var results = computeContentAssist(
 				// ignoring the second type
 				"/** @type Array.<Number> */ var xxx;\nxxx[0].toF", "toF");
+			testProposals(results, [
+				["toFixed(digits)", "toFixed(digits) : String"]
+			]);
+		};
+		tests["test array type3a"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
 			testProposals(results, [
 				["toFixed(digits)", "toFixed(digits) : String"]
 			]);
