@@ -45,7 +45,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 	}
 
 	var THE_UNKNOWN_TYPE = createNameType("Object");
-	
+
 	var JUST_DOTS = '$$__JUST_DOTS__$$';
 
 	/**
@@ -1415,17 +1415,25 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		 * Otherwise object
 		 */
 		extractArrayParameterType : function(arrayObj) {
-			if ((arrayObj.type === 'ArrayType' || arrayObj.type === 'TypeApplication')) {
-				if (arrayObj.elements.length > 0) {
-					return arrayObj.elements[0];
+			var elts;
+			if (arrayObj.type === 'TypeApplication') {
+				if (arrayObj.expression.name === 'Array') {
+					elts = arrayObj.applications;
 				} else {
-					return THE_UNKNOWN_TYPE;
+					return arrayObj.expression;
 				}
+			} else if (arrayObj.type === 'ArrayType') {
+				elts = arrayObj.elements;
 			} else {
 				// not an array type
 				return arrayObj;
 			}
 
+			if (elts.length > 0) {
+				return elts[0];
+			} else {
+				return THE_UNKNOWN_TYPE;
+			}
 		},
 
 		extractReturnType : function(fnType) {
@@ -1549,12 +1557,12 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					var typeApp = {
 						type: jsdocType.type,
 						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1),
-						
+
 					};
 					if (jsdocType.applications) {
                         typeApp.applications = jsdocType.applications.map(function(elt) {
 							return self.convertJsDocType(elt, env, doCombine, depth+1);
-						});		    
+						});
 					}
 					return typeApp;
 
@@ -1587,7 +1595,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 								return;
 							}
 							var prop = origFields[key];
-							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name)) ? 
+							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name)) ?
 							     { type : 'NameExpression', name : JUST_DOTS } :
 							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);
 							newFields.push({
