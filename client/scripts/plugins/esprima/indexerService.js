@@ -24,7 +24,7 @@
  */
 define(["plugins/esprima/esprimaJsContentAssist", "servlets/jsdepend-client", "scripted/utils/storage", "when", "scriptedLogger"],
 function(mEsprimaContentAssist, jsdepend, storage, when, scriptedLogger) {
-	
+
 /**
  * Promise aware array iterator. Loops over elements of an array from left to right
  * applying the function to each element in the array. The function gets passed
@@ -39,7 +39,7 @@ function each(array, fun) {
 		null
 	);
 }
-	
+
 	// webworkers exist
 	var worker;
 	if ((this.window && this.window.Worker) && !this.window.isTest) {
@@ -67,7 +67,7 @@ function each(array, fun) {
 		}
 	}
 
-	
+
 	// for each file, there are 4 things put in local storage:
 	// <file-name>-deps : direct dependency list for file
 	// <file-name>-deps-ts : timestamp for dependency list  (not sure if this is necessary)
@@ -75,7 +75,7 @@ function each(array, fun) {
 	// <file-name>-summary-ts : timestamp for summary
 	// See https://issuetracker.springsource.com/browse/SCRIPTED-160 for a full description of
 	// what the dependencies look like
-	
+
 	// The dependencies is an associative array where each key is a path to a transitive dependency
 	// the values contain the module kind, and an associative array of references.
 	// Each reference has a kind, name, and path
@@ -122,7 +122,7 @@ function each(array, fun) {
 						var textStructure = JSON.stringify(structure);
 						var ts = generateTimeStamp();
 						statusFn("Persisting summary of " + file);
-						
+
 						persistFn(file + "-summary", textStructure);
 						persistFn(file + "-summary-ts", ts);
 						indexer.setTargetFile(oldFile);
@@ -142,7 +142,7 @@ function each(array, fun) {
 		}
 		return deferred.promise;
 	}
-	
+
 	/**
 	 * caches the dependencies for current file and its transitive dependencies
 	 */
@@ -154,7 +154,7 @@ function each(array, fun) {
 			}
 		}
 	}
-	
+
 	/**
 	 * checks the dependency list to see which summaries need updating.
 	 * TODO FIXADE : this is currently a stub method and always assumes that everything needs updating
@@ -176,9 +176,9 @@ function each(array, fun) {
 		}
 		return needsUpdating;
 	}
-	
-	
-	
+
+
+
 	// anything over 2 days old is considered stale
 	var twoDays = 1000 * 60 * 60 * 24 * 2;
 	function isStale(val, currentTime) {
@@ -201,7 +201,7 @@ function each(array, fun) {
 	 * @param statusFn is a function that accepts status messages
 	 */
 	function Indexer(persistFn, retrieveFn, statusFn) {
-	
+
 		if (!persistFn) {
 			persistFn = function(key, value) { storage.safeStore(key, value); };
 		}
@@ -212,7 +212,7 @@ function each(array, fun) {
 			statusFn = function(msg) { scriptedLogger.debug(msg, "INDEXER"); };
 		}
 
-		
+
 		// private instance variable
 		var indexTargetFile;
 
@@ -228,7 +228,7 @@ function each(array, fun) {
 			}
 			return JSON.parse(deps);
 		}
-		
+
 		/**
 		 * retrieves the summaries for all dependencies in the global scope
 		 */
@@ -242,7 +242,7 @@ function each(array, fun) {
 				return { };
 			}
 			deps = JSON.parse(deps);
-			
+
 			// for each dependency that is global, extract the summary
 			var summaries = [ ];
 			for (var prop in deps.refs) {
@@ -263,7 +263,7 @@ function each(array, fun) {
 			}
 			return summaries;
 		};
-		
+
 		/**
 		 * retrieves the summary with the given name if it exists, or null if it doesn't
 		 */
@@ -277,7 +277,7 @@ function each(array, fun) {
 				return null;
 			}
 			deps = JSON.parse(deps);
-			
+
 			var ref = deps.refs[name];
 			if (ref) {
 				var summary = retrieveFn(ref.path + "-summary");
@@ -294,15 +294,15 @@ function each(array, fun) {
 			}
 			return null;
 		};
-		
+
 		this.setTargetFile = function(targetFile){
 			indexTargetFile = targetFile;
 		};
-		
+
 		this.getTargetFile = function(){
 			return indexTargetFile;
 		};
-		
+
 		this.hasProblem = function(name) {
 			var deps = getDeps(name);
 			if (deps) {
@@ -311,7 +311,7 @@ function each(array, fun) {
 			}
 			return true;
 		};
-		
+
 		/**
 		 * looks for a dependency with the given module name
 		 * returns the path to that dependency
@@ -322,7 +322,7 @@ function each(array, fun) {
 				return deps.refs[name].path;
 			}
 		};
-	
+
 		/**
 		 * Two kinds of objects are worked with here:
 		 *    dependency = { path : { path to file }, name { module name }, kind : { global, AMD }, timestamp : long }
@@ -361,11 +361,11 @@ function each(array, fun) {
 					that._internalPerformIndex(fileName, callback);
 				}, 100);
 			}
-			
+
 			// since this function is being used as a syntax checker, must return an empty array
 			return [];
 		};
-		
+
 		/**
 		 * Does the actual indexing.  Will be performed by a webworker if the current browser supports them.
 		 * So, therefore must abstract away from localStorage and from calling the console
@@ -377,10 +377,10 @@ function each(array, fun) {
 			getDependencies(fileName, statusFn, function(deps) {
 				// cache these dependencies
 				cacheDeps(fileName, deps, persistFn);
-		
+
 				// for each dependency, check local storage to see if still valid
 				var needsUpdating = checkCache(deps, retrieveFn);
-				
+
 				each(needsUpdating, function(element) {
 					return createSummary(element, indexer, persistFn, statusFn);
 				}).then(function() {
@@ -391,7 +391,7 @@ function each(array, fun) {
 			});
 		};
 	}
-	
+
 	return {
 		Indexer : Indexer
 	};
