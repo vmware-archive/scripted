@@ -23,10 +23,20 @@ var jsonMerge = require('./jsdepend/json-merge');
 
 function start(filesystem, options) {
 
+//Default options for the 'localhost', commandline version of scripted.
+// Note: any options that need to be false by default don't need to be
+// added here since not setting them will already make them 'falsy'.
 var defaultOptions = {
-	applicationManager: true
+	applicationManager: true,
+	shutdownHook: true,
+	exec: true
 };
 options = jsonMerge(defaultOptions, options);
+if (options.help_text) {
+	if (Array.isArray(options.help_text)) {
+		options.help_text = options.help_text.join('\n');
+	}
+}
 
 var isCloudfoundry = (options && options.cloudfoundry);
 
@@ -39,9 +49,8 @@ var requestHandlers = require("./requestHandlers").configure(filesystem);
 //require("./servlets/hello");
 //require("./servlets/listFiles"); //Dead?
 require("./servlets/jsdepend-servlet").install(filesystem);
-if (!isCloudfoundry) {
-	require("./servlets/exec-servlet");
-}
+require("./servlets/exec-servlet").install(options);
+
 //require("./servlets/config-servlet");
 //these two wired up in server.
 //require("./servlets/kill");
