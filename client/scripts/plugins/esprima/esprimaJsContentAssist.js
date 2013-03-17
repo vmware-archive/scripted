@@ -2053,80 +2053,94 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		}
 	}
 
-	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
-
-		function visitTypeStructure(typeObj) {
-			if (typeof typeObj !== 'object') {
-				return;
-			}
-			switch (typeObj.type) {
-				case 'NullableLiteral':
-				case 'AllLiteral':
-				case 'NullLiteral':
-				case 'UndefinedLiteral':
-				case 'VoidLiteral':
-					// leaf nodes
-					return;
-
-				case 'NameExpression':
-					alreadySeen[typeObj.name] = true;
-					return;
-
-				case 'ArrayType':
-					visitTypeStructure(typeObj.expression);
-					// fall-through
-				case 'UnionType':
-					if (typeObj.elements) {
-						typeObj.elements.forEach(visitTypeStructure);
-					}
-					return;
-
-				case 'RecordType':
-					if (typeObj.fields) {
-						typeObj.fields.forEach(visitTypeStructure);
-					}
-					return;
-
-				case 'FieldType':
-					visitTypeStructure(typeObj.expression);
-					return;
-
-				case 'FunctionType':
-					// do we need to check for serialized functions???
-					visitTypeStructure(typeObj.result);
-					if (typeObj.params) {
-						typeObj.params.forEach(visitTypeStructure);
-					}
-					return;
-
-				case 'ParameterType':
-					visitTypeStructure(typeObj.expression);
-					return;
-
-				case 'TypeApplication':
-					if (typeObj.applications) {
-						typeObj.applications.forEach(visitTypeStructure);
-					}
-
-					// fall-throudh
-				case 'RestType':
-				case 'NonNullableType':
-				case 'OptionalType':
-				case 'NullableType':
-					visitTypeStructure(typeObj.expression);
-					return;
-
-
-			}
+	function visitTypeStructure(typeObj, allTypes, alreadySeen) {
+		if (typeof typeObj !== 'object') {
+			return;
 		}
+		switch (typeObj.type) {
+			case 'NullableLiteral':
+			case 'AllLiteral':
+			case 'NullLiteral':
+			case 'UndefinedLiteral':
+			case 'VoidLiteral':
+				// leaf nodes
+				return;
 
+			case 'NameExpression':
+				if (alreadySeen[typeObj.name]) {
+					// prevent infinite recursion for circular refs
+					return;
+				}
+				alreadySeen[typeObj.name] = true;
+				findUnreachable(typeObj.name, allTypes, alreadySeen);
+				return;
+
+			case 'ArrayType':
+				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				// fall-through
+			case 'UnionType':
+				if (typeObj.elements) {
+					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+				}
+				return;
+
+			case 'RecordType':
+				if (typeObj.fields) {
+					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+				}
+				return;
+
+			case 'FieldType':
+				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				return;
+
+			case 'FunctionType':
+				// do we need to check for serialized functions???
+				if (typeObj.params) {
+					typeObj.params.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+				}
+				if (typeObj.result) {
+					visitTypeStructure(typeObj.result, allTypes, alreadySeen);
+				}
+				if (typeObj['this']) {
+					visitTypeStructure(typeObj['this'], allTypes, alreadySeen);
+				}
+				if (typeObj['new']) {
+					visitTypeStructure(typeObj['new'], allTypes, alreadySeen);
+				}
+				return;
+
+			case 'ParameterType':
+				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				return;
+
+			case 'TypeApplication':
+				if (typeObj.applications) {
+					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+				}
+
+				// fall-throudh
+			case 'RestType':
+			case 'NonNullableType':
+			case 'OptionalType':
+			case 'NullableType':
+				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				return;
+
+
+		}
+	}
+
+	// finds unreachable types from the given type name
+	// and marks them as already seen
+	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
 		var currentType = allTypes[currentTypeName];
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
 					var propType = currentType[prop].typeObj;
 					// must visit the type strucutre
-					visitTypeStructure(propType);
+					visitTypeStructure(propType, allTypes, alreadySeen);
 				}
 			}
 		}
@@ -2135,48 +2149,19 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	/**
 	 * filters types from the environment that should not be exported
 	 */
-	function filterTypes(environment, kind, moduleTypeName, provided) {
+	function filterTypes(environment, kind, moduleTypeName, moduleTypeObj, provided) {
 		var allTypes = environment.getAllTypes();
 		if (kind === "global") {
 			// for global dependencies must keep the global scope, but remove all builtin global variables
-			allTypes.clearDefaultGlobal();
 		} else {
-			delete allTypes[environment.globalTypeName()];
 		}
+		allTypes.clearDefaultGlobal();
+//		delete allTypes[environment.globalTypeName()];
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
-		// if we have a function, then the function return type and its prototype are reachable
-		// also do same if parameterized array type
-		// in the module, so add them
-		if (mTypes.isFunctionOrConstructor(moduleTypeName) || mTypes.isArrayType(moduleTypeName)) {
-			var retType = moduleTypeName;
-			while (mTypes.isFunctionOrConstructor(retType) || mTypes.isArrayType(retType)) {
-				if (mTypes.isFunctionOrConstructor(retType)) {
-					retType = mTypes.removeParameters(retType);
-					reachable[retType] = true;
-					var constrType;
-					if (retType.charAt(0) === "?") {
-						// this is a function, not a constructor, but we also
-						// need to expose the constructor if one exists.
-						constrType = "*" + retType.substring(1);
-						reachable[constrType] = true;
-					} else {
-						constrType = retType;
-					}
-					// don't strictly need this if the protoype of the object has been changed, but OK to keep
-					reachable[constrType + "~proto"] = true;
-					retType = mTypes.extractReturnType(retType);
-				} else if (mTypes.isArrayType(retType)) {
-					retType = mTypes.extractArrayParameterType(retType);
-					if (retType) {
-						reachable[retType] = true;
-					} else {
-						retType = "Object";
-					}
-				}
-			}
-			reachable[retType] = true;
+		if (moduleTypeObj.type !== "NameExpression") {
+			visitTypeStructure(moduleTypeObj, allTypes, reachable);
 		}
 
 		findUnreachable(moduleTypeName, allTypes, reachable);
@@ -2185,7 +2170,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				delete allTypes[prop];
 			}
 		}
-		
+
 		// now reformat the types so that they are combined and serialized
 		Object.keys(allTypes).forEach(function(typeName) {
 		    var type = allTypes[typeName];
@@ -2197,7 +2182,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 			}
 		});
-		
+
 		if (typeof provided === 'object') {
 			for (var defName in provided) {
 				if (provided.hasOwnProperty(defName)) {
@@ -2556,7 +2541,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			var allTypes = environment.getAllTypes();
 
 			// now filter the builtins since they are always available
-			filterTypes(environment, kind, modTypeName, providedType);
+			filterTypes(environment, kind, modTypeName, modTypeObj, providedType);
 
 			return {
 				provided : providedType,
