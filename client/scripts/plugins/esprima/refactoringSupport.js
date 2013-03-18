@@ -55,28 +55,46 @@ define(function (require) {
 				if (parent.type === 'MemberExpression') {
 					return node === parent.object;
 				}
-				return parent.type === 'CallExpression' ||
-						parent.type === 'ArrayExpression' ||
-						parent.type === 'AssignmentExpression' ||
-						parent.type === 'VariableDeclaration' ||
-						parent.type === 'ExpressionStatement' ||
-						parent.type === 'FunctionExpression' ||
-						parent.type === 'NewExpression' ||
-						parent.type === 'VariableDeclarator' ||
-						parent.type === 'IfStatement' ||
-						parent.type === 'WhileStatement' ||
-						parent.type === 'DoWhileStatement' ||
-						parent.type === 'FunctionExpression' ||
-						parent.type === 'FunctionDeclaration' ||
-						parent.type === 'ForInStatement' ||
-						parent.type === 'ForStatement' ||
-						parent.type === 'CatchClause' ||
-						parent.type === 'TryStatement' ||
-						parent.type === 'BlockStatement' ||
-						parent.type === 'SwitchStatement' ||
-						parent.type === 'SwitchCase' ||
-						parent.type === 'Program' ||
-						parent.type === 'ReturnStatement';
+
+				switch(parent.type) {
+					case 'ArrayExpression':
+					case 'AssignmentExpression':
+					case 'BinaryExpression':
+					case 'BlockStatement':
+					case 'CallExpression':
+					case 'CatchClause':
+					case 'ConditionalExpression':
+					case 'DoWhileStatement':
+					case 'ExpressionStatement':
+					case 'ForInStatement':
+					case 'ForStatement':
+					case 'FunctionDeclaration':
+					case 'FunctionExpression':
+					case 'IfStatement':
+					case 'LogicalExpression':
+					case 'NewExpression':
+					case 'Program':
+					case 'ReturnStatement':
+					case 'SwitchCase':
+					case 'SwitchStatement':
+					case 'ThrowStatemen':
+					case 'TryStatement':
+					case 'UnaryExpression':
+					case 'UpdateExpression':
+					case 'VariableDeclaration':
+					case 'VariableDeclarator':
+					case 'WhileStatement':
+					case 'WithStatement':
+						return true;
+
+					case 'BreakStatement':
+					case 'Identifier':
+					case 'LabeledStatement':
+					case 'Literal':
+						return false;
+					default: // in case there's anythign I missed
+						console.warning("Unhandled expression type in refactoring: " + parent.type);
+				}
 			}
 
 			visitor.visit(root, null, function(node, context) {
