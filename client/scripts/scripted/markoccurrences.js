@@ -120,12 +120,13 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		this.interval = 500; // inteval between caret changes and mark occurrence changes
 		this.disable = false; // set to true if mark occurrences should be disabled
 		this.retain = false;  // set to true if marks should be retained after caret moves away
-
+		this.isActive = true;
 		this.initOptions();
 	}
 	SelectionMatcher.prototype = {
 		install : function(editor) {
 			this.editor = editor;
+			this.isActive = true;
 			editor.getTextView().addEventListener("Selection", this);
 		},
 		initOptions : function() {
@@ -141,6 +142,23 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					this.retain = opts.retain;
 				}
 			}
+		},
+
+		deactivate: function() {
+			this.isActive=false;
+			var annotationModel = this.editor.getAnnotationModel();
+			annotationModel.removeAnnotations(ANNOTATION_TYPE);
+		},
+
+		activate: function() {
+			this.isActive=true;
+			var self = this;
+			currentRequest = setTimeout(function() {
+				var sel = self.editor.getSelection();
+				if (sel) {
+					self.markOccurrences(sel.start,sel.end);
+				}
+			}, this.interval);
 		},
 
 		// TODO not used
@@ -176,6 +194,9 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		},
 
 		markOccurrences : function(selstart, selend) {
+			if (!this.isActive) {
+				return;
+			}
 			/** @type AnnotationModel*/
 			var annotationModel = this.editor.getAnnotationModel();
 

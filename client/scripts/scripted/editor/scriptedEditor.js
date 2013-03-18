@@ -956,8 +956,8 @@ define([
 			}
 		}
 
-		// TODO should we persist the instance of mark occurrences?
-		new mMarkoccurrences.SelectionMatcher().install(editor);
+		editor.selectionMatcher = new mMarkoccurrences.SelectionMatcher();
+		editor.selectionMatcher.install(editor);
 
 		editor.type = editorType;
 
