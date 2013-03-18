@@ -138,7 +138,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 			var argName = param.name || 'arg' + p;
 			if (rest) {
-				argName += '...';
+				argName = '...' + argName;
 			}
 			if (optional) {
 				argName = '[' + argName + ']';
@@ -512,7 +512,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						env.popScope();
 					}
 					env.mergeSummary(summary, mergeTypeName);
-					return typeName;
+					return mTypes.ensureTypeObject(typeName);
 				}
 			}
 		}
@@ -1563,7 +1563,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * @return {boolean} true iff this is an internally generated name
 			 */
 			isSyntheticName: function(name) {
-				return name.substr(0, namePrefix.length) === namePrefix;
+				return name.substr(0, mTypes.GEN_NAME.length) === mTypes.GEN_NAME;
 			},
 
 			/**
@@ -1674,6 +1674,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							return inferredTypeObj['new'].name;
 						}
 						return "Function";
+					} else if (inferredTypeObj.type === 'ArrayType') {
+						return "Array";
 					}
 				} else {
 					// grab topmost scope
@@ -1855,11 +1857,24 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * @param String targetTypeName
 			 */
 			mergeSummary : function(summary, targetTypeName) {
-
+				var defn, existingDefn, property;
 				// add the extra types that don't already exists
-				for (var type in summary.types) {
-					if (summary.types.hasOwnProperty(type) && !this._allTypes[type]) {
-						this._allTypes[type] = summary.types[type];
+				for (var typeName in summary.types) {
+					if (summary.types.hasOwnProperty(typeName)) {
+						// create type if doesn't already exist, othewise merge
+						var type = this._allTypes[typeName];
+						var existingType = summary.types[typeName];
+						if (!type) {
+							type = this._allTypes[typeName] = {};
+						}
+
+						// for each property defined in the type from the sumamry,
+						// also add it to the current module's type
+						for (var typeProp in existingType) {
+							if (!type[typeProp]) {
+								type[typeProp] = mTypes.Definition.revive(existingType[typeProp]);
+							}
+						}
 					}
 				}
 
@@ -1870,9 +1885,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// TODO summary.provided mightbe a RecordType
 					for (var providedProperty in summary.provided) {
 						if (summary.provided.hasOwnProperty(providedProperty)) {
+							// copy over the summary into the type den
 							// the targetType may already have the providedProperty defined
 							// but should override
-							targetType[providedProperty] = summary.provided[providedProperty];
+							targetType[providedProperty] = mTypes.Definition.revive(summary.provided[providedProperty]);
 						}
 					}
 				}
@@ -2151,12 +2167,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 */
 	function filterTypes(environment, kind, moduleTypeName, moduleTypeObj, provided) {
 		var allTypes = environment.getAllTypes();
-		if (kind === "global") {
-			// for global dependencies must keep the global scope, but remove all builtin global variables
-		} else {
-		}
 		allTypes.clearDefaultGlobal();
-//		delete allTypes[environment.globalTypeName()];
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };

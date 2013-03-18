@@ -281,7 +281,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"    return Car;\n" +
 			"});",
 			"define(['car'], function(Car) { var c = new Car('ford'); c.show(); });",
-			'show', "?undefined:", 'show : () ⇒ undefined');
+			'show', "function():undefined", 'show : function():undefined');
 	};
 
 	//////////////////////////////////////////////////////////
@@ -368,7 +368,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"	function a() {\n" +
 			"		aa();\n" +
 			"	}\n" +
-			"}", "aa", "?undefined:", "aa : () ⇒ undefined", 1);
+			"}", "aa", "function():undefined", "aa : function():undefined", 1);
 	};
 
 	tests.testFullFile7 = function() {
@@ -377,7 +377,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"		aa();\n" +
 			"	}\n" +
 			"	function aa() {	}\n" +
-			"}", "aa", "?undefined:", "aa : () ⇒ undefined", 2);
+			"}", "aa", "function():undefined", "aa : function():undefined", 2);
 	};
 
 	tests.testFullFile8 = function() {
@@ -408,17 +408,17 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testArray2 = function() {
 		doSameFileTest(
 			"var other = [1]\n;" +
-			"other", "other", "Array.<Number>", "other : Number[]", 1);
+			"other", "other", "[Number]", "other : [Number]", 1);
 	};
 	tests.testArray3 = function() {
 		doSameFileTest(
 			"var other = [[1]]\n;" +
-			"other", "other", "Array.<Array.<Number>>", "other : Number[][]", 1);
+			"other", "other", "[[Number]]", "other : [[Number]]", 1);
 	};
 	tests.testArray4 = function() {
 		doSameFileTest(
 			"var first = [[1]]\n;" +
-			"var other = first[0]", "other", "Array.<Number>", "other : Number[]", 1);
+			"var other = first[0]", "other", "[Number]", "other : [Number]", 1);
 	};
 	tests.testArray5 = function() {
 		doSameFileTest(
@@ -473,7 +473,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"exports.x = function() {};";
 		doMultiFileTest(
 			"a", otherContents, "require('a').x", "x",
-			"?undefined:", "x : () ⇒ undefined", 2, false,
+			"function():undefined", "x : function():undefined", 2, false,
 			[otherContents.indexOf("/**"), otherContents.indexOf("*/")+2]);
 	};
 
@@ -495,7 +495,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function parseFile(path) { }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "parseFile", "?String:path/String", "parseFile : (path:String) ⇒ String", 1,
+			contents, "parseFile", "function(path:String):String", "parseFile : function(path:String):String", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -507,7 +507,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function parseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "parseFile", "?String:path/gen~local~1", "parseFile : (path:{ foo:Number, bar:String, sumpin:String }) ⇒ String", 1,
+			contents, "parseFile", "function(path:gen~local~1):String", "parseFile : function(path:{foo:Number,bar:String,sumpin:String}):String", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -518,7 +518,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function ParseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "ParseFile", "*ParseFile:path/gen~local~2", "ParseFile : new(path:{ foo:Number, bar:String, sumpin:String }) ⇒ ParseFile", 1,
+			contents, "ParseFile", "function(path:gen~local~2,new:ParseFile):ParseFile", "ParseFile : function(path:{foo:Number,bar:String,sumpin:String},new:ParseFile):ParseFile", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -529,7 +529,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function parseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "parseFile", "?undefined:path/gen~local~1", "parseFile : (path:{ foo:Number, bar:(a, b) ⇒ String, sumpin:String }) ⇒ undefined", 1,
+			contents, "parseFile", "function(path:gen~local~1):undefined", "parseFile : function(path:{foo:Number,bar:function(Object,Object):String,sumpin:String}):undefined", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -539,8 +539,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		doSameFileTest(
 		contents,
 		"addSaveTransform",
-		"?undefined:transformFun/?String:text/String,path/String,configuration/?Object:foo/String",
-		"addSaveTransform : (transformFun:(text:String) ⇒ String, path:String, configuration:(foo:String) ⇒ Object) ⇒ undefined", 1,
+
+		"function(transformFun:function(text:String,path:String,configuration:function(foo:String):Object):?String):undefined",
+		"addSaveTransform : function(transformFun:function(text:String,path:String,configuration:function(foo:String):Object):?String):undefined", 1,
 		[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -558,7 +559,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function a() {}";
 		doSameFileTest(
 			contents, "getContent",
-			"?String:","getContent : () ⇒ String", 0,
+			"function():String","getContent : function():String", 0,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -577,7 +578,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function a() {}";
 		doSameFileTest(
 			contents, "getContent",
-			"?String:","getContent : () ⇒ String", 0,
+			"function():String","getContent : function():String", 0,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -606,7 +607,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function a() {}";
 		doSameFileTest(
 			contents, "getContent",
-			"?String:","getContent : () ⇒ String", 0,
+			"function():String","getContent : function():String", 0,
 			[contents.indexOf("/**", contents.indexOf("before")), contents.indexOf("*/", contents.indexOf("before"))+2]);
 	};
 	tests.testFullFileJSDoc4 = function() {
@@ -630,7 +631,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function a() {}";
 		doSameFileTest(
 			contents, "getContent",
-			"?String:","getContent : () ⇒ String", 0,
+			"function():String","getContent : function():String", 0,
 			[contents.indexOf("/**", contents.indexOf("before")), contents.indexOf("*/", contents.indexOf("before"))+2]);
 	};
 	return tests;
