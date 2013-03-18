@@ -10,14 +10,14 @@
  * Contributors:
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
- 
+
 // Tests that the indexing service properly adds and retrieves indexed files.
 // must use a stubbed out server
 
 /*global define window console setTimeout */
-define(["plugins/esprima/indexerService", "servlets/jsdepend-client", "orion/assert"], 
+define(["plugins/esprima/indexerService", "servlets/jsdepend-client", "orion/assert"],
 function(mIndexer, jsdependsStub, assert) {
-	var sampleData1 = 
+	var sampleData1 =
 			{ "utils.js": {
 				"kind": "commonjs",
 				"path": "utils.js",
@@ -51,14 +51,14 @@ function(mIndexer, jsdependsStub, assert) {
 				}
 			}
 		};
-				
-		
+
+
 	var sampleContents1 = {
 			"utils.js" : "exports.foo = 9;",
 			"sub/other.js" : "exports.bar = 9; exports.foo2 = require('../utils');",
 			"main.js" : "require('./utils').foo++; require('sub/other').foo2.foo++;"
 	};
-	
+
 	var sampleSummaries1 = {
 		"utils.js": {
 			"kind": "commonjs",
@@ -66,14 +66,14 @@ function(mIndexer, jsdependsStub, assert) {
 			"provided": {
 				"$$proto": {
 					"path": "utils.js",
-					"typeName": "Object"
+					"typeSig": "Object"
 				},
 				"foo": {
 					"path": "utils.js",
 					"range": [
 					8,
 					11],
-					"typeName": "Number"
+					"typeSig": "Number"
 				}
 			},
 			"types": {}
@@ -85,35 +85,35 @@ function(mIndexer, jsdependsStub, assert) {
 			"provided": {
 				"$$proto": {
 					"path": "sub/other.js",
-					"typeName": "Object"
+					"typeSig": "Object"
 				},
 				"bar": {
 					"path": "sub/other.js",
 					"range": [
 					8,
 					11],
-					"typeName": "Number"
+					"typeSig": "Number"
 				},
 				"foo2": {
 					"path": "sub/other.js",
 					"range": [
 					25,
 					29],
-					"typeName": "gen~sub/other.js~4"
+					"typeSig": "gen~sub/other.js~4"
 				}
 			},
 			"types": {
 				"gen~sub/other.js~4": {
 					"$$proto": {
 						"path": "utils.js",
-						"typeName": "Object"
+						"typeSig": "Object"
 					},
 					"foo": {
 						"path": "utils.js",
 						"range": [
 						8,
 						11],
-						"typeName": "Number"
+						"typeSig": "Number"
 					}
 				}
 			}
@@ -123,13 +123,13 @@ function(mIndexer, jsdependsStub, assert) {
 	function toCompareString(obj) {
 		return JSON.stringify(obj, null, '  ');
 	}
-	
+
 	var persistedData = {};
 	var persistFn = function(key, value) { persistedData[key] = value; };
 	var retrieveFn = function(key) { return persistedData[key]; };
 	var statusFn = function(msg) { console.log(msg); };
 	var indexer = new mIndexer.Indexer(persistFn, retrieveFn, statusFn);
-	// TODO FIXADE not tested yet: retrieveGlobalSummaries  
+	// TODO FIXADE not tested yet: retrieveGlobalSummaries
 
 	var setUp = function() {
 		persistedData = {};
@@ -139,29 +139,29 @@ function(mIndexer, jsdependsStub, assert) {
 	};
 
 	var tests = {};
-	
+
 	tests.asyncTestPerformIndex1 = function() {
 		setUp();
 		indexer.performIndex("main.js", function() {
 			// check that the proper things are persisted
 			for (var file in sampleContents1) {
 				if (sampleContents1.hasOwnProperty(file)) {
-					assert.ok(persistedData[file + "-summary"], 
+					assert.ok(persistedData[file + "-summary"],
 						"Expected a summary of " + file + ", instead found:\n" + toCompareString(persistedData));
-					assert.ok(persistedData[file + "-summary-ts"], 
+					assert.ok(persistedData[file + "-summary-ts"],
 						"Expected a timestamp for summary of " + file + ", instead found:\n" + toCompareString(persistedData));
-					assert.ok(persistedData[file + "-deps"], 
+					assert.ok(persistedData[file + "-deps"],
 						"Expected a dependency list for " + file + ", instead found:\n" + toCompareString(persistedData));
-					assert.deepEqual(JSON.parse(persistedData[file + "-deps"]), sampleData1[file], 
+					assert.deepEqual(sampleData1[file], JSON.parse(persistedData[file + "-deps"]),
 						"Persisted dependency doesn't match provided");
-					assert.ok(persistedData[file + "-deps-ts"], 
+					assert.ok(persistedData[file + "-deps-ts"],
 						"Expected a timestamp for the dependency list of " + file + ", instead found:\n" + toCompareString(persistedData));
 				}
 			}
 			assert.start();
 		});
 	};
-	
+
 	tests.asyncTestHasDependency1 = function() {
 		setUp();
 		indexer.performIndex("main.js", function() {
@@ -180,7 +180,7 @@ function(mIndexer, jsdependsStub, assert) {
 			assert.start();
 		});
 	};
-	
+
 	tests.asyncTestRetrieveSummary1 = function() {
 		setUp();
 		indexer.performIndex("main.js", function() {
@@ -202,6 +202,6 @@ function(mIndexer, jsdependsStub, assert) {
 			assert.start();
 		});
 	};
-	
+
 	return tests;
 });
