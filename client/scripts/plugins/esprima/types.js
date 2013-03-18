@@ -25,6 +25,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 	 * Doctrine closure compiler style type objects
 	 */
 	function ensureTypeObject(signature) {
+		if (!signature) {
+			return signature;
+		}
 		if (signature.type) {
 			return signature;
 		}
@@ -79,6 +82,23 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		get typeObj() {
 			return this._typeObj;
 		}
+	};
+
+	/**
+	 * Revivies a Definition object from a regular object
+	 */
+	Definition.revive = function(obj) {
+		var defn = new Definition();
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				if (prop === 'typeSig') {
+					defn.typeObj = obj[prop];
+				} else {
+					defn[prop] = obj[prop];
+				}
+			}
+		}
+		return defn;
 	};
 
 	// From ecma script manual 262 section 15
@@ -394,8 +414,8 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			$$isBuiltin: true,
 			apply : new Definition("function(func:function(),argArray:Array=):Object"),
 			"arguments" : new Definition("Arguments"),
-			bind : new Definition("function(func:function(),args:Object...):Object"),
-			call : new Definition("function(func:function(),args:Object...):Object"),
+			bind : new Definition("function(func:function(),...args:Object):Object"),
+			call : new Definition("function(func:function(),...args:Object):Object"),
 			caller : new Definition("Function"),
 			length : new Definition("Number"),
 			name : new Definition("String"),
@@ -408,17 +428,17 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		Array : {
 			$$isBuiltin: true,
 
-			concat : new Definition("function(first:Array,rest:Array...):Array"),
+			concat : new Definition("function(first:Array,...rest:Array):Array"),
 			join : new Definition("function(separator:Object):String"),
 			length : new Definition("Number"),
 			pop : new Definition("function():Object"),
-			push : new Definition("function(vals:Object...):Object"),
+			push : new Definition("function(...vals:Object):Object"),
 			reverse : new Definition("function():Array"),
 			shift : new Definition("function():Object"),
-			slice : new Definition("function(start:Number,deleteCount:Number,items:Object...):Array"),
+			slice : new Definition("function(start:Number,deleteCount:Number,...items:Object):Array"),
 			splice : new Definition("function(start:Number,end:Number):Array"),
 			sort : new Definition("function(sorter:Object=):Array"),
-			unshift : new Definition("function(items:Object...):Number"),
+			unshift : new Definition("function(...items:Object):Number"),
 			indexOf : new Definition("function(searchElement,fromIndex=):Number"),
 			lastIndexOf : new Definition("function(searchElement,fromIndex=):Number"),
 			every : new Definition("function(callbackFn:function(elt:Object),thisArg:Object=):Boolean"),
@@ -1131,11 +1151,11 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			getElementsByTagNameNS : new Definition("function(namespace:String,localName:String):HTMLCollection"),
 			getElementsByClassName : new Definition("function(classname:String):HTMLCollection"),
 
-			prepend : new Definition("function(nodes:Node...)"),
-			append : new Definition("function(nodes:Node...)"),
-			before : new Definition("function(nodes:Node...)"),
-			after : new Definition("function(nodes:Node...)"),
-			replace : new Definition("function(nodes:Node...)"),
+			prepend : new Definition("function(...nodes:Node)"),
+			append : new Definition("function(...nodes:Node)"),
+			before : new Definition("function(...nodes:Node)"),
+			after : new Definition("function(...nodes:Node)"),
+			replace : new Definition("function(...nodes:Node)"),
 			remove : new Definition("function()")
 		},
 
@@ -1276,8 +1296,8 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
 
-			prepend : new Definition("function(nodes:Node...)"),
-			append : new Definition("function(nodes:Node...)")
+			prepend : new Definition("function(...nodes:Node)"),
+			append : new Definition("function(...nodes:Node)")
 		},
 
 		// incomplete
@@ -1729,6 +1749,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			if (useFunctionSig) {
 				typeObj = this.convertJsDocType(typeObj, env, true);
 				var res = doctrine.stringify(typeObj);
+				// TODO g flag doesn't work on chrome and webkit
 				res = res.replace(JUST_DOTS, "{...}", 'g');
 				return res;
 			} else {
@@ -1815,7 +1836,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				return this.styleAsType(typeName, useHtml);
 			}
 		},
-
+		ensureTypeObject: ensureTypeObject,
 		OBJECT_TYPE: THE_UNKNOWN_TYPE,
 		UNDEFINED_TYPE: createNameType("undefined"),
 		NUMBER_TYPE: createNameType("Number"),
