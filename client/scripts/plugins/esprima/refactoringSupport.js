@@ -19,7 +19,7 @@
 define(function (require) {
 
 	var visitor = require('plugins/esprima/esprimaVisitor');
-	var findSelectedWord = require('scripted/markOccurrences').findSelectedWord;
+	var findSelectedWord = require('scripted/markoccurrences').findSelectedWord;
 
 
 	function inRange(range, offset) {
