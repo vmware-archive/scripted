@@ -1500,6 +1500,11 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			// check that here
 			return !type.hasOwnProperty(prop);
 		}
+		if (Object.prototype.hasOwnProperty(prop)) {
+			// this is one of the synthetic properties like __defineGetter__
+			// should be ignored, unless already exists in property
+			return type.hasOwnProperty(prop);
+		}
 		return true;
 	}
 
