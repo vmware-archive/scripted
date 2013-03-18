@@ -15,7 +15,9 @@ function(keyBinding, markoccurrences, refactoringSupport, annotationManager, ori
 		var self = this;
 
 		this._editor.pushKeyMode(this._inlineRenameRefactoringMode);
-		this._textView.setKeyBinding(new keyBinding.KeyBinding('r', false, true, false, true), "rename");
+		// was:
+		// this._textView.setKeyBinding(new keyBinding.KeyBinding('r', false, true, false, true), "rename");
+		this._textView.setKeyBinding(new keyBinding.KeyBinding('r', false, true, true, false), "rename"); // Shift+Alt+R
 		this._textView.setAction("rename", function() {
 			self.activate();
 			return true;
