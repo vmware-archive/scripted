@@ -1711,7 +1711,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * @param {Array.<Number>} docRange
 			 */
 			addVariable : function(name, target, typeObj, range, docRange) {
-				if (this._allTypes.Object["$_$" + name]) {
+				if (name === 'prototype' || name === '__proto__') {
+					name = '$$proto';
+				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
 					return;
 				}
@@ -1746,7 +1748,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * Will not override an existing variable if the new typeName is "Object" or "undefined"
 			 */
 			addOrSetVariable : function(name, target, typeObj, range, docRange) {
-				if (name === 'prototype') {
+				if (name === 'prototype' || name === '__proto__') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
@@ -1809,6 +1811,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				var swapper = function(name) {
 					switch (name) {
 						case "prototype":
+						case "__proto__":
 							return "$$proto";
 						case "toString":
 						case "hasOwnProperty":
