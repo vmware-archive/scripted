@@ -50,6 +50,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 	var THE_UNKNOWN_TYPE = createNameType("Object");
 
 	var JUST_DOTS = '$$__JUST_DOTS__$$';
+	var JUST_DOTS_REGEX = /\$\$__JUST_DOTS__\$\$/g;
+	var UNDEFINED_OR_EMPTY_OBJ = /:undefined|:\{\}/g;
+
 
 	/**
 	 * The Definition class refers to the declaration of an identifier.
@@ -1732,13 +1735,13 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 
 		// type styling
 		styleAsProperty : function(prop, useHtml) {
-			return useHtml ? "<span style=\"color: blue;font-weight:bold;\">" + prop + "</span>": prop;
+			return useHtml ? '<span style="color: blue;font-weight:bold;">' + prop + '</span>': prop;
 		},
 		styleAsType : function(type, useHtml) {
-			return useHtml ? "<span style=\"color: green;font-weight:bold;\">" + type + "</span>": type;
+			return useHtml ? '<span style="color: black;">' + type + '</span>': type;
 		},
 		styleAsOther : function(text, useHtml) {
-			return useHtml ? "<span style=\"font-style:italic;\">" + text + "</span>": text;
+			return useHtml ? '<span style="font-weight:bold; color:purple;">' + text + '</span>': text;
 		},
 
 
@@ -1748,93 +1751,144 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		createReadableType : function(typeObj, env, useFunctionSig, depth, useHtml) {
 			if (useFunctionSig) {
 				typeObj = this.convertJsDocType(typeObj, env, true);
+				if (useHtml) {
+					return this.convertToHtml(typeObj, env, 0);
+				}
 				var res = doctrine.stringify(typeObj);
-				// TODO g flag doesn't work on chrome and webkit
-				res = res.replace(JUST_DOTS, "{...}", 'g');
+				res = res.replace(JUST_DOTS_REGEX, "{...}");
+				res = res.replace(UNDEFINED_OR_EMPTY_OBJ, "");
 				return res;
 			} else {
 				typeObj = this.extractReturnType(typeObj);
 				return this.createReadableType(typeObj, env, true, depth, useHtml);
 			}
 		},
-		/**
-		 * creates a human readable type name from the name given
-		 */
-		createReadableTypeOLD : function(typeName, env, useFunctionSig, depth, useHtml) {
-			depth = depth || 0;
-			var first = typeName.charAt(0);
-			if (first === "?" || first === "*") {
-				// a function
-				var returnEnd = this.findReturnTypeEnd(typeName);
-				if (returnEnd === -1) {
-					returnEnd = typeName.length;
-				}
-				var funType = typeName.substring(1, returnEnd);
-				if (useFunctionSig) {
-					// convert into a function signature
-					var prefix = first === "?" ? "" : "new";
-					var args = typeName.substring(returnEnd+1, typeName.length);
-					var argsSigs = [];
-					var self = this;
-					args.split(",").forEach(function(arg) {
-						var typeSplit = arg.indexOf("/");
-						var argName = typeSplit > 0 ? arg.substring(0, typeSplit) : arg;
-						argName = self.styleAsProperty(argName, useHtml);
-						var argSig = typeSplit > 0 ? arg.substring(typeSplit + 1) : "";
+		convertToHtml : function(typeObj) {
+			// typeObj must already be converted to avoid infinite loops
+//			typeObj = this.convertJsDocType(typeObj, env, true);
+			var self = this;
+			var res;
+			var parts = [];
 
-						if (argSig) {
-							var sig = self.createReadableType(argSig, env, true, depth+1, useHtml);
-							if (sig === "{  }") {
-								argsSigs.push(argName);
-							} else {
-								argsSigs.push(argName + ":" + sig);
-							}
-						} else {
-							argsSigs.push(argName);
-						}
-					});
+			switch(typeObj.type) {
+				case 'NullableLiteral':
+					return this.styleAsType("?", true);
+				case 'AllLiteral':
+					return this.styleAsType("*", true);
+				case 'NullLiteral':
+					return this.styleAsType("null", true);
+				case 'UndefinedLiteral':
+					return this.styleAsType("undefined", true);
+				case 'VoidLiteral':
+					return this.styleAsType("void", true);
 
-					// note the use of the ⇒ &rArr; char here.  Must use the char directly since js_render will format it otherwise
-					return prefix + "(" + argsSigs.join(", ") +
-						(useHtml ? ")<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;", depth+1) + "⇒ " : ") ⇒ ") +
-						this.createReadableType(funType, env, true, depth + 1, useHtml);
-				} else {
-					// use the return type
-					return this.createReadableType(funType, env, true, depth, useHtml);
-				}
-			} else if (typeName.indexOf(this.GEN_NAME) === 0) {
-				// a generated object
-				if (depth > 1) {
-					// don't show inner types
-					return this.styleAsOther("{...}", useHtml);
-				}
+				case 'NameExpression':
+					var name = typeObj.name === JUST_DOTS ? "{...}" : typeObj.name;
+					return this.styleAsType(name, true);
 
-				// create a summary
-				var type = env.findType(typeName);
-				var res = "{ ";
-				var props = [];
-				for (var val in type) {
-					if (type.hasOwnProperty(val) && val !== "$$proto") {
-						var name;
-						// don't show inner objects
-						name = this.createReadableType(type[val].typeObj, env, true, depth + 1, useHtml);
-						props.push((useHtml ? "<br/>" + proposalUtils.repeatChar("&nbsp;&nbsp;&nbsp;&nbsp;", depth+1) : "" ) +
-							this.styleAsProperty(val, useHtml) + ":" + name);
+				case 'UnionType':
+					parts = [];
+					if (typeObj.expressions) {
+						typeObj.expressions.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt));
+						});
 					}
-				}
-				res += props.join(", ");
-				return res + " }";
-			} else if (this.isArrayType(typeName)) {
-				var typeParameter = this.extractArrayParameterType(typeName);
-				if (typeParameter !== "Object") {
-					typeName = this.createReadableType(typeParameter, env, true, depth+1, useHtml) + "[]";
-				} else {
-					typeName = "[]";
-				}
-				return typeName;
-			} else {
-				return this.styleAsType(typeName, useHtml);
+					return "( " + parts.join(", ") + " )";
+
+
+
+				case 'TypeApplication':
+					if (typeObj.applications) {
+						typeObj.applications.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt));
+						});
+					}
+					var isArray = typeObj.expression.name === 'Array';
+					if (!isArray) {
+						res = this.convertToHtml(typeObj.expression) + ".<";
+					}
+					res += parts.join(",");
+					if (isArray) {
+						res += '[]';
+					} else {
+						res += ">";
+					}
+					return res;
+				case 'ArrayExpressopm':
+					if (typeObj.applications) {
+						typeObj.applications.forEach(function(elt) {
+							parts.push(self.convertToHtml(elt));
+						});
+					}
+					return parts.join(", ") + '[]';
+
+				case 'NonNullableType':
+					return "!" +  this.convertToHtml(typeObj.expression);
+				case 'OptionalType':
+					return this.convertToHtml(typeObj.expression) + "=";
+				case 'NullableType':
+					return "?" +  this.convertToHtml(typeObj.expression);
+				case 'RestType':
+					return "..." +  this.convertToHtml(typeObj.expression);
+
+				case 'ParameterType':
+					return this.styleAsProperty(typeObj.name, true) +
+						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression)));
+
+				case 'FunctionType':
+					var isCons = false;
+					var resType;
+					if (typeObj.params) {
+						typeObj.params.forEach(function(elt) {
+							if (elt.name === 'this') {
+								isCons = true;
+								resType = elt.expression;
+							} else if (elt.name === 'new') {
+								isCons = true;
+								resType = elt.expression;
+							} else {
+								parts.push(self.convertToHtml(elt));
+							}
+						});
+					}
+
+					if (!resType && typeObj.result) {
+						resType = typeObj.result;
+					}
+
+					var resText;
+					if (resType && resType.type !== 'UndefinedLiteral' && resType.name !== 'undefined') {
+						resText = this.convertToHtml(resType);
+					} else {
+						resText = '';
+					}
+					res = this.styleAsOther(isCons ? 'new ' : 'function', true);
+					if (isCons) {
+						res += resText;
+					}
+					res += '(' + parts.join(",") + ')';
+					if (!isCons && resText) {
+						res += '&rarr;' + resText;
+					}
+
+					return res;
+
+				case 'RecordType':
+					if (typeObj.fields && typeObj.fields.length > 0) {
+						typeObj.fields.forEach(function(elt) {
+							parts.push('&nbsp;&nbsp;' + self.convertToHtml(elt));
+						});
+						return '{<br/>' + parts.join(',<br/>') + '<br/>}';
+					} else {
+						return '{ }';
+					}
+					break;
+
+				case 'FieldType':
+					return this.styleAsProperty(typeObj.key, true) +
+						":" + this.convertToHtml(typeObj.value);
 			}
+
 		},
 		ensureTypeObject: ensureTypeObject,
 		OBJECT_TYPE: THE_UNKNOWN_TYPE,
