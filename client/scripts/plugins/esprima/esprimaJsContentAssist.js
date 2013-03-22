@@ -1895,15 +1895,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						// if type is built-in, then we must overwrite it with ours
 						if (!type || type.$$isBuiltin) {
 							type = this._allTypes[typeName] = {};
-						}
-
-						// for each property defined in the type from the sumamry,
-						// also add it to the current module's type
-						for (var typeProp in existingType) {
-							if (!type[typeProp]) {
-								type[typeProp] = mTypes.Definition.revive(existingType[typeProp]);
+							// for each property defined in the type from the sumamry,
+							// also add it to the current module's type
+							for (var typeProp in existingType) {
+								if (!type[typeProp]) {
+									type[typeProp] = mTypes.Definition.revive(existingType[typeProp]);
+								}
 							}
 						}
+
 					}
 				}
 
@@ -2630,14 +2630,19 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// assume a non-module
 				providedType = environment.globalScope();
 
-				if (providedType.exports) {
+				// if there is an exports global or a module.exports global, then assume commonjs
+				var maybeExports = providedType.exports ||
+						(providedType.module && environment.getAllTypes()[providedType.module.typeObj.name] &&
+						environment.getAllTypes()[providedType.module.typeObj.name].exports);
+
+				if (maybeExports) {
 					// actually, commonjs
 					kind = "commonjs";
-					modTypeObj = providedType.exports.typeObj;
-	       			modTypeName = doctrine.stringify(modTypeObj);
+					modTypeObj = maybeExports.typeObj;
+					modTypeName = doctrine.stringify(modTypeObj);
 				} else {
 					kind = "global";
-    				modTypeName = environment.globalTypeName();
+					modTypeName = environment.globalTypeName();
 					modTypeObj = providedType['this'].typeObj;
 				}
 			}
