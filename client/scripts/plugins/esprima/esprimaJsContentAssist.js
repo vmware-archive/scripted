@@ -1574,7 +1574,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			offset : offset,
 			/** the entire contents being completed on */
 			contents : buffer,
-			uid : uid === 'local' ? null : uid,
+			uid : uid === 'local' ? null : uid, // make the uid shorter
 
 			/** List of comments in the AST*/
 			comments : comments,
@@ -1891,7 +1891,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						// create type if doesn't already exist, othewise merge
 						var type = this._allTypes[typeName];
 						var existingType = summary.types[typeName];
-						if (!type) {
+						// if doesn't exist yet create it
+						// if type is built-in, then we must overwrite it with ours
+						if (!type || type.$$isBuiltin) {
 							type = this._allTypes[typeName] = {};
 						}
 
@@ -2052,8 +2054,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			for (var prop in type) {
 				if (isInterestingProperty(type, prop)) {
 					var propType = type[prop].typeObj;
-					var first = propType.charAt(0);
-					if (first === "?" || first === "*") {
+					if (propType.type === 'FunctionType') {
 						var res = calculateFunctionProposal(prop, propType, replaceStart - 1);
 						proposals[prop] = {
 							proposal: removePrefix(prefix, res.completion),
@@ -2140,15 +2141,18 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				if (typeObj.result) {
 					visitTypeStructure(typeObj.result, operation);
 				}
-				if (typeObj['this']) {
-					visitTypeStructure(typeObj['this'], operation);
-				}
-				if (typeObj['new']) {
-					visitTypeStructure(typeObj['new'], operation);
-				}
+				// not correct. this and new are folded into result
+//				if (typeObj['this']) {
+//					visitTypeStructure(typeObj['this'], operation);
+//				}
+//				if (typeObj['new']) {
+//					visitTypeStructure(typeObj['new'], operation);
+//				}
 				return;
 
 			case 'ParameterType':
+				// TODO FIXADE this will make the size of summaries smaller
+				typeObj.expression = { name: 'Object', type: 'NameExpression' };
 				visitTypeStructure(typeObj.expression, operation);
 				return;
 
@@ -2194,9 +2198,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		}
 	}
 
-	function fixMissingPointers(currentTypeName, allTypes, empties, alreadySeen) {
+	/**
+	 * Before we can remove empty objects from the type graph, we need to update
+	 * the properties currently pointing to those types.  Make them point to the
+	 * closest non-empty type in their prototype hierarchy (most likely, this is Object).
+	 */
+	function fixMissingPointers(currentTypeObj, allTypes, empties, alreadySeen) {
 		alreadySeen = alreadySeen || {};
-		var currentType = allTypes[currentTypeName];
 		var operation = function(typeObj, operation) {
 			if (alreadySeen[typeObj.name]) {
 				return;
@@ -2209,18 +2217,19 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 			}
 			alreadySeen[typeObj.name] = true;
-			fixMissingPointers(typeObj.name, allTypes, empties, alreadySeen);
-		};
-
-		if (currentType) {
-			for(var prop in currentType) {
-				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-					var propType = currentType[prop].typeObj;
-					// must visit the type strucutre
-					visitTypeStructure(propType, operation);
+			var currentType = allTypes[typeObj.name];
+			if (currentType) {
+				for(var prop in currentType) {
+					if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
+						var propType = currentType[prop].typeObj;
+						// must visit the type strucutre
+						visitTypeStructure(propType, operation);
+					}
 				}
 			}
-		}
+		};
+
+		visitTypeStructure(currentTypeObj, operation);
 	}
 	/**
 	 * filters types from the environment that should not be exported
@@ -2250,10 +2259,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				reachable[moduleTypeName] = true;
 				wasReachable = false;
 			}
-			for (var prop in allTypes) {
-				if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
-					delete allTypes[prop];
-				}
+		}
+		for (var prop in allTypes) {
+			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
+				delete allTypes[prop];
 			}
 		}
 
@@ -2265,7 +2274,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			}
 		});
 		// now fix up pointers to empties
-		fixMissingPointers(moduleTypeName, allTypes, empties);
+		fixMissingPointers(moduleTypeObj, allTypes, empties);
 
 		if (!wasReachable) {
 			delete allTypes[moduleTypeName];
