@@ -43,7 +43,7 @@ define(["scriptedLogger"], function(scriptedLogger) {
 				if (depth < thresholds.length) {
 					localStorage.setItem(key, value);
 				} else {
-					scriptedLogger.warn("Tried to add to local storage: " + key + " : " + value, "STORAGE");
+					scriptedLogger.warn("Tried to add to local storage: " + key, "STORAGE");
 					scriptedLogger.warn("Tried too many times. Ignoring request.", "STORAGE");
 				}
 			} catch (e) {
