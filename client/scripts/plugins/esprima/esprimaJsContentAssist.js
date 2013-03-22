@@ -1403,6 +1403,39 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		return string.substring(prefix.length);
 	}
 
+	function isEmpty(generatedTypeName, allTypes) {
+		if (typeof generatedTypeName !== 'string') {
+			// original type was not a name expression
+			return false;
+		} else if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
+			return true;
+		} else if (generatedTypeName.substring(0, mTypes.GEN_NAME.length) !== mTypes.GEN_NAME) {
+			// not a synthetic type, so not empty
+			return false;
+		}
+
+
+		// now check to see if there are any non-default fields in this type
+		var type = allTypes[generatedTypeName];
+		var popCount = 0;
+		// type should have a $$proto only and nothing else if it is empty
+		for (var property in type) {
+			if (type.hasOwnProperty(property)) {
+				popCount++;
+				if (popCount > 1) {
+					break;
+				}
+			}
+		}
+		if (popCount === 1) {
+			// we have an empty object literal, must check parent
+			// must traverse prototype hierarchy to make sure empty
+			return isEmpty(type.$$proto.typeObj.name, allTypes);
+		}
+		return false;
+	}
+
+
 	/**
 	 * Determines if the left type name is more general than the right type name.
 	 * Generality (>) is defined as follows:
@@ -1426,44 +1459,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				leftTypeName = 'undefined';
 			}
 		}
-		function isEmpty(generatedTypeName) {
-			if (typeof generatedTypeName !== 'string') {
-				// original type was not a name expression
-				return false;
-			} else if (generatedTypeName === "Object" || generatedTypeName === "undefined") {
-				return true;
-			} else if (generatedTypeName.substring(0, mTypes.GEN_NAME.length) !== mTypes.GEN_NAME) {
-				// not a synthetic type, so not empty
-				return false;
-			}
-
-
-			// now check to see if there are any non-default fields in this type
-			var type = env.getAllTypes()[generatedTypeName];
-			var popCount = 0;
-			// type should have a $$proto only and nothing else if it is empty
-			for (var property in type) {
-				if (type.hasOwnProperty(property)) {
-					popCount++;
-					if (popCount > 1) {
-						break;
-					}
-				}
-			}
-			if (popCount === 1) {
-				// we have an empty object literal, must check parent
-				// must traverse prototype hierarchy to make sure empty
-				return isEmpty(type.$$proto.typeObj.name);
-			}
-			return false;
-		}
 
 		function convertToNumber(typeName) {
 			if (typeName === "undefined") {
 				return 0;
 			} else if (typeName === "Object") {
 				return 1;
-			} else if (isEmpty(typeName)) {
+			} else if (isEmpty(typeName, env.getAllTypes())) {
 				return 2;
 			} else {
 				return 3;
@@ -1481,7 +1483,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		} else if (leftNum === 1) {
 			return rightTypeName !== "undefined" && rightTypeName !== "Object";
 		} else if (leftNum === 2) {
-			return rightTypeName !== "undefined" && rightTypeName !== "Object" && !isEmpty(rightTypeName);
+			return rightTypeName !== "undefined" && rightTypeName !== "Object" && !isEmpty(rightTypeName, env.getAllTypes());
 		} else {
 			return false;
 		}
@@ -1527,10 +1529,27 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			}
 		}
 
+
+		// create a hash of the path using a hashcode calculation similar to java's String.hashCode() method
+		var hashCode = function(str) {
+			var hash = 0, c, i;
+			if (str.length === 0) {
+				return hash;
+			}
+			for (i = 0; i < str.length; i++) {
+				c = str.charCodeAt(i);
+				hash = ((hash << 5) - hash) + c;
+				hash = hash & hash; // Convert to 32bit integer
+			}
+			return hash;
+		};
+
 		// prefix for generating local types
 		// need to add a unique id for each file so that types defined in dependencies don't clash with types
 		// defined locally
-		var namePrefix = mTypes.GEN_NAME + uid + "~";
+		var namePrefix = mTypes.GEN_NAME + hashCode(uid) + "~";
+		// uncomment to show names
+//		var namePrefix = mTypes.GEN_NAME + (uid) + "~";
 
 		return {
 			/** Each element is the type of the current scope, which is a key into the types array */
@@ -2077,7 +2096,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		}
 	}
 
-	function visitTypeStructure(typeObj, allTypes, alreadySeen) {
+	function visitTypeStructure(typeObj, operation) {
 		if (typeof typeObj !== 'object') {
 			return;
 		}
@@ -2091,56 +2110,51 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				return;
 
 			case 'NameExpression':
-				if (alreadySeen[typeObj.name]) {
-					// prevent infinite recursion for circular refs
-					return;
-				}
-				alreadySeen[typeObj.name] = true;
-				findUnreachable(typeObj.name, allTypes, alreadySeen);
+				operation(typeObj, operation);
 				return;
 
 			case 'ArrayType':
-				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				visitTypeStructure(typeObj.expression, operation);
 				// fall-through
 			case 'UnionType':
 				if (typeObj.elements) {
-					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+					typeObj.elements.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 				return;
 
 			case 'RecordType':
 				if (typeObj.fields) {
-					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+					typeObj.fields.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 				return;
 
 			case 'FieldType':
-				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				visitTypeStructure(typeObj.expression, operation);
 				return;
 
 			case 'FunctionType':
 				// do we need to check for serialized functions???
 				if (typeObj.params) {
-					typeObj.params.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+					typeObj.params.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 				if (typeObj.result) {
-					visitTypeStructure(typeObj.result, allTypes, alreadySeen);
+					visitTypeStructure(typeObj.result, operation);
 				}
 				if (typeObj['this']) {
-					visitTypeStructure(typeObj['this'], allTypes, alreadySeen);
+					visitTypeStructure(typeObj['this'], operation);
 				}
 				if (typeObj['new']) {
-					visitTypeStructure(typeObj['new'], allTypes, alreadySeen);
+					visitTypeStructure(typeObj['new'], operation);
 				}
 				return;
 
 			case 'ParameterType':
-				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				visitTypeStructure(typeObj.expression, operation);
 				return;
 
 			case 'TypeApplication':
 				if (typeObj.applications) {
-					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, allTypes, alreadySeen); });
+					typeObj.applications.forEach(function(elt) { visitTypeStructure(elt, operation); });
 				}
 
 				// fall-throudh
@@ -2148,7 +2162,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			case 'NonNullableType':
 			case 'OptionalType':
 			case 'NullableType':
-				visitTypeStructure(typeObj.expression, allTypes, alreadySeen);
+				visitTypeStructure(typeObj.expression, operation);
 				return;
 
 
@@ -2159,17 +2173,55 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	// and marks them as already seen
 	function findUnreachable(currentTypeName, allTypes, alreadySeen) {
 		var currentType = allTypes[currentTypeName];
+		var operation = function(typeObj, operation) {
+			if (alreadySeen[typeObj.name]) {
+				// prevent infinite recursion for circular refs
+				return;
+			}
+
+			alreadySeen[typeObj.name] = true;
+			findUnreachable(typeObj.name, allTypes, alreadySeen);
+		};
+
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
 					var propType = currentType[prop].typeObj;
 					// must visit the type strucutre
-					visitTypeStructure(propType, allTypes, alreadySeen);
+					visitTypeStructure(propType, operation);
 				}
 			}
 		}
 	}
 
+	function fixMissingPointers(currentTypeName, allTypes, empties, alreadySeen) {
+		alreadySeen = alreadySeen || {};
+		var currentType = allTypes[currentTypeName];
+		var operation = function(typeObj, operation) {
+			if (alreadySeen[typeObj.name]) {
+				return;
+			}
+			while (empties[typeObj.name]) {
+				// change this to the first non-epty prototype of the empty type
+				typeObj.name = allTypes[typeObj.name].$$proto.name;
+				if (!typeObj.name) {
+					typeObj.name = 'Object';
+				}
+			}
+			alreadySeen[typeObj.name] = true;
+			fixMissingPointers(typeObj.name, allTypes, empties, alreadySeen);
+		};
+
+		if (currentType) {
+			for(var prop in currentType) {
+				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
+					var propType = currentType[prop].typeObj;
+					// must visit the type strucutre
+					visitTypeStructure(propType, operation);
+				}
+			}
+		}
+	}
 	/**
 	 * filters types from the environment that should not be exported
 	 */
@@ -2179,16 +2231,49 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
+		var wasReachable = true;
 		if (moduleTypeObj.type !== "NameExpression") {
-			visitTypeStructure(moduleTypeObj, allTypes, reachable);
-		}
-
-		findUnreachable(moduleTypeName, allTypes, reachable);
-		for (var prop in allTypes) {
-			if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
-				delete allTypes[prop];
+			// TODO FIXADE duplicated code
+			visitTypeStructure(moduleTypeObj, function(typeObj, operation) {
+				if (reachable[typeObj.name]) {
+					// prevent infinite recursion for circular refs
+					return;
+				}
+				reachable[typeObj.name] = true;
+				findUnreachable(typeObj.name, allTypes, reachable);
+			});
+		} else {
+			// first remove any types that are unreachable
+			findUnreachable(moduleTypeName, allTypes, reachable);
+			if (!reachable[moduleTypeName]) {
+				// not really reachable, but need to keep it for now to track empties
+				reachable[moduleTypeName] = true;
+				wasReachable = false;
+			}
+			for (var prop in allTypes) {
+				if (allTypes.hasOwnProperty(prop) && !reachable[prop]) {
+					delete allTypes[prop];
+				}
 			}
 		}
+
+		// now find empty types
+		var empties = {};
+		Object.keys(allTypes).forEach(function(key) {
+			if (isEmpty(key, allTypes)) {
+				empties[key] = true;
+			}
+		});
+		// now fix up pointers to empties
+		fixMissingPointers(moduleTypeName, allTypes, empties);
+
+		if (!wasReachable) {
+			delete allTypes[moduleTypeName];
+		}
+		// don't need the empty types any more
+		Object.keys(empties).forEach(function(key) {
+			delete allTypes[key];
+		});
 
 		// now reformat the types so that they are combined and serialized
 		Object.keys(allTypes).forEach(function(typeName) {

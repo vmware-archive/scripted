@@ -347,42 +347,38 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		Node : new Definition("function(new:Node):Node")
 	};
 
-	var initialGlobalProperties = [];
-	for (var prop in Global) {
-		if (Global.hasOwnProperty(prop)) {
-			initialGlobalProperties.push(prop);
-		}
-	}
+	var initialGlobalProperties = {};
+	Object.keys(Global.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
+	Object.keys(Window.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
+	Object.keys(Module.prototype).forEach(function(key) {
+		initialGlobalProperties[key] = true;
+	});
 
-	for (prop in Window) {
-		if (Window.hasOwnProperty(prop)) {
-			initialGlobalProperties.push(prop);
-		}
-	}
 
 	/**
 	 * A prototype that contains the common built-in types
 	 */
 	var Types = function(globalObjName) {
-
+		var globObj;
 		// this object can be touched by clients
 		// and so must not be in the prototype
 		// the global 'this'
 		if (globalObjName === 'Window') {
-			this.Window = new Window();
+			globObj = this.Window = new Window();
 		} else if (globalObjName === 'Module') {
-			this.Module = new Module();
+			globObj = this.Module = new Module();
 		} else {
-			this.Global = new Global();
+			globObj = this.Global = new Global();
 		}
 
-		// TODO FIXADE should be declared on prototype
 		this.clearDefaultGlobal = function() {
-			for (var i = 0; i < initialGlobalProperties.length; i++) {
-				if (this.Global[initialGlobalProperties[i]]) {
-					delete this.Global[initialGlobalProperties[i]];
-				}
-			}
+			Object.keys(initialGlobalProperties).forEach(function(key) {
+				delete globObj[key];
+			});
 		};
 
 	};
@@ -1560,18 +1556,26 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'FunctionType':
 					var fnType = {
 						type: jsdocType.type,
-						result: self.convertJsDocType(jsdocType.result, env, doCombine, depth+1),
 						params: jsdocType.params.map(function(elt) {
 							return self.convertJsDocType(elt, env, doCombine, depth+1);
 						})
 					};
+					if (jsdocType.result) {
+						// prevent recursion on functions that return themselves
+						fnType.result = depth < 2 ? self.convertJsDocType(jsdocType.result, env, doCombine, depth+1) :
+							{ type : 'NameExpression', name : JUST_DOTS };
+					}
 
 					if (jsdocType['new']) {
-						fnType['new'] = self.convertJsDocType(jsdocType['new'], env, doCombine, depth+1);
+						// prevent recursion on functions that return themselves
+						fnType['new'] = depth < 2 ? self.convertJsDocType(jsdocType['new'], env, doCombine, depth+1) :
+							{ type : 'NameExpression', name : JUST_DOTS };
 					}
 
 					if (jsdocType['this']) {
-						fnType['this'] = self.convertJsDocType(jsdocType['this'], env, doCombine, depth+1);
+						// prevent recursion on functions that return themselves
+						fnType['this'] = depth < 2 ? self.convertJsDocType(jsdocType['this'], env, doCombine, depth+1) :
+							{ type : 'NameExpression', name : JUST_DOTS };
 					}
 
 					return fnType;
