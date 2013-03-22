@@ -1756,7 +1756,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 			if (useFunctionSig) {
 				typeObj = this.convertJsDocType(typeObj, env, true);
 				if (useHtml) {
-					return this.convertToHtml(typeObj, env, 0);
+					return this.convertToHtml(typeObj, 0);
 				}
 				var res = doctrine.stringify(typeObj);
 				res = res.replace(JUST_DOTS_REGEX, "{...}");
@@ -1767,12 +1767,13 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				return this.createReadableType(typeObj, env, true, depth, useHtml);
 			}
 		},
-		convertToHtml : function(typeObj) {
+		convertToHtml : function(typeObj, depth) {
 			// typeObj must already be converted to avoid infinite loops
 //			typeObj = this.convertJsDocType(typeObj, env, true);
 			var self = this;
 			var res;
 			var parts = [];
+			depth = depth || 0;
 
 			switch(typeObj.type) {
 				case 'NullableLiteral':
@@ -1794,7 +1795,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					parts = [];
 					if (typeObj.expressions) {
 						typeObj.expressions.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt));
+							parts.push(self.convertToHtml(elt, depth+1));
 						});
 					}
 					return "( " + parts.join(", ") + " )";
@@ -1804,12 +1805,12 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'TypeApplication':
 					if (typeObj.applications) {
 						typeObj.applications.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt));
+							parts.push(self.convertToHtml(elt, depth));
 						});
 					}
 					var isArray = typeObj.expression.name === 'Array';
 					if (!isArray) {
-						res = this.convertToHtml(typeObj.expression) + ".<";
+						res = this.convertToHtml(typeObj.expression, depth) + ".<";
 					}
 					res += parts.join(",");
 					if (isArray) {
@@ -1821,23 +1822,23 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'ArrayExpressopm':
 					if (typeObj.applications) {
 						typeObj.applications.forEach(function(elt) {
-							parts.push(self.convertToHtml(elt));
+							parts.push(self.convertToHtml(elt, depth+1));
 						});
 					}
 					return parts.join(", ") + '[]';
 
 				case 'NonNullableType':
-					return "!" +  this.convertToHtml(typeObj.expression);
+					return "!" +  this.convertToHtml(typeObj.expression, depth);
 				case 'OptionalType':
-					return this.convertToHtml(typeObj.expression) + "=";
+					return this.convertToHtml(typeObj.expression, depth) + "=";
 				case 'NullableType':
-					return "?" +  this.convertToHtml(typeObj.expression);
+					return "?" +  this.convertToHtml(typeObj.expression, depth);
 				case 'RestType':
-					return "..." +  this.convertToHtml(typeObj.expression);
+					return "..." +  this.convertToHtml(typeObj.expression, depth);
 
 				case 'ParameterType':
 					return this.styleAsProperty(typeObj.name, true) +
-						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression)));
+						(typeObj.expression.name === JUST_DOTS ? "" : (":" + this.convertToHtml(typeObj.expression, depth)));
 
 				case 'FunctionType':
 					var isCons = false;
@@ -1851,7 +1852,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 								isCons = true;
 								resType = elt.expression;
 							} else {
-								parts.push(self.convertToHtml(elt));
+								parts.push(self.convertToHtml(elt, depth+1));
 							}
 						});
 					}
@@ -1862,7 +1863,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 
 					var resText;
 					if (resType && resType.type !== 'UndefinedLiteral' && resType.name !== 'undefined') {
-						resText = this.convertToHtml(resType);
+						resText = this.convertToHtml(resType, depth+1);
 					} else {
 						resText = '';
 					}
@@ -1880,9 +1881,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'RecordType':
 					if (typeObj.fields && typeObj.fields.length > 0) {
 						typeObj.fields.forEach(function(elt) {
-							parts.push('&nbsp;&nbsp;' + self.convertToHtml(elt));
+							parts.push(proposalUtils.repeatChar('&nbsp;&nbsp;', depth+1) + self.convertToHtml(elt, depth+1));
 						});
-						return '{<br/>' + parts.join(',<br/>') + '<br/>}';
+						return '{<br/>' + parts.join(',<br/>') + '<br/>' + proposalUtils.repeatChar('&nbsp;&nbsp;', depth) + '}';
 					} else {
 						return '{ }';
 					}
@@ -1890,7 +1891,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 
 				case 'FieldType':
 					return this.styleAsProperty(typeObj.key, true) +
-						":" + this.convertToHtml(typeObj.value);
+						":" + this.convertToHtml(typeObj.value, depth);
 			}
 
 		},
