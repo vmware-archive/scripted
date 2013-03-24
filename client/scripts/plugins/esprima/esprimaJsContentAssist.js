@@ -769,6 +769,18 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 				isConstructor = false;
 			}
+
+			var callArgs = new Array(params.length);
+			if (node.extras.paramTypeObj && node.extras.paramTypeObj.type === 'FunctionType') {
+				// this function is an anonymous function being passed as an argument
+				// to another function and we have a hint of what the function type is
+				// shunt the argument types to this function's arguments
+				var paramTypes = node.extras.paramTypeObj.params;
+				var len = Math.min(params.length || 0, paramTypes.length || 0);
+				for (var i = 0; i < len; i++) {
+					callArgs[i] = paramTypes[i];
+				}
+			}
 			if (!node.body.extras) {
 				node.body.extras = {};
 			}
@@ -779,15 +791,20 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (params.length > 0) {
 				var moduleDefs = findModuleDefinitions(node, env);
 				for (i = 0; i < params.length; i++) {
-					// choose jsdoc tags over module definitions
+					// choose jsdoc tags over module definitions and both of those over call args
 					var jsDocParam = jsdocResult.params[params[i]];
 					var paramTypeObj = null;
 					if (jsDocParam) {
 						paramTypeObj = mTypes.convertJsDocType(jsDocParam, env);
-					}
-					if (!paramTypeObj) {
+					} else {
 						paramTypeObj = moduleDefs[i];
 					}
+					if (callArgs[i] && leftTypeIsMoreGeneral(paramTypeObj, callArgs[i], env)) {
+						// unwrap parameter type since name is probably wrong
+						// TODO if param is wrapped in a RestType, then problem
+						paramTypeObj = callArgs[i].type === 'ParameterType' ? callArgs[i].expression : callArgs[i];
+					}
+
 					paramTypeObjs.push(mTypes.createParamType(params[i], paramTypeObj));
 				}
 			}
@@ -912,8 +929,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			break;
 		case "MemberExpression":
 			if (node.property) {
-				if (!node.computed ||  // like this: foo.at
-					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['at']
+				if (!node.computed ||  // like this: foo.prop
+					(node.computed && node.property.type === "Literal" && typeof node.property.value === "string")) {  // like this: foo['prop']
 
 					// keep track of the target of the property expression
 					// so that its type can be used as the seed for finding properties
@@ -921,7 +938,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						node.property.extras = {};
 					}
 					node.property.extras.target = node.object;
-				} else { // like this: foo[at] or foo[0]
+				} else { // like this: foo[prop] or foo[0]
 					// do nothing
 				}
 			}
@@ -939,6 +956,14 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						args[args.length-1].extras = {};
 					}
 					args[args.length-1].extras.amdDefn = node;
+				}
+			} else {
+				// the type of the function call may help infer the types of the parameters
+				// keep track of that here
+				rightMost = findRightMost(node.callee);
+				if (rightMost.type === "Identifier") {
+					rightMost.extras = rightMost.extras || {};
+					rightMost.extras.callArgs = node["arguments"];
 				}
 			}
 			break;
@@ -1264,6 +1289,30 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// We found it! rmember for later, but continue to the end of file anyway
 					env.storeTarget(env.scope(node.extras.target));
 				}
+
+				// if this identifier refers to a function call, and we know the argument types, then push on to the arg nodes
+				if (node.extras.callArgs) {
+					if (newTypeObj.type === 'FunctionType') {
+						// match param types with args
+						var paramTypes = newTypeObj.params;
+						var args = node.extras.callArgs;
+						var len = Math.min(args.length || 0, paramTypes.length || 0);
+						for (var i = 0; i < len; i++) {
+							args[i].extras = args[i].extras || {};
+							args[i].extras.paramTypeObj = paramTypes[i].type === 'ParameterType' ? paramTypes[i].expression : paramTypes[i];
+						}
+					}
+				}
+
+				if (node.extras.paramTypeObj) {
+					// this identifier is an argument of a function call whose type we know
+					if (leftTypeIsMoreGeneral(newTypeObj, node.extras.paramTypeObj, env)) {
+						// the param type is more specific, use that one instead of the otherwise inferred type
+						node.extras.inferredTypeObj = newTypeObj = node.extras.paramTypeObj;
+						env.addOrSetVariable(name, node.extras.target /* should be null */, newTypeObj);
+					}
+				}
+
 			} else if (!node.extras.isLHS) {
 				if (!inRange(env.offset, node.range, true) && !isReserverdWord(name)) {
 					// we have encountered a read of a variable/property that we have never seen before

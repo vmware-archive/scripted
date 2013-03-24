@@ -1557,26 +1557,30 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					var fnType = {
 						type: jsdocType.type,
 						params: jsdocType.params.map(function(elt) {
-							return self.convertJsDocType(elt, env, doCombine, depth+1);
+							return self.convertJsDocType(elt, env, doCombine, depth);
 						})
 					};
 					if (jsdocType.result) {
 						// prevent recursion on functions that return themselves
-						fnType.result = depth < 2 ? self.convertJsDocType(jsdocType.result, env, doCombine, depth+1) :
+						fnType.result = depth < 2 && jsdocType.result.type === 'FunctionType' ?
+							self.convertJsDocType(jsdocType.result, env, doCombine, depth) :
 							{ type : 'NameExpression', name : JUST_DOTS };
 					}
 
-					if (jsdocType['new']) {
-						// prevent recursion on functions that return themselves
-						fnType['new'] = depth < 2 ? self.convertJsDocType(jsdocType['new'], env, doCombine, depth+1) :
-							{ type : 'NameExpression', name : JUST_DOTS };
-					}
-
-					if (jsdocType['this']) {
-						// prevent recursion on functions that return themselves
-						fnType['this'] = depth < 2 ? self.convertJsDocType(jsdocType['this'], env, doCombine, depth+1) :
-							{ type : 'NameExpression', name : JUST_DOTS };
-					}
+					// TODO should remove?  new and this are folded into params
+//					if (jsdocType['new']) {
+//						// prevent recursion on functions that return themselves
+//						fnType['new'] = depth < 2 && jsdocType['new'].type === 'FunctionType' ?
+//							self.convertJsDocType(jsdocType['new'], env, doCombine, depth) :
+//							{ type : 'NameExpression', name : JUST_DOTS };
+//					}
+//
+//					if (jsdocType['this']) {
+//						// prevent recursion on functions that return themselves
+//						fnType['this'] = depth < 2 && jsdocType['this'].type === 'FunctionType' ?
+//							self.convertJsDocType(jsdocType['this'], env, doCombine, depth) :
+//							{ type : 'NameExpression', name : JUST_DOTS };
+//					}
 
 					return fnType;
 
