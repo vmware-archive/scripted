@@ -1422,8 +1422,13 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				result: result
 			};
 			if (isConstructor) {
+				functionTypeObj.params = functionTypeObj.params || [];
 			    // TODO should we also do 'this'?
-				functionTypeObj['new'] = result;
+				functionTypeObj.params.push({
+					type: 'ParameterType',
+					name: 'new',
+					expression: result
+				});
 			}
 
 			return functionTypeObj;
@@ -1456,7 +1461,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 		},
 
 		extractReturnType : function(fnType) {
-			return fnType.result || fnType;
+			return fnType.result || (fnType.type === 'FunctionType' ? this.UNDEFINED_TYPE: fnType);
 		},
 
 		// TODO should we just return a typeObj here???
@@ -1535,21 +1540,21 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					return {
 						type: jsdocType.type,
 						elements: jsdocType.elements.map(function(elt) {
-							return self.convertJsDocType(elt, env, doCombine, depth+1);
+							return self.convertJsDocType(elt, env, doCombine, depth);
 						})
 					};
 
 				case 'RestType':
 					return {
 						type: jsdocType.type,
-						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1)
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
 					};
 
 				case 'ArrayType':
 					return {
 						type: jsdocType.type,
 						elements: jsdocType.elements.map(function(elt) {
-							return self.convertJsDocType(elt, env, doCombine, depth+1);
+							return self.convertJsDocType(elt, env, doCombine, depth);
 						})
 					};
 
@@ -1562,9 +1567,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					};
 					if (jsdocType.result) {
 						// prevent recursion on functions that return themselves
-						fnType.result = depth < 2 && jsdocType.result.type === 'FunctionType' ?
-							self.convertJsDocType(jsdocType.result, env, doCombine, depth) :
-							{ type : 'NameExpression', name : JUST_DOTS };
+						fnType.result = depth > 1 && jsdocType.result.type === 'FunctionType' ?
+							{ type : 'NameExpression', name : JUST_DOTS } :
+							self.convertJsDocType(jsdocType.result, env, doCombine, depth);
 					}
 
 					// TODO should remove?  new and this are folded into params
@@ -1587,12 +1592,12 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'TypeApplication':
 					var typeApp = {
 						type: jsdocType.type,
-						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1),
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth),
 
 					};
 					if (jsdocType.applications) {
                         typeApp.applications = jsdocType.applications.map(function(elt) {
-							return self.convertJsDocType(elt, env, doCombine, depth+1);
+							return self.convertJsDocType(elt, env, doCombine, depth);
 						});
 					}
 					return typeApp;
@@ -1602,7 +1607,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 						type: jsdocType.type,
 						name: name,
 						expression: jsdocType.expression ?
-							self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1) :
+							self.convertJsDocType(jsdocType.expression, env, doCombine, depth) :
 							null
 					};
 
@@ -1611,7 +1616,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'NullableType':
 					return {
 						type: jsdocType.type,
-						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth+1)
+						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
 					};
 
 				case 'NameExpression':
@@ -1657,7 +1662,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					return {
 						type: jsdocType.type,
 						key: jsdocType.key,
-						value: self.convertJsDocType(jsdocType.value, env, doCombine, depth+1)
+						value: self.convertJsDocType(jsdocType.value, env, doCombine, depth)
 					};
 
 				case 'RecordType':

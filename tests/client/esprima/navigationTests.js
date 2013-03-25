@@ -131,21 +131,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	};
 	tests.testVar2 = function() {
 		doSameFileTest("var aaa = function(a,b,c) { return 9; }\naaa", 'aaa',
-		"function(a:gen~local~0,b:gen~local~1,c:gen~local~2):Number", 'aaa : function(a:{},b:{},c:{}):Number');
+		"function(a:gen~103145323~0,b:gen~103145323~1,c:gen~103145323~2):Number", 'aaa : function(a,b,c):Number');
 
 	};
 	tests.testVar3 = function() {
 		doSameFileTest("var aaa = function(a,b,c) { return function(a) { return 9; }; }\naaa",
-			'aaa', "function(a:gen~local~0,b:gen~local~1,c:gen~local~2):function(a:gen~local~5):Number",
-			'aaa : function(a:{},b:{},c:{}):function(a:{}):Number');
+			'aaa', "function(a:gen~103145323~0,b:gen~103145323~1,c:gen~103145323~2):function(a:gen~103145323~5):Number",
+			'aaa : function(a,b,c):function(a):Number');
 	};
 	tests.testParam1 = function() {
 		doSameFileTest("var bbb = function(a,b,d) { d }",
-			'd', "gen~local~2", 'd : {}');
+			'd', "gen~103145323~2", 'd : {}');
 	};
 	tests.testParam2 = function() {
 		doSameFileTest("var d = 9;var bbb = function(a,b,d) { d }",
-			'd', "gen~local~2", 'd : {}', 2);
+			'd', "gen~103145323~2", 'd : {}', 2);
 	};
 	tests.testParam3 = function() {
 		doSameFileTest("var d = 9;var bbb = function(a,b,d) {}\nd",
@@ -191,7 +191,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 
 	tests.testThis4 = function() {
 		doSameFileTest("var Foo = function() {};\nFoo.prototype = { a : this }",
-			'this', "gen~local~4", 'this : {a:{a:{...}}}', '{ a : this }');
+			'this', "gen~103145323~4", 'this : {a:{a:{...}}}', '{ a : this }');
 	};
 
 	//////////////////////////////////////////////////////////
@@ -281,7 +281,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"    return Car;\n" +
 			"});",
 			"define(['car'], function(Car) { var c = new Car('ford'); c.show(); });",
-			'show', "function():undefined", 'show : function():undefined');
+			'show', "function():undefined", 'show : function()');
 	};
 
 	//////////////////////////////////////////////////////////
@@ -347,7 +347,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	tests.testFullFile2 = function() {
 		doSameFileTest("var x = y;\n" +
 			"x;\n" +
-			"var y = { fff : 0 };", "x", "gen~local~0", "x : {}", 1);
+			"var y = { fff : 0 };", "x", "gen~103145323~0", "x : {}", 1);
 	};
 
 	// arrrrgh need to fix this one so that the test chooses the first fff, not the last
@@ -368,7 +368,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"	function a() {\n" +
 			"		aa();\n" +
 			"	}\n" +
-			"}", "aa", "function():undefined", "aa : function():undefined", 1);
+			"}", "aa", "function():undefined", "aa : function()", 1);
 	};
 
 	tests.testFullFile7 = function() {
@@ -377,7 +377,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"		aa();\n" +
 			"	}\n" +
 			"	function aa() {	}\n" +
-			"}", "aa", "function():undefined", "aa : function():undefined", 2);
+			"}", "aa", "function():undefined", "aa : function()", 2);
 	};
 
 	tests.testFullFile8 = function() {
@@ -446,7 +446,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			" */\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {}", 1,
+			contents, "x", "gen~103145323~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	tests.testJSDoc0a = function() {
@@ -454,7 +454,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"/***/\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {}", 1,
+			contents, "x", "gen~103145323~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 	tests.testJSDoc0b = function() {
@@ -463,7 +463,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"// TODO this is strannnnnnnnge.\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "x", "gen~local~0", "x : {}", 1,
+			contents, "x", "gen~103145323~0", "x : {}", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -473,7 +473,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"exports.x = function() {};";
 		doMultiFileTest(
 			"a", otherContents, "require('a').x", "x",
-			"function():undefined", "x : function():undefined", 2, false,
+			"function():undefined", "x : function()", 2, false,
 			[otherContents.indexOf("/**"), otherContents.indexOf("*/")+2]);
 	};
 
@@ -507,7 +507,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function parseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "parseFile", "function(path:gen~local~1):String", "parseFile : function(path:{foo:Number,bar:String,sumpin:String}):String", 1,
+			contents, "parseFile", "function(path:gen~103145323~1):String", "parseFile : function(path:{foo:Number,bar:String,sumpin:String}):String", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -518,7 +518,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function ParseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "ParseFile", "function(path:gen~local~2,new:ParseFile):ParseFile", "ParseFile : function(path:{foo:Number,bar:String,sumpin:String},new:ParseFile):ParseFile", 1,
+			contents, "ParseFile", "function(path:gen~103145323~2,new:ParseFile):ParseFile", "ParseFile : function(path:{foo:Number,bar:String,sumpin:String},new:ParseFile):ParseFile", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -529,7 +529,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function parseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "parseFile", "function(path:gen~local~1):undefined", "parseFile : function(path:{foo:Number,bar:function(Object,Object):String,sumpin:String}):undefined", 1,
+			contents, "parseFile", "function(path:gen~103145323~1):undefined", "parseFile : function(path:{foo:Number,bar:function(Object,Object):String,sumpin:String})", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
@@ -539,9 +539,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		doSameFileTest(
 		contents,
 		"addSaveTransform",
-
 		"function(transformFun:function(text:String,path:String,configuration:function(foo:String):Object):?String):undefined",
-		"addSaveTransform : function(transformFun:function(text:String,path:String,configuration:function(foo:String):Object):?String):undefined", 1,
+		"addSaveTransform : function(transformFun:function(text:String,path:String,configuration:function(foo:String):Object):?String)", 1,
 		[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
