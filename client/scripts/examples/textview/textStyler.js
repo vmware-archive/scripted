@@ -32,6 +32,25 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 		 "while", "with",
 		 "yield"];
 
+	var TS_KEYWORDS =
+		["break",
+		"case", "class", "catch", "continue", "const",
+		"debugger", "declare", "default", "delete", "do",
+		"else", "enum", "export", "extends",
+		"false", "finally", "for", "function",
+		"if", "implements", "import", "in", "instanceof", "interface",
+		"let",
+		"module",
+		"new", "null",
+		"package", "private", "protected", "public",
+		"return",
+		"static", "super", "switch",
+		"this", "throw", "true", "try", "typeof",
+		"undefined",
+		"var", "void",
+		"while", "with",
+		"yield"];
+
 	var JAVA_KEYWORDS =
 		["abstract",
 		 "boolean", "break", "byte",
@@ -394,6 +413,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 		switch (lang) {
 			case "java": keywords = JAVA_KEYWORDS; break;
 			case "js": keywords = JS_KEYWORDS; break;
+			case "ts": keywords = TS_KEYWORDS; break;
 			case "css": keywords = CSS_KEYWORDS; break;
 		}
 		this.whitespacesVisible = false;
