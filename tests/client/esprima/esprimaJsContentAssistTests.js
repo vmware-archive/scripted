@@ -1985,7 +1985,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals(results, [
 			["obj.Fun()", "obj.Fun() : obj.Fun"],
 			["Object([val])", "Object([val]) : Object"],
-			["obj", "obj : {Fun:function(new:obj.Fun):obj.Fun,fun:function():undefined,fun2:Number}"]
+			["obj", "obj : {Fun:function(new:obj.Fun):obj.Fun,fun:function(),fun2:Number}"]
 		]);
 	};
 
@@ -2715,7 +2715,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"var xx;\nxx.foo.foo", "foo"
 			);
 			testProposals(results, [
-				["foo()", "foo() : Object"]
+				["foo()", "foo() : undefined"]
 			]);
 		};
 
@@ -2725,7 +2725,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				"var xx;\nxx.foo.foo", "foo"
 			);
 			testProposals(results, [
-				["foo(a, b)", "foo(a, b) : Object"]
+				["foo(a, b)", "foo(a, b) : undefined"]
 			]);
 		};
 

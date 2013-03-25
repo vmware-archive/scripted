@@ -1743,8 +1743,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					if (inferredTypeObj.type === 'NameExpression') {
 						return inferredTypeObj.name;
 					} else if (inferredTypeObj.type === 'FunctionType') {
-						if (inferredTypeObj['new'] && inferredTypeObj['new'].name) {
-							return inferredTypeObj['new'].name;
+						if (inferredTypeObj.params) {
+							for (var i = 0; i < inferredTypeObj.params.length; i++) {
+								if ((inferredTypeObj.params[i].name === 'new' ||
+									inferredTypeObj.params[i].name === 'this') &&
+									inferredTypeObj.params[i].expression.name) {
+
+									return inferredTypeObj.params[i].expression.name;
+								}
+							}
 						}
 						return "Function";
 					} else if (inferredTypeObj.type === 'ArrayType') {
@@ -2190,18 +2197,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				if (typeObj.result) {
 					visitTypeStructure(typeObj.result, operation);
 				}
-				// not correct. this and new are folded into result
-//				if (typeObj['this']) {
-//					visitTypeStructure(typeObj['this'], operation);
-//				}
-//				if (typeObj['new']) {
-//					visitTypeStructure(typeObj['new'], operation);
-//				}
 				return;
 
 			case 'ParameterType':
-				// TODO FIXADE this will make the size of summaries smaller
-				typeObj.expression = { name: 'Object', type: 'NameExpression' };
+				// TODO FIXADE uncomment to make the size of summaries smaller
+				// by not including parameter types in summary.
+//				typeObj.expression = { name: 'Object', type: 'NameExpression' };
 				visitTypeStructure(typeObj.expression, operation);
 				return;
 
@@ -2255,15 +2256,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	function fixMissingPointers(currentTypeObj, allTypes, empties, alreadySeen) {
 		alreadySeen = alreadySeen || {};
 		var operation = function(typeObj, operation) {
-			if (alreadySeen[typeObj.name]) {
-				return;
-			}
 			while (empties[typeObj.name]) {
 				// change this to the first non-epty prototype of the empty type
-				typeObj.name = allTypes[typeObj.name].$$proto.name;
+				typeObj.name = allTypes[typeObj.name].$$proto.typeObj.name;
 				if (!typeObj.name) {
 					typeObj.name = 'Object';
 				}
+			}
+			if (alreadySeen[typeObj.name]) {
+				return;
 			}
 			alreadySeen[typeObj.name] = true;
 			var currentType = allTypes[typeObj.name];
@@ -2283,7 +2284,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	/**
 	 * filters types from the environment that should not be exported
 	 */
-	function filterTypes(environment, kind, moduleTypeName, moduleTypeObj, provided) {
+	function filterTypes(environment, kind, moduleTypeObj, provided) {
+		var moduleTypeName = doctrine.stringify(moduleTypeObj);
 		var allTypes = environment.getAllTypes();
 		allTypes.clearDefaultGlobal();
 
@@ -2653,7 +2655,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			}
 			var providedType;
 			var kind;
-			var modTypeName;
 			var modTypeObj;
 			if (environment.amdModule) {
 				// provide the exports of the AMD module
@@ -2661,10 +2662,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				var args = environment.amdModule["arguments"];
 				if (args && args.length > 0) {
 					modTypeObj = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
-					modTypeName = doctrine.stringify(modTypeObj);
 				} else {
 					modTypeObj = mTypes.OBJECT_TYPE;
-					modTypeName = modTypeObj.name;
 				}
 				kind = "AMD";
 			} else if (environment.commonjsModule) {
@@ -2672,7 +2671,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// we have already checked the correctness of this function
 				var exportsParam = environment.commonjsModule["arguments"][0].params[1];
 				modTypeObj = exportsParam.extras.inferredTypeObj;
-				modTypeName = doctrine.stringify(modTypeObj);
 				providedType = environment.findType(modTypeObj);
 
 			} else {
@@ -2688,19 +2686,16 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 					// actually, commonjs
 					kind = "commonjs";
 					modTypeObj = maybeExports.typeObj;
-					modTypeName = doctrine.stringify(modTypeObj);
 				} else {
 					kind = "global";
-					modTypeName = environment.globalTypeName();
 					modTypeObj = providedType['this'].typeObj;
 				}
 			}
 
 			// simplify the exported type
-			if (mTypes.isFunctionOrConstructor(modTypeObj) || environment.findType(modTypeObj).$$isBuiltin) {
-				// this module provides a built in type or a function
-				providedType = modTypeName;
-			} else {
+			if (!mTypes.isFunctionOrConstructor(modTypeObj) &&
+				!environment.findType(modTypeObj).$$isBuiltin) {
+
 				// this module provides a composite type
 				providedType = environment.findType(modTypeObj);
 			}
@@ -2708,7 +2703,14 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			var allTypes = environment.getAllTypes();
 
 			// now filter the builtins since they are always available
-			filterTypes(environment, kind, modTypeName, modTypeObj, providedType);
+			filterTypes(environment, kind, modTypeObj, providedType);
+
+			// Cases when provided type is not a record type.  store as a string
+			// warning...not all cases handled here...eg- union types
+			if (mTypes.isFunctionOrConstructor(modTypeObj) ||
+				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
+				providedType = doctrine.stringify(modTypeObj);
+			}
 
 			return {
 				provided : providedType,
