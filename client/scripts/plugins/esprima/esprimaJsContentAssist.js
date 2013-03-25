@@ -961,7 +961,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// the type of the function call may help infer the types of the parameters
 				// keep track of that here
 				rightMost = findRightMost(node.callee);
-				if (rightMost.type === "Identifier") {
+				if (rightMost && rightMost.type === "Identifier") {
 					rightMost.extras = rightMost.extras || {};
 					rightMost.extras.callArgs = node["arguments"];
 				}
