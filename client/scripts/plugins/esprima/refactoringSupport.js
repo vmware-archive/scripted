@@ -77,7 +77,7 @@ define(function (require) {
 					case 'ReturnStatement':
 					case 'SwitchCase':
 					case 'SwitchStatement':
-					case 'ThrowStatemen':
+					case 'ThrowStatement':
 					case 'TryStatement':
 					case 'UnaryExpression':
 					case 'UpdateExpression':

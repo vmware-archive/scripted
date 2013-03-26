@@ -71,7 +71,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			i--;
 		}
 
-		if (!start && i === 0) {
+		if (!start && i === -1) {
 			start = 0;
 		}
 

@@ -22,12 +22,13 @@
 					 "tests/client/esprima/summaryBuildingTests", 
 					 "tests/client/esprima/contentAssistDependencyTests",
 					 "tests/client/esprima/proposalUtilsTests",
+					 "tests/client/esprima/refactoringSupportTests",
 					 "tests/client/markoccurrences/markOccurrencesTests",
 					 "tests/client/indexer/indexerTests",
 					 "tests/client/keybindings/keystroke-tests",
 					 "tests/client/templates/param-resolverTests"],
 				function(nodeunitShim, pageState, contentAssistTests, navTests, summaryTests, dependencyTests,
-					proposalUtilsTests, markOccurrencesTests, indexerTests, keystroke, resolverTests) {
+					proposalUtilsTests, refactoringSupportTests, markOccurrencesTests, indexerTests, keystroke, resolverTests) {
 					pageState._setEditorPrefix(window.location.pathname + '?');
 					function testShim(tests) {
 						if (tests.module) {
@@ -58,6 +59,8 @@
 					testShim(dependencyTests);
 					module("Proposal Utils tests");
 					testShim(proposalUtilsTests);
+					module("Refactoring Support tests");
+					testShim(refactoringSupportTests);
 					module("Indexer tests");
 					testShim(indexerTests);
 					module("Mark occurrences tests");

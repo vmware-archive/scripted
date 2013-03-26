@@ -1501,7 +1501,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 * @return Boolean
 	 */
 	function leftTypeIsMoreGeneral(leftTypeObj, rightTypeObj, env) {
-		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj.name;
+		var leftTypeName = leftTypeObj.name || mTypes.convertToSimpleTypeName(leftTypeObj),
+			rightTypeName = rightTypeObj.name || mTypes.convertToSimpleTypeName(rightTypeObj);
 
 		if (!leftTypeName) {
 			if (leftTypeObj.type === 'NullLiteral' || leftTypeObj.type === 'UndefinedLiteral' || leftTypeObj.type === 'VoidLiteral') {
