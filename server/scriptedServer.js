@@ -29,7 +29,8 @@ function start(filesystem, options) {
 var defaultOptions = {
 	applicationManager: true,
 	shutdownHook: true,
-	exec: true
+	exec: true,
+	keyedit: true
 };
 options = jsonMerge(defaultOptions, options);
 if (options.help_text) {
