@@ -86,13 +86,13 @@ define(['plugins/esprima/refactoringSupport', "orion/assert"], function(refactor
 	tests['test function arguments'] = function() {
 		doTest('function f(xxx) { xxx; }', "xxx", 1);
 		doTest('function f(yyy,xxx) { xxx; }', "xxx", 1);
-		doTest('var xxx; function f(xxx) { var xxx; xxx; } xxx;', "xxx", 2, [0,1,4]);
 	};
 
 	tests['_test functions still failing'] = function() {
 		doTest('function f(yyy,xxx) { xxx; function f2(xxx) { xxx; } xxx; } xxx;', "xxx", 1, [2,3,5]);
 		doTest('function f(yyy,xxx) { xxx; } var xxx;', "xxx", 2, [0,1]);
 		doTest('var xxx; function f(yyy,xxx) { xxx; } xxx;', "xxx", 0, [1,2]);
+		doTest('var xxx; function f(xxx) { var xxx; xxx; } xxx;', "xxx", 2, [0,1,4]);
 	};
 
 
