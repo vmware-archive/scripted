@@ -53,7 +53,7 @@ define(function (require) {
 					return node === parent.value;
 				}
 				if (parent.type === 'MemberExpression') {
-					return node === parent.object;
+					return node === parent.object || (node === parent.property && parent.computed);
 				}
 
 				switch(parent.type) {

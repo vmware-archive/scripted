@@ -75,6 +75,7 @@ define(['plugins/esprima/refactoringSupport', "orion/assert"], function(refactor
 	};
 	tests['test expression kinds']  = function() {
 		doTest("var xxx; [xxx,xxx];", "xxx", 1);
+		doTest("var xxx; xxx[xxx];", "xxx", 1);
 		doTest("var xxx; ['xxx','xxx'];", "xxx", 0, [1,2]);
 		doTest("var xxx; xxx = xxx;", "xxx", 1);
 		doTest("var xxx; xxx.xxx;", "xxx", 1, [2]);
