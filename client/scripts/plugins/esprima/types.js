@@ -1723,7 +1723,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					return typeObj.name;
 
 				case 'TypeApplication':
-				case 'ArrayExpressopm':
+				case 'ArrayType':
 					return "Array";
 
 				case 'FunctionType':
@@ -1828,9 +1828,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 						res += ">";
 					}
 					return res;
-				case 'ArrayExpressopm':
-					if (typeObj.applications) {
-						typeObj.applications.forEach(function(elt) {
+				case 'ArrayType':
+					if (typeObj.elements) {
+						typeObj.elements.forEach(function(elt) {
 							parts.push(self.convertToHtml(elt, depth+1));
 						});
 					}

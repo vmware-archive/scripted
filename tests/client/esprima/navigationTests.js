@@ -335,6 +335,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"foo[x]", "x", "Number", "x : Number", 1);
 	};
 
+	tests.testInsideArrayAccess1 = function() {
+		doSameFileTest("var x = 0;\n" +
+			"var foo = [];\n" +
+			"foo[x]", "x", "Number", "x : Number", 1);
+	};
 
 	//////////////////////////////////////////////////////////
 	// full file inferencing
@@ -436,6 +441,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"var first = [];\n" +
 			"first[0] = [1];\n" +
 			"var other = first[0][0]", "other", "Number", "other : Number", 1);
+	};
+
+	tests.testArray8 = function() {
+		doSameFileTest(
+			"var first = ['Andrew', 'Eisenberg'];\n" +
+			"first", "first", "[String]", "first : [String]", 1);
 	};
 
 
