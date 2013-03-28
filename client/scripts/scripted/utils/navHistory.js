@@ -109,6 +109,9 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 		var mainEditor = editorUtils.getMainEditor();
 		var subEditor = editorUtils.getSubEditor();
 
+		var mainWasDirty = mainEditor.isDirty();
+		var subWasDirty = subEditor.isDirty();
+
 		var mainPath = mainEditor.getFilePath();
 		var mainScrollpos = mainEditor.getScroll();
 		var mainSel = mainEditor.getTextView().getSelection();
@@ -148,6 +151,13 @@ function(mSidePanelManager, mPaneFactory, mPageState, mOsUtils, editorUtils, scr
 					subEditor.getTextView().focus();
 				} else {
 					mainEditor.getTextView().focus();
+				}
+
+				if (!mainWasDirty) {
+					subEditor.setDirty(false);
+				}
+				if (!subWasDirty) {
+					mainEditor.setDirty(false);
 				}
 			});
 		});
