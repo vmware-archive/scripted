@@ -1730,7 +1730,9 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					return "Function";
 
 				case 'UnionType':
-					return typeObj.expressions[0];
+					return typeObj.expressions && typeObj.expressions.length > 0 ?
+						this.convertToSimpleTypeName(typeObj.expressions[0]) :
+						"Object";
 
 				case 'RecordType':
 					return "Object";
