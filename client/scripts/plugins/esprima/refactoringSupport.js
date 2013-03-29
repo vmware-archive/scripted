@@ -114,8 +114,26 @@ define(function (require) {
 									? parentStack.length-2 : parentStack.length-1;
 							for (i = startStack; i >= 0 ; i--) {
 								if (parentStack[i].type === 'FunctionExpression' ||
-									parentStack[i].type === 'FunctionDeclaration' ||
-									parentStack[i].type === 'Program') {
+									parentStack[i].type === 'FunctionDeclaration') {
+
+									// if the node is a parameter, then add the function as the scope
+									// if the node is an identifier in the function body, then add the body.
+									// this allows for a distinction between function parameters and vars declared in them
+									var found;
+									if (parentStack[i].params && parentStack[i].params.length > 0) {
+										for (var j = 0; j < parentStack[i].params.length; j++) {
+											if (parentStack[i].params[j] === node) {
+												declScopes.push(parentStack[i].range);
+												found = true;
+												break;
+											}
+										}
+									}
+
+									if (!found) {
+										declScopes.push(parentStack[i].body.range);
+									}
+								} else if (parentStack[i].type === 'Program') {
 
 									declScopes.push(parentStack[i].range);
 									break;
@@ -146,9 +164,9 @@ define(function (require) {
 
 			// next, order declScopes from smallest to biggest
 			declScopes.sort(function(l, r) {
-				var lSize = l.end - l.start;
-				var rSize = r.end - r.start;
-				return rSize - lSize; // TODO reverse???
+				var lSize = l[1] - l[0];
+				var rSize = r[1] - r[0];
+				return lSize - rSize;
 			});
 
 			var targetScope;
