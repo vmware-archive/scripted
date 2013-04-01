@@ -26,10 +26,10 @@ define(function() {
 		//  editor.expandtab (boolean)
 		//  editor.tabsize (number)
 		// rule: if possible (compatible), copy one config to the other
-		var editor_expandtab_set = dotScripted.editor && dotScripted.editor.expandtab !== null;
-		var editor_tabsize_set = dotScripted.editor && dotScripted.editor.tabsize !== null;
-		var formatter_js_indent_size_set = dotScripted.formatter && dotScripted.formatter.js && dotScripted.formatter.js.indent_size !== null;
-		var formatter_js_indent_char_set = dotScripted.formatter && dotScripted.formatter.js && dotScripted.formatter.js.indent_char !== null;
+		var editor_expandtab_set = dotScripted.editor && (typeof dotScripted.editor.expandtab !== 'undefined');
+		var editor_tabsize_set = dotScripted.editor && (typeof dotScripted.editor.tabsize !== 'undefined');
+		var formatter_js_indent_size_set = dotScripted.formatter && dotScripted.formatter.js && (typeof dotScripted.formatter.js.indent_size !== 'undefined');
+		var formatter_js_indent_char_set = dotScripted.formatter && dotScripted.formatter.js && (typeof dotScripted.formatter.js.indent_char !== 'undefined');
 
 		// Just do the common cases for now:
 		if (editor_expandtab_set || editor_tabsize_set) {
@@ -80,16 +80,16 @@ define(function() {
 					} else {
 						dotScripted.editor.expandtab = true;
 					}
-					if (formatter_js_indent_size_set) {
-						// Set the tabsize to match the indent size
-						var indentsize = dotScripted.formatter.js.indent_size;
-						if (!dotScripted.editor) {
-							dotScripted.editor = {
-								"tabsize": indentsize
-							};
-						} else {
-							dotScripted.editor.tabsize = indentsize;
-						}
+				}
+				if (formatter_js_indent_size_set) {
+					// Set the tabsize to match the indent size
+					var indentsize = dotScripted.formatter.js.indent_size;
+					if (!dotScripted.editor) {
+						dotScripted.editor = {
+							"tabsize": indentsize
+						};
+					} else {
+						dotScripted.editor.tabsize = indentsize;
 					}
 				}
 			}
