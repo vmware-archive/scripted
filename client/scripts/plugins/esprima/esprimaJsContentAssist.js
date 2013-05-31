@@ -1836,7 +1836,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			 * Will not override an existing variable if the new typeName is "Object" or "undefined"
 			 */
 			addOrSetVariable : function(name, target, typeObj, range, docRange) {
-				if (name === 'prototype' || name === '__proto__') {
+				if (name === 'prototype') {
+					name = '$$prototype';
+				} else if (name === '__proto__') {
 					name = '$$proto';
 				} else if (this._allTypes.Object["$_$" + name]) {
 					// this is a built in property of object.  do not redefine
@@ -1868,7 +1870,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 							// special case: if we're updating $$prototype, and $$newtype is
 							// also present, update $$proto of newType appropriately
 							if (name === '$$prototype' && current.$$newtype) {
-							  var newType = this._allTypes[current.$$newtype.typeObj];
+							  var newType = this._allTypes[current.$$newtype.typeObj.name];
 							  newType.$$proto.typeObj = typeObj;
 							}
 
