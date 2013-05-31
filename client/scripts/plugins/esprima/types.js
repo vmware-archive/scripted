@@ -1624,6 +1624,10 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					if (doCombine && env.isSyntheticName(name)) {
 						// Must mush together all properties for this synthetic type
 						var origFields = allTypes[name];
+						// MS hack for new function types
+						if (origFields.$$fntype) {
+							return self.convertJsDocType(origFields.$$fntype, env, doCombine, depth);
+						}
 						// must combine a record type
 						var newFields = [];
 						Object.keys(origFields).forEach(function(key) {

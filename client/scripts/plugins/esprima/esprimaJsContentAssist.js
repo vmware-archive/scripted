@@ -719,7 +719,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			break;
 		case "FunctionDeclaration":
 		case "FunctionExpression":
-			debugger;
 			var nameRange;
 			if (node.id) {
 				// true for function declarations
@@ -1188,9 +1187,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						fnameRange = node.extras.fnameRange;
 					}
 
-					// an extra scope was created for the implicit 'this'
-					env.popScope();
-
 					// now add a reference to the constructor
 					env.addOrSetVariable(mTypes.extractReturnType(node.extras.inferredTypeObj), node.extras.target, node.extras.inferredTypeObj, fnameRange);
 				} else {
@@ -1296,7 +1292,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			break;
 		case 'Identifier':
 			name = node.name;
-			debugger;
 			newTypeObj = env.lookupTypeObj(name, node.extras.target);
 			if (newTypeObj && !node.extras.isDecl) {
 				// name already exists but we are redeclaring it and so not being overridden
