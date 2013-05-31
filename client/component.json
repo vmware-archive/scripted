@@ -11,6 +11,6 @@
 		"qunit": "1.10.0",
 		"json5": "0.1.0",
 		"probes": "0.1.0",
-		"doctrine": "git://github.com/aeisenberg/doctrine.git"
+		"doctrine": "0.0.4"
 	}
 }

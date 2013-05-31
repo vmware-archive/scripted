@@ -2286,7 +2286,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 * filters types from the environment that should not be exported
 	 */
 	function filterTypes(environment, kind, moduleTypeObj, provided) {
-		var moduleTypeName = doctrine.stringify(moduleTypeObj);
+		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
 		var allTypes = environment.getAllTypes();
 		allTypes.clearDefaultGlobal();
 
@@ -2342,7 +2342,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			for (var defName in type) {
 				if (type.hasOwnProperty(defName)) {
 					var def = type[defName];
-					def.typeSig = doctrine.stringify(def.typeObj);
+					def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
 					delete def._typeObj;
 				}
 			}
@@ -2353,7 +2353,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				if (provided.hasOwnProperty(defName)) {
 					var def = provided[defName];
 					if (def.typeObj) {
-						def.typeSig = doctrine.stringify(def.typeObj);
+						def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
 						delete def._typeObj;
 					}
 				}
@@ -2710,7 +2710,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			// warning...not all cases handled here...eg- union types
 			if (mTypes.isFunctionOrConstructor(modTypeObj) ||
 				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
-				providedType = doctrine.stringify(modTypeObj);
+				providedType = doctrine.type.stringify(modTypeObj, {compact: true});
 			}
 
 			return {

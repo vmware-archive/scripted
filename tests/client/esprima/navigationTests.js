@@ -46,7 +46,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		if (!actual) {
 			assert.fail("No definition found for:\n" + expected.hoverText );
 		}
-		assert.equal(doctrine.stringify(actual.typeObj), expected.typeSig, "Invalid type name in definition");
+		assert.equal(doctrine.type.stringify(actual.typeObj, {compact: true}), expected.typeSig, "Invalid type name in definition");
 		assert.equal(actual.path, expected.path, "Invalid path in definition");
 		if (!expected.range) {
 			assert.ok(!actual.range, "Should not have found a range object: " + actual.range);
