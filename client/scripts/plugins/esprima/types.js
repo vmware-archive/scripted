@@ -1615,6 +1615,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				case 'OptionalType':
 				case 'NullableType':
 					return {
+						prefix: true,
 						type: jsdocType.type,
 						expression: self.convertJsDocType(jsdocType.expression, env, doCombine, depth)
 					};
@@ -1769,7 +1770,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 				if (useHtml) {
 					return this.convertToHtml(typeObj, 0);
 				}
-				var res = doctrine.stringify(typeObj);
+				var res = doctrine.type.stringify(typeObj, {compact: true});
 				res = res.replace(JUST_DOTS_REGEX, "{...}");
 				res = res.replace(UNDEFINED_OR_EMPTY_OBJ, "");
 				return res;
