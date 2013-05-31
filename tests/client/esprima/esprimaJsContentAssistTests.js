@@ -430,6 +430,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {}"],
 			["c", "c : {}"],
+			["this", "this : {}"],
 			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -454,7 +455,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
-			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
@@ -473,6 +473,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {}"],
 			["c", "c : {}"],
+			["this", "this : {}"],
 			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -498,7 +499,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["nuthin", "nuthin : {}"],
-			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
@@ -569,6 +569,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {}"],
 			["c", "c : {}"],
+			["this", "this : {}"],
 			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -593,7 +594,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
-			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
@@ -618,6 +618,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {}"],
 			["c", "c : {}"],
+			["this", "this : {}"],
 			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
@@ -641,7 +642,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
-			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : Boolean"],
@@ -858,13 +858,15 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	};
 
 
-	tests["test get global var"] = function() {
-		// should infer that we are referring to the globally defined xxx, not the param
-		var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { this.xxx.toF/**/}", "toF");
-		testProposals(results, [
-			["toFixed(digits)", "toFixed(digits) : String"]
-		]);
-	};
+	// TODO MS disabling this test.  It's not clear to me this is the desired behavior,
+	// since we don't really have any idea if the global object will be passed as 'this'
+	// tests["test get global var"] = function() {
+	// 	// should infer that we are referring to the globally defined xxx, not the param
+	// 	var results = computeContentAssist("var xxx = 9;\nfunction fff(xxx) { this.xxx.toF/**/}", "toF");
+	// 	testProposals(results, [
+	// 		["toFixed(digits)", "toFixed(digits) : Number"]
+	// 	]);
+	// };
 
 	tests["test get local var"] = function() {
 		// should infer that we are referring to the locally defined xxx, not the global
@@ -2093,14 +2095,15 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 
 	// TODO FIXADE this is wrong, but we're still going to test it
 	// constructor declared as a member available in global scope
-	tests["test constructor in constructor BAD"] = function() {
-		var results = computeContentAssist(
-			"var obj = function() { this.Fn = function() { }; };\n" +
-			"new Fn", "Fn");
-		testProposals(results, [
-			["Fn()", "Fn() : obj.Fn"]
-		]);
-	};
+	// TODO MS disabled this test now.  I don't think we want this behavior
+//	tests["test constructor in constructor BAD"] = function() {
+//		var results = computeContentAssist(
+//			"var obj = function() { this.Fn = function() { }; };\n" +
+//			"new Fn", "Fn");
+//		testProposals(results, [
+//			["Fn()", "Fn() : obj.Fn"]
+//		]);
+//	};
 
 	// Not ideal, but a constructor being used from a constructed object is not dotted, but should be
 	tests["test constructor in constructor Not Ideal"] = function() {
