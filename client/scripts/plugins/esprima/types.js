@@ -1636,7 +1636,7 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 								return;
 							}
 							var prop = origFields[key];
-							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name)) ?
+							var fieldType = depth > 0 && (prop.typeObj.type === 'NameExpression' && env.isSyntheticName(prop.typeObj.name) && !allTypes[prop.typeObj.name].$$fntype) ?
 							     { type : 'NameExpression', name : JUST_DOTS } :
 							     self.convertJsDocType(prop.typeObj, env, doCombine, depth+1);
 							newFields.push({
