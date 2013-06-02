@@ -43,7 +43,7 @@ function makeApi(relativeBaseDir) {
 	var baseDir = __dirname+'/test-resources/'+relativeBaseDir;
 	var testfs = filesystem.withBaseDir(baseDir, {
 		userHome: 'user.home',
-		scriptedHome: 'scripted.home'
+		scriptedHome: baseDir
 	});
 	var api = require('../../server/jsdepend/dot-scripted').configure(testfs);
 	//We are in test mode so the 'private' apis are ok to use:

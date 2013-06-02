@@ -763,6 +763,25 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		]);
 	};
 
+	//////////////////////////////////////////////////////////
+	// tests for closure modules
+	// These tests are limited because closure doesn't really
+	// provide a module system, only a dependency resolver. So
+	// everything is essentially treated as namespaced globals.
+	//////////////////////////////////////////////////////////
+	tests.testClosure1 = function() {
+		var results = computeContentAssist(
+			"goog.require('foo.Bar')\n"+
+			"new foo.Bar()./**/\n" +
+			"});", "b", new MockIndexer({
+				'foo.Bar':  "goog.provide('foo.Bar')\n" +
+							"foo.Bar = function() {};\n" +
+							"foo.Bar.prototype.baz = function() {};\n"
+			}));
+		testProposals(results, [
+			["baz()", "baz() : undefined"]
+		]);
+	};
 
 	//////////////////////////////////////////////////////////
 	// Browser awareness

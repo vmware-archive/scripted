@@ -92,6 +92,49 @@ exports.asynchRequireCallRefs = function (test) {
 	});
 };
 
+exports.closureRequire = function (test) {
+	var api = makeApi('simple-web');
+	api.getContents("with-closure-require-call.js", function (contents) {
+		var parseTree = esprima.parse(contents);
+		//dumpTree(parseTree);
+		findReferences(parseTree, function (references) {
+			test.equals(toCompareString(references), toCompareString([
+				{kind: 'closure', name: 'some.package'}
+			]));
+			test.done();
+		});
+	});
+};
+
+exports.closureProvide = function (test) {
+	var api = makeApi('simple-web');
+	api.getContents("with-closure-require-call.js", function (contents) {
+		var parseTree = esprima.parse(contents);
+		//dumpTree(parseTree);
+		findReferences(parseTree, function (references) {
+			test.equals(toCompareString(references), toCompareString([
+				{kind: 'closure', name: 'some.package'}
+			]));
+			test.done();
+		});
+	});
+};
+
+exports.closureMultipleRequires = function (test) {
+	var api = makeApi('simple-web');
+	api.getContents("with-closure-calls.js", function (contents) {
+		var parseTree = esprima.parse(contents);
+		//dumpTree(parseTree);
+		findReferences(parseTree, function (references) {
+			test.equals(toCompareString(references), toCompareString([
+				{kind: 'closure', name: 'foo.Baz'},
+				{kind: 'closure', name: 'foo.Bez'}
+			]));
+			test.done();
+		});
+	});
+};
+
 exports.commonjsRefs = function (test) {
 	var api = makeApi('node-with-amd-defines');
 	api.getContents("main.js", function (contents) {

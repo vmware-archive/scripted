@@ -77,7 +77,7 @@ function configure(filesystem, options) {
 		require('./servlets/application-servlet').install(app);
 
 		console.log('Server port = ' + port);
-		app.server.listen(port, "127.0.0.1" /* only accepting connections from localhost */);
+		app.server.listen(port, "" /* only accepting connections from localhost */);
 		console.log("Server has started.");
 	}
 

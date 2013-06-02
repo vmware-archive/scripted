@@ -307,6 +307,27 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		assertCreateSummary('{"provided":"function(a:Object,b:Object,new:Exported):Exported","types":{"Exported":{"$$proto":"Exported~proto","a":"Number"},"Exported~proto":{"$$proto":"Object","open":"function():Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports = Exported; });", "a");
 	};
+	
+	
+	//////////////////////////////////////////////////////////
+	// Closure dependencies
+	// Testing basics of goog.provide, otherwise they act just
+	// like globals
+	//////////////////////////////////////////////////////////
+	tests.testClosure1 = function() {
+		assertCreateSummary('{"provided":{"goog":"gen~97~0"},"types":{"gen~97~0":{"$$proto":"Object","provide":"Object"}},"kind":"closure"}',
+			"goog.provide('Bar');", "a");
+	};
+	tests.testClosure2 = function() {
+		assertCreateSummary('{"provided":{"goog":"gen~97~0","Bar":"function(new:Bar):Bar","[object Object]":"function(new:Bar):Bar"},"types":{"gen~97~0":{"$$proto":"Object","provide":"Object"},"Bar":{"$$proto":"Bar~proto"},"Bar~proto":{"$$proto":"Object"}},"kind":"closure"}',
+			"goog.provide('Bar');\n" +
+			"Bar = function() {};", "a");
+	};
+	tests.testClosure3 = function() {
+		assertCreateSummary('{"provided":{"goog":"gen~97~0","foo":"gen~97~2","foo.Bar":"function(new:foo.Bar):foo.Bar","[object Object]":"function(new:foo.Bar):foo.Bar"},"types":{"gen~97~0":{"$$proto":"Object","provide":"Object"},"gen~97~2":{"$$proto":"Object","Bar":"function(new:foo.Bar):foo.Bar"},"foo.Bar":{"$$proto":"foo.Bar~proto"},"foo.Bar~proto":{"$$proto":"Object"}},"kind":"closure"}',
+			"goog.provide('foo.Bar');\n" +
+			"foo.Bar = function() {};", "a");
+	};
 
 	//////////////////////////////////////////////////////////
 	// Browser awareness

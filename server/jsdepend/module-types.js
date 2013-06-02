@@ -74,6 +74,23 @@ var exportsAssignment = objectPat({
     }
 });
 
+var closureProvideRequire =  containsPat(objectPat( {
+	/* matches: goog.require('string') */
+    "type": "CallExpression",
+    "callee": {
+      "type": "MemberExpression",
+      "object": {
+        "type": "Identifier",
+        "name": "goog"
+      },
+      "property": {
+        "type": "Identifier",
+        "name": orPat([objectPat("provide"), objectPat("require")])
+      }
+    }
+}));
+
+
 // create a pattern that matches a call to a given function name
 function callPat(name) {
 	return objectPat( {
@@ -98,6 +115,8 @@ function getModuleType(tree) {
 		return 'AMD';
 	} else if (matches(commonJsWrapper, tree)) {
 		return 'commonjs,AMD';
+	} else if (matches(closureProvideRequire, tree)) {
+		return 'closure';
 	} else if (matches(commonJsPlain, tree)) {
 		return 'commonjs';
 	} else {

@@ -248,7 +248,7 @@ function each(array, fun) {
 			for (var prop in deps.refs) {
 				if (deps.refs.hasOwnProperty(prop)) {
 					var ref = deps.refs[prop];
-					if (ref.kind === "global") {
+					if (ref.kind === "global" || ref.kind === "closure") {
 						var depPath = ref.path;
 						var summary = retrieveFn(depPath + "-summary");
 						if (summary) {
