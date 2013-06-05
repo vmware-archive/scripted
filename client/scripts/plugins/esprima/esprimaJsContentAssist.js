@@ -1106,7 +1106,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				if (kvps[i].hasOwnProperty("key")) {
 					name = kvps[i].key.name;
 					if (name && kvps[i].value.type === "FunctionExpression") {
-						env.updateObjLitFunctionType(node,kvps[i].value);
+						env.updateObjLitFunctionType(node,name,kvps[i].value);
 					}
 				}
 			}
@@ -2030,15 +2030,15 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
              * update the $$newtype of a function expression created in an object literal to have the final
              * types for all the object literal's properties
              */
-            updateObjLitFunctionType: function(objLitNode,funcExpNode) {
-              var objLitTypeName = objLitNode.extras.inferredType, funcTypeName = funcExpNode.extras.inferredType;
+            updateObjLitFunctionType: function(objLitNode,propName,funcExpNode) {
+              var objLitTypeName = objLitNode.extras.inferredTypeObj.name, funcTypeName = funcExpNode.extras.inferredTypeObj.name;
               if (objLitTypeName && funcTypeName) {
                 var objLitType = this._allTypes[objLitTypeName];
-                var funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeName];
+                var funcExpNewType = this._allTypes[this._allTypes[funcTypeName].$$newtype.typeObj.name];
                 for (var p in objLitType) {
                   // NOTE we don't add a property if it already exists, to preserve writes to 'this'
-                  // inside the function
-                  if (objLitType.hasOwnProperty(p) && !funcExpNewType.hasOwnProperty(p) && p.indexOf("$$") !== 0) {
+                  // inside the function.  Also, don't add a type for the corresponding property name
+                  if (objLitType.hasOwnProperty(p) && !funcExpNewType.hasOwnProperty(p) && p !== propName && p.indexOf("$$") !== 0) {
                     funcExpNewType[p] = objLitType[p];
                   }
                 }

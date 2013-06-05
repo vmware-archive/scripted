@@ -4179,5 +4179,55 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
+	// tests for richer function types
+	tests['test function with property'] = function() {
+		var results = computeContentAssist(
+			"function f() { }\n" +
+			"f.xxxx = 3;\n" +
+			"f.x", "x");
+		testProposals(results, [
+			["xxxx", "xxxx : Number"]
+		]);
+	};
+	tests["test lowercase constructor 1"] = function() {
+		var results = computeContentAssist(
+		"function fun() {\n	this.xxx = 9;\n	this.uuu = this.x/**/;}", "x");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests["test lowercase constructor 2"] = function() {
+		var results = computeContentAssist(
+		"function fun() {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
+		"var y = new fun();\n" +
+		"y.x", "x");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests["test lowercase constructor prototype"] = function() {
+		var results = computeContentAssist(
+			"var aaa = function() { };\naaa.prototype = { foo : 9 };\nnew aaa().f", "f");
+		testProposals(results, [
+			["foo", "foo : Number"]
+		]);
+	};
+	tests["test object literal usage-based inference"] = function() {
+		var results = computeContentAssist(
+			"var p = { xxxx: function() { }, yyyy: function() { this.x/**/; } };", "x");
+		testProposals(results, [
+			["xxxx()", "xxxx() : undefined"]
+		]);
+	};
+	tests["test object literal usage-based inference 2"] = function() {
+		var results = computeContentAssist(
+			"var p = { xxxx: function() { this.yyyy = 3; }, yyyy: function() {} };\n" +
+			"var q = new p.xxxx();\n" +
+			"q.y", "y");
+		testProposals(results, [
+			["yyyy", "yyyy : Number"]
+		]);
+	};
+
 	return tests;
 });
