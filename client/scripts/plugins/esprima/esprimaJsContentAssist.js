@@ -2398,6 +2398,39 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	}
 
 	/**
+	 * Is typeObj a reference to a function type?
+	 */
+	function fnTypeRef(typeObj, allTypes) {
+		return typeObj.type === "NameExpression" &&
+			allTypes[typeObj.name] && allTypes[typeObj.name].$$fntype;
+	}
+
+	/**
+	 * Inline all the function types referenced from the function type
+	 * def, by replacing references to object types with a $$fntype
+	 * property to the value of the $$fntype property
+	 */
+	function inlineFunctionTypes(def,allTypes,fnTypes) {
+		if (def.params) {
+			for (var i = 0; i < def.params.length; i++) {
+				var paramType = def.params[i];
+				if (fnTypeRef(paramType, allTypes)) {
+					if (fnTypes) { fnTypes[paramType.name] = true; }
+					inlineFunctionTypes(allTypes[paramType.name].$$fntype,allTypes,fnTypes);
+					def.params[i] = allTypes[paramType.name].$$fntype;
+				}
+			}
+		}
+		if (def.result) {
+			if (fnTypeRef(def.result, allTypes)) {
+				if (fnTypes) { fnTypes[def.result.name] = true; }
+				inlineFunctionTypes(allTypes[def.result.name].$$fntype,allTypes,fnTypes);
+				def.result = allTypes[def.result.name].$$fntype;
+			}
+		}
+	}
+
+	/**
 	 * filters types from the environment that should not be exported
 	 */
 	function filterTypes(environment, kind, moduleTypeObj, provided) {
@@ -2405,11 +2438,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		var allTypes = environment.getAllTypes();
 		allTypes.clearDefaultGlobal();
 
-		// utility function
-		var fnTypeRef = function(typeObj) {
-			return typeObj.type === "NameExpression" &&
-				allTypes[typeObj.name] && allTypes[typeObj.name].$$fntype;
-		};
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
@@ -2463,23 +2491,6 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		// properties
 		var fnTypes = {};
 
-		var inlineFunctionTypes = function(def) {
-			if (def.params) {
-				for (var i = 0; i < def.params.length; i++) {
-					var paramType = def.params[i];
-					if (fnTypeRef(paramType)) {
-						fnTypes[paramType.name] = true;
-						def.params[i] = allTypes[paramType.name].$$fntype;
-					}
-				}
-			}
-			if (def.result) {
-				if (fnTypeRef(def.result)) {
-					fnTypes[def.result.name] = true;
-					def.result = allTypes[def.result.name].$$fntype;
-				}
-			}
-		}
 		// now reformat the types so that they are combined and serialized
 		Object.keys(allTypes).forEach(function(typeName) {
 		    var type = allTypes[typeName];
@@ -2490,10 +2501,10 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						// here, we still need to "inline" function types for parameters
 						// and result
 						// TODO make this a visitor?
-						inlineFunctionTypes(def);
+						inlineFunctionTypes(def, allTypes, fnTypes);
 					} else {
 						var typeObj = def.typeObj;
-						if (fnTypeRef(typeObj)) {
+						if (fnTypeRef(typeObj, allTypes)) {
 							fnTypes[typeObj.name] = true;
 							typeObj = allTypes[typeObj.name].$$fntype;
 						}
@@ -2509,11 +2520,11 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				if (provided.hasOwnProperty(defName)) {
 					var def = provided[defName];
 					if (defName === '$$fntype') {
-						inlineFunctionTypes(def);
+						inlineFunctionTypes(def, allTypes, fnTypes);
 					} else {
 						if (def.typeObj) {
 							var typeObj = def.typeObj;
-							if (fnTypeRef(typeObj)) {
+							if (fnTypeRef(typeObj, allTypes)) {
 								fnTypes[typeObj.name] = true;
 								typeObj = allTypes[typeObj.name].$$fntype;
 							}
@@ -2782,6 +2793,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			var lookupName = toLookFor.type === "Identifier" ? toLookFor.name : 'this';
 			var maybeType = environment.lookupTypeObj(lookupName, toLookFor.extras.target || target, true);
 			if (maybeType) {
+				// if it's a reference to a function type, suck out $$fntype
+				var allTypes = environment.getAllTypes();
+				if (fnTypeRef(maybeType.typeObj,allTypes)) {
+					inlineFunctionTypes(allTypes[maybeType.typeObj.name].$$fntype,allTypes);
+					maybeType.typeObj = allTypes[maybeType.typeObj.name].$$fntype;
+				}
 				var hover = mTypes.styleAsProperty(lookupName, findName) + " : " + mTypes.createReadableType(maybeType.typeObj, environment, true, 0, findName);
 				maybeType.hoverText = hover;
 				return maybeType;

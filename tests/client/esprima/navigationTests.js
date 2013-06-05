@@ -136,7 +136,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	};
 	tests.testVar3 = function() {
 		doSameFileTest("var aaa = function(a,b,c) { return function(a) { return 9; }; }\naaa",
-			'aaa', "function(a:gen~103145323~0,b:gen~103145323~1,c:gen~103145323~2):function(a:gen~103145323~5):Number",
+			'aaa', "function(a:gen~103145323~0,b:gen~103145323~1,c:gen~103145323~2):function(a:gen~103145323~6):Number",
 			'aaa : function(a,b,c):function(a):Number');
 	};
 	tests.testParam1 = function() {
@@ -529,7 +529,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"function ParseFile(path) { path.sumpin = ''; }\n" +
 			"var x;";
 		doSameFileTest(
-			contents, "ParseFile", "function(path:gen~103145323~2,new:ParseFile):ParseFile", "ParseFile : function(path:{foo:Number,bar:String,sumpin:String},new:ParseFile):ParseFile", 1,
+			contents, "ParseFile", "function(path:gen~103145323~1,new:ParseFile):ParseFile", "ParseFile : function(path:{foo:Number,bar:String,sumpin:String},new:ParseFile):ParseFile", 1,
 			[contents.indexOf("/**"), contents.indexOf("*/")+2]);
 	};
 
