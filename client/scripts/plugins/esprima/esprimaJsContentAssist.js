@@ -2354,6 +2354,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
 					var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
+					// don't count $$newtype as keeping a type reachable, since we inline function types
+					if (prop === '$$newtype') { continue; }
 					// must visit the type strucutre
 					visitTypeStructure(propType, operation);
 				}

@@ -209,7 +209,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 
 	// https://github.com/scripted-editor/scripted/issues/96
 	tests["test constructor export with changed prototype"] = function() {
-		assertCreateSummary('{"provided":"function(model:Object,new:Car):Car","types":{"Car":{"$$proto":"gen~97~9","model":"Object"},"gen~97~9":{"$$proto":"Object","show":"function():undefined","model":"Object"}},"kind":"AMD"}',
+		assertCreateSummary("{\"provided\":\"function(model:Object,new:Car):Car\",\"types\":{\"Car\":{\"$$proto\":\"gen~97~10\",\"model\":\"Object\"},\"gen~97~10\":{\"$$proto\":\"Object\",\"show\":\"function():undefined\"}},\"kind\":\"AMD\"}",
 			"define(function() {\n" +
 			"    function Car(model) {\n" +
 			"        this.model = model;\n" +
