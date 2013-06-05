@@ -2353,7 +2353,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		if (currentType) {
 			for(var prop in currentType) {
 				if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-					var propType = currentType[prop].typeObj;
+					var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
 					// must visit the type strucutre
 					visitTypeStructure(propType, operation);
 				}
@@ -2384,7 +2384,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (currentType) {
 				for(var prop in currentType) {
 					if (currentType.hasOwnProperty(prop) && prop !== '$$isBuiltin' ) {
-						var propType = currentType[prop].typeObj;
+						var propType = prop === '$$fntype' ? currentType[prop] : currentType[prop].typeObj;
 						// must visit the type strucutre
 						visitTypeStructure(propType, operation);
 					}
@@ -2394,6 +2394,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 
 		visitTypeStructure(currentTypeObj, operation);
 	}
+
 	/**
 	 * filters types from the environment that should not be exported
 	 */
@@ -2401,6 +2402,12 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		var moduleTypeName = doctrine.type.stringify(moduleTypeObj, {compact: true});
 		var allTypes = environment.getAllTypes();
 		allTypes.clearDefaultGlobal();
+
+		// utility function
+		var fnTypeRef = function(typeObj) {
+			return typeObj.type === "NameExpression" &&
+				allTypes[typeObj.name] && allTypes[typeObj.name].$$fntype;
+		};
 
 		// recursively walk the type tree to find unreachable types and delete them, too
 		var reachable = { };
@@ -2448,14 +2455,49 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			delete allTypes[key];
 		});
 
+		// for now, we delete *all* object types representing functions,
+		// "inlining" the function type wherever it appears
+		// TODO devise a serialized representation for function types with
+		// properties
+		var fnTypes = {};
+
+		var inlineFunctionTypes = function(def) {
+			if (def.params) {
+				for (var i = 0; i < def.params.length; i++) {
+					var paramType = def.params[i];
+					if (fnTypeRef(paramType)) {
+						fnTypes[paramType.name] = true;
+						def.params[i] = allTypes[paramType.name].$$fntype;
+					}
+				}
+			}
+			if (def.result) {
+				if (fnTypeRef(def.result)) {
+					fnTypes[def.result.name] = true;
+					def.result = allTypes[def.result.name].$$fntype;
+				}
+			}
+		}
 		// now reformat the types so that they are combined and serialized
 		Object.keys(allTypes).forEach(function(typeName) {
 		    var type = allTypes[typeName];
 			for (var defName in type) {
 				if (type.hasOwnProperty(defName)) {
 					var def = type[defName];
-					def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
-					delete def._typeObj;
+					if (defName === '$$fntype') {
+						// here, we still need to "inline" function types for parameters
+						// and result
+						// TODO make this a visitor?
+						inlineFunctionTypes(def);
+					} else {
+						var typeObj = def.typeObj;
+						if (fnTypeRef(typeObj)) {
+							fnTypes[typeObj.name] = true;
+							typeObj = allTypes[typeObj.name].$$fntype;
+						}
+						def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
+						delete def._typeObj;
+					}
 				}
 			}
 		});
@@ -2464,13 +2506,27 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			for (var defName in provided) {
 				if (provided.hasOwnProperty(defName)) {
 					var def = provided[defName];
-					if (def.typeObj) {
-						def.typeSig = doctrine.type.stringify(def.typeObj, {compact: true});
-						delete def._typeObj;
+					if (defName === '$$fntype') {
+						inlineFunctionTypes(def);
+					} else {
+						if (def.typeObj) {
+							var typeObj = def.typeObj;
+							if (fnTypeRef(typeObj)) {
+								fnTypes[typeObj.name] = true;
+								typeObj = allTypes[typeObj.name].$$fntype;
+							}
+							def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
+							delete def._typeObj;
+						}
 					}
 				}
 			}
 		}
+
+		// finally, delete all function types
+		Object.keys(fnTypes).forEach(function(key) {
+			delete allTypes[key];
+		});
 
 	}
 
@@ -2774,7 +2830,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				// the exports is the return value of the final argument
 				var args = environment.amdModule["arguments"];
 				if (args && args.length > 0) {
-					modTypeObj = mTypes.extractReturnType(args[args.length-1].extras.inferredTypeObj);
+					modTypeObj = mTypes.extractReturnType(environment.getFnType(args[args.length-1]));
 				} else {
 					modTypeObj = mTypes.OBJECT_TYPE;
 				}
@@ -2823,6 +2879,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 			if (mTypes.isFunctionOrConstructor(modTypeObj) ||
 				(environment.findType(modTypeObj) && environment.findType(modTypeObj).$$isBuiltin)) {
 				providedType = doctrine.type.stringify(modTypeObj, {compact: true});
+			} else if (providedType.$$fntype) {
+				providedType = doctrine.type.stringify(providedType.$$fntype, {compact: true});
 			}
 
 			return {
