@@ -1,6 +1,8 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2013 IBM Corporation.
+ *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
@@ -10,6 +12,7 @@
  * Contributors:
  *	 Andy Clement (VMware) - initial API and implementation
  *	 Andrew Eisenberg (VMware) - implemented visitor pattern
+ *       Manu Sridharan (IBM) - Various improvements
  ******************************************************************************/
 
 /*global define esprima doctrine */

@@ -1,6 +1,8 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+ * Copyright (c) 2013 IBM Corporation.
+ *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
@@ -9,6 +11,7 @@
  *
  * Contributors:
  *     Andrew Eisenberg (VMware) - initial API and implementation
+ *     Manu Sridharan (IBM) - Various improvements
  ******************************************************************************/
 
 /*
@@ -1624,8 +1627,8 @@ function(proposalUtils, scriptedLogger/*, doctrine*/) {
 					if (doCombine && env.isSyntheticName(name)) {
 						// Must mush together all properties for this synthetic type
 						var origFields = allTypes[name];
-						// MS hack for new function types
 						if (origFields.$$fntype) {
+							// just represent the function type directly, not as an object type
 							return self.convertJsDocType(origFields.$$fntype, env, doCombine, depth);
 						}
 						// must combine a record type
