@@ -162,7 +162,7 @@ our [scripted-dev](https://groups.google.com/forum/#!forum/scripted-dev) discuss
 # Can I contribute?
 
 Sure! Just press *Fork* at the top of this github page and get coding. Before we accept pull requests we just need you to sign a simple contributor's
-agreement - which you can find [here](https://support.springsource.com/spring_committer_signup). Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.
+agreement - which you can find [here](https://support.springsource.com/spring_eclipsecla_committer_signup). Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.
 Pull requests should ideally reference a JIRA ticket in the [issuetracker](https://issuetracker.springsource.com/browse/SCRIPTED) that details what the request is addressing.
 
 The codebase is entirely JavaScript/HTML/CSS.
