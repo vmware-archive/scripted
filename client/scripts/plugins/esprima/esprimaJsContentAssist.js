@@ -2426,9 +2426,16 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 		}
 		if (def.result) {
 			if (fnTypeRef(def.result, allTypes)) {
-				if (fnTypes) { fnTypes[def.result.name] = true; }
-				inlineFunctionTypes(allTypes[def.result.name].$$fntype,allTypes,fnTypes);
-				def.result = allTypes[def.result.name].$$fntype;
+				if (fnTypes) {
+					fnTypes[def.result.name] = true;
+				}
+
+				// avoid recursive type defns
+				var fntype = allTypes[def.result.name].$$fntype;
+				if (fntype.result && fntype.result.name  !== def.result.name) {
+					inlineFunctionTypes(allTypes[def.result.name].$$fntype, allTypes, fnTypes);
+				}
+				def.result = fntype;
 			}
 		}
 	}
@@ -2507,11 +2514,13 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 						inlineFunctionTypes(def, allTypes, fnTypes);
 					} else {
 						var typeObj = def.typeObj;
-						if (fnTypeRef(typeObj, allTypes)) {
-							fnTypes[typeObj.name] = true;
-							typeObj = allTypes[typeObj.name].$$fntype;
+						if (typeObj) {
+							if (fnTypeRef(typeObj, allTypes)) {
+								fnTypes[typeObj.name] = true;
+								typeObj = allTypes[typeObj.name].$$fntype;
+							}
+							def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
 						}
-						def.typeSig = doctrine.type.stringify(typeObj, {compact: true});
 						delete def._typeObj;
 					}
 				}
