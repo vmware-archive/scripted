@@ -35,6 +35,7 @@ function configure(options) {
 		request: function (request, config) {
 			var headers = request.headers || (request.headers = {});
 			headers.Authorization = "token " + token;
+			headers["User-Agent"] = "Scripted";
 			return request;
 		}
 	});
