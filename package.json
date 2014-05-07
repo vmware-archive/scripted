@@ -44,7 +44,7 @@
 		"serv": "https://github.com/aclement/serv/archive/master.tar.gz",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
-        "when": "https://github.com/cujojs/when/archive/noisy-deferred-then.tar.gz",
+        "when": "https://github.com/cujojs/when/archive/master.tar.gz",
         "rest": "https://github.com/s2js/rest/archive/dev.tar.gz",
         "express": "3.0.6",
 		"bower": "0.8.5",
