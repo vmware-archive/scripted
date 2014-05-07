@@ -56,10 +56,14 @@ function start(options) {
 	var file = options._;
 	var suppressOpen = options.suppressOpen?'true':'false';
 	// console.log("path is "+path.resolve(path.dirname(module.filename),'../commands/scripted.js'));
-	child = spawn('node', [ path.resolve(path.dirname(module.filename),'../commands/scripted.js'), suppressOpen, file ],{
-		detached:true,
+	child = spawn('node', [ path.resolve(path.dirname(module.filename),'../commands/scripted.js'), file, suppressOpen ],{
+	        detached:true,
 		stdio: ['ignore', out, err]
 	});
+    
+        var logfile = tmp + '/scripted.log';
+        console.log('Log file: ' + logfile);
+        tailf = spawn('tail', [ '-100f', logfile ],{ stdio: 'inherit' });
 	child.unref();
 }
 
