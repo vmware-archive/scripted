@@ -1,9 +1,14 @@
 --- 
 applications: 
-- instances: 1
-  memory: 1G
-  name: scr
+- services: 
+    scr-mongodb: 
+      vendor: mongodb
+      version: "2.0"
+      tier: free
   runtime: node08
-  path: .
+  instances: 1
   url: scrptd.${target-base}
+  memory: 1G
   framework: node
+  name: scr
+  path: .

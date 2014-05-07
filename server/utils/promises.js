@@ -242,7 +242,51 @@
 			return d.promise;
 		}
 
+		var	slice = Array.prototype.slice;
+		var nodeApply = require('when/node/function').apply;
+
+		/**
+		 * Creates a promisified methodCaller function for a method with a given
+		 * name. Usage example:
+		 *
+		 * Say you have a collection object that has a node-style callbacky method
+		 * called 'find' that you would call as follows:
+		 *
+		 *    collection.find(query, function (err, result) {
+		 *        if (err) {
+		 *            ...handle error...
+		 *        } else {
+		 *            ...process result...
+		 *        }
+		 *    });
+		 *
+		 * Then you can do the following instead
+		 *
+		 *    var find = methodCaller('find');
+		 *
+		 *    find(collection, query).then(
+		 *		function (result) { ... },
+		 *		function (err) { ... }
+		 *	  );
+		 */
+		function methodCaller(name) {
+			//TODO: more sensible error messages when calling non-existent methods.
+			var caller = function (self /*, args...*/) {
+				var args = slice.call(arguments, 1);
+				return when(self, function (self) {
+					//console.log('calling '+name+' on '+self);
+					//console.log('args = '+args);
+					var f = self[name];
+					//console.log('self.'+name+' = '+f);
+					return nodeApply(f.bind(self), args);
+				});
+			};
+			caller.name = name+'MethodCaller';
+			return caller;
+		}
+
 		return {
+			methodCaller: methodCaller,
 			whileLoop: whileLoop,
 			not: not,
 			until: until,

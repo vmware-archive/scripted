@@ -12,7 +12,7 @@
  *     Andy Clement - overhaul
  ******************************************************************************/
 
-exports.install = function (app) {
+exports.install = function (app, options) {
 
 	app.get("/status",function(request, response) {
 		response.writeHead(200, {
@@ -22,14 +22,21 @@ exports.install = function (app) {
 		response.write("\n");
 		response.end();
 	});
-	
+
 	app.del("/status",function(request, response) {
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.write("Server will stop shortly");
-		response.write("\n");
-		response.end();
-		console.log("Scripted is exiting...");
-		process.exit();
-		// this might be better: app.close();
+		if (options.shutdownHook) {
+			response.writeHead(200, {"Content-Type": "text/plain"});
+			response.write("Server will stop shortly");
+			response.write("\n");
+			response.end();
+			console.log("Scripted is exiting...");
+			process.exit();
+			// this might be better: app.close();
+		} else {
+			response.status(403);
+			response.header('Content-Type', 'text/plain');
+			response.write('Scripted server shutdown hook is disabled');
+			response.end();
+		}
 	});
 };

@@ -10,7 +10,7 @@
  * Contributors:
  *     Kris De Volder - initial API and implementation
  ******************************************************************************/
- 
+
 /*global require define console module*/
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
@@ -83,17 +83,22 @@ var requirePat = objectPat({
 var stringVar = variablePat('string');
 var starVar = variablePat();
 
+var stringLitPat = objectPat({
+	type: 'Literal',
+	value: stringVar
+});
+
 var arrayExp = objectPat({
     "type": "ArrayExpression",
     "elements": starVar
 });
 
-// Given a parse-tree, find references to other modules in that module. 
+// Given a parse-tree, find references to other modules in that module.
 function findReferences(tree, callback) {
 
 	var foundList = [];
 	var foundSet = {};
-	
+
 	function addFound(name) {
 		if (typeof(name)==='string') {
 			if (!foundSet.hasOwnProperty(name)) {
@@ -102,23 +107,23 @@ function findReferences(tree, callback) {
 			}
 		}
 	}
-	
+
 	function addArrayElements(args) {
 		for (var i = 0; i < args.length; i++) {
 			var arg = args[i];
-			if (arg.type === 'Literal' && typeof(arg.value)==='string') {
+			if (matches(stringLitPat, arg)) {
 				addFound(arg.value);
 			}
 		}
 	}
-	
+
 	walk(tree, function (node) {
 		//dumpTree(node);
 		if (matches(definePat, node)) {
 			addArrayElements(defineVar.value);
 		} else if (matches(requirePat, node)) {
 			var arg = requireParam.value;
-			if (arg.type === 'Literal' && typeof(arg.value)==='string') {
+			if (matches(stringLitPat, arg)) {
 				addFound(arg.value);
 			} else if (matches(arrayExp, arg)) {
 				addArrayElements(starVar.value);

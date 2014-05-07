@@ -10,7 +10,7 @@
  * Contributors:
  *     Andrew Eisenberg- initial API and implementation
  ******************************************************************************/
- 
+
 /*global require define scripted*/
 /*jslint browser:true */
 
@@ -28,7 +28,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			(char >= '0' && char <= '9') ||
 			char === '_' || char === '$';
 	}
-	
+
 	function isWord(selstart, selend, buffer) {
 		if (selstart < 0 || selend > buffer.length || selstart > selend || !isWordChar(buffer[selstart])) {
 			return false;
@@ -42,11 +42,11 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		}
 		return true;
 	}
-	
+
 	function isDelineatedWord(selstart, selend, buffer) {
 		return isWord(selstart, selend, buffer) && !isWordChar(buffer[selstart-1]) && !isWordChar(buffer[selend]);
 	}
-	
+
 	/**
 	 * Find word from selection
 	 * A word is a contiguous block of alphanumerics or $ or _
@@ -59,7 +59,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		if (!isWord(selstart, selend, buffer)) {
 			return null;
 		}
-		
+
 		// at this point, we know there is a word selected, must find the start and the end
 		var start, end;
 		var i = selstart;
@@ -70,11 +70,11 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			}
 			i--;
 		}
-		
-		if (!start && i === 0) {
+
+		if (!start && i === -1) {
 			start = 0;
 		}
-		
+
 		i = selend;
 		while (i <= buffer.length) {
 			if (!isWordChar(buffer[i])) {
@@ -83,18 +83,18 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			}
 			i++;
 		}
-		
+
 		if (!end && i === buffer.length) {
 			end = buffer.length;
 		}
-		
+
 		return {
 			word: buffer.substring(start, end),
 			start: start,
 			end: end
 		};
 	}
-	
+
 	/**
 	 * @param {String} buffer
 	 * @param {String} toFind
@@ -111,21 +111,22 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 		}
 		return matches;
 	}
-	
-	
+
+
 	var currentRequest;
-	
+
 	function SelectionMatcher() {
 		// config options
 		this.interval = 500; // inteval between caret changes and mark occurrence changes
 		this.disable = false; // set to true if mark occurrences should be disabled
 		this.retain = false;  // set to true if marks should be retained after caret moves away
-
+		this.isActive = true;
 		this.initOptions();
 	}
 	SelectionMatcher.prototype = {
 		install : function(editor) {
 			this.editor = editor;
+			this.isActive = true;
 			editor.getTextView().addEventListener("Selection", this);
 		},
 		initOptions : function() {
@@ -141,6 +142,23 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 					this.retain = opts.retain;
 				}
 			}
+		},
+
+		deactivate: function() {
+			this.isActive=false;
+			var annotationModel = this.editor.getAnnotationModel();
+			annotationModel.removeAnnotations(ANNOTATION_TYPE);
+		},
+
+		activate: function() {
+			this.isActive=true;
+			var self = this;
+			currentRequest = setTimeout(function() {
+				var sel = self.editor.getSelection();
+				if (sel) {
+					self.markOccurrences(sel.start,sel.end);
+				}
+			}, this.interval);
 		},
 
 		// TODO not used
@@ -163,7 +181,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 				self.markOccurrences(evt.newValue.start, evt.newValue.end);
 			}, this.interval);
 		},
-		
+
 		findMatches : function(selstart, selend, buffer) {
 			var toFind = findSelectedWord(selstart, selend, buffer);
 			var matches;
@@ -174,11 +192,14 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 				return { matches : null, word : null };
 			}
 		},
-		
+
 		markOccurrences : function(selstart, selend) {
+			if (!this.isActive) {
+				return;
+			}
 			/** @type AnnotationModel*/
 			var annotationModel = this.editor.getAnnotationModel();
-			
+
 			// find new matches
 			var buffer = this.editor.getText();
 			var result = this.findMatches(selstart, selend, buffer);
@@ -202,7 +223,7 @@ define(['orion/textview/annotations'], function(mAnnotations) {
 			}
 		}
 	};
-	
+
 	// configure: persist when no selection. disable completely, settimeout
-	return { SelectionMatcher : SelectionMatcher };
+	return { SelectionMatcher : SelectionMatcher,  findSelectedWord : findSelectedWord};
 });

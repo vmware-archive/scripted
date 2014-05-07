@@ -50,6 +50,13 @@ function configure(filesystem, options) {
 		app.configure(function() {
 			app.use(express.json());
 			app.use(express.cookieParser());
+
+			if (options.cloudfoundry) {
+				//Add cf specific middleware
+				console.log('Add cf middleware');
+				require('./cloudfoundry/user-tracker').install(app, filesystem);
+			}
+
 			app.use(app.router);
 			app.use(onRequest); // bridge to 'servlets', we should remove over time
 			app.use(express['static'](pathResolve(__dirname, '../client'), { maxAge: 6e5 }));
@@ -59,12 +66,33 @@ function configure(filesystem, options) {
 			}));
 		});
 
-		require('./servlets/status').install(app);
+		//Make the options available to client code.
+		app.get('/options', function (req, res) {
+			res.status(200);
+			res.header('Content-Type', 'application/json');
+			res.write(JSON.stringify(options));
+			res.end();
+		});
 
-
-		if (isCloudfoundry) {
-			require('./routes/cloudfoundry-routes.js').install(app, filesystem);
+		//Serve alternate help.txt
+		if (options.help_text) {
+			app.get('/scripts/scripted/help.txt', function (req, res) {
+				console.log('Request for help.txt intercepted');
+				res.status(200);
+				res.header('Content-Type', 'text/plain');
+				res.write(options.help_text);
+				res.end();
+			});
 		}
+
+		if (options.cloudfoundry) {
+			console.log('Add cf routes');
+
+			//Add cf specific 'routes'
+			require('./cloudfoundry/cloudfoundry-routes').install(app, filesystem);
+		}
+		require('./routes/status-routes').install(app, options);
+
 		require('./routes/editor-routes').install(app, filesystem);
 		require('./routes/test-routes').install(app);
 		require('./routes/config-routes').install(app, filesystem);
@@ -74,7 +102,9 @@ function configure(filesystem, options) {
 		require('./servlets/incremental-search-servlet').install(app, filesystem);
 		require('./servlets/incremental-file-search-servlet').install(app, filesystem);
 
-		require('./servlets/application-servlet').install(app);
+		if (options.applicationManager) {
+			require('./servlets/application-servlet').install(app);
+		}
 
 		console.log('Server port = ' + port);
 		app.server.listen(port, "127.0.0.1" /* only accepting connections from localhost */);

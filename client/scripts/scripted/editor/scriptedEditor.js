@@ -18,6 +18,7 @@
 
 define([
 	"require",
+	"scripted/editor/InlineRenameRefactoring",
 	"scripted/api/editor-wrapper",
 	"scripted/utils/deref", "scripted/editor/save-hooks", "when", "scripted/fileapi",
 	"orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor",
@@ -31,6 +32,7 @@ define([
 	"scripted/exec/exec-keys", "scripted/exec/exec-after-save", "jshint", "jquery"
 ], function (
 	require,
+	inlineRenameRefactoring,
 	EditorProxy,
 	deref, mSaveHooks, when, fileapi,
 	mTextView, mKeyBinding, mEditor, mKeystroke,
@@ -573,6 +575,8 @@ define([
 				return true;
 			});
 
+			new inlineRenameRefactoring.InlineRenameRefactoring(editor,undoStack,linkedMode);
+
 			// save binding
 			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "Save");
 			editor.getTextView().setAction("Save", function() {
@@ -952,8 +956,8 @@ define([
 			}
 		}
 
-		// TODO should we persist the instance of mark occurrences?
-		new mMarkoccurrences.SelectionMatcher().install(editor);
+		editor.selectionMatcher = new mMarkoccurrences.SelectionMatcher();
+		editor.selectionMatcher.install(editor);
 
 		editor.type = editorType;
 

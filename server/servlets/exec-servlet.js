@@ -18,24 +18,39 @@ var makeRequestHandler = require('./servlet-utils').makeRequestHandler;
 
 var cpExec = require('child_process').exec;
 
-function exec(cmd, callback, errback) {
+function install(options) {
 
-	//cmd looks like this:
-	// {cmd: "ls -la", ...other options to pass to the nodejs exec function...}
+	var exec;
 
-	var options = cmd;
-	cmd = cmd.cmd;
+	if (options.exec) {
+		exec = function (cmd, callback) {
 
-	// TODO use mixin, if scipted had one...
-	// options.env = mixin({}, options.env, process.env);
-	options.env = options.env || {};
-	for (var env in process.env) {
-		if (!(env in options.env)) {
-			options.env[env] = process.env[env];
-		}
+			//cmd looks like this:
+			// {cmd: "ls -la", ...other options to pass to the nodejs exec function...}
+
+			var options = cmd;
+			cmd = cmd.cmd;
+
+			// TODO use mixin, if scipted had one...
+			// options.env = mixin({}, options.env, process.env);
+			options.env = options.env || {};
+			for (var env in process.env) {
+				if (!(env in options.env)) {
+					options.env[env] = process.env[env];
+				}
+			}
+
+			/*var process = */cpExec(cmd, options, callback);
+		};
+	} else {
+		exec = function (cmd, callback) {
+			callback('ERROR: exec is disabled');
+		};
 	}
 
-	/*var process = */cpExec(cmd, options, callback);
+	exec.remoteType = ['JSON', 'callback'];
+	servlets.register('/exec', makeRequestHandler(exec));
+
 }
-exec.remoteType = ['JSON', 'callback'];
-servlets.register('/exec', makeRequestHandler(exec));
+
+exports.install = install;

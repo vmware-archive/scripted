@@ -2781,15 +2781,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_handleKeyPress: function (e) {
-			if (this._keyPressHandlers) {
-				for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
-					var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
-					if (handled) {
-						if (e.preventDefault) { e.preventDefault(); }
-						return false;
-					}
-				}
-			}
 			/*
 			* Feature in Embedded WebKit.  Embedded WekKit on Mac runs in compatibility mode and
 			* generates key press events for these Unicode values (Function keys).  This does not
@@ -2836,6 +2827,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			if (!ignore) {
+				if (this._keyPressHandlers) {
+					for (var kph=0; kph<this._keyPressHandlers.length; kph++) {
+						var handled =  this._keyPressHandlers[kph].handleKeyPress(e);
+						if (handled) {
+							if (e.preventDefault) { e.preventDefault(); }
+							return false;
+						}
+					}
+				}
 				var key = util.isOpera ? e.which : (e.charCode !== undefined ? e.charCode : e.keyCode);
 				if (key > 31) {
 					this._doContent(String.fromCharCode (key));

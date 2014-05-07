@@ -12,8 +12,11 @@
  *     Brian Cavalier
  ******************************************************************************/
 define(['require', "jquery", "jquery_ui", "scripted/utils/navHistory", "scripted/utils/pageState",
-		"scripted/utils/editorUtils", "scripted/utils/storage", "scripted/exec/exec-on-load"],
-function(require, jQuery, jqueryUi, mNavHistory, mPageState, editorUtils, storage, execOnLoad) {
+		"scripted/utils/editorUtils", "scripted/utils/storage", "scripted/exec/exec-on-load",
+		"scripted/utils/server-options"
+],
+function(require, jQuery, jqueryUi, mNavHistory, mPageState, editorUtils, storage, execOnLoad,
+options) {
 
 	// Initialize navigator state
 	var navigatorVisible = false;
@@ -142,7 +145,9 @@ function(require, jQuery, jqueryUi, mNavHistory, mPageState, editorUtils, storag
 			});
 
 			// add live reloading support
-			require(['scripted/application-manager']);
+			if (options.applicationManager) {
+				require(['scripted/application-manager']);
+			}
 
 			require(['scripted/editor/themeManager']);
 

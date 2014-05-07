@@ -4160,11 +4160,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
-
-
-
-
-
 	// See https://github.com/scripted-editor/scripted/issues/258
 	tests['test invalid array type param in jsdoc']  = function() {
 		var results = computeContentAssist(
@@ -4173,6 +4168,127 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"graph[''].k.proto", "proto");
 		testProposals(results, [
 			["prototype", "prototype : Object"]
+		]);
+	};
+
+	// call args inferencing
+	tests['test call args 1']  = function() {
+		var results = computeContentAssist(
+			"function parseFile(path) {\n" +
+			"	path.xxx = 9;\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x.xx", "xx");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests['test call args 2']  = function() {
+		var results = computeContentAssist(
+			"function parseFile(path) {\n" +
+			"	path.xxx = 9;\n" +
+			"}\n" +
+			"var x = 0;\n" +
+			"parseFile(x);\n" +
+			"x.xx", "xx");
+		// should keep the Number type
+		testProposals(results, [
+		]);
+	};
+	tests['test call args 3']  = function() {
+		var results = computeContentAssist(
+			"var parseFile = function(path) {\n" +
+			"	path.xxx = 9;\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x.xx", "xx");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests['test call args 4']  = function() {
+		var results = computeContentAssist(
+			"var parseFile = function(path) {\n" +
+			"	path.xxx = 9;\n" +
+			// this one is ignored
+			"	path = 9;\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x.xx", "xx");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests['test call args 5']  = function() {
+		var results = computeContentAssist(
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x", "x");
+		testProposals(results, [
+			["x", "x : {}"]
+		]);
+	};
+	tests['test call args 6']  = function() {
+		var results = computeContentAssist(
+			"/** @param {{xxx:Number}} path */\n" +
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x.xx", "xx");
+		testProposals(results, [
+			["xxx", "xxx : Number"]
+		]);
+	};
+	tests['test call args 7']  = function() {
+		var results = computeContentAssist(
+			"/** @param {function()} path */\n" +
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x", "x");
+		testProposals(results, [
+			["x()", "x() : undefined"]
+		]);
+	};
+	tests['test call args 8']  = function() {
+		var results = computeContentAssist(
+			"/** @param {function(String,Number)} path */\n" +
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"var x;\n" +
+			"parseFile(x);\n" +
+			"x", "x");
+		testProposals(results, [
+			["x(String, Number)", "x(String, Number) : undefined"]
+		]);
+	};
+	tests['test call args 9']  = function() {
+		var results = computeContentAssist(
+			"/** @param {function(a1:String,b1:Number)} path */\n" +
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"parseFile(function(a,b) { b.toF/**/ } );\n",
+			"toF");
+		testProposals(results, [
+			["toFixed(digits)", "toFixed(digits) : String"]
+		]);
+	};
+	tests['test call args 10']  = function() {
+		var results = computeContentAssist(
+			"/** @param {function(String,Number)} path */\n" +
+			"var parseFile = function(path) {\n" +
+			"}\n" +
+			"parseFile(function(a,b) { b.toF/**/ } );\n",
+			"toF");
+		testProposals(results, [
+			["toFixed(digits)", "toFixed(digits) : String"]
 		]);
 	};
 

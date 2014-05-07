@@ -53,7 +53,7 @@ function nonWindows() {
 	var api = makeApi(false);
 	var toRegexp = api.toRegexp;
 	var matchTest = api.matchTest;
-	
+
 	return {
 		toRegexp: function (test) {
 			test.equals(toRegexp('/foo/bar.js'),
@@ -70,7 +70,7 @@ function nonWindows() {
 		match: function (test) {
 			matchTest(test, '/foo/bar.js', '/foo/bar.js', true);
 			matchTest(test, '/foo/bar.js', '/foo/foo.js', false);
-			
+
 			matchTest(test, '**/*.js', '/foo.js', true);
 			matchTest(test, '**/*.js', '/bar/foo.js', true);
 			matchTest(test, '**/*.js', '/zor/bar/foo.js', true);
@@ -89,7 +89,16 @@ function nonWindows() {
 			//Verify that '*' doesn't match path separator
 			matchTest(test, '**/foo/*.js', '/a/b/foo/bar.js', true);
 			matchTest(test, '**/foo/*.js', '/a/b/foo/nested/bar.js', false);
-			
+
+			//Verify that '/**' at the end of a pattern works as desired
+			matchTest(test, '/editor/**', '/editor', true);
+			matchTest(test, '/editor/**', '/editor/', true);
+			matchTest(test, '/editor/**', '/editor/foo/bar', true);
+			matchTest(test, '/editor/**', '/editor/foo/bar/', true);
+			matchTest(test, '/editor/**', '/editor-add-ons', false);
+			matchTest(test, '/editor/**', '/editor-add-ons/', false);
+			matchTest(test, '/editor/**', '/editor-add-ons/foo', false);
+
 			test.done();
 		}
 	};
@@ -109,21 +118,21 @@ function windows() {
 			matchTest(test, '/foo/bar.js', 'C:/foo/bar.js', true);
 			matchTest(test, '/foo/bar.js', 'D:/foo/bar.js', true);
 			matchTest(test, '/foo/bar.js', 'C:/foo/foo.js', false);
-			
+
 			matchTest(test, '**/*.js', 'C:/foo.js', true);
 			matchTest(test, '**/*.js', 'D:/bar/foo.js', true);
 			matchTest(test, '**/*.js', 'E:/zor/bar/foo.js', true);
 			matchTest(test, '**/*.js', 'F:/foo.css', false);
 			matchTest(test, '**/*.js', 'G:/bar/foo.css', false);
 			matchTest(test, '**/*.js', 'H:/zor/bar/foo.css', false);
-			
+
 			matchTest(test, 'C:/**/foo.js', 'C:/foo.js', true);
 			matchTest(test, 'C:/**/foo.js', 'D:/foo.js', false);
 			matchTest(test, 'C:/**/foo.js', 'C:/a/foo.js', true);
 			matchTest(test, 'C:/**/foo.js', 'D:/a/foo.js', false);
 			matchTest(test, 'C:/**/foo.js', 'C:/a/b/foo.js', true);
 			matchTest(test, 'C:/**/foo.js', 'D:/a/b/foo.js', false);
-			
+
 			//Ommitting the '/' after device is ok (though somewhat weird).
 			matchTest(test, 'C:**/foo.js', 'C:/foo.js', true);
 			matchTest(test, 'C:**/foo.js', 'D:/foo.js', false);
@@ -131,48 +140,48 @@ function windows() {
 			matchTest(test, 'C:**/foo.js', 'D:/a/foo.js', false);
 			matchTest(test, 'C:**/foo.js', 'C:/a/b/foo.js', true);
 			matchTest(test, 'C:**/foo.js', 'D:/a/b/foo.js', false);
-			
+
 			//Using backslashes in patterns should work ok on windows.
-			
+
 			matchTest(test, '\\foo\\bar.js', 'C:/foo/bar.js', true);
 			matchTest(test, '\\foo\\bar.js', 'D:/foo/bar.js', true);
 			matchTest(test, '\\foo\\bar.js', 'C:/foo/foo.js', false);
-			
+
 			matchTest(test, '**\\*.js', 'C:/foo.js', true);
 			matchTest(test, '**\\*.js', 'D:/bar/foo.js', true);
 			matchTest(test, '**\\*.js', 'E:/zor/bar/foo.js', true);
 			matchTest(test, '**\\*.js', 'F:/foo.css', false);
 			matchTest(test, '**\\*.js', 'G:/bar/foo.css', false);
 			matchTest(test, '**\\*.js', 'H:/zor/bar/foo.css', false);
-			
+
 			matchTest(test, 'C:\\**\\foo.js', 'C:/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/foo.js', false);
 			matchTest(test, 'C:\\**\\foo.js', 'C:/a/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/a/foo.js', false);
 			matchTest(test, 'C:\\**\\foo.js', 'C:/a/b/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/a/b/foo.js', false);
-			
+
 			matchTest(test, 'C:\\**\\foo.js', 'C:/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/foo.js', false);
 			matchTest(test, 'C:\\**\\foo.js', 'C:/a/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/a/foo.js', false);
 			matchTest(test, 'C:\\**\\foo.js', 'C:/a/b/foo.js', true);
 			matchTest(test, 'C:\\**\\foo.js', 'D:/a/b/foo.js', false);
-			
+
 			//Slashes in patterns should also match '\' in paths
 			matchTest(test, 'C:/a/foo.js', 'C:\\a\\foo.js', true);
 			matchTest(test, 'C:/a/foo.js', 'D:\\a\\foo.js', false);
-			
+
 			//Verify that '*' doesn't match path separator
 			matchTest(test, '**/foo/*.js', 'C:/a/b/foo/bar.js', true);
 			matchTest(test, '**/foo/*.js', 'C:/a/b/foo/nested/bar.js', false);
 			matchTest(test, '**/foo/*.js', 'C:\\a\\b\\foo\\bar.js', true);
 			matchTest(test, '**/foo/*.js', 'C:\\a\\b\\foo\\nested\\bar.js', false);
-			
+
 			test.done();
 		}
-		
-		
+
+
 	};
 }
 

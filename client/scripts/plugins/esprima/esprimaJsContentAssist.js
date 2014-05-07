@@ -1501,7 +1501,8 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 	 * @return Boolean
 	 */
 	function leftTypeIsMoreGeneral(leftTypeObj, rightTypeObj, env) {
-		var leftTypeName = leftTypeObj.name, rightTypeName = rightTypeObj.name;
+		var leftTypeName = leftTypeObj.name || mTypes.convertToSimpleTypeName(leftTypeObj),
+			rightTypeName = rightTypeObj.name || mTypes.convertToSimpleTypeName(rightTypeObj);
 
 		if (!leftTypeName) {
 			if (leftTypeObj.type === 'NullLiteral' || leftTypeObj.type === 'UndefinedLiteral' || leftTypeObj.type === 'VoidLiteral') {
@@ -1794,7 +1795,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				}
 				var type = this._allTypes[this.scope(target)];
 				// do not allow augmenting built in types
-				if (!type.$$isBuiltin) {
+				if (type && !type.$$isBuiltin) {
 					// if new type name is not more general than old type, do not replace
 					if (typeContainsProperty(type, name) && leftTypeIsMoreGeneral(typeObj, type[name].typeObj, this)) {
 						// do nuthin
@@ -1901,7 +1902,7 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				};
 
 				var innerLookup = function(name, type, allTypes) {
-					var res = type[name];
+					var res = type && type[name];
 
 					var proto = type.$$proto;
 					if (res) {
@@ -1915,9 +1916,9 @@ define(["plugins/esprima/esprimaVisitor", "plugins/esprima/types", "plugins/espr
 				var targetType = this._allTypes[this.scope(target)];
 
 				// uncomment this if we want to hide errors where there is an unknown type being placed on the scope stack
-//				if (!targetType) {
-//					targetType = this.globalScope()
-//				}
+				if (!targetType) {
+					targetType = this.globalScope();
+				}
 				var res = innerLookup(swapper(name), targetType, this._allTypes);
 				return res;
 			},

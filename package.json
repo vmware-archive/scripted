@@ -28,7 +28,7 @@
 		"scripted": "./bin/scripted"
 	},
 	"scripts": {
-		"start" : "node server/start-cloudfoundry.js",
+		"start" : "node server/cloudfoundry/start-cloudfoundry.js",
 		"test": "node tests/server/run-all.js",
 		"postinstall": "cd client && bower install"
 	},
@@ -41,7 +41,7 @@
         "node-static": "0.5.9",
         "optimist": "0.3.5",
         "rest": "0.8.4",
-		"serv": "https://github.com/aclement/serv/archive/master.tar.gz",
+		"serv": "https://github.com/kdvolder/serv/archive/master.tar.gz",
         "sockjs": "0.3.1",
         "websocket-multiplex": "https://github.com/kdvolder/websocket-multiplex/archive/master.tar.gz",
         "when": "2.0.1",
@@ -49,7 +49,8 @@
         "express": "3.0.6",
 		"bower": "0.8.5",
 		"mime": "1.2.9",
-		"priorityqueuejs": "0.1.0"
+		"priorityqueuejs": "0.1.0",
+		"mongodb": "1.2.13"
 	},
 	"devDependencies": {
 		"fake-fs": "https://github.com/eldargab/node-fake-fs/archive/50f54e9551d9ece5578213564268021d4976db26.tar.gz",

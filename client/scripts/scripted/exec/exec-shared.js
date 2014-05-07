@@ -18,11 +18,8 @@
 //
 //   Common functionality shared between exec-keys and exec-after-save
 //
-//   TODO: actually, exec-keys isn't using this yet. The code was merely copied
-//     from it.
 /////////////////////////////
-define(['require', 'servlets/exec-client', 'scripted/exec/exec-console'],
-function (require) {
+define(function (require) {
 
 	var exec = require('servlets/exec-client').exec;
 	var execConsole = require('scripted/exec/exec-console');
