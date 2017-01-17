@@ -281,7 +281,6 @@
 					return nodeApply(f.bind(self), args);
 				});
 			};
-			caller.name = name+'MethodCaller';
 			return caller;
 		}
 

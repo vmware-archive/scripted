@@ -1,4 +1,5 @@
 {
+        "name": "scripted",
 	"dependencies": {
 		"requirejs": "2.1.4",
 		"requirejs-text": "2.0.4",
