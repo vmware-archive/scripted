@@ -33,7 +33,8 @@ function dumpTree(parseTree) {
 var finders = {
 	'AMD': require('./amd-reference-finder').findReferences,
 	'commonjs': require('./commonjs-reference-finder').configure('commonjs'),
-	'commonjs,AMD': require('./commonjs-reference-finder').configure('commonjs,AMD')
+	'commonjs,AMD': require('./commonjs-reference-finder').configure('commonjs,AMD'),
+	'closure': require('./closure-reference-finder').configure('closure')
 };
 
 // Given a parse-tree, find references to other modules in that module. 

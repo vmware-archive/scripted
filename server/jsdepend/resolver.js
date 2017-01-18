@@ -195,12 +195,14 @@ function configure(conf) {
 
 	var amdResolver = require('./amd-resolver').configure(conf).resolver;
 	var commonjsResolver = require('./commonjs-resolver').configure(conf).resolver;
+	var closureResolver = require('./closure-resolver').configure(conf).resolver;
 
 	var resolvers = {
 		'list': listResolver,
 		'AMD': amdResolver,
 		'commonjs':commonjsResolver,
-		'commonjs,AMD': compose(amdResolver, commonjsResolver)
+		'commonjs,AMD': compose(amdResolver, commonjsResolver),
+		'closure': closureResolver
 		//TODO: replace 'commonjs,AMD' resolver with a custom implementation.
 		// Custom resolver should try to pick the 'correct' resolver instead of
 		// simply trying both of them.

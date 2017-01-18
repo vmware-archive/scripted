@@ -1,0 +1,5 @@
+{
+  "closure": {
+    "deps": "../deps1.js"
+  }
+}

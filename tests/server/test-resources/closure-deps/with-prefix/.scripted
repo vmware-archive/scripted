@@ -1,0 +1,6 @@
+{
+  "closure": {
+    "deps": "deps1.js",
+    "pathPrefix": "/some/prefix/to/tree"
+  }
+}
