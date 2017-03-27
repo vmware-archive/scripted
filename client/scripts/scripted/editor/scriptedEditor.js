@@ -25,6 +25,7 @@ define([
 	"scripted/keybindings/keystroke", "orion/editor/editorFeatures", "examples/textview/textStyler", "orion/editor/textMateStyler",
 	"plugins/esprima/esprimaJsContentAssist", "orion/editor/contentAssist",
 	"plugins/esprima/indexerService", "orion/editor/htmlGrammar", "plugins/esprima/moduleVerifier",
+	"plugins/typescript/typescriptContentAssist",
 	"scripted/editor/jshintdriver", "jsbeautify", "orion/textview/textModel", "orion/textview/projectionTextModel",
 	"orion/editor/cssContentAssist", "scripted/editor/templateContentAssist",
 	"scripted/markoccurrences","text!scripted/help.txt", "scripted/editor/themeManager", "scripted/utils/storage",
@@ -38,6 +39,7 @@ define([
 	mTextView, mKeyBinding, mEditor, mKeystroke,
 	mEditorFeatures, mTextStyler, mTextMateStyler, mJsContentAssist, mContentAssist,
 	mIndexerService, mHtmlGrammar, mModuleVerifier,
+	mTsContentAssist,
 	mJshintDriver, mJsBeautify, mTextModel, mProjectionModel,
 	mCssContentAssist, mTemplateContentAssist,
 	mMarkoccurrences, tHelptext, themeManager, storage, layoutManager,
@@ -299,6 +301,7 @@ define([
 		}
 		var isJSON = extension === "json";
 		var isJS = !isJSON && extension === "js";
+		var isTypeScript = extension === 'ts';
 		var isHTML = !isJS && extension === "html";
 		var isCSS = !isHTML && extension === "css";
 
@@ -317,6 +320,7 @@ define([
 		}
 
 		var jsContentAssistant = new mJsContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, window.scripted && window.scripted.config && window.scripted.config.jshint);
+		var tsContentAssistant = new mTsContentAssist.TypeScriptContentAssistProvider(filePath);
 		var cssContentAssistant = new mCssContentAssist.CssContentAssistProvider();
 		var templateContentAssistant = new mTemplateContentAssist.TemplateContentAssist();
 
@@ -327,6 +331,11 @@ define([
 					if (!(isHTML || isJSON)) {
 						problems = mJshintDriver.checkSyntax('', text).problems;
 					}
+					editor.showProblems(problems);
+					editor.problems = problems;
+				});
+			} else if(isTypeScript){
+				tsContentAssistant.checkSyntax(text, function(problems) {
 					editor.showProblems(problems);
 					editor.problems = problems;
 				});
@@ -343,6 +352,11 @@ define([
 					// not so pretty, but showProblems removes all old problems, so must re-add them
 					problems = problems.concat(missingModules);
 					editor.showProblems(problems);
+				});
+			} else if (isTypeScript) {
+				tsContentAssistant.checkSyntax(text, function(problems) {
+					editor.showProblems(problems);
+					editor.problems = problems;
 				});
 			}
 			setEditorTitle(editor, fileName);
@@ -401,6 +415,8 @@ define([
 					var providers = [];
 					if (isJS) {
 						providers.push(jsContentAssistant);
+					} else if (isTypeScript) {
+						providers.push(tsContentAssistant);
 					} else if (isCSS) {
 						providers.push(cssContentAssistant);
 					}
@@ -678,6 +694,7 @@ define([
 						case "js":
 						case "java":
 						case "css":
+						case "ts":
 							this.styler = new mTextStyler.TextStyler(textView, extension, annotationModel);
 							break;
 						case "html":
@@ -783,9 +800,41 @@ define([
 					}
 					return type;
 				}
+			} else if (isTypeScript) {
+				type = tsContentAssistant.computeHover(buffer, offset);
+				tsContentAssistant.checkSyntax(buffer, function(problems) {
+					editor.showProblems(problems);
+					editor.problems = problems;
+				});
+				return type;
 			}
 			return {hoverText: null };
 		});
+
+		if (isTypeScript) {(function(){
+			function verifyTypescript() {
+				var text = editor.getTextView().getText();
+				tsContentAssistant.checkSyntax(text, function(problems) {
+					editor.showProblems(problems);
+					editor.problems = problems;
+				});
+			}
+			var updateTimeout;
+			editor.getTextView().addEventListener("Verify" , function(evt) {
+				tsContentAssistant.makeChange(evt);
+				if (updateTimeout) {
+					clearTimeout(updateTimeout);
+				}
+				updateTimeout = setTimeout(function () {
+					updateTimeout = null;
+					verifyTypescript();
+				}, 500);
+			});
+
+			tsContentAssistant.onResolve = verifyTypescript;
+		})();
+		}
+
 		editor.setInput("Content", null, "No contents");
 
 		/*function that fixes Firefox cursor problem*/
@@ -818,6 +867,9 @@ define([
 					definition = editor.jsContentAssistant.findDefinition(text, offset);
 				}
 				return definition;
+			} else if (isTypeScript) {
+				var text = editor.getTextView().getText();
+				return tsContentAssistant.findDefinition(text, offset);
 			}
 		};
 
