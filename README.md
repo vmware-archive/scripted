@@ -1,3 +1,5 @@
+# This repository is no longer actively maintained by VMware, Inc.
+
 # Welcome to Scripted
 
 [![Build Status](https://travis-ci.org/scripted-editor/scripted.png?branch=master)](https://travis-ci.org/scripted-editor/scripted)
